@@ -1,0 +1,1303 @@
+{
+  "filename": "test_all_modules_1.pch2",
+  "modules": [
+    {
+      "name": "Out2",
+      "id": 1,
+      "type": 4,
+      "parameters": "[0, 1, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 0
+    },
+    {
+      "name": "Out4",
+      "id": 2,
+      "type": 3,
+      "parameters": "[0, 1, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 2
+    },
+    {
+      "name": "In2",
+      "id": 3,
+      "type": 170,
+      "parameters": "[0, 1, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 4
+    },
+    {
+      "name": "In4",
+      "id": 4,
+      "type": 171,
+      "parameters": "[0, 1, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 6
+    },
+    {
+      "name": "Keyboard",
+      "id": 5,
+      "type": 1,
+      "parameters": "[]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 8
+    },
+    {
+      "name": "MonoKey",
+      "id": 6,
+      "type": 199,
+      "parameters": "[0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 10
+    },
+    {
+      "name": "Device",
+      "id": 7,
+      "type": 30,
+      "parameters": "[]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 12
+    },
+    {
+      "name": "status",
+      "id": 8,
+      "type": 197,
+      "parameters": "[]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 15
+    },
+    {
+      "name": "NoteDet",
+      "id": 9,
+      "type": 156,
+      "parameters": "[64]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 17
+    },
+    {
+      "name": "Name",
+      "id": 10,
+      "type": 126,
+      "parameters": "[]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 19
+    },
+    {
+      "name": "OscA",
+      "id": 11,
+      "type": 97,
+      "parameters": "[64, 64, 1, 0, 2, 1, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 0
+    },
+    {
+      "name": "OscB",
+      "id": 12,
+      "type": 7,
+      "parameters": "[64, 64, 1, 0, 0, 0, 0, 0, 2, 1, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 3
+    },
+    {
+      "name": "OscC",
+      "id": 13,
+      "type": 9,
+      "parameters": "[64, 64, 1, 0, 0, 1, 0, 0]",
+      "modes": [
+        0
+      ],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 8
+    },
+    {
+      "name": "OscD",
+      "id": 14,
+      "type": 96,
+      "parameters": "[64, 64, 1, 0, 1]",
+      "modes": [
+        0
+      ],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 11
+    },
+    {
+      "name": "OscPM",
+      "id": 15,
+      "type": 183,
+      "parameters": "[64, 64, 1, 0, 0, 1, 0]",
+      "modes": [
+        0
+      ],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 13
+    },
+    {
+      "name": "OscShpA",
+      "id": 16,
+      "type": 163,
+      "parameters": "[64, 64, 1, 0, 0, 0, 0, 0, 0, 0, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 16
+    },
+    {
+      "name": "OscShpB",
+      "id": 17,
+      "type": 8,
+      "parameters": "[64, 64, 1, 0, 0, 0, 0, 0, 1, 0]",
+      "modes": [
+        0
+      ],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 21
+    },
+    {
+      "name": "OscDual",
+      "id": 18,
+      "type": 164,
+      "parameters": "[64, 64, 1, 0, 0, 127, 0, 0, 0, 0, 1, 0, 0, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 25
+    },
+    {
+      "name": "OscNoise",
+      "id": 19,
+      "type": 106,
+      "parameters": "[64, 64, 1, 0, 0, 0, 0, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 30
+    },
+    {
+      "name": "Noise",
+      "id": 20,
+      "type": 31,
+      "parameters": "[0, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 33
+    },
+    {
+      "name": "MetNoise",
+      "id": 21,
+      "type": 29,
+      "parameters": "[64, 64, 1, 0, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 35
+    },
+    {
+      "name": "OscPerc",
+      "id": 22,
+      "type": 196,
+      "parameters": "[64, 64, 0, 0, 0, 64, 64, 0, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 37
+    },
+    {
+      "name": "DrumSynth",
+      "id": 23,
+      "type": 58,
+      "parameters": "[42, 15, 46, 50, 120, 102, 57, 32, 39, 49, 1, 68, 61, 79, 115, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 40
+    },
+    {
+      "name": "OscString",
+      "id": 24,
+      "type": 13,
+      "parameters": "[64, 64, 1, 0, 0, 80, 0, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 48
+    },
+    {
+      "name": "Operator",
+      "id": 25,
+      "type": 180,
+      "parameters": "[1, 0, 0, 1, 0, 7, 0, 0, 90, 99, 80, 99, 70, 99, 70, 0, 0, 50, 0, 0, 0, 0, 99, 1, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 51
+    },
+    {
+      "name": "DXRouter",
+      "id": 26,
+      "type": 165,
+      "parameters": "[0, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 63
+    },
+    {
+      "name": "OscMaster",
+      "id": 27,
+      "type": 27,
+      "parameters": "[64, 64, 1, 0, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 69
+    },
+    {
+      "name": "RandomA",
+      "id": 28,
+      "type": 200,
+      "parameters": "[64, 0, 0, 1, 1, 4, 3]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 21
+    },
+    {
+      "name": "RandomB",
+      "id": 29,
+      "type": 202,
+      "parameters": "[64, 0, 0, 0, 127, 1, 0, 1, 4]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 23
+    },
+    {
+      "name": "RndClkA",
+      "id": 30,
+      "type": 204,
+      "parameters": "[127, 0, 0, 0, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 26
+    },
+    {
+      "name": "RndClkB",
+      "id": 31,
+      "type": 206,
+      "parameters": "[127, 0, 1, 0, 0]",
+      "modes": [
+        0
+      ],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 28
+    },
+    {
+      "name": "RndTrig",
+      "id": 32,
+      "type": 205,
+      "parameters": "[64, 0, 1, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 31
+    },
+    {
+      "name": "RndPattern",
+      "id": 33,
+      "type": 208,
+      "parameters": "[64, 64, 127, 15, 0, 0, 1]",
+      "modes": [
+        0
+      ],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 33
+    },
+    {
+      "name": "FltLP",
+      "id": 34,
+      "type": 87,
+      "parameters": "[75, 0, 0, 1]",
+      "modes": [
+        0
+      ],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 0
+    },
+    {
+      "name": "FltHP",
+      "id": 35,
+      "type": 134,
+      "parameters": "[60, 0, 0, 1]",
+      "modes": [
+        0
+      ],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 2
+    },
+    {
+      "name": "FltNord",
+      "id": 36,
+      "type": 51,
+      "parameters": "[75, 0, 0, 1, 0, 1, 1, 0, 0, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 4
+    },
+    {
+      "name": "FltClassic",
+      "id": 37,
+      "type": 92,
+      "parameters": "[75, 0, 0, 0, 2, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 9
+    },
+    {
+      "name": "FltMulti",
+      "id": 38,
+      "type": 49,
+      "parameters": "[75, 0, 0, 1, 0, 1, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 13
+    },
+    {
+      "name": "FltStatic",
+      "id": 39,
+      "type": 54,
+      "parameters": "[75, 0, 0, 1, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 17
+    },
+    {
+      "name": "FltPhase",
+      "id": 40,
+      "type": 102,
+      "parameters": "[0, 64, 0, 64, 2, 64, 1, 127, 0, 0, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 20
+    },
+    {
+      "name": "FltComb",
+      "id": 41,
+      "type": 162,
+      "parameters": "[64, 0, 0, 64, 0, 0, 127, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 25
+    },
+    {
+      "name": "WahWah",
+      "id": 42,
+      "type": 125,
+      "parameters": "[0, 64, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 29
+    },
+    {
+      "name": "FltVoice",
+      "id": 43,
+      "type": 45,
+      "parameters": "[0, 1, 2, 100, 64, 0, 64, 0, 64, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 31
+    },
+    {
+      "name": "Vocoder",
+      "id": 44,
+      "type": 108,
+      "parameters": "[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 35
+    },
+    {
+      "name": "EqPeak",
+      "id": 45,
+      "type": 103,
+      "parameters": "[60, 64, 64, 1, 127]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 43
+    },
+    {
+      "name": "Eq2Band",
+      "id": 46,
+      "type": 32,
+      "parameters": "[64, 64, 127, 1, 0, 2]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 47
+    },
+    {
+      "name": "Eq3Band",
+      "id": 47,
+      "type": 33,
+      "parameters": "[64, 64, 93, 64, 127, 1, 0, 2]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 50
+    },
+    {
+      "name": "DlySingleA",
+      "id": 48,
+      "type": 172,
+      "parameters": "[64]",
+      "modes": [
+        0
+      ],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 37
+    },
+    {
+      "name": "DlySingleB",
+      "id": 49,
+      "type": 173,
+      "parameters": "[64, 64]",
+      "modes": [
+        0
+      ],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 39
+    },
+    {
+      "name": "DelayDual",
+      "id": 50,
+      "type": 174,
+      "parameters": "[64, 64, 64, 64]",
+      "modes": [
+        0
+      ],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 41
+    },
+    {
+      "name": "DelayQuad",
+      "id": 51,
+      "type": 175,
+      "parameters": "[64, 64, 64, 64, 64, 64, 64, 64, 0]",
+      "modes": [
+        0
+      ],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 44
+    },
+    {
+      "name": "DlyEight",
+      "id": 52,
+      "type": 181,
+      "parameters": "[0]",
+      "modes": [
+        0
+      ],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 49
+    },
+    {
+      "name": "DlyShiftReg",
+      "id": 53,
+      "type": 179,
+      "parameters": "[]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 52
+    },
+    {
+      "name": "DlyClock",
+      "id": 54,
+      "type": 178,
+      "parameters": "[0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 54
+    },
+    {
+      "name": "DelayA",
+      "id": 55,
+      "type": 176,
+      "parameters": "[64, 64, 64, 64, 1, 0]",
+      "modes": [
+        0
+      ],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 56
+    },
+    {
+      "name": "DelayB",
+      "id": 56,
+      "type": 177,
+      "parameters": "[64, 64, 127, 64, 0, 0, 0, 1, 0]",
+      "modes": [
+        0
+      ],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 59
+    },
+    {
+      "name": "DlyStereo",
+      "id": 57,
+      "type": 182,
+      "parameters": "[64, 64, 64, 64, 0, 0, 0, 127, 64, 1, 0]",
+      "modes": [
+        0
+      ],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 63
+    },
+    {
+      "name": "Constant",
+      "id": 58,
+      "type": 43,
+      "parameters": "[64, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 0
+    },
+    {
+      "name": "ConstSwM",
+      "id": 59,
+      "type": 188,
+      "parameters": "[64, 0, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 2
+    },
+    {
+      "name": "ConstSwT",
+      "id": 60,
+      "type": 50,
+      "parameters": "[64, 0, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 4
+    },
+    {
+      "name": "LevAdd",
+      "id": 61,
+      "type": 112,
+      "parameters": "[64, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 6
+    },
+    {
+      "name": "LevConv",
+      "id": 62,
+      "type": 157,
+      "parameters": "[4, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 8
+    },
+    {
+      "name": "LevAmp",
+      "id": 63,
+      "type": 81,
+      "parameters": "[64, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 10
+    },
+    {
+      "name": "LevMult",
+      "id": 64,
+      "type": 44,
+      "parameters": "[]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 12
+    },
+    {
+      "name": "LevMod",
+      "id": 65,
+      "type": 117,
+      "parameters": "[0, 64]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 14
+    },
+    {
+      "name": "EnvFollow",
+      "id": 66,
+      "type": 71,
+      "parameters": "[0, 20]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 17
+    },
+    {
+      "name": "NoiseGate",
+      "id": 67,
+      "type": 189,
+      "parameters": "[20, 0, 64, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 19
+    },
+    {
+      "name": "CompLev",
+      "id": 68,
+      "type": 59,
+      "parameters": "[64]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 22
+    },
+    {
+      "name": "CompSig",
+      "id": 69,
+      "type": 159,
+      "parameters": "[]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 24
+    },
+    {
+      "name": "MinMax",
+      "id": 70,
+      "type": 128,
+      "parameters": "[]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 26
+    },
+    {
+      "name": "ModAmt",
+      "id": 71,
+      "type": 195,
+      "parameters": "[100, 1, 0, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 28
+    },
+    {
+      "name": "swOnOffM",
+      "id": 72,
+      "type": 36,
+      "parameters": "[0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 31
+    },
+    {
+      "name": "swOnOffT",
+      "id": 73,
+      "type": 76,
+      "parameters": "[0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 33
+    },
+    {
+      "name": "sw21M",
+      "id": 74,
+      "type": 187,
+      "parameters": "[0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 35
+    },
+    {
+      "name": "sw21",
+      "id": 75,
+      "type": 100,
+      "parameters": "[0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 37
+    },
+    {
+      "name": "sw41",
+      "id": 76,
+      "type": 79,
+      "parameters": "[0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 39
+    },
+    {
+      "name": "sw81",
+      "id": 77,
+      "type": 15,
+      "parameters": "[0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 42
+    },
+    {
+      "name": "sw12M",
+      "id": 78,
+      "type": 186,
+      "parameters": "[0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 46
+    },
+    {
+      "name": "sw12",
+      "id": 79,
+      "type": 90,
+      "parameters": "[0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 48
+    },
+    {
+      "name": "sw14",
+      "id": 80,
+      "type": 88,
+      "parameters": "[0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 50
+    },
+    {
+      "name": "sw18",
+      "id": 81,
+      "type": 78,
+      "parameters": "[0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 53
+    },
+    {
+      "name": "ValSw2",
+      "id": 82,
+      "type": 105,
+      "parameters": "[0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 57
+    },
+    {
+      "name": "ValSw1",
+      "id": 83,
+      "type": 17,
+      "parameters": "[0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 59
+    },
+    {
+      "name": "WindSw",
+      "id": 84,
+      "type": 85,
+      "parameters": "[40, 80]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 61
+    },
+    {
+      "name": "Mux81",
+      "id": 85,
+      "type": 124,
+      "parameters": "[]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 63
+    },
+    {
+      "name": "Mux18",
+      "id": 86,
+      "type": 21,
+      "parameters": "[]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 65
+    },
+    {
+      "name": "Mux81X",
+      "id": 87,
+      "type": 60,
+      "parameters": "[0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 67
+    },
+    {
+      "name": "sH",
+      "id": 88,
+      "type": 53,
+      "parameters": "[]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 70
+    },
+    {
+      "name": "TH",
+      "id": 89,
+      "type": 139,
+      "parameters": "[]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 3,
+      "vpos": 72
+    },
+    {
+      "name": "seqEvent",
+      "id": 90,
+      "type": 144,
+      "parameters": "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15, 0, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 55
+    },
+    {
+      "name": "seqVal",
+      "id": 91,
+      "type": 145,
+      "parameters": "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15, 0, 0, 0, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 60
+    },
+    {
+      "name": "seqLev",
+      "id": 92,
+      "type": 146,
+      "parameters": "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15, 1, 0, 0, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 68
+    },
+    {
+      "name": "seqNote",
+      "id": 93,
+      "type": 121,
+      "parameters": "[64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15, 0, 0, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 76
+    },
+    {
+      "name": "seqCtr",
+      "id": 94,
+      "type": 154,
+      "parameters": "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 85
+    },
+    {
+      "name": "NoteQuant",
+      "id": 95,
+      "type": 75,
+      "parameters": "[127, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 0
+    },
+    {
+      "name": "KeyQuant",
+      "id": 96,
+      "type": 152,
+      "parameters": "[127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 2
+    },
+    {
+      "name": "PartQuant",
+      "id": 97,
+      "type": 22,
+      "parameters": "[127]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 4
+    },
+    {
+      "name": "NoteScaler",
+      "id": 98,
+      "type": 72,
+      "parameters": "[0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 6
+    },
+    {
+      "name": "Glide",
+      "id": 99,
+      "type": 158,
+      "parameters": "[64, 1, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 8
+    },
+    {
+      "name": "PitchTrack",
+      "id": 100,
+      "type": 198,
+      "parameters": "[20]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 10
+    },
+    {
+      "name": "ZeroCnt",
+      "id": 101,
+      "type": 160,
+      "parameters": "[]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 12
+    },
+    {
+      "name": "LevScaler",
+      "id": 102,
+      "type": 115,
+      "parameters": "[64, 64, 64, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 14
+    },
+    {
+      "name": "LfoA",
+      "id": 103,
+      "type": 26,
+      "parameters": "[64, 0, 0, 0, 0, 1, 4, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 69
+    },
+    {
+      "name": "LfoB",
+      "id": 104,
+      "type": 190,
+      "parameters": "[64, 0, 1, 0, 0, 0, 0, 1, 4, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 72
+    },
+    {
+      "name": "LfoC",
+      "id": 105,
+      "type": 24,
+      "parameters": "[64, 0, 4, 1, 1]",
+      "modes": [
+        0
+      ],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 76
+    },
+    {
+      "name": "LfoShpA",
+      "id": 106,
+      "type": 25,
+      "parameters": "[64, 1, 0, 0, 1, 64, 0, 0, 0, 0, 4, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 78
+    },
+    {
+      "name": "ClkGen",
+      "id": 107,
+      "type": 68,
+      "parameters": "[64, 1, 0, 2, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 83
+    },
+    {
+      "name": "EnvADSR",
+      "id": 108,
+      "type": 20,
+      "parameters": "[0, 0, 54, 100, 14, 0, 1, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 18
+    },
+    {
+      "name": "EnvH",
+      "id": 109,
+      "type": 41,
+      "parameters": "[32, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 22
+    },
+    {
+      "name": "EnvD",
+      "id": 110,
+      "type": 55,
+      "parameters": "[54, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 24
+    },
+    {
+      "name": "EnvADR",
+      "id": 111,
+      "type": 84,
+      "parameters": "[0, 0, 0, 54, 1, 0, 1, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 26
+    },
+    {
+      "name": "EnvAHD",
+      "id": 112,
+      "type": 46,
+      "parameters": "[0, 0, 32, 0, 14, 0, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 29
+    },
+    {
+      "name": "EnvADDSR",
+      "id": 113,
+      "type": 119,
+      "parameters": "[1, 0, 0, 54, 100, 54, 70, 14, 1, 0, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 33
+    },
+    {
+      "name": "EnvMulti",
+      "id": 114,
+      "type": 52,
+      "parameters": "[127, 45, 64, 0, 0, 30, 30, 14, 0, 2, 0, 1, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 38
+    },
+    {
+      "name": "ModAHD",
+      "id": 115,
+      "type": 169,
+      "parameters": "[0, 32, 14, 0, 0, 0, 0, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 44
+    },
+    {
+      "name": "ModADSR",
+      "id": 116,
+      "type": 23,
+      "parameters": "[0, 54, 100, 14, 0, 0, 0, 0, 0, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 49
+    },
+    {
+      "name": "stChorus",
+      "id": 117,
+      "type": 94,
+      "parameters": "[20, 127, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 55
+    },
+    {
+      "name": "Phaser",
+      "id": 118,
+      "type": 192,
+      "parameters": "[0, 64, 0, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 58
+    },
+    {
+      "name": "Flanger",
+      "id": 119,
+      "type": 89,
+      "parameters": "[64, 64, 64, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 60
+    },
+    {
+      "name": "Digitizer",
+      "id": 120,
+      "type": 118,
+      "parameters": "[11, 64, 0, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 63
+    },
+    {
+      "name": "FreqShift",
+      "id": 121,
+      "type": 98,
+      "parameters": "[0, 0, 2, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 66
+    },
+    {
+      "name": "PShift",
+      "id": 122,
+      "type": 167,
+      "parameters": "[64, 64, 0, 2, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 69
+    },
+    {
+      "name": "scratch",
+      "id": 123,
+      "type": 63,
+      "parameters": "[80, 0, 2, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 72
+    },
+    {
+      "name": "Reverb",
+      "id": 124,
+      "type": 12,
+      "parameters": "[64, 64, 64, 1]",
+      "modes": [
+        0
+      ],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 75
+    },
+    {
+      "name": "Compress",
+      "id": 125,
+      "type": 150,
+      "parameters": "[18, 20, 1, 20, 30, 0, 1]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 4,
+      "vpos": 78
+    },
+    {
+      "name": "FxIn",
+      "id": 1,
+      "type": 127,
+      "parameters": "[0, 1, 1]",
+      "modes": [],
+      "area": "FX",
+      "hpos": 0,
+      "vpos": 0
+    }
+  ],
+  "cables": [],
+  "textpad": ""
+}

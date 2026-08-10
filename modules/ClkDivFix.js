@@ -1,0 +1,163 @@
+// Автоматически сгенерированный модуль: ClkDivFix
+// Исходный файл: ClkDivFix.js
+// Версия: 208
+
+export const ClkDivFixModule = {
+    type: 'ClkDivFix',
+        typeID: 0,
+    displayName: 'ClkDivFix',
+    gridHeight: 2,
+    originalName: 'ClkDivFix',
+    tooltip: 'Clock Divider Fixed',
+    components: [
+        {
+                "componentType": "Input",
+                "id": "1",
+                "x": 81,
+                "y": 13,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "0",
+                "x": 99,
+                "y": 15,
+                "text": "Clk",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "2",
+                "x": 121,
+                "y": 13,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "3",
+                "x": 140,
+                "y": 15,
+                "text": "Rst",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "5",
+                "x": 134,
+                "y": 13,
+                "text": "⤒",
+                "fontSize": 10,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Trig 2",
+                "width": 12
+        },
+        {
+                "componentType": "Output",
+                "id": "6",
+                "x": 240,
+                "y": 13,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "7",
+                "x": 210,
+                "y": 13,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "8",
+                "x": 180,
+                "y": 13,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "9",
+                "x": 165,
+                "y": 15,
+                "text": "/12",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "10",
+                "x": 199,
+                "y": 15,
+                "text": "/8",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "11",
+                "x": 229,
+                "y": 15,
+                "text": "/6",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "4",
+                "x": 94,
+                "y": 14,
+                "text": "↑",
+                "fontSize": 10,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Trig 1",
+                "width": 9
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "12",
+                "x": 79,
+                "y": 3,
+                "text": "1/96",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "13",
+                "x": 179,
+                "y": 3,
+                "text": "1/8",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "14",
+                "x": 207,
+                "y": 3,
+                "text": "1/8T",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "15",
+                "x": 236,
+                "y": 3,
+                "text": "1/16",
+                "fontSize": 9,
+                "color": "#ffffff"
+        }
+]
+};

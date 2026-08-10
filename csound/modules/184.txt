@@ -1,0 +1,39 @@
+;@ map AMPEXP CLA001 AMPEXP
+;@ map BUT002
+;@ map BUT003
+
+;@ ins k k
+;@ outs k
+opcode Mix11A, 0, kkkkkk
+  kLev, kOn, kExpLin, kin, kchain, kout  xin
+  kIn zkr kin
+  kChain zkr kchain
+
+  if kExpLin == 1 goto Out
+    kLev table kLev, giAMPEXP
+    goto Next
+  Out:
+  kLev table kLev, giCLA001
+  Next:
+  kOut = kChain + kIn * kLev * kOn
+  kOut limit kOut, -4, 4
+  zkw kOut, kout
+endop
+
+;@ ins a a
+;@ outs a
+opcode Mix11A, 0, kkkkkk
+  kLev, kOn, kExpLin, kin, kchain, kout  xin
+  aIn zar kin
+  aChain zar kchain
+
+  if kExpLin == 1 goto Out
+    kLev table kLev, giAMPEXP
+    goto Next
+  Out:
+  kLev table kLev, giCLA001
+  Next:
+  aOut = aChain + aIn * kLev * kOn
+  aOut limit aOut, -4, 4
+  zaw aOut, kout
+endop

@@ -1,0 +1,1477 @@
+{
+  "EnvADSR": [
+    {
+      "id": "2",
+      "svgSrc": "/svg/levscaler_ADSR.svg"
+    },
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 0, 54, 100, 14, 0, 1, 0 ]
+    }
+  ],
+  "Automate": [
+    {
+      "id": "16",
+      "svgSrc": "/svg/ctrsend_pcsend_automate.svg",
+      "color": "#ffffff"
+    },
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 7, 64, 0, 0 ]
+    }
+  ],
+  "ConstSwM": [
+    {
+      "id": "4",
+      "svgSrc": "/svg/ConstSWM_ConstSWT.svg",
+      "color": "#ffffff"
+    },
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 0, 0 ]
+    }
+  ],
+  "ConstSwT": [
+    {
+      "id": "4",
+      "svgSrc": "/svg/ConstSWM_ConstSWT.svg",
+      "color": "#ffffff"
+    },
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 0, 0 ]
+    }
+  ],
+  "CtrlSend": [
+    {
+      "id": "16",
+      "svgSrc": "/svg/ctrsend_pcsend_automate.svg",
+      "color": "#ffffff"
+    },
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 1, 0, 0 ]
+    }
+  ],
+  "EnvH": [
+    {
+      "id": "11",
+      "svgSrc": "/svg/EnvH.svg"
+    },
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 32, 0 ]
+    }
+  ],
+  "Fade1-2": [
+    {
+      "id": "12",
+      "svgSrc": "/svg/Fade1-2.svg"
+    }
+  ],
+  "Fade2-1": [
+    {
+      "id": "11",
+      "svgSrc": "/svg/Fade2-1.svg"
+    }
+  ],
+  "FltClassic": [
+    {
+      "id": "5",
+      "tableName": "fltfrq"
+    },
+    {
+      "id": "22",
+      "tableName": "fltrec"
+    },
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 75, 0, 0, 0, 2, 1 ]
+    }
+  ],
+  "FltHP": [
+    {
+      "id": "3",
+      "tableName": "fltfrq"
+    },
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 60, 0, 0, 1 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "FltLP": [
+    {
+      "id": "2",
+      "tableName": "fltfrq"
+    },
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 75, 0, 0, 1 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "FltNord": [
+    {
+      "id": "9",
+      "tableName": "fltfrq"
+    },
+    {
+      "id": "15",
+      "tableName": "fltres"
+    },
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 75, 0, 0, 1, 0, 1, 1, 0, 0, 0 ]
+    }
+  ],
+  "Invert": [
+    {
+      "id": "7",
+      "svgSrc": "/svg/Invert.svg"
+    },
+    {
+      "id": "10",
+      "svgSrc": "/svg/Invert.svg"
+    },
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    }
+  ],
+  "LevAdd": [
+    {
+      "id": "2",
+      "svgSrc": "/svg/Levadd.svg",
+      "color": "#ffffff"
+    },
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 1 ]
+    }
+  ],
+  "LevMod": [
+    {
+      "id": "4",
+      "svgSrc": "/svg/levmod.svg"
+    },
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 64 ]
+    }
+  ],
+  "LevScaler": [
+    {
+      "id": "15",
+      "svgSrc": "/svg/levscaler_ADSR.svg"
+    },
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 64, 1 ]
+    }
+  ],
+  "LfoShpA": [
+    {
+      "field": "typeID",
+      "action": "set",
+      "value": 25
+    },
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 1, 0, 0, 1, 64, 0, 0, 0, 0, 4, 0 ]
+    }
+  ],
+  "OscDual": [
+    {
+      "id": "33",
+      "svgSrc": "/svg/OscDual.svg"
+    },
+    {
+      "id": "34",
+      "svgSrc": "/svg/OscDual2.svg"
+    },
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 1, 0, 0, 127, 0, 0, 0, 0, 1, 0, 0, 0 ]
+    }
+  ],
+  "Pan": [
+    {
+      "id": "12",
+      "svgSrc": "/svg/pan.svg"
+    },
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 64, 0 ]
+    }
+  ],
+  "PCSend": [
+    {
+      "id": "15",
+      "svgSrc": "/svg/ctrsend_pcsend_automate.svg"
+    },
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 0 ]
+    }
+  ],
+  "S&H": [
+    {
+      "id": "7",
+      "svgSrc": "/svg/TH_SH.svg"
+    },
+    {
+      "id": "2",
+      "svgSrc": "/svg/SW_onoffM_T.svg"
+    }
+  ],
+  "Sw1-2": [
+    {
+      "id": "6",
+      "svgSrc": "/svg/Sw1221.svg"
+    }
+  ],
+  "Sw2-1M": [
+    {
+      "id": "7",
+      "svgSrc": "/svg/Sw1221.svg",
+      "color": "#ffffff"
+    },
+    {
+      "action": "replace",
+      "id": "11",
+      "newComponent": {
+        "componentType": "TextLabel",
+        "id": "11",
+        "x": 102,
+        "y": 9,
+        "fontSize": 12,
+        "color": "#ffffff",
+        "text": "↕"
+      }
+    }
+  ],
+  "Sw1-2M": [
+    {
+      "id": "6",
+      "svgSrc": "/svg/Sw1221.svg"
+    }
+  ],
+  "Sw2-1": [
+    {
+      "id": "7",
+      "svgSrc": "/svg/Sw1221.svg",
+      "color": "#ffffff"
+    }
+  ],
+  "SwOnOffM": [
+    {
+      "id": "6",
+      "svgSrc": "/svg/SW_onoffM_T.svg"
+    },
+    {
+      "action": "replace",
+      "id": "9",
+      "newComponent": {
+        "componentType": "TextLabel",
+        "id": "9",
+        "x": 143,
+        "y": 11,
+        "fontSize": 12,
+        "color": "#ffffff",
+        "text": "↕"
+      }
+    }
+  ],
+  "SwOnOffT": [
+    {
+      "id": "8",
+      "svgSrc": "/svg/SW_onoffM_T.svg",
+      "color": "#ffffff"
+    }
+  ],
+  "T&H": [
+    {
+      "id": "6",
+      "svgSrc": "/svg/TH_SH.svg"
+    },
+    {
+      "id": "3",
+      "svgSrc": "/svg/SW_onoffM_T.svg"
+    }
+  ],
+  "X-Fade": [
+    {
+      "id": "12",
+      "svgSrc": "/svg/x-fade.svg",
+      "color": "#ffffff"
+    }
+  ],
+  "ADConv": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    }
+  ],
+  "BinCounter": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    }
+  ],
+  "Clip": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 0, 0, 1 ]
+    }
+  ],
+  "ClkDiv": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "ClkGen": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 1, 0, 2, 0 ]
+    }
+  ],
+  "CompLev": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64 ]
+    }
+  ],
+  "Compress": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 18, 20, 1, 20, 30, 0, 1 ]
+    }
+  ],
+  "CompSig": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    }
+  ],
+  "Constant": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 0 ]
+    }
+  ],
+  "CtrlRcv": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 7, 0 ]
+    }
+  ],
+  "DAConv": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    }
+  ],
+  "Delay": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 0, 1 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "DelayA": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 64, 64, 1, 0 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "DelayB": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 127, 64, 0, 0, 0, 1, 0 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "DelayDual": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 64, 64 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "DelayQuad": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 64, 64, 64, 64, 64, 64, 0 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "Device": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    }
+  ],
+  "Digitizer": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 11, 64, 0, 1 ]
+    }
+  ],
+  "DlyClock": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "DlyEight": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "DlyShiftReg": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    }
+  ],
+  "DlySingleA": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "DlySingleB": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "DlyStereo": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 64, 64, 0, 0, 0, 127, 64, 1, 0 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "DrumSynth": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 42, 15, 46, 50, 120, 102, 57, 32, 39, 49, 1, 68, 61, 79, 115, 1 ]
+    }
+  ],
+  "DXRouter": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 0 ]
+    }
+  ],
+  "8Counter": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    }
+  ],
+  "EnvADDSR": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 1, 0, 0, 54, 100, 54, 70, 14, 1, 0, 0 ]
+    }
+  ],
+  "EnvADR": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 0, 0, 54, 1, 0, 1, 0 ]
+    }
+  ],
+  "EnvAHD": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 0, 32, 0, 14, 0, 1 ]
+    }
+  ],
+  "EnvD": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 54, 0 ]
+    }
+  ],
+  "EnvFollow": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 20 ]
+    }
+  ],
+  "EnvMulti": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 127, 45, 64, 0, 0, 30, 30, 14, 0, 2, 0, 1, 0 ]
+    }
+  ],
+  "Eq2Band": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 127, 1, 0, 2 ]
+    }
+  ],
+  "Eq3Band": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 93, 64, 127, 1, 0, 2 ]
+    }
+  ],
+  "EqPeak": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 60, 64, 64, 1, 127 ]
+    }
+  ],
+  "Fade1-2": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 0 ]
+    }
+  ],
+  "Fade2-1": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 0 ]
+    }
+  ],
+  "Flanger": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 64, 1 ]
+    }
+  ],
+  "FlipFlop": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "FltComb": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 0, 0, 64, 0, 0, 127, 1 ]
+    }
+  ],
+  "FltMulti": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 75, 0, 0, 1, 0, 1, 1 ]
+    }
+  ],
+  "FltPhase": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 64, 0, 64, 2, 64, 1, 127, 0, 0, 0 ]
+    }
+  ],
+  "FltStatic": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 75, 0, 0, 1, 0 ]
+    }
+  ],
+  "FltVoice": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 1, 2, 100, 64, 0, 64, 0, 64, 1 ]
+    }
+  ],
+  "FreqShift": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 0, 2, 1 ]
+    }
+  ],
+  "Fx-In": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 1, 1 ]
+    }
+  ],
+  "Gate": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0, 0 ]
+    }
+  ],
+  "Glide": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 1, 0 ]
+    }
+  ],
+  "2-In": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 1, 1 ]
+    }
+  ],
+  "4-In": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 1, 1 ]
+    }
+  ],
+  "Keyboard": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    }
+  ],
+  "KeyQuant": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+    }
+  ],
+  "LevAmp": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 0 ]
+    }
+  ],
+  "LevConv": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 4, 0 ]
+    }
+  ],
+  "LevMult": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    }
+  ],
+  "LfoA": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 0, 0, 0, 0, 1, 4, 1 ]
+    }
+  ],
+  "LfoB": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 0, 1, 0, 0, 0, 0, 1, 4, 0 ]
+    }
+  ],
+  "LfoC": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 0, 4, 1, 1 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "MetNoise": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 1, 0, 0 ]
+    }
+  ],
+  "MinMax": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    }
+  ],
+  "Mix11A": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 100, 1, 0 ]
+    }
+  ],
+  "Mix11S": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 100, 1, 0 ]
+    }
+  ],
+  "Mix21A": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 100, 1, 100, 1, 0 ]
+    }
+  ],
+  "Mix21B": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 100, 0, 100, 0 ]
+    }
+  ],
+  "Mix4-1A": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    }
+  ],
+  "Mix4-1B": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 100, 100, 100, 100, 0 ]
+    }
+  ],
+  "Mix4-1C": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 100, 100, 100, 100, 1, 1, 1, 1, 0, 0 ]
+    }
+  ],
+  "Mix4-1S": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 100, 100, 100, 100, 1, 1, 1, 1, 0 ]
+    }
+  ],
+  "Mix8-1A": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "Mix8-1B": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 100, 100, 100, 100, 100, 100, 100, 100, 0, 0 ]
+    }
+  ],
+  "MixFader": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 100, 100, 100, 100, 100, 100, 100, 100, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0 ]
+    }
+  ],
+  "MixStereo": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 100, 100, 100, 100, 100, 100, 64, 64, 64, 64, 64, 64, 100 ]
+    }
+  ],
+  "ModADSR": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 54, 100, 14, 0, 0, 0, 0, 0, 1 ]
+    }
+  ],
+  "ModAHD": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 32, 14, 0, 0, 0, 0, 1 ]
+    }
+  ],
+  "ModAmt": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 100, 1, 0, 0 ]
+    }
+  ],
+  "MonoKey": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "Mux1-8": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    }
+  ],
+  "Mux8-1": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    }
+  ],
+  "Mux8-1X": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "Name": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    }
+  ],
+  "Noise": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 1 ]
+    }
+  ],
+  "NoiseGate": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 20, 0, 64, 1 ]
+    }
+  ],
+  "NoteDet": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64 ]
+    }
+  ],
+  "NoteQuant": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 127, 0 ]
+    }
+  ],
+  "NoteRcv": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 0 ]
+    }
+  ],
+  "NoteScaler": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "NoteSend": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 100, 64, 0 ]
+    }
+  ],
+  "NoteZone": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 0, 127, 64, 0, 0 ]
+    }
+  ],
+  "Operator": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 1, 0, 0, 1, 0, 7, 0, 0, 90, 99, 80, 99, 70, 99, 70, 0, 0, 50, 0, 0, 0, 0, 99, 1, 1 ]
+    }
+  ],
+  "OscA": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 1, 0, 2, 1, 0 ]
+    }
+  ],
+  "OscB": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 1, 0, 0, 0, 0, 0, 2, 1, 0 ]
+    }
+  ],
+  "OscC": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 1, 0, 0, 1, 0, 0 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "OscD": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 1, 0, 1 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "OscMaster": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 1, 0, 0 ]
+    }
+  ],
+  "OscNoise": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 1, 0, 0, 0, 0, 1 ]
+    }
+  ],
+  "OscPerc": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 0, 0, 0, 64, 64, 0, 1 ]
+    }
+  ],
+  "OscPM": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 1, 0, 0, 1, 0 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "OscShpA": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 1, 0, 0, 0, 0, 0, 0, 0, 1 ]
+    }
+  ],
+  "OscShpB": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 1, 0, 0, 0, 0, 0, 1, 0 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "OscString": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 1, 0, 0, 80, 0, 1 ]
+    }
+  ],
+  "2-Out": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 1, 0 ]
+    }
+  ],
+  "4-Out": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 1, 0 ]
+    }
+  ],
+  "Overdrive": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 0, 1, 0, 1 ]
+    }
+  ],
+  "PartQuant": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 127 ]
+    }
+  ],
+  "Phaser": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 64, 0, 1 ]
+    }
+  ],
+  "PitchTrack": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 20 ]
+    }
+  ],
+  "PShift": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 0, 2, 1 ]
+    }
+  ],
+  "Pulse": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 1, 0, 0 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "RandomA": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 0, 0, 1, 1, 4, 3 ]
+    }
+  ],
+  "RandomB": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 0, 0, 0, 127, 1, 0, 1, 4 ]
+    }
+  ],
+  "Rect": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 1 ]
+    }
+  ],
+  "Reverb": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 64, 1 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "RndClkA": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 127, 0, 0, 0, 1 ]
+    }
+  ],
+  "RndClkB": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 127, 0, 1, 0, 0 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "RndPattern": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 127, 15, 0, 0, 1 ]
+    },
+    {
+      "field": "mode",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "RndTrig": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 0, 1, 0 ]
+    }
+  ],
+  "saturate": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 0, 1, 0 ]
+    }
+  ],
+  "scratch": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 80, 0, 2, 1 ]
+    }
+  ],
+  "seqCtr": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+    }
+  ],
+  "seqEvent": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15, 0, 0 ]
+    }
+  ],
+  "seqLev": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15, 1, 0, 0, 0 ]
+    }
+  ],
+  "seqNote": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15, 0, 0, 0 ]
+    }
+  ],
+  "seqVal": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15, 0, 0, 0, 0 ]
+    }
+  ],
+  "sH": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    }
+  ],
+  "shpExp": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 0, 1, 0 ]
+    }
+  ],
+  "shpStatic": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 1, 1 ]
+    }
+  ],
+  "status": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    }
+  ],
+  "stChorus": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 20, 127, 1 ]
+    }
+  ],
+  "sw1-2": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "sw1-2M": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "sw1-4": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "sw1-8": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "sw2-1": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "sw2-1M": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "sw4-1": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "sw8-1": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "swOnOffM": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "swOnOffT": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "T&H": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    }
+  ],
+  "ValSw1-2": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "ValSw2-1": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0 ]
+    }
+  ],
+  "Vocoder": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 0 ]
+    }
+  ],
+  "WahWah": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 64, 1 ]
+    }
+  ],
+  "WaveWrap": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 0, 1 ]
+    }
+  ],
+  "WindSw": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 40, 80 ]
+    }
+  ],
+  "X-Fade": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+"value": [ 0, 64, 0 ]
+    }
+  ],
+  "ZeroCnt": [
+    {
+      "field": "defaultParams",
+      "action": "addField",
+      "value": []
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+// Мониторинг FPS
+let frameCount = 0;
+let lastTime = performance.now();
+function monitorFPS() {
+    frameCount++;
+    const now = performance.now();
+    if (now - lastTime >= 1000) {
+        console.log(`FPS: ${frameCount}`);
+        frameCount = 0;
+        lastTime = now;
+    }
+    requestAnimationFrame(monitorFPS);
+}
+monitorFPS();
+
+// Проверка на утечки памяти
+window.performance.memory && console.log(
+    `Memory: ${(window.performance.memory.usedJSHeapSize / 1048576).toFixed(2)}MB`
+);

@@ -1,0 +1,81 @@
+{
+  "filename": "crazy1.pch2",
+  "modules": [
+    {
+      "name": "DlyEight",
+      "id": 1,
+      "type": 181,
+      "parameters": "[0]",
+      "modes": [
+        0
+      ],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 21
+    },
+    {
+      "name": "seqCtr",
+      "id": 2,
+      "type": 154,
+      "parameters": "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 2
+    }
+  ],
+  "cables": [
+    {
+      "from": {
+        "module": "DlyEight",
+        "id": 1,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "seqCtr",
+        "id": 2,
+        "jack": 2,
+        "pin": "in"
+      },
+      "color": "red",
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "DlyEight",
+        "id": 1,
+        "jack": 6,
+        "pin": "out"
+      },
+      "to": {
+        "module": "seqCtr",
+        "id": 2,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "red",
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "seqCtr",
+        "id": 2,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "DlyEight",
+        "id": 1,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "red",
+      "type": "out-in",
+      "area": "VOICE"
+    }
+  ],
+  "textpad": ""
+}

@@ -1,0 +1,77 @@
+// Автоматически сгенерированный модуль: ConstSwT
+// Исходный файл: ConstSwT.js
+// Версия: 206
+
+export const ConstSwTModule = {
+    type: 'ConstSwT',
+        typeID: 50,
+    defaultParams: [64, 0, 0],
+    displayName: 'ConstSwT',
+    gridHeight: 2,
+    originalName: 'ConstSwT',
+    tooltip: 'Constant Switch Toggling',
+    components: [
+        {
+                "componentType": "Output",
+                "id": "0",
+                "x": 240,
+                "y": 10,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Knob",
+                "id": "5",
+                "x": 163,
+                "y": 5,
+                "infoFunc": 16,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextField",
+                "id": "1",
+                "x": 187,
+                "y": 8,
+                "width": 28,
+                "referenceElementId": 5
+        },
+        {
+                "componentType": "Line",
+                "id": "7",
+                "x": 199,
+                "y": 15,
+                "length": 21,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "SVG",
+                "id": "4",
+                "x": 217,
+                "y": 9,
+                "width": 23,
+                "height": 10,
+                "color": "#ffffff"
+        ,
+        "svgSrc": "/svg/ConstSWM_ConstSWT.svg"},
+        {
+                "componentType": "TextEdit",
+                "id": "2",
+                "x": 111,
+                "y": 8,
+                "width": 43,
+                "text": "Switch"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "3",
+                "x": 54,
+                "y": 14,
+                "width": 23,
+                "height": 12,
+                "labels": [
+                        "BiP",
+                        "Uni"
+                ]
+        }
+]
+};

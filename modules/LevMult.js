@@ -1,0 +1,69 @@
+// Автоматически сгенерированный модуль: LevMult
+// Исходный файл: LevMult.js
+// Версия: 206
+
+export const LevMultModule = {
+    type: 'LevMult',
+        typeID: 44,
+    defaultParams: [],
+    displayName: 'LevMult',
+    gridHeight: 2,
+    originalName: 'LevMult',
+    tooltip: 'Level Multiplier',
+    components: [
+        {
+                "componentType": "Input",
+                "id": "1",
+                "x": 210,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "0",
+                "x": 240,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "2",
+                "x": 215,
+                "y": 7,
+                "text": "↑",
+                "fontSize": 18,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Amplifier",
+                "width": 102
+        },
+        {
+                "componentType": "Line",
+                "id": "3",
+                "x": 185,
+                "y": 6,
+                "length": 47,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Line",
+                "id": "4",
+                "x": 185,
+                "y": 6,
+                "length": 9,
+                "orientation": "Vertical"
+        },
+        {
+                "componentType": "Input",
+                "id": "6",
+                "x": 180,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        }
+]
+};

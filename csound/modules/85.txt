@@ -1,0 +1,39 @@
+;@ ins k k
+;@ outs k k
+opcode WindSw, 0, kkkkkk
+  kFrom, kTo, kin,kctrl,kout,kgate xin
+  kCtrl zkr kctrl
+  kCtrl *= 64
+  kIn zkr kin
+  kGate init 0
+
+  if (kCtrl >= kFrom && kCtrl <= kTo ) then
+  	kGate = 1
+  	goto run
+  endif
+  kGate = 0
+run:
+  zkw kGate, kgate
+  zkw kIn*kGate,kout
+endop
+
+;@ ins a a
+;@ outs a a
+opcode WindSw, 0, kkkkkk
+  kFrom, kTo, kin,kctrl,kout,kgate xin
+  setkmps 1
+  aCtrl zar kctrl
+  kCtrl = k(aCtrl)
+  kCtrl *= 64
+  aIn zar kin
+  kGate init 0
+
+  if (kCtrl >= kFrom && kCtrl <= kTo ) then
+  	kGate = 1
+  	goto run
+  endif
+  kGate = 0
+run:
+  zaw kGate, kgate
+  zaw aIn*kGate,kout
+endop

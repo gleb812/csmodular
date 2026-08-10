@@ -1,0 +1,256 @@
+// Автоматически сгенерированный модуль: Resonator
+// Исходный файл: Resonator.js
+// Версия: 208
+
+export const ResonatorModule = {
+    type: 'Resonator',
+        typeID: 56,
+    displayName: 'Resonator',
+    gridHeight: 5,
+    originalName: 'Resonator',
+    tooltip: 'Resonator',
+    components: [
+        {
+                "componentType": "Input",
+                "id": "0",
+                "x": 5,
+                "y": 54,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Input",
+                "id": "1",
+                "x": 21,
+                "y": 54,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Knob",
+                "id": "2",
+                "x": 38,
+                "y": 49,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "5",
+                "x": 5,
+                "y": 41,
+                "text": "Pitch",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextField",
+                "id": "4",
+                "x": 28,
+                "y": 15,
+                "width": 50,
+                "referenceElementId": 6
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "7",
+                "x": 81,
+                "y": 4,
+                "width": 28,
+                "height": 12,
+                "labels": [
+                        "Semi",
+                        "Freq",
+                        "Fac",
+                        "Part"
+                ]
+        },
+        {
+                "componentType": "Knob",
+                "id": "6",
+                "x": 84,
+                "y": 18,
+                "infoFunc": 61,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "9",
+                "x": 112,
+                "y": 14,
+                "infoFunc": 59,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "8",
+                "x": 113,
+                "y": 6,
+                "text": "Cent",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Line",
+                "id": "3",
+                "x": 25,
+                "y": 59,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Knob",
+                "id": "10",
+                "x": 185,
+                "y": 49,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "15",
+                "x": 182,
+                "y": 39,
+                "text": "Decay",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Knob",
+                "id": "16",
+                "x": 185,
+                "y": 15,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "20",
+                "x": 184,
+                "y": 4,
+                "text": "Damp",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Output",
+                "id": "23",
+                "x": 215,
+                "y": 5,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Input",
+                "id": "24",
+                "x": 239,
+                "y": 5,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Line",
+                "id": "26",
+                "x": 224,
+                "y": 10,
+                "length": 17,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "27",
+                "x": 223,
+                "y": 57,
+                "width": 13,
+                "text": "M"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "12",
+                "x": 56,
+                "y": 30,
+                "width": 22,
+                "height": 12,
+                "labels": [
+                        "Off",
+                        "On"
+                ]
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "11",
+                "x": 37,
+                "y": 32,
+                "text": "KBT",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "13",
+                "x": 226,
+                "y": 18,
+                "text": "Drv",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Knob",
+                "id": "14",
+                "x": 147,
+                "y": 20,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "17",
+                "x": 149,
+                "y": 10,
+                "text": "Pos",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "18",
+                "x": 119,
+                "y": 53,
+                "width": 45,
+                "height": 12,
+                "labels": [
+                        "String1",
+                        "String2",
+                        "Tube1",
+                        "Tube2",
+                        "Tube3"
+                ]
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "19",
+                "x": 74,
+                "y": 56,
+                "text": "Algorithm",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "21",
+                "x": 235,
+                "y": 46,
+                "text": "Out",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Output",
+                "id": "22",
+                "x": 239,
+                "y": 57,
+                "jackType": "audio",
+                "bandwidth": "static"
+        }
+]
+};

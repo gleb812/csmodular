@@ -1,0 +1,75 @@
+;@ map AMPEXP CLA001
+;@ map BUT002
+;@ map BUT003
+
+;@ ins k k k k k k k k k k
+;@ outs k k
+opcode Mix41S, 0, kkkkkkkkkkkkkkkkkkkkk
+kL1,kL2,kL3,kL4,kO1,kO2,kO3,kO4,kEL,k1L,k1R,k2L,k2R,k3L,k3R,k4L,k4R,kCL,kCR,kOuL,kOuR xin
+	k1l zkr k1L
+	k2l zkr k2L
+	k3l zkr k3L
+	k4l zkr k4L
+	kcl zkr kCL
+
+  k1r zkr k1R
+  k2r zkr k2R
+  k3r zkr k3R
+  k4r zkr k4R
+  kcr zkr kCR
+
+	if kEL == 1 kgoto Out
+    kL1 table kL1, giAMPEXP
+    kL2 table kL2, giAMPEXP
+		kL3 table kL3, giAMPEXP
+		kL4 table kL4, giAMPEXP
+		kgoto Next
+  Out:
+		kL1 table kL1, giCLA001
+		kL2 table kL2, giCLA001
+		kL3 table kL3, giCLA001
+		kL4 table kL4, giCLA001
+	Next:
+	koutL = k1l*kL1*kO1 + k2l*kL2*kO2 + k3l*kL3*kO3 + k4l*kL4*kO4 + kcl
+  koutR = k1r*kL1*kO1 + k2r*kL2*kO2 + k3r*kL3*kO3 + k4r*kL4*kO4 + kcr
+	koutL limit koutL, -4, 4
+	koutR limit koutR, -4, 4
+	zkw koutL, kOuL
+  zkw koutR, kOuR
+endop
+
+;@ ins a a a a a a a a a a
+;@ outs a a
+opcode Mix41S, 0, kkkkkkkkkkkkkkkkkkkkk
+kL1,kL2,kL3,kL4,kO1,kO2,kO3,kO4,kEL,k1L,k1R,k2L,k2R,k3L,k3R,k4L,k4R,kCL,kCR,kOuL,kOuR xin
+	a1l zar k1L
+	a2l zar k2L
+	a3l zar k3L
+	a4l zar k4L
+	acl zar kCL
+
+  a1r zar k1R
+  a2r zar k2R
+  a3r zar k3R
+  a4r zar k4R
+  acr zar kCR
+
+	if kEL == 1 kgoto Out
+    kL1 table kL1, giAMPEXP
+    kL2 table kL2, giAMPEXP
+		kL3 table kL3, giAMPEXP
+		kL4 table kL4, giAMPEXP
+		kgoto Next
+  Out:
+		kL1 table kL1, giCLA001
+		kL2 table kL2, giCLA001
+		kL3 table kL3, giCLA001
+		kL4 table kL4, giCLA001
+	Next:
+	aoutL = a1l*kL1*kO1 + a2l*kL2*kO2 + a3l*kL3*kO3 + a4l*kL4*kO4 + acl
+  aoutR = a1r*kL1*kO1 + a2r*kL2*kO2 + a3r*kL3*kO3 + a4r*kL4*kO4 + acr
+	aoutL limit aoutL, -4, 4
+	aoutR limit aoutR, -4, 4
+	zaw aoutL, kOuL
+  zaw aoutR, kOuR
+endop

@@ -1,0 +1,156 @@
+// Автоматически сгенерированный модуль: EqPeak
+// Исходный файл: EqPeak.js
+// Версия: 208
+
+export const EqPeakModule = {
+    type: 'EqPeak',
+        typeID: 103,
+    defaultParams: [60, 64, 64, 1, 127],
+    displayName: 'EqPeak',
+    gridHeight: 4,
+    originalName: 'EqPeak',
+    tooltip: 'Eq Peak',
+    components: [
+        {
+                "componentType": "Knob",
+                "id": "1",
+                "x": 143,
+                "y": 35,
+                "infoFunc": 76,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "2",
+                "x": 49,
+                "y": 35,
+                "infoFunc": 38,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "3",
+                "x": 96,
+                "y": 35,
+                "infoFunc": 36,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextField",
+                "id": "5",
+                "x": 27,
+                "y": 18,
+                "width": 44,
+                "referenceElementId": 2
+        },
+        {
+                "componentType": "Graph",
+                "id": "0",
+                "x": 182,
+                "y": 4,
+                "width": 52,
+                "height": 28
+        },
+        {
+                "componentType": "TextField",
+                "id": "4",
+                "x": 76,
+                "y": 18,
+                "width": 44,
+                "referenceElementId": 3
+        },
+        {
+                "componentType": "TextField",
+                "id": "6",
+                "x": 125,
+                "y": 18,
+                "width": 44,
+                "referenceElementId": 1
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "7",
+                "x": 28,
+                "y": 35,
+                "text": "Freq",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "8",
+                "x": 77,
+                "y": 35,
+                "text": "Gain",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "9",
+                "x": 126,
+                "y": 35,
+                "text": "BW",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Output",
+                "id": "10",
+                "x": 240,
+                "y": 45,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Input",
+                "id": "11",
+                "x": 240,
+                "y": 4,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "12",
+                "x": 239,
+                "y": 24,
+                "width": 13,
+                "text": "B"
+        },
+        {
+                "componentType": "Line",
+                "id": "13",
+                "x": 245,
+                "y": 10,
+                "length": 40,
+                "orientation": "Vertical"
+        },
+        {
+                "componentType": "Knob",
+                "id": "14",
+                "x": 203,
+                "y": 35,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "15",
+                "x": 184,
+                "y": 41,
+                "text": "Lev",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "MiniVU",
+                "id": "16",
+                "x": 227,
+                "y": 40,
+                "width": 6,
+                "height": 15,
+                "orientation": "vertical"
+        }
+]
+};

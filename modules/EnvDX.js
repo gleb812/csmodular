@@ -1,0 +1,320 @@
+// Автоматически сгенерированный модуль: EnvDX
+// Исходный файл: EnvDX.js
+// Версия: 226
+
+export const EnvDXModule = {
+    type: 'EnvDX',
+        typeID: 0,
+    displayName: 'EnvDX',
+    gridHeight: 7,
+    originalName: 'EnvDX',
+    tooltip: 'DX style envelope',
+    components: [
+        {
+                "componentType": "Knob",
+                "id": "0",
+                "x": 9,
+                "y": 79,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "1",
+                "x": 40,
+                "y": 79,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "2",
+                "x": 71,
+                "y": 79,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "3",
+                "x": 102,
+                "y": 79,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "4",
+                "x": 133,
+                "y": 79,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "5",
+                "x": 164,
+                "y": 79,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "6",
+                "x": 195,
+                "y": 79,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "7",
+                "x": 226,
+                "y": 79,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextField",
+                "id": "8",
+                "x": 6,
+                "y": 64,
+                "width": 27,
+                "referenceElementId": 0
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "9",
+                "x": 46,
+                "y": 55,
+                "text": "L1",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "10",
+                "x": 15,
+                "y": 55,
+                "text": "R1",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextField",
+                "id": "11",
+                "x": 37,
+                "y": 64,
+                "width": 27,
+                "referenceElementId": 1
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "12",
+                "x": 77,
+                "y": 55,
+                "text": "R2",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextField",
+                "id": "13",
+                "x": 68,
+                "y": 64,
+                "width": 27,
+                "referenceElementId": 2
+        },
+        {
+                "componentType": "TextField",
+                "id": "14",
+                "x": 99,
+                "y": 64,
+                "width": 27,
+                "referenceElementId": 3
+        },
+        {
+                "componentType": "TextField",
+                "id": "15",
+                "x": 130,
+                "y": 65,
+                "width": 27,
+                "referenceElementId": 4
+        },
+        {
+                "componentType": "TextField",
+                "id": "16",
+                "x": 161,
+                "y": 64,
+                "width": 27,
+                "referenceElementId": 5
+        },
+        {
+                "componentType": "TextField",
+                "id": "17",
+                "x": 192,
+                "y": 64,
+                "width": 27,
+                "referenceElementId": 6
+        },
+        {
+                "componentType": "TextField",
+                "id": "18",
+                "x": 223,
+                "y": 64,
+                "width": 27,
+                "referenceElementId": 7
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "19",
+                "x": 108,
+                "y": 55,
+                "text": "L2",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "20",
+                "x": 170,
+                "y": 55,
+                "text": "L3",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "21",
+                "x": 232,
+                "y": 55,
+                "text": "L4",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "22",
+                "x": 139,
+                "y": 55,
+                "text": "R3",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "23",
+                "x": 201,
+                "y": 55,
+                "text": "R4",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "24",
+                "x": 4,
+                "y": 31,
+                "jackType": "logic",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "27",
+                "x": 18,
+                "y": 19,
+                "text": "Gate",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "LED",
+                "id": "28",
+                "x": 6,
+                "y": 19
+        },
+        {
+                "componentType": "Input",
+                "id": "33",
+                "x": 239,
+                "y": 8,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "34",
+                "x": 239,
+                "y": 38,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "SVG",
+                "id": "35",
+                "x": 240,
+                "y": 17,
+                "width": 11,
+                "height": 24,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Output",
+                "id": "36",
+                "x": 223,
+                "y": 38,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "37",
+                "x": 18,
+                "y": 31,
+                "width": 18,
+                "text": "KB"
+        },
+        {
+                "componentType": "Input",
+                "id": "25",
+                "x": 48,
+                "y": 31,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Input",
+                "id": "26",
+                "x": 76,
+                "y": 31,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "29",
+                "x": 46,
+                "y": 19,
+                "text": "Rate",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "30",
+                "x": 71,
+                "y": 19,
+                "text": "Level",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Graph",
+                "id": "31",
+                "x": 101,
+                "y": 8,
+                "width": 85,
+                "height": 28
+        }
+]
+};

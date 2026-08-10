@@ -1,0 +1,112 @@
+;@ map LOGsub LOGlow LOGhii
+;@ ins k k
+;@ outs k
+opcode Delay, 0, kkkkkkk
+  kTime,kMod,kRange,kMode,kIn,kTMod,kout xin
+  kin zkr kIn
+  ktmod zkr kTMod
+
+  kTime += kMod * ktmod/127
+  if kRange == 0 then
+      kTime table kTime, giLOGlow
+  elseif kRange == 1 then
+      kTime table kTime, giLOGhii
+  elseif kRange == 2 then
+      kTime table kTime, giLOGsub
+  endif
+
+kTime /= 1000
+kin K2Y kin
+
+  kON trigger kin, .5, 0
+  kOFF trigger kin,.5, 1
+
+if kON != 1 goto Next0
+   kSet = 1
+   kRel = 0
+   kCurT = 0
+Next0:
+if kOFF !=1 goto Next2
+   kSet = 0
+   kRel = 1
+   kCurT = 0
+Next2:
+
+if kSet != 1 goto Next
+  if kMode != 1 kgoto Next1
+     kOut = 1
+     kgoto Next
+Next1:
+     kOut = (kCurT < kTime ? 0 : 1)
+     kCurT += 1/kr
+     kCurT limit kCurT, 0, kTime
+Next:
+if kRel != 1 goto Out
+  if kMode != 0 kgoto Next3
+     kOut = 0
+     kgoto Out
+Next3:
+     kOut = (kCurT < kTime ? 1 : 0)
+     kCurT += 1/kr
+     kCurT limit kCurT, 0, kTime
+Out:
+  zkw kOut, kout
+endop
+
+;@ ins a a
+;@ outs a
+opcode Delay, 0, kkkkkkk
+  kTime,kMod,kRange,kMode,kIn,kTMod,kout xin
+  setksmps 1
+  ain zar kIn
+  atmod zar kTMod
+  kin = k(ain)
+  ktmod = k(atmod)
+
+  kTime += kMod * ktmod/127
+  if kRange == 0 then
+      kTime table kTime, giLOGlow
+  elseif kRange == 1 then
+      kTime table kTime, giLOGhii
+  elseif kRange == 2 then
+      kTime table kTime, giLOGsub
+  endif
+
+kTime /= 1000
+
+  kin K2Y kin
+
+  kON trigger kin, .5, 0
+  kOFF trigger kin,.5, 1
+
+  if kON != 1 goto Next0
+     kSet = 1
+     kRel = 0
+     kCurT = 0
+  Next0:
+  if kOFF !=1 goto Next2
+     kSet = 0
+     kRel = 1
+     kCurT = 0
+  Next2:
+
+  if kSet != 1 goto Next
+    if kMode != 1 kgoto Next1
+       kOut = 1
+       kgoto Next
+  Next1:
+       kOut = (kCurT < kTime ? 0 : 1)
+       kCurT += 1/kr
+       kCurT limit kCurT, 0, kTime
+  Next:
+  if kRel != 1 goto Out
+    if kMode != 0 kgoto Next3
+       kOut = 0
+       kgoto Out
+  Next3:
+       kOut = (kCurT < kTime ? 1 : 0)
+       kCurT += 1/kr
+       kCurT limit kCurT, 0, kTime
+  Out:
+  zaw a(kOut), kout
+endop

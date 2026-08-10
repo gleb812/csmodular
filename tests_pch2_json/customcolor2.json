@@ -1,0 +1,64 @@
+{
+  "filename": "customcolor.json",
+  "modules": [
+    {
+      "name": "Digitizer",
+      "id": 1,
+      "type": 0,
+      "parameters": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 15
+    },
+    {
+      "name": "LfoShpA",
+      "id": 2,
+      "type": 0,
+      "parameters": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 4
+    }
+  ],
+  "cables": [
+    {
+      "from": {
+        "module": "LfoShpA",
+        "id": 2,
+        "jack": 0,
+        "pin": "in"
+      },
+      "to": {
+        "module": "Digitizer",
+        "id": 1,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#ffffff",
+      "customColor": "#10b981",
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "Digitizer",
+        "id": 1,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "LfoShpA",
+        "id": 2,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": "#8b5cf6",
+      "type": "out-in",
+      "area": "VOICE"
+    }
+  ],
+  "textpad": ""
+}

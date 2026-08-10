@@ -1,0 +1,23 @@
+;@ ins k
+;@ outs k k
+opcode swOnOffM, 0, kkkk
+  kSw, kin, kout, kctrl xin
+
+  kSw K2Y kSw
+  kIn zkr kin
+
+  zkw kIn*kSw, kout
+  zkw kSw/16,  kctrl
+endop
+
+;@ ins a
+;@ outs a k
+opcode swOnOffM, 0, kkkk
+kSw, kin, kout, kctrl xin
+
+aIn zar kin
+kSw K2Y kSw
+
+zaw aIn*kSw, kout
+zkw kSw/16,  kctrl
+endop

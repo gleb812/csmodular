@@ -1,0 +1,296 @@
+// Автоматически сгенерированный модуль: ModAHD
+// Исходный файл: ModAHD.js
+// Версия: 206
+
+export const ModAHDModule = {
+    type: 'ModAHD',
+        typeID: 169,
+    defaultParams: [0, 32, 14, 0, 0, 0, 0, 1],
+    displayName: 'ModAHD',
+    gridHeight: 5,
+    originalName: 'ModAHD',
+    tooltip: 'Envelope Modulation AHD',
+    components: [
+        {
+                "componentType": "TextLabel",
+                "id": "0",
+                "x": 23,
+                "y": 34,
+                "text": "Trig",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "LED",
+                "id": "1",
+                "x": 6,
+                "y": 19
+        },
+        {
+                "componentType": "Input",
+                "id": "2",
+                "x": 4,
+                "y": 31,
+                "jackType": "logic",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "3",
+                "x": 18,
+                "y": 32,
+                "text": "↑",
+                "fontSize": 10,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Trig 1",
+                "width": 9
+        },
+        {
+                "componentType": "Input",
+                "id": "7",
+                "x": 4,
+                "y": 60,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "8",
+                "x": 18,
+                "y": 62,
+                "text": "AM",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "9",
+                "x": 240,
+                "y": 4,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "10",
+                "x": 240,
+                "y": 60,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "LevelShift",
+                "id": "12",
+                "x": 200,
+                "y": 59
+        },
+        {
+                "componentType": "Output",
+                "id": "13",
+                "x": 223,
+                "y": 60,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Graph",
+                "id": "14",
+                "x": 176,
+                "y": 4,
+                "width": 58,
+                "height": 28
+        },
+        {
+                "componentType": "TextField",
+                "id": "15",
+                "x": 51,
+                "y": 14,
+                "width": 35,
+                "referenceElementId": 17
+        },
+        {
+                "componentType": "TextField",
+                "id": "16",
+                "x": 137,
+                "y": 14,
+                "width": 35,
+                "referenceElementId": 18
+        },
+        {
+                "componentType": "Knob",
+                "id": "17",
+                "x": 60,
+                "y": 31,
+                "infoFunc": 28,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "18",
+                "x": 146,
+                "y": 31,
+                "infoFunc": 28,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "21",
+                "x": 51,
+                "y": 32,
+                "text": "A",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "22",
+                "x": 138,
+                "y": 32,
+                "text": "D",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextField",
+                "id": "23",
+                "x": 94,
+                "y": 14,
+                "width": 35,
+                "referenceElementId": 24
+        },
+        {
+                "componentType": "Knob",
+                "id": "24",
+                "x": 103,
+                "y": 31,
+                "infoFunc": 28,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "25",
+                "x": 94,
+                "y": 32,
+                "text": "H",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "SVG",
+                "id": "11",
+                "x": 240,
+                "y": 27,
+                "width": 11,
+                "height": 21,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "4",
+                "x": 66,
+                "y": 59,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Knob",
+                "id": "5",
+                "x": 80,
+                "y": 52,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "6",
+                "x": 70,
+                "y": 62,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Input",
+                "id": "19",
+                "x": 110,
+                "y": 59,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Knob",
+                "id": "20",
+                "x": 124,
+                "y": 52,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "26",
+                "x": 112,
+                "y": 62,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Input",
+                "id": "27",
+                "x": 153,
+                "y": 59,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Knob",
+                "id": "28",
+                "x": 167,
+                "y": 52,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "29",
+                "x": 155,
+                "y": 62,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "30",
+                "x": 220,
+                "y": 50,
+                "text": "Env",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "31",
+                "x": 16,
+                "y": 17,
+                "width": 18,
+                "text": "KB"
+        },
+        {
+                "componentType": "Line",
+                "id": "32",
+                "x": 245,
+                "y": 8,
+                "length": 23,
+                "orientation": "Vertical"
+        },
+        {
+                "componentType": "Line",
+                "id": "33",
+                "x": 245,
+                "y": 44,
+                "length": 23,
+                "orientation": "Vertical"
+        }
+]
+};

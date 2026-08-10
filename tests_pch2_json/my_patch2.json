@@ -1,0 +1,126 @@
+{
+  "filename": "my_patch1.json",
+  "modules": [
+    {
+      "name": "Digitizer",
+      "id": 1,
+      "type": 0,
+      "parameters": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 0
+    },
+    {
+      "name": "NoteScaler",
+      "id": 2,
+      "type": 0,
+      "parameters": "[0,0,0,0,0,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 3
+    },
+    {
+      "name": "EnvFollow",
+      "id": 3,
+      "type": 0,
+      "parameters": "[0,0,0,0,0,0,0,0,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 0,
+      "vpos": 13
+    },
+    {
+      "name": "FltComb",
+      "id": 4,
+      "type": 0,
+      "parameters": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]",
+      "modes": [],
+      "area": "FX",
+      "hpos": 0,
+      "vpos": 0
+    },
+    {
+      "name": "FltLP",
+      "id": 5,
+      "type": 0,
+      "parameters": "[0,0,0,0,0,0,0,0,-32,0,0,0,0]",
+      "modes": [],
+      "area": "FX",
+      "hpos": 0,
+      "vpos": 4
+    }
+  ],
+  "cables": [
+    {
+      "from": {
+        "module": "NoteScaler",
+        "id": 2,
+        "jack": 0,
+        "pin": "in"
+      },
+      "to": {
+        "module": "EnvFollow",
+        "id": 3,
+        "jack": 0,
+        "pin": "out"
+      },
+      "color": "blue",
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "EnvFollow",
+        "id": 3,
+        "jack": 0,
+        "pin": "in"
+      },
+      "to": {
+        "module": "Digitizer",
+        "id": 1,
+        "jack": 0,
+        "pin": "out"
+      },
+      "color": "red",
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "Digitizer",
+        "id": 1,
+        "jack": 0,
+        "pin": "in"
+      },
+      "to": {
+        "module": "NoteScaler",
+        "id": 2,
+        "jack": 0,
+        "pin": "out"
+      },
+      "color": "blue",
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "FltComb",
+        "id": 4,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "FltLP",
+        "id": 5,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "red",
+      "type": "out-in",
+      "area": "FX"
+    }
+  ],
+  "textpad": ""
+}

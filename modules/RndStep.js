@@ -1,0 +1,127 @@
+// Автоматически сгенерированный модуль: RndStep
+// Исходный файл: RndStep.js
+// Версия: 238
+
+export const RndStepModule = {
+    type: 'RndStep',
+        typeID: 0,
+    displayName: 'RndStep',
+    gridHeight: 2,
+    originalName: 'RndStep',
+    tooltip: 'Rnd Step',
+    components: [
+        {
+                "componentType": "Knob",
+                "id": "0",
+                "x": 121,
+                "y": 5,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Output",
+                "id": "1",
+                "x": 239,
+                "y": 15,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "2",
+                "x": 238,
+                "y": 3,
+                "width": 13,
+                "text": "M"
+        },
+        {
+                "componentType": "Input",
+                "id": "3",
+                "x": 4,
+                "y": 14,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "4",
+                "x": 18,
+                "y": 16,
+                "text": "Pitch",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "5",
+                "x": 145,
+                "y": 9,
+                "width": 42,
+                "height": 12,
+                "labels": [
+                        "Rate Sub",
+                        "Rate Lo",
+                        "Rate Hi",
+                        "BPM",
+                        "Clk"
+                ]
+        },
+        {
+                "componentType": "TextField",
+                "id": "6",
+                "x": 78,
+                "y": 8,
+                "width": 40,
+                "referenceElementId": 0
+        },
+        {
+                "componentType": "LED",
+                "id": "8",
+                "x": 226,
+                "y": 4
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "9",
+                "x": 42,
+                "y": 14,
+                "width": 28,
+                "height": 12,
+                "labels": [
+                        "Poly",
+                        "Mono"
+                ]
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "10",
+                "x": 194,
+                "y": 3,
+                "text": "Step",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "12",
+                "x": 190,
+                "y": 13,
+                "width": 27,
+                "height": 12,
+                "labels": [
+                        "25%",
+                        "50%",
+                        "75%",
+                        "100%"
+                ]
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "11",
+                "x": 221,
+                "y": 13,
+                "width": 16,
+                "height": 12
+        }
+]
+};

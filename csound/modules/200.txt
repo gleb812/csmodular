@@ -1,0 +1,84 @@
+;@ map RNDlow RNDhir RNDbpm RNDsub
+
+;@ ins k
+;@ outs k
+opcode RandomA, 0, kkkkkkkkk
+  kRate,kMode,kType,kRange,kON,kEdge,kStep,kin,kout xin
+  kMod zkr kin
+; Gleb Rogozinsky 291119
+; TODO env is exp, but should be more like sigmoid, also check param order!
+; POLY is not working yet
+; Type is OutType
+  if kType  == 0 then
+    kSHIFT = 128
+    kDIV = 128
+  elseif kType == 1 then
+    kSHIFT = 0
+    kDIV = 256
+  elseif kType == 2 then
+    kSHIFT = 256
+    kDIV = 256
+  endif
+
+  if kRange == 1 then
+    kTime table kRate+kMod, giRNDlow
+  elseif kRange == 2 then
+    kTime table kRate+kMod, giRNDhir
+    kTime = 1/kTime ; Hz->s
+  elseif kRange == 3 then
+    kTime table kRate+kMod, giRNDbpm
+    kTime = 60/kTime ; BPM->s
+  elseif kRange == 0 then
+    kTime table kRate+kMod, giRNDsub
+  endif
+
+    if kEdge == 0 then
+      kE = 1  ;EDGE 0%
+    elseif kEdge == 1 then
+      kE = 3  ;EDGE 25%
+    elseif kEdge == 2 then
+      kE = 10 ;EDGE 50%
+    elseif kEdge == 3 then
+      kE = 20 ; EDGE 75%
+    elseif kEdge == 4 then
+        kE = 120 ; EDGE 100%
+    endif
+
+    if kStep == 0 then
+      kstep = 25
+    elseif kStep == 1 then
+      kstep = 50
+    elseif kStep == 2 then
+      kstep = 75
+    elseif kStep == 3 then
+      kstep = 100
+    endif
+
+  kOut1 init 0
+  ih = 8  ; Rand Gen constant
+  kTH = round(kstep*255/100)
+  kndx init 0
+  kndx = kndx%ih
+
+  k0 metro 1/kTime
+  if k0 != 1 goto Over2
+  kPh = 0
+  kO = kOut1
+  k1 random 0, kTH
+  k1 = round(k1)
+  if kndx != 0 goto Over1
+  k2 random 0, 4*kTH/ih
+  k2 = round(k2)*ih
+Over1:
+  kndx += 1
+  kS = (k1 + k2)%256
+Over2:
+  kPh += 1/(kr)
+  if (kS < kO) goto One ; kS = next value, kO = previous value
+  kOut1 = kO + (1.013*kS-kO)*(1-exp(-kE*kPh/kTime))
+  goto Two
+One:
+  kOut1 = 0.9993*kS + (kO-0.9993*kS)*exp(-kE*kPh/kTime)
+Two:
+  zkw kON*(kOut1-kSHIFT)/kDIV,kout
+endop

@@ -1,0 +1,46 @@
+0 CLA000
+
+;; надо сейчас только те, которые требуют отображения на панели!!
+; ==in-out
+13 NoteDet - его вообще нет у нас, потому что это миди ноты
+
+; ==osc
+; как быть с FREq/Semi ? сейчас это 64
+; Oscnoise - width линейно управляет графиком.
+; остался DX не сделан еще - там есть параметры
+
+22 OSCmaD
+23 OSCsID
+59 OSCcnt
+126 OSCshp
+
+; ==rnd
+RNDsub RNDlow RNDhir RNDbpm
+
+; наверное нет процентов для Step - RndClk, он же Prob - RndTrig
+
+; ==filter
+123 FLTfrq
+124 FLTres   ; у nord, multi, static
+0 CLA000 ;  у классик
+38 FLTfrQ
+36 FLTgai
+76 FLTbwi
+184 FLRfr3
+
+; ==delay
+DLY_5m	DLY25m	DLY100	DLY500	DLY_1s	DLY_2s	DLY2p7
+DLY5m8	DLY258	DLY1h8	DLY5h8	DLY1s8	DLY2s8	DLY278
+
+Delayclock= просто на 1 больше чем МИДИ значение
+
+; ==level
+LVLlev LVLpos
+; не все фунции хорошо подходят увы
+LVLamp
+
+
+
+
+
+

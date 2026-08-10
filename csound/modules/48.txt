@@ -1,0 +1,92 @@
+;@ map AMPEXP
+;@ map PANLOG
+
+;@ ins k k k k k k
+;@ outs k k
+
+opcode MixStereo, 0, kkkkkkkkkkkkkkkkkkkkk
+  kL1,kL2,kL3,kL4,kL5,kL6,kP1,kP2,kP3,kP4,kP5,kP6,kM,ki1,ki2,ki3,ki4,ki5,ki6,koL,koR xin
+
+  k1 zkr ki1
+  k2 zkr ki2
+  k3 zkr ki3
+  k4 zkr ki4
+  k5 zkr ki5
+  k6 zkr ki6
+
+  kM table kM, giAMPEXP
+
+  kL1 table kL1, giAMPEXP
+  kL2 table kL2, giAMPEXP
+  kL3 table kL3, giAMPEXP
+  kL4 table kL4, giAMPEXP
+  kL5 table kL5, giAMPEXP
+  kL6 table kL6, giAMPEXP
+
+  kP1L table kP1, giPANLOG
+  kP2L table kP2, giPANLOG
+  kP3L table kP3, giPANLOG
+  kP4L table kP4, giPANLOG
+  kP5L table kP5, giPANLOG
+  kP6L table kP6, giPANLOG
+
+  kP1R table 127-kP1, giPANLOG
+  kP2R table 127-kP2, giPANLOG
+  kP3R table 127-kP3, giPANLOG
+  kP4R table 127-kP4, giPANLOG
+  kP5R table 127-kP5, giPANLOG
+  kP6R table 127-kP6, giPANLOG
+
+  koutL = k1*kL1*kP1L+k2*kL2*kP2L+k3*kL3*kP3L+k4*kL4*kP4L+k5*kL5*kP5L+k6*kL6*kP6L
+  koutR = k1*kL1*kP1R+k2*kL2*kP2R+k3*kL3*kP3R+k4*kL4*kP4R+k5*kL5*kP5R+k6*kL6*kP6R
+  koutL limit koutL, -4, 4
+  koutR limit koutR, -4, 4
+
+  zkw koutL*kM, koL
+  zkw koutR*kM, koR
+endop
+
+;@ ins a a a a a a
+;@ outs a a
+
+opcode MixStereo, 0, kkkkkkkkkkkkkkkkkkkkk
+  kL1,kL2,kL3,kL4,kL5,kL6,kP1,kP2,kP3,kP4,kP5,kP6,kM,ki1,ki2,ki3,ki4,ki5,ki6,koL,koR xin
+
+  a1 zar ki1
+  a2 zar ki2
+  a3 zar ki3
+  a4 zar ki4
+  a5 zar ki5
+  a6 zar ki6
+
+  kM table kM, giAMPEXP
+
+  kL1 table kL1, giAMPEXP
+  kL2 table kL2, giAMPEXP
+  kL3 table kL3, giAMPEXP
+  kL4 table kL4, giAMPEXP
+  kL5 table kL5, giAMPEXP
+  kL6 table kL6, giAMPEXP
+
+  kP1L table kP1, giPANLOG
+  kP2L table kP2, giPANLOG
+  kP3L table kP3, giPANLOG
+  kP4L table kP4, giPANLOG
+  kP5L table kP5, giPANLOG
+  kP6L table kP6, giPANLOG
+
+  kP1R table 127-kP1, giPANLOG
+  kP2R table 127-kP2, giPANLOG
+  kP3R table 127-kP3, giPANLOG
+  kP4R table 127-kP4, giPANLOG
+  kP5R table 127-kP5, giPANLOG
+  kP6R table 127-kP6, giPANLOG
+
+  aoutL = a1*kL1*kP1L+a2*kL2*kP2L+a3*kL3*kP3L+a4*kL4*kP4L+a5*kL5*kP5L+a6*kL6*kP6L
+  aoutR = a1*kL1*kP1R+a2*kL2*kP2R+a3*kL3*kP3R+a4*kL4*kP4R+a5*kL5*kP5R+a6*kL6*kP6R
+  aoutL limit aoutL, -4, 4
+  aoutR limit aoutR, -4, 4
+
+  zaw aoutL*kM, koL
+  zaw aoutR*kM, koR
+endop

@@ -1,0 +1,12 @@
+;@ outs a a a a
+opcode In4, 0, kkkkkkk
+  kS, kPad, kOn, k1,k2,k3,k4  xin
+  kPad += 1
+  a1, a2, a3, a4 ins
+  zaw a1 * kPad * kOn, k1
+  zaw a2 * kPad * kOn, k2
+  zaw a3 * kPad * kOn, k3
+  zaw a4 * kPad * kOn, k4
+endop
+
+; NO BUS HERE

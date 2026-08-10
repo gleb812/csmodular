@@ -1,0 +1,75 @@
+;@ map LOGsub LOGlow LOGhii
+;@ ins k k
+;@ outs k
+opcode Pulse, 0, kkkkkkk
+  kTime,kMod,kRange,kMode,kin,kmodi,kout xin
+  kIn zkr kin
+  kModIn zkr kmodi
+
+  kIn K2Y kIn
+
+  kOut init 0
+  kCurrent init 0
+  kTime += kMod * kModIn
+  if kRange == 0 then
+    kTimer table kTime, giLOGsub
+  elseif kRange == 1 then
+    kTimer table kTime, giLOGlow
+  elseif kRange == 2 then
+    kTimer table kTime, giLOGhii
+  endif
+  kTimer /= 1000
+
+  if kMode != 0 goto AltMode
+    kTrig trigger kIn,0.5,0
+    goto Next
+AltMode:
+    kTrig trigger kIn,0.5,1
+Next:
+  if kTrig != 1 goto Over
+      kCurrent = kTimer
+Over:
+  kCurrent -= 1/kr
+  kCurrent limit kCurrent, 0, 100*kr
+  kOut = (kCurrent > 0 ? 1:0)
+  zkw kOut, kout
+endop
+
+;@ ins a a
+;@ outs a
+opcode Pulse, 0, kkkkkkk
+  kTime,kMod,kRange,kMode,kin,kmodi,kout xin
+  setksmps 1
+  aIn zar kin
+  aModIn zar kmodi
+  kIn = k(aIn)
+
+  kIn K2Y kIn
+
+  kModIn = k(aModIn)
+  kOut init 0
+  kCurrent init 0
+  kTime += kMod * kModIn
+  if kRange == 0 then
+    kTimer table kTime, giLOGsub
+  elseif kRange == 1 then
+    kTimer table kTime, giLOGlow
+  elseif kRange == 2 then
+    kTimer table kTime, giLOGhii
+  endif
+  kTimer /= 1000
+
+  if kMode != 0 goto AltMode
+    kTrig trigger kIn,0.5,0
+    goto Next
+AltMode:
+    kTrig trigger kIn,0.5,1
+Next:
+  if kTrig != 1 goto Over
+      kCurrent = kTimer
+Over:
+  kCurrent -= 1/kr
+  kCurrent limit kCurrent, 0, 100*kr
+  kOut = (kCurrent > 0 ? 1:0)
+  zaw a(kOut), kout
+endop

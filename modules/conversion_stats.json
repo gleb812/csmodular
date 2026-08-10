@@ -1,0 +1,144 @@
+{
+  "total": 191,
+  "without_typeid": 23,
+  "files_without_typeid": [
+    {
+      "filename": "PeakFollow.txt",
+      "file_stem": "PeakFollow",
+      "fileName_field": "PeakDetector",
+      "js_name": "PeakFollow"
+    },
+    {
+      "filename": "OutBusA.txt",
+      "file_stem": "OutBusA",
+      "fileName_field": "IOOutBusA",
+      "js_name": "OutBusA"
+    },
+    {
+      "filename": "LfoD.txt",
+      "file_stem": "LfoD",
+      "fileName_field": "LfoD",
+      "js_name": "LfoD"
+    },
+    {
+      "filename": "OutBusB.txt",
+      "file_stem": "OutBusB",
+      "fileName_field": "IOOutBusB",
+      "js_name": "OutBusB"
+    },
+    {
+      "filename": "EnvDX.txt",
+      "file_stem": "EnvDX",
+      "fileName_field": "EnvDX",
+      "js_name": "EnvDX"
+    },
+    {
+      "filename": "ClkDivFix.txt",
+      "file_stem": "ClkDivFix",
+      "fileName_field": "LogicClkDivFix",
+      "js_name": "ClkDivFix"
+    },
+    {
+      "filename": "AR-Env.txt",
+      "file_stem": "AR-Env",
+      "fileName_field": "EnvAR",
+      "js_name": "AR-Env"
+    },
+    {
+      "filename": "BusIn.txt",
+      "file_stem": "BusIn",
+      "fileName_field": "BusIn",
+      "js_name": "BusIn"
+    },
+    {
+      "filename": "PolarFade.txt",
+      "file_stem": "PolarFade",
+      "fileName_field": "MxrPolarFade",
+      "js_name": "PolarFade"
+    },
+    {
+      "filename": "ShelvEQ.txt",
+      "file_stem": "ShelvEQ",
+      "fileName_field": "FilterShelvEQ",
+      "js_name": "ShelvEQ"
+    },
+    {
+      "filename": "~FltVoice.txt",
+      "file_stem": "~FltVoice",
+      "fileName_field": "FilterVocal",
+      "js_name": "~FltVoice"
+    },
+    {
+      "filename": "RndState.txt",
+      "file_stem": "RndState",
+      "fileName_field": "RndLfoLogic",
+      "js_name": "RndState"
+    },
+    {
+      "filename": "Delay_Unknown.txt",
+      "file_stem": "Delay_Unknown",
+      "fileName_field": "FXDelay",
+      "js_name": "Delay_Unknown"
+    },
+    {
+      "filename": "RndDistr.txt",
+      "file_stem": "RndDistr",
+      "fileName_field": "RndDistr",
+      "js_name": "RndDistr"
+    },
+    {
+      "filename": "RndStep.txt",
+      "file_stem": "RndStep",
+      "fileName_field": "RndLfoC",
+      "js_name": "RndStep"
+    },
+    {
+      "filename": "SyncOsc.txt",
+      "file_stem": "SyncOsc",
+      "fileName_field": "OscSync",
+      "js_name": "SyncOsc"
+    },
+    {
+      "filename": "AudioIn.txt",
+      "file_stem": "AudioIn",
+      "fileName_field": "AudioIn",
+      "js_name": "AudioIn"
+    },
+    {
+      "filename": "RndChaos.txt",
+      "file_stem": "RndChaos",
+      "fileName_field": "RndClkChaos",
+      "js_name": "RndChaos"
+    },
+    {
+      "filename": "Mixer6-1B.txt",
+      "file_stem": "Mixer6-1B",
+      "fileName_field": "MxrMixer6-1B",
+      "js_name": "Mixer6-1B"
+    },
+    {
+      "filename": "SeqA.txt",
+      "file_stem": "SeqA",
+      "fileName_field": "SeqA",
+      "js_name": "SeqA"
+    },
+    {
+      "filename": "Mixer6-1A.txt",
+      "file_stem": "Mixer6-1A",
+      "fileName_field": "MxrMixer6-1A",
+      "js_name": "Mixer6-1A"
+    },
+    {
+      "filename": "PolarPan.txt",
+      "file_stem": "PolarPan",
+      "fileName_field": "MxrPolarPan",
+      "js_name": "PolarPan"
+    },
+    {
+      "filename": "PulseOsc.txt",
+      "file_stem": "PulseOsc",
+      "fileName_field": "OscPulse",
+      "js_name": "PulseOsc"
+    }
+  ]
+}

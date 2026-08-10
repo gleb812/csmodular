@@ -1,0 +1,163 @@
+// Автоматически сгенерированный модуль: RndChaos
+// Исходный файл: RndChaos.js
+// Версия: 238
+
+export const RndChaosModule = {
+    type: 'RndChaos',
+        typeID: 0,
+    displayName: 'RndChaos',
+    gridHeight: 4,
+    originalName: 'RndChaos',
+    tooltip: 'Rnd Chaos',
+    components: [
+        {
+                "componentType": "Input",
+                "id": "1",
+                "x": 6,
+                "y": 14,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "0",
+                "x": 239,
+                "y": 29,
+                "jackType": "control",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "3",
+                "x": 27,
+                "y": 17,
+                "text": "Clk",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Knob",
+                "id": "2",
+                "x": 150,
+                "y": 10,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "5",
+                "x": 96,
+                "y": 4,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "4",
+                "x": 6,
+                "y": 28,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "6",
+                "x": 27,
+                "y": 30,
+                "text": "Rst",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "7",
+                "x": 49,
+                "y": 28,
+                "jackType": "control",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "8",
+                "x": 44,
+                "y": 17,
+                "text": "Seed",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "10",
+                "x": 238,
+                "y": 15,
+                "width": 13,
+                "text": "M"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "11",
+                "x": 20,
+                "y": 16,
+                "text": "↑",
+                "fontSize": 10,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Trig 1",
+                "width": 9
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "12",
+                "x": 20,
+                "y": 29,
+                "text": "⤒",
+                "fontSize": 10,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Trig 2",
+                "width": 12
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "13",
+                "x": 184,
+                "y": 17,
+                "width": 28,
+                "height": 12,
+                "labels": [
+                        "Poly",
+                        "Mono"
+                ]
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "14",
+                "x": 83,
+                "y": 4,
+                "text": "Dir",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "15",
+                "x": 137,
+                "y": 4,
+                "text": "FB",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "9",
+                "x": 220,
+                "y": 28,
+                "width": 16,
+                "height": 12
+        }
+]
+};

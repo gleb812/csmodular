@@ -1,0 +1,299 @@
+// Автоматически сгенерированный модуль: PulseOsc
+// Исходный файл: PulseOsc.js
+// Версия: 208
+
+export const PulseOscModule = {
+    type: 'PulseOsc',
+        typeID: 0,
+    displayName: 'PulseOsc',
+    gridHeight: 6,
+    originalName: 'PulseOsc',
+    tooltip: 'Pulse oscillator',
+    components: [
+        {
+                "componentType": "Input",
+                "id": "0",
+                "x": 4,
+                "y": 31,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Input",
+                "id": "1",
+                "x": 4,
+                "y": 51,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Input",
+                "id": "2",
+                "x": 4,
+                "y": 71,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Knob",
+                "id": "3",
+                "x": 19,
+                "y": 66,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "4",
+                "x": 8,
+                "y": 76,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "5",
+                "x": 17,
+                "y": 32,
+                "text": "↑",
+                "fontSize": 10,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Trig 1",
+                "width": 9
+        },
+        {
+                "componentType": "TextField",
+                "id": "6",
+                "x": 53,
+                "y": 30,
+                "width": 46,
+                "referenceElementId": 8
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "7",
+                "x": 53,
+                "y": 45,
+                "width": 28,
+                "height": 12,
+                "labels": [
+                        "Semi",
+                        "Freq",
+                        "Part",
+                        "Sub"
+                ]
+        },
+        {
+                "componentType": "Knob",
+                "id": "8",
+                "x": 54,
+                "y": 62,
+                "infoFunc": 61,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "9",
+                "x": 83,
+                "y": 58,
+                "infoFunc": 59,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "10",
+                "x": 84,
+                "y": 50,
+                "text": "Cent",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "11",
+                "x": 18,
+                "y": 53,
+                "text": "Pitch",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "12",
+                "x": 22,
+                "y": 33,
+                "text": "Sync",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Knob",
+                "id": "13",
+                "x": 120,
+                "y": 33,
+                "infoFunc": 27,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "14",
+                "x": 113,
+                "y": 69,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Knob",
+                "id": "15",
+                "x": 128,
+                "y": 64,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "16",
+                "x": 117,
+                "y": 74,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Stub",
+                "id": "17",
+                "x": 109,
+                "y": 3,
+                "width": 20,
+                "height": 20,
+                "originalType": "Frame",
+                "color": "#ff0000"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "18",
+                "x": 118,
+                "y": 6,
+                "text": "Shape",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Output",
+                "id": "19",
+                "x": 239,
+                "y": 72,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "20",
+                "x": 223,
+                "y": 72,
+                "width": 13,
+                "text": "M"
+        },
+        {
+                "componentType": "PartSelector",
+                "id": "21",
+                "x": 209,
+                "y": 5,
+                "width": 35,
+                "height": 20,
+                "imageCount": 7,
+                "menuOffset": 0
+        },
+        {
+                "componentType": "Graph",
+                "id": "22",
+                "x": 209,
+                "y": 5,
+                "width": 35,
+                "height": 20
+        },
+        {
+                "componentType": "TextField",
+                "id": "23",
+                "x": 118,
+                "y": 17,
+                "width": 26,
+                "referenceElementId": 8
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "24",
+                "x": 155,
+                "y": 6,
+                "text": "Pulse period",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Knob",
+                "id": "25",
+                "x": 169,
+                "y": 38,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "26",
+                "x": 162,
+                "y": 69,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Knob",
+                "id": "27",
+                "x": 177,
+                "y": 64,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "28",
+                "x": 166,
+                "y": 74,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "30",
+                "x": 209,
+                "y": 30,
+                "width": 23,
+                "text": "TRK"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "31",
+                "x": 209,
+                "y": 46,
+                "width": 23,
+                "text": "Pha"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "32",
+                "x": 17,
+                "y": 15,
+                "width": 23,
+                "text": "KBT"
+        },
+        {
+                "componentType": "TextField",
+                "id": "29",
+                "x": 157,
+                "y": 17,
+                "width": 48,
+                "referenceElementId": 8
+        }
+]
+};

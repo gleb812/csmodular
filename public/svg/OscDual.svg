@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg1"
+   width="676.99017"
+   height="533.06311"
+   viewBox="0 0 676.99017 533.06311"
+   sodipodi:docname="OscDual.png"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1">
+    <inkscape:page
+       x="0"
+       y="0"
+       width="676.99017"
+       height="533.06311"
+       id="page2"
+       margin="0"
+       bleed="0" />
+  </sodipodi:namedview>
+  <g
+     inkscape:groupmode="layer"
+     inkscape:label="Image"
+     id="g1"
+     transform="translate(-58.63694,-117.27388)">
+    <path
+       style="fill:none;stroke:#000000;stroke-width:25;stroke-opacity:1"
+       d="M 179.98528,217.67853 V 551.26381"
+       id="path1" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:25.0001;stroke-opacity:1"
+       d="M 185.76805,228.5445 682.97191,542.14997"
+       id="path1-5" />
+  </g>
+</svg>

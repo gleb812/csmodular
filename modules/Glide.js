@@ -1,0 +1,129 @@
+// Автоматически сгенерированный модуль: Glide
+// Исходный файл: Glide.js
+// Версия: 210
+
+export const GlideModule = {
+    type: 'Glide',
+        typeID: 158,
+    defaultParams: [64, 1, 0],
+    displayName: 'Glide',
+    gridHeight: 2,
+    originalName: 'Glide',
+    tooltip: 'Glide',
+    components: [
+        {
+                "componentType": "Input",
+                "id": "3",
+                "x": 4,
+                "y": 15,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Knob",
+                "id": "5",
+                "x": 155,
+                "y": 5,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextField",
+                "id": "6",
+                "x": 104,
+                "y": 12,
+                "width": 48,
+                "referenceElementId": 5
+        },
+        {
+                "componentType": "Input",
+                "id": "7",
+                "x": 210,
+                "y": 11,
+                "jackType": "control",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "8",
+                "x": 240,
+                "y": 11,
+                "jackType": "control",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "9",
+                "x": 116,
+                "y": 2,
+                "text": "Time",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "10",
+                "x": 214,
+                "y": 11,
+                "text": "↑",
+                "fontSize": 11,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Box",
+                "width": 102
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "11",
+                "x": 181,
+                "y": 14,
+                "width": 25,
+                "height": 12,
+                "labels": [
+                        "Log",
+                        "Lin"
+                ]
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "12",
+                "x": 181,
+                "y": 4,
+                "text": "Shape",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "0",
+                "x": 80,
+                "y": 4,
+                "text": "Glide",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "1",
+                "x": 80,
+                "y": 14,
+                "width": 20,
+                "height": 12,
+                "labels": [
+                        "Off",
+                        "On"
+                ]
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "2",
+                "x": 17,
+                "y": 17,
+                "text": "Glide on",
+                "fontSize": 9,
+                "color": "#ffffff"
+        }
+]
+};

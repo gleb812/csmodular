@@ -1,0 +1,20 @@
+{
+  "name": "vite-project",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "dev:full": "concurrently \"npm run dev\" \"npm run backend\"",
+    "backend": "cd backend && python server.py"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "vite": "^7.2.4"
+  },
+  "dependencies": {
+    "@csound/browser": "^7.0.0-beta13"
+  }
+}

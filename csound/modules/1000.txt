@@ -1,0 +1,7 @@
+;@ ins k
+;@ outs a
+opcode K2A, 0, ii
+    izkIn, izaOut xin
+    kIn zkr izkIn
+    zaw a(kIn), izaOut
+endop

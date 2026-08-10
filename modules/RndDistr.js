@@ -1,0 +1,94 @@
+// Автоматически сгенерированный модуль: RndDistr
+// Исходный файл: RndDistr.js
+// Версия: 242
+
+export const RndDistrModule = {
+    type: 'RndDistr',
+        typeID: 0,
+    displayName: 'RndDistr',
+    gridHeight: 2,
+    originalName: 'RndDistr',
+    tooltip: 'Rnd Distribution',
+    components: [
+        {
+                "componentType": "Input",
+                "id": "0",
+                "x": 85,
+                "y": 14,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Knob",
+                "id": "1",
+                "x": 99,
+                "y": 7,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "2",
+                "x": 88,
+                "y": 17,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Knob",
+                "id": "3",
+                "x": 150,
+                "y": 3,
+                "infoFunc": 206,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "4",
+                "x": 210,
+                "y": 10,
+                "jackType": "control",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "5",
+                "x": 240,
+                "y": 10,
+                "jackType": "control",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Graph",
+                "id": "6",
+                "x": 172,
+                "y": 4,
+                "width": 35,
+                "height": 22
+        },
+        {
+                "componentType": "Line",
+                "id": "9",
+                "x": 214,
+                "y": 15,
+                "length": 33,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "8",
+                "x": 224,
+                "y": 9,
+                "width": 13,
+                "text": ""
+        },
+        {
+                "componentType": "TextField",
+                "id": "7",
+                "x": 121,
+                "y": 8,
+                "width": 26,
+                "referenceElementId": 3
+        }
+]
+};

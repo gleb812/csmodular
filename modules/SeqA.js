@@ -1,0 +1,686 @@
+// Автоматически сгенерированный модуль: SeqA
+// Исходный файл: SeqA.js
+// Версия: 208
+
+export const SeqAModule = {
+    type: 'SeqA',
+        typeID: 0,
+    displayName: 'SeqA',
+    gridHeight: 8,
+    originalName: 'SeqA',
+    tooltip: 'Control and step sequencer',
+    components: [
+        {
+                "componentType": "TextLabel",
+                "id": "1",
+                "x": 4,
+                "y": 21,
+                "text": "Clk",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "0",
+                "x": 4,
+                "y": 30,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "2",
+                "x": 17,
+                "y": 31,
+                "text": "↑",
+                "fontSize": 10,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Trig 1",
+                "width": 9
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "6",
+                "x": 4,
+                "y": 51,
+                "text": "Rst",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "7",
+                "x": 4,
+                "y": 60,
+                "jackType": "logic",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "8",
+                "x": 17,
+                "y": 61,
+                "text": "⤒",
+                "fontSize": 10,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Trig 2",
+                "width": 12
+        },
+        {
+                "componentType": "LED",
+                "id": "13",
+                "x": 26,
+                "y": 30
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "21",
+                "x": 28,
+                "y": 21,
+                "text": "1",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "22",
+                "x": 39,
+                "y": 21,
+                "text": "2",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "23",
+                "x": 51,
+                "y": 21,
+                "text": "3",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "24",
+                "x": 63,
+                "y": 21,
+                "text": "4",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "25",
+                "x": 75,
+                "y": 21,
+                "text": "5",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "26",
+                "x": 88,
+                "y": 21,
+                "text": "6",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "27",
+                "x": 99,
+                "y": 21,
+                "text": "7",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "28",
+                "x": 111,
+                "y": 21,
+                "text": "8",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "LED",
+                "id": "30",
+                "x": 38,
+                "y": 30
+        },
+        {
+                "componentType": "LED",
+                "id": "31",
+                "x": 50,
+                "y": 30
+        },
+        {
+                "componentType": "LED",
+                "id": "32",
+                "x": 62,
+                "y": 30
+        },
+        {
+                "componentType": "LED",
+                "id": "33",
+                "x": 74,
+                "y": 30
+        },
+        {
+                "componentType": "LED",
+                "id": "34",
+                "x": 87,
+                "y": 30
+        },
+        {
+                "componentType": "LED",
+                "id": "35",
+                "x": 98,
+                "y": 30
+        },
+        {
+                "componentType": "LED",
+                "id": "36",
+                "x": 110,
+                "y": 30
+        },
+        {
+                "componentType": "Slider",
+                "id": "3",
+                "x": 24,
+                "y": 38,
+                "infoFunc": 0,
+                "width": 10,
+                "height": 60
+        },
+        {
+                "componentType": "Slider",
+                "id": "4",
+                "x": 36,
+                "y": 38,
+                "infoFunc": 0,
+                "width": 10,
+                "height": 60
+        },
+        {
+                "componentType": "Slider",
+                "id": "5",
+                "x": 48,
+                "y": 38,
+                "infoFunc": 0,
+                "width": 10,
+                "height": 60
+        },
+        {
+                "componentType": "Slider",
+                "id": "9",
+                "x": 60,
+                "y": 38,
+                "infoFunc": 0,
+                "width": 10,
+                "height": 60
+        },
+        {
+                "componentType": "Slider",
+                "id": "10",
+                "x": 72,
+                "y": 38,
+                "infoFunc": 0,
+                "width": 10,
+                "height": 60
+        },
+        {
+                "componentType": "Slider",
+                "id": "11",
+                "x": 84,
+                "y": 38,
+                "infoFunc": 0,
+                "width": 10,
+                "height": 60
+        },
+        {
+                "componentType": "Slider",
+                "id": "12",
+                "x": 96,
+                "y": 38,
+                "infoFunc": 0,
+                "width": 10,
+                "height": 60
+        },
+        {
+                "componentType": "Slider",
+                "id": "37",
+                "x": 108,
+                "y": 38,
+                "infoFunc": 0,
+                "width": 10,
+                "height": 60
+        },
+        {
+                "componentType": "Slider",
+                "id": "38",
+                "x": 120,
+                "y": 38,
+                "infoFunc": 0,
+                "width": 10,
+                "height": 60
+        },
+        {
+                "componentType": "Slider",
+                "id": "39",
+                "x": 132,
+                "y": 38,
+                "infoFunc": 0,
+                "width": 10,
+                "height": 60
+        },
+        {
+                "componentType": "Slider",
+                "id": "40",
+                "x": 144,
+                "y": 38,
+                "infoFunc": 0,
+                "width": 10,
+                "height": 60
+        },
+        {
+                "componentType": "Slider",
+                "id": "41",
+                "x": 156,
+                "y": 38,
+                "infoFunc": 0,
+                "width": 10,
+                "height": 60
+        },
+        {
+                "componentType": "Slider",
+                "id": "42",
+                "x": 168,
+                "y": 38,
+                "infoFunc": 0,
+                "width": 10,
+                "height": 60
+        },
+        {
+                "componentType": "Slider",
+                "id": "43",
+                "x": 180,
+                "y": 38,
+                "infoFunc": 0,
+                "width": 10,
+                "height": 60
+        },
+        {
+                "componentType": "Slider",
+                "id": "44",
+                "x": 192,
+                "y": 38,
+                "infoFunc": 0,
+                "width": 10,
+                "height": 60
+        },
+        {
+                "componentType": "Slider",
+                "id": "45",
+                "x": 204,
+                "y": 38,
+                "infoFunc": 0,
+                "width": 10,
+                "height": 60
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "15",
+                "x": 123,
+                "y": 21,
+                "text": "9",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "16",
+                "x": 134,
+                "y": 21,
+                "text": "10",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "17",
+                "x": 147,
+                "y": 21,
+                "text": "11",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "18",
+                "x": 158,
+                "y": 21,
+                "text": "12",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "19",
+                "x": 170,
+                "y": 21,
+                "text": "13",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "20",
+                "x": 183,
+                "y": 21,
+                "text": "14",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "46",
+                "x": 194,
+                "y": 21,
+                "text": "15",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "47",
+                "x": 206,
+                "y": 21,
+                "text": "16",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "LED",
+                "id": "48",
+                "x": 122,
+                "y": 30
+        },
+        {
+                "componentType": "LED",
+                "id": "49",
+                "x": 134,
+                "y": 30
+        },
+        {
+                "componentType": "LED",
+                "id": "50",
+                "x": 146,
+                "y": 30
+        },
+        {
+                "componentType": "LED",
+                "id": "51",
+                "x": 158,
+                "y": 30
+        },
+        {
+                "componentType": "LED",
+                "id": "52",
+                "x": 170,
+                "y": 30
+        },
+        {
+                "componentType": "LED",
+                "id": "53",
+                "x": 183,
+                "y": 30
+        },
+        {
+                "componentType": "LED",
+                "id": "54",
+                "x": 194,
+                "y": 30
+        },
+        {
+                "componentType": "LED",
+                "id": "55",
+                "x": 206,
+                "y": 30
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "56",
+                "x": 24,
+                "y": 103,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "57",
+                "x": 36,
+                "y": 103,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "58",
+                "x": 48,
+                "y": 103,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "59",
+                "x": 60,
+                "y": 103,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "60",
+                "x": 72,
+                "y": 103,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "61",
+                "x": 84,
+                "y": 103,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "62",
+                "x": 96,
+                "y": 103,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "63",
+                "x": 108,
+                "y": 103,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "64",
+                "x": 120,
+                "y": 103,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "65",
+                "x": 132,
+                "y": 103,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "66",
+                "x": 144,
+                "y": 103,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "67",
+                "x": 156,
+                "y": 103,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "68",
+                "x": 168,
+                "y": 103,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "69",
+                "x": 180,
+                "y": 103,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "70",
+                "x": 192,
+                "y": 103,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "71",
+                "x": 204,
+                "y": 103,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "TextField",
+                "id": "72",
+                "x": 207,
+                "y": 3,
+                "width": 21,
+                "referenceElementId": 33
+        },
+        {
+                "componentType": "ButtonIncDec",
+                "id": "73",
+                "x": 230,
+                "y": 4,
+                "infoFunc": 2
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "74",
+                "x": 155,
+                "y": 3,
+                "width": 23,
+                "text": "loop"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "75",
+                "x": 186,
+                "y": 6,
+                "text": "Step",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "78",
+                "x": 228,
+                "y": 52,
+                "width": 21,
+                "text": "Uni"
+        },
+        {
+                "componentType": "Output",
+                "id": "79",
+                "x": 239,
+                "y": 73,
+                "jackType": "control",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "80",
+                "x": 239,
+                "y": 103,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "81",
+                "x": 224,
+                "y": 75,
+                "text": "Out",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "82",
+                "x": 237,
+                "y": 93,
+                "text": "Out",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "83",
+                "x": 221,
+                "y": 103,
+                "width": 13,
+                "text": "G"
+        },
+        {
+                "componentType": "Line",
+                "id": "84",
+                "x": 212,
+                "y": 109,
+                "length": 30,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Graph",
+                "id": "76",
+                "x": 228,
+                "y": 22,
+                "width": 20,
+                "height": 29
+        }
+]
+};

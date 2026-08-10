@@ -1,0 +1,80 @@
+;@ ins k k k
+;@ outs k k
+opcode FlipFlop, 0, kkkkkk
+  kType,kclk,kin,krst,knotq,kq xin  ; kin and krst permutated
+  kClk zkr kclk
+  kIn  zkr kin
+  kRst zkr krst
+
+  kClk K2Y kClk
+  kIn  K2Y kIn
+  kRst K2Y kRst
+
+  kQ init 0
+
+  if kRst != 0 kgoto Reset
+
+  ktrig	trigger kClk, 0, 0
+
+  if (ktrig == 0) kgoto Run
+
+  if (kType!=0) kgoto RS
+  	kQ = kIn
+  	kgoto Run
+RS:
+    if kIn != 0 kgoto QSet
+  	   kQ = 1 - kQ
+  kgoto Run
+QSet:
+  kQ = 1
+  kgoto Run
+Reset:
+  kQ = 0
+Run:
+  zkw kQ, kq
+  zkw 1-kQ, knotq
+endop
+
+; TODO Time of flip & flop needs checking!
+
+;@ ins a a a
+;@ outs a a
+opcode FlipFlop, 0, kkkkkk
+setksmps 1
+  kType,kclk,kin,krst,knotq,kq xin ; kin and krst permutated
+  aClk zar kclk
+  aIn zar kin
+  aRst zar krst
+
+  kClk = k(aClk)
+  kIn  = k(aIn)
+  kRst = k(aRst)
+
+  kClk K2Y kClk
+  kIn  K2Y kIn
+  kRst K2Y kRst
+
+  kQ init 0
+
+  if kRst != 0 kgoto Reset
+
+  ktrig	trigger kClk, 0, 0
+
+  if (ktrig == 0) kgoto Run
+
+  if (kType!=0) kgoto RS
+  	kQ = kIn
+  	kgoto Run
+RS:
+      if kIn != 0 kgoto QSet
+    	   kQ = 1 - kQ
+    kgoto Run
+QSet:
+    kQ = 1
+    kgoto Run
+Reset:
+  kQ = 0
+Run:
+  zaw a(kQ), kq
+  zaw a(1-kQ), knotq
+endop

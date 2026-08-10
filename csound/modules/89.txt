@@ -1,0 +1,22 @@
+;@ map EFXraF EFXraK CLA000
+
+;@ ins a
+;@ outs a
+
+opcode Flanger, 0, kkkkkk
+krate, krange, kfdbk, kOn, kin, kout xin
+ain zar kin
+
+kFdbk table kfdbk, giCLA000
+kRate table krate, giEFXraF
+kRange table krange, giEFXraK
+
+alfo oscil .001, kRate, giTriP
+abuf delayr 0.0055
+atap deltapi 0.0008 + kRange * alfo
+delayw ain + atap * kFdbk/100
+zaw kOn * (ain + atap)/2 , kout
+endop
+
+; Reversed by Ekaterina Kalmykova, Spring 2020
+; Coded by G. Rogozinsky

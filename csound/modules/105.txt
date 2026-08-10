@@ -1,0 +1,35 @@
+;@ ins k k k
+;@ outs k
+opcode ValSw2, 0, kkkkk
+kval, kin1,kin2,kctrl,kout xin
+  k1 zkr kin1
+  k2 zkr kin2
+  kCtrl zkr kctrl
+  kCtrl *= 64
+;  kVal table kval, giCLA001
+  if (kVal != kCtrl) goto default
+  zkw k2, kout
+  goto halt
+default:
+  zkw k1, kout
+halt:
+endop
+
+;@ ins a a a
+;@ outs a
+opcode ValSw2, 0, kkkkk
+kval, kin1,kin2,kctrl,kout xin
+  setksmps 1
+  a1 zar kin1
+  a2 zar kin2
+  aCtrl zar kctrl
+  kCtrl = k(aCtrl)
+  kCtrl *= 64
+;  kVal table kval, giCLA001
+  if (kVal != kCtrl) goto default
+  zaw a2, kout
+  goto halt
+default:
+  zaw a1, kout
+halt:
+endop

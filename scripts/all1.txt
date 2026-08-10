@@ -1,0 +1,135 @@
+Patch file: test_all_modules_1.pch2
+
+Modules
+Name           ID    Type  Parameters                                                                                                                        Modes    Area      Hpos    Vpos
+-----------  ----  ------  --------------------------------------------------------------------------------------------------------------------------------  -------  ------  ------  ------
+Out2            1       4  [0, 1, 0]                                                                                                                         []       VOICE        0       0
+Out4            2       3  [0, 1, 0]                                                                                                                         []       VOICE        0       2
+In2             3     170  [0, 1, 1]                                                                                                                         []       VOICE        0       4
+In4             4     171  [0, 1, 1]                                                                                                                         []       VOICE        0       6
+Keyboard        5       1  []                                                                                                                                []       VOICE        0       8
+MonoKey         6     199  [0]                                                                                                                               []       VOICE        0      10
+Device          7      30  []                                                                                                                                []       VOICE        0      12
+status          8     197  []                                                                                                                                []       VOICE        0      15
+NoteDet         9     156  [64]                                                                                                                              []       VOICE        0      17
+Name           10     126  []                                                                                                                                []       VOICE        0      19
+OscA           11      97  [64, 64, 1, 0, 2, 1, 0]                                                                                                           []       VOICE        1       0
+OscB           12       7  [64, 64, 1, 0, 0, 0, 0, 0, 2, 1, 0]                                                                                               []       VOICE        1       3
+OscC           13       9  [64, 64, 1, 0, 0, 1, 0, 0]                                                                                                        [0]      VOICE        1       8
+OscD           14      96  [64, 64, 1, 0, 1]                                                                                                                 [0]      VOICE        1      11
+OscPM          15     183  [64, 64, 1, 0, 0, 1, 0]                                                                                                           [0]      VOICE        1      13
+OscShpA        16     163  [64, 64, 1, 0, 0, 0, 0, 0, 0, 0, 1]                                                                                               []       VOICE        1      16
+OscShpB        17       8  [64, 64, 1, 0, 0, 0, 0, 0, 1, 0]                                                                                                  [0]      VOICE        1      21
+OscDual        18     164  [64, 64, 1, 0, 0, 127, 0, 0, 0, 0, 1, 0, 0, 0]                                                                                    []       VOICE        1      25
+OscNoise       19     106  [64, 64, 1, 0, 0, 0, 0, 1]                                                                                                        []       VOICE        1      30
+Noise          20      31  [0, 1]                                                                                                                            []       VOICE        1      33
+MetNoise       21      29  [64, 64, 1, 0, 0]                                                                                                                 []       VOICE        1      35
+OscPerc        22     196  [64, 64, 0, 0, 0, 64, 64, 0, 1]                                                                                                   []       VOICE        1      37
+DrumSynth      23      58  [42, 15, 46, 50, 120, 102, 57, 32, 39, 49, 1, 68, 61, 79, 115, 1]                                                                 []       VOICE        1      40
+OscString      24      13  [64, 64, 1, 0, 0, 80, 0, 1]                                                                                                       []       VOICE        1      48
+Operator       25     180  [1, 0, 0, 1, 0, 7, 0, 0, 90, 99, 80, 99, 70, 99, 70, 0, 0, 50, 0, 0, 0, 0, 99, 1, 1]                                              []       VOICE        1      51
+DXRouter       26     165  [0, 0]                                                                                                                            []       VOICE        1      63
+OscMaster      27      27  [64, 64, 1, 0, 0]                                                                                                                 []       VOICE        1      69
+RandomA        28     200  [64, 0, 0, 1, 1, 4, 3]                                                                                                            []       VOICE        0      21
+RandomB        29     202  [64, 0, 0, 0, 127, 1, 0, 1, 4]                                                                                                    []       VOICE        0      23
+RndClkA        30     204  [127, 0, 0, 0, 1]                                                                                                                 []       VOICE        0      26
+RndClkB        31     206  [127, 0, 1, 0, 0]                                                                                                                 [0]      VOICE        0      28
+RndTrig        32     205  [64, 0, 1, 0]                                                                                                                     []       VOICE        0      31
+RndPattern     33     208  [64, 64, 127, 15, 0, 0, 1]                                                                                                        [0]      VOICE        0      33
+FltLP          34      87  [75, 0, 0, 1]                                                                                                                     [0]      VOICE        2       0
+FltHP          35     134  [60, 0, 0, 1]                                                                                                                     [0]      VOICE        2       2
+FltNord        36      51  [75, 0, 0, 1, 0, 1, 1, 0, 0, 0]                                                                                                   []       VOICE        2       4
+FltClassic     37      92  [75, 0, 0, 0, 2, 1]                                                                                                               []       VOICE        2       9
+FltMulti       38      49  [75, 0, 0, 1, 0, 1, 1]                                                                                                            []       VOICE        2      13
+FltStatic      39      54  [75, 0, 0, 1, 0]                                                                                                                  []       VOICE        2      17
+FltPhase       40     102  [0, 64, 0, 64, 2, 64, 1, 127, 0, 0, 0]                                                                                            []       VOICE        2      20
+FltComb        41     162  [64, 0, 0, 64, 0, 0, 127, 1]                                                                                                      []       VOICE        2      25
+WahWah         42     125  [0, 64, 1]                                                                                                                        []       VOICE        2      29
+FltVoice       43      45  [0, 1, 2, 100, 64, 0, 64, 0, 64, 1]                                                                                               []       VOICE        2      31
+Vocoder        44     108  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 0]                                                                     []       VOICE        2      35
+EqPeak         45     103  [60, 64, 64, 1, 127]                                                                                                              []       VOICE        2      43
+Eq2Band        46      32  [64, 64, 127, 1, 0, 2]                                                                                                            []       VOICE        2      47
+Eq3Band        47      33  [64, 64, 93, 64, 127, 1, 0, 2]                                                                                                    []       VOICE        2      50
+DlySingleA     48     172  [64]                                                                                                                              [0]      VOICE        0      37
+DlySingleB     49     173  [64, 64]                                                                                                                          [0]      VOICE        0      39
+DelayDual      50     174  [64, 64, 64, 64]                                                                                                                  [0]      VOICE        0      41
+DelayQuad      51     175  [64, 64, 64, 64, 64, 64, 64, 64, 0]                                                                                               [0]      VOICE        0      44
+DlyEight       52     181  [0]                                                                                                                               [0]      VOICE        0      49
+DlyShiftReg    53     179  []                                                                                                                                []       VOICE        0      52
+DlyClock       54     178  [0]                                                                                                                               []       VOICE        0      54
+DelayA         55     176  [64, 64, 64, 64, 1, 0]                                                                                                            [0]      VOICE        0      56
+DelayB         56     177  [64, 64, 127, 64, 0, 0, 0, 1, 0]                                                                                                  [0]      VOICE        0      59
+DlyStereo      57     182  [64, 64, 64, 64, 0, 0, 0, 127, 64, 1, 0]                                                                                          [0]      VOICE        0      63
+Constant       58      43  [64, 0]                                                                                                                           []       VOICE        3       0
+ConstSwM       59     188  [64, 0, 0]                                                                                                                        []       VOICE        3       2
+ConstSwT       60      50  [64, 0, 0]                                                                                                                        []       VOICE        3       4
+LevAdd         61     112  [64, 1]                                                                                                                           []       VOICE        3       6
+LevConv        62     157  [4, 0]                                                                                                                            []       VOICE        3       8
+LevAmp         63      81  [64, 0]                                                                                                                           []       VOICE        3      10
+LevMult        64      44  []                                                                                                                                []       VOICE        3      12
+LevMod         65     117  [0, 64]                                                                                                                           []       VOICE        3      14
+EnvFollow      66      71  [0, 20]                                                                                                                           []       VOICE        3      17
+NoiseGate      67     189  [20, 0, 64, 1]                                                                                                                    []       VOICE        3      19
+CompLev        68      59  [64]                                                                                                                              []       VOICE        3      22
+CompSig        69     159  []                                                                                                                                []       VOICE        3      24
+MinMax         70     128  []                                                                                                                                []       VOICE        3      26
+ModAmt         71     195  [100, 1, 0, 0]                                                                                                                    []       VOICE        3      28
+swOnOffM       72      36  [0]                                                                                                                               []       VOICE        3      31
+swOnOffT       73      76  [0]                                                                                                                               []       VOICE        3      33
+sw21M          74     187  [0]                                                                                                                               []       VOICE        3      35
+sw21           75     100  [0]                                                                                                                               []       VOICE        3      37
+sw41           76      79  [0]                                                                                                                               []       VOICE        3      39
+sw81           77      15  [0]                                                                                                                               []       VOICE        3      42
+sw12M          78     186  [0]                                                                                                                               []       VOICE        3      46
+sw12           79      90  [0]                                                                                                                               []       VOICE        3      48
+sw14           80      88  [0]                                                                                                                               []       VOICE        3      50
+sw18           81      78  [0]                                                                                                                               []       VOICE        3      53
+ValSw2         82     105  [0]                                                                                                                               []       VOICE        3      57
+ValSw1         83      17  [0]                                                                                                                               []       VOICE        3      59
+WindSw         84      85  [40, 80]                                                                                                                          []       VOICE        3      61
+Mux81          85     124  []                                                                                                                                []       VOICE        3      63
+Mux18          86      21  []                                                                                                                                []       VOICE        3      65
+Mux81X         87      60  [0]                                                                                                                               []       VOICE        3      67
+sH             88      53  []                                                                                                                                []       VOICE        3      70
+TH             89     139  []                                                                                                                                []       VOICE        3      72
+seqEvent       90     144  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15, 0, 0]                     []       VOICE        2      55
+seqVal         91     145  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15, 0, 0, 0, 0]               []       VOICE        2      60
+seqLev         92     146  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15, 1, 0, 0, 0]               []       VOICE        2      68
+seqNote        93     121  [64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15, 0, 0, 0]  []       VOICE        2      76
+seqCtr         94     154  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]                   []       VOICE        2      85
+NoteQuant      95      75  [127, 0]                                                                                                                          []       VOICE        4       0
+KeyQuant       96     152  [127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]                                                                                      []       VOICE        4       2
+PartQuant      97      22  [127]                                                                                                                             []       VOICE        4       4
+NoteScaler     98      72  [0]                                                                                                                               []       VOICE        4       6
+Glide          99     158  [64, 1, 0]                                                                                                                        []       VOICE        4       8
+PitchTrack    100     198  [20]                                                                                                                              []       VOICE        4      10
+ZeroCnt       101     160  []                                                                                                                                []       VOICE        4      12
+LevScaler     102     115  [64, 64, 64, 1]                                                                                                                   []       VOICE        4      14
+LfoA          103      26  [64, 0, 0, 0, 0, 1, 4, 1]                                                                                                         []       VOICE        0      69
+LfoB          104     190  [64, 0, 1, 0, 0, 0, 0, 1, 4, 0]                                                                                                   []       VOICE        0      72
+LfoC          105      24  [64, 0, 4, 1, 1]                                                                                                                  [0]      VOICE        0      76
+LfoShpA       106      25  [64, 1, 0, 0, 1, 64, 0, 0, 0, 0, 4, 0]                                                                                            []       VOICE        0      78
+ClkGen        107      68  [64, 1, 0, 2, 0]                                                                                                                  []       VOICE        0      83
+EnvADSR       108      20  [0, 0, 54, 100, 14, 0, 1, 0]                                                                                                      []       VOICE        4      18
+EnvH          109      41  [32, 0]                                                                                                                           []       VOICE        4      22
+EnvD          110      55  [54, 0]                                                                                                                           []       VOICE        4      24
+EnvADR        111      84  [0, 0, 0, 54, 1, 0, 1, 0]                                                                                                         []       VOICE        4      26
+EnvAHD        112      46  [0, 0, 32, 0, 14, 0, 1]                                                                                                           []       VOICE        4      29
+EnvADDSR      113     119  [1, 0, 0, 54, 100, 54, 70, 14, 1, 0, 0]                                                                                           []       VOICE        4      33
+EnvMulti      114      52  [127, 45, 64, 0, 0, 30, 30, 14, 0, 2, 0, 1, 0]                                                                                    []       VOICE        4      38
+ModAHD        115     169  [0, 32, 14, 0, 0, 0, 0, 1]                                                                                                        []       VOICE        4      44
+ModADSR       116      23  [0, 54, 100, 14, 0, 0, 0, 0, 0, 1]                                                                                                []       VOICE        4      49
+stChorus      117      94  [20, 127, 1]                                                                                                                      []       VOICE        4      55
+Phaser        118     192  [0, 64, 0, 1]                                                                                                                     []       VOICE        4      58
+Flanger       119      89  [64, 64, 64, 1]                                                                                                                   []       VOICE        4      60
+Digitizer     120     118  [11, 64, 0, 1]                                                                                                                    []       VOICE        4      63
+FreqShift     121      98  [0, 0, 2, 1]                                                                                                                      []       VOICE        4      66
+PShift        122     167  [64, 64, 0, 2, 1]                                                                                                                 []       VOICE        4      69
+scratch       123      63  [80, 0, 2, 1]                                                                                                                     []       VOICE        4      72
+Reverb        124      12  [64, 64, 64, 1]                                                                                                                   [0]      VOICE        4      75
+Compress      125     150  [18, 20, 1, 20, 30, 0, 1]                                                                                                         []       VOICE        4      78
+FxIn            1     127  [0, 1, 1]                                                                                                                         []       FX           0       0
+
+Cables
+From        To    Color    Type    Area
+------  --  ----  -------  ------  ------

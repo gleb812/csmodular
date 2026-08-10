@@ -1,0 +1,154 @@
+// Автоматически сгенерированный модуль: PShift
+// Исходный файл: PShift.js
+// Версия: 238
+
+export const PShiftModule = {
+    type: 'PShift',
+        typeID: 167,
+    defaultParams: [64, 64, 0, 2, 1],
+    displayName: 'PShift',
+    gridHeight: 3,
+    originalName: 'PShift',
+    tooltip: 'Pitch Shifter',
+    components: [
+        {
+                "componentType": "Knob",
+                "id": "0",
+                "x": 139,
+                "y": 14,
+                "infoFunc": 61,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "1",
+                "x": 240,
+                "y": 4,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Output",
+                "id": "2",
+                "x": 240,
+                "y": 30,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Knob",
+                "id": "5",
+                "x": 166,
+                "y": 14,
+                "infoFunc": 59,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "6",
+                "x": 11,
+                "y": 29,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Knob",
+                "id": "7",
+                "x": 25,
+                "y": 22,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "8",
+                "x": 15,
+                "y": 32,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "3",
+                "x": 138,
+                "y": 4,
+                "text": "Semi",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "4",
+                "x": 168,
+                "y": 4,
+                "text": "Fine",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "10",
+                "x": 202,
+                "y": 10,
+                "text": "Delay",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextField",
+                "id": "11",
+                "x": 76,
+                "y": 27,
+                "width": 60,
+                "referenceElementId": 0
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "12",
+                "x": 4,
+                "y": 19,
+                "text": "Pitch",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "13",
+                "x": 195,
+                "y": 20,
+                "width": 36,
+                "height": 12,
+                "labels": [
+                        "12.5 ms",
+                        "25 ms",
+                        "50 ms",
+                        "100 ms"
+                ]
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "14",
+                "x": 239,
+                "y": 17,
+                "width": 13,
+                "text": "M"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "9",
+                "x": 83,
+                "y": 17,
+                "text": "Pitch Shift",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Line",
+                "id": "15",
+                "x": 245,
+                "y": 11,
+                "length": 25,
+                "orientation": "Vertical"
+        }
+]
+};

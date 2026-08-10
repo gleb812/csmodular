@@ -1,0 +1,86 @@
+;@ ins k k
+;@ outs k k k k k k k k
+opcode E8Counter, 0, kkkkkkkkkk
+  kclk,krst,ko1,ko2,ko3,ko4,ko5,ko6,ko7,ko8 xin
+  kCount init 0
+
+  k1[] fillarray 1,0,0,0,0,0,0,0
+  k2[] fillarray 0,1,0,0,0,0,0,0
+  k3[] fillarray 0,0,1,0,0,0,0,0
+  k4[] fillarray 0,0,0,1,0,0,0,0
+  k5[] fillarray 0,0,0,0,1,0,0,0
+  k6[] fillarray 0,0,0,0,0,1,0,0
+  k7[] fillarray 0,0,0,0,0,0,1,0
+  k8[] fillarray 0,0,0,0,0,0,0,1
+
+  kRst zkr krst
+  kClk zkr kclk
+
+  kRst K2Y kRst
+  kClk K2Y kClk
+
+  if kRst !=0 goto Reset
+
+  ktrig	trigger kClk, 0, 0
+  if (ktrig != 1) goto Run
+  	kCount += 1
+  	kCount = kCount%8
+    goto Run
+
+  Reset:
+  	kCount = 0
+  Run:
+    zkw k1[kCount], ko1
+    zkw k2[kCount], ko2
+    zkw k3[kCount], ko3
+    zkw k4[kCount], ko4
+    zkw k5[kCount], ko5
+    zkw k6[kCount], ko6
+    zkw k7[kCount], ko7
+    zkw k8[kCount], ko8
+endop
+
+;@ ins a a
+;@ outs a a a a a a a a
+opcode E8Counter, 0, kkkkkkkkkk
+setksmps 1
+  kclk,krst,ko1,ko2,ko3,ko4,ko5,ko6,ko7,ko8 xin
+  kCount init 0
+
+  k1[] fillarray 1,0,0,0,0,0,0,0
+  k2[] fillarray 0,1,0,0,0,0,0,0
+  k3[] fillarray 0,0,1,0,0,0,0,0
+  k4[] fillarray 0,0,0,1,0,0,0,0
+  k5[] fillarray 0,0,0,0,1,0,0,0
+  k6[] fillarray 0,0,0,0,0,1,0,0
+  k7[] fillarray 0,0,0,0,0,0,1,0
+  k8[] fillarray 0,0,0,0,0,0,0,1
+
+  aRst zar krst
+  aClk zar kclk
+
+  kRst = k(aRst)
+  kClk = k(aClk)
+
+  kRst K2Y kRst
+  kClk K2Y kClk
+
+  if kRst !=0 goto Reset
+
+  ktrig	trigger kClk, 0, 0
+  if (ktrig != 1) goto Run
+  	kCount += 1
+  	kCount = kCount%8
+    goto Run
+  Reset:
+  	kCount = 0
+  Run:
+    zaw a(k1[kCount]), ko1
+    zaw a(k2[kCount]), ko2
+    zaw a(k3[kCount]), ko3
+    zaw a(k4[kCount]), ko4
+    zaw a(k5[kCount]), ko5
+    zaw a(k6[kCount]), ko6
+    zaw a(k7[kCount]), ko7
+    zaw a(k8[kCount]), ko8
+endop

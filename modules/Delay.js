@@ -1,0 +1,149 @@
+// Автоматически сгенерированный модуль: Delay
+// Исходный файл: Delay.js
+// Версия: 208
+
+export const DelayModule = {
+    type: 'Delay',
+        typeID: 0,
+    mode: [0],
+    defaultParams: [64, 0, 1],
+    displayName: 'Delay',
+    gridHeight: 3,
+    originalName: 'Delay',
+    tooltip: 'Audio delay',
+    components: [
+        {
+                "componentType": "Input",
+                "id": "0",
+                "x": 42,
+                "y": 26,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Knob",
+                "id": "1",
+                "x": 57,
+                "y": 21,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "2",
+                "x": 46,
+                "y": 31,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Knob",
+                "id": "3",
+                "x": 115,
+                "y": 18,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "4",
+                "x": 80,
+                "y": 7,
+                "text": "Delay time",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Knob",
+                "id": "5",
+                "x": 188,
+                "y": 18,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "6",
+                "x": 178,
+                "y": 7,
+                "text": "Feedback",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextField",
+                "id": "7",
+                "x": 80,
+                "y": 18,
+                "width": 32,
+                "referenceElementId": 3
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "8",
+                "x": 224,
+                "y": 16,
+                "width": 13,
+                "text": "B"
+        },
+        {
+                "componentType": "Output",
+                "id": "10",
+                "x": 239,
+                "y": 27,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Input",
+                "id": "9",
+                "x": 239,
+                "y": 5,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Line",
+                "id": "11",
+                "x": 231,
+                "y": 11,
+                "length": 10,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Line",
+                "id": "12",
+                "x": 231,
+                "y": 32,
+                "length": 10,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Line",
+                "id": "13",
+                "x": 231,
+                "y": 11,
+                "length": 21,
+                "orientation": "Vertical"
+        },
+        {
+                "componentType": "PartSelector",
+                "id": "14",
+                "x": 138,
+                "y": 18,
+                "width": 33,
+                "height": 14,
+                "imageCount": 3,
+                "menuOffset": 0
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "15",
+                "x": 132,
+                "y": 7,
+                "text": "Max time",
+                "fontSize": 9,
+                "color": "#ffffff"
+        }
+]
+};

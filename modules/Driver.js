@@ -1,0 +1,117 @@
+// Автоматически сгенерированный модуль: Driver
+// Исходный файл: Driver.js
+// Версия: 234
+
+export const DriverModule = {
+    type: 'Driver',
+        typeID: 35,
+    displayName: 'Driver',
+    gridHeight: 3,
+    originalName: 'Driver',
+    tooltip: 'Driver',
+    components: [
+        {
+                "componentType": "Knob",
+                "id": "0",
+                "x": 188,
+                "y": 18,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "2",
+                "x": 134,
+                "y": 18,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "3",
+                "x": 224,
+                "y": 34,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Input",
+                "id": "4",
+                "x": 215,
+                "y": 28,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Output",
+                "id": "5",
+                "x": 239,
+                "y": 28,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "10",
+                "x": 117,
+                "y": 5,
+                "text": "Embouchure",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "11",
+                "x": 178,
+                "y": 5,
+                "text": "Stiffness",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "8",
+                "x": 8,
+                "y": 28,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "12",
+                "x": 4,
+                "y": 16,
+                "text": "Excitation",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "PartSelector",
+                "id": "7",
+                "x": 71,
+                "y": 22,
+                "width": 47,
+                "height": 17,
+                "imageCount": 4,
+                "menuOffset": 0
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "13",
+                "x": 81,
+                "y": 5,
+                "text": "Type",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "6",
+                "x": 225,
+                "y": 16,
+                "text": "Drv",
+                "fontSize": 9,
+                "color": "#ffffff"
+        }
+]
+};

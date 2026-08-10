@@ -1,0 +1,1892 @@
+{
+  "1": [
+    {
+      "ConnectorName": "Pitch",
+      "ID": 0,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Gate",
+      "ID": 1,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "Lin",
+      "ID": 2,
+      "ConnectorIndex": 2
+    },
+    {
+      "ConnectorName": "Release",
+      "ID": 3,
+      "ConnectorIndex": 3
+    },
+    {
+      "ConnectorName": "Note",
+      "ID": 7,
+      "ConnectorIndex": 4
+    },
+    {
+      "ConnectorName": "Exp",
+      "ID": 10,
+      "ConnectorIndex": 5
+    }
+  ],
+  "5": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 1,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 4,
+      "ConnectorIndex": 1
+    }
+  ],
+  "7": [
+    {
+      "ConnectorName": "Out",
+      "ID": 17,
+      "ConnectorIndex": 0
+    }
+  ],
+  "8": [
+    {
+      "ConnectorName": "Out",
+      "ID": 18,
+      "ConnectorIndex": 0
+    }
+  ],
+  "9": [
+    {
+      "ConnectorName": "Out",
+      "ID": 12,
+      "ConnectorIndex": 0
+    }
+  ],
+  "12": [
+    {
+      "ConnectorName": "OutL",
+      "ID": 15,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "OutR",
+      "ID": 19,
+      "ConnectorIndex": 1
+    }
+  ],
+  "13": [
+    {
+      "ConnectorName": "Out",
+      "ID": 23,
+      "ConnectorIndex": 0
+    }
+  ],
+  "15": [
+    {
+      "ConnectorName": "Out",
+      "ID": 20,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Control",
+      "ID": 11,
+      "ConnectorIndex": 1
+    }
+  ],
+  "17": [
+    {
+      "ConnectorName": "OutOn",
+      "ID": 0,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "OutOff",
+      "ID": 5,
+      "ConnectorIndex": 1
+    }
+  ],
+  "18": [
+    {
+      "ConnectorName": "Out",
+      "ID": 6,
+      "ConnectorIndex": 0
+    }
+  ],
+  "19": [
+    {
+      "ConnectorName": "Out",
+      "ID": 13,
+      "ConnectorIndex": 0
+    }
+  ],
+  "20": [
+    {
+      "ConnectorName": "Env",
+      "ID": 4,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 1
+    }
+  ],
+  "21": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 0,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 1,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "Out3",
+      "ID": 4,
+      "ConnectorIndex": 2
+    },
+    {
+      "ConnectorName": "Out4",
+      "ID": 10,
+      "ConnectorIndex": 3
+    },
+    {
+      "ConnectorName": "Out5",
+      "ID": 14,
+      "ConnectorIndex": 4
+    },
+    {
+      "ConnectorName": "Out6",
+      "ID": 26,
+      "ConnectorIndex": 5
+    },
+    {
+      "ConnectorName": "Out7",
+      "ID": 29,
+      "ConnectorIndex": 6
+    },
+    {
+      "ConnectorName": "Out8",
+      "ID": 31,
+      "ConnectorIndex": 7
+    }
+  ],
+  "22": [
+    {
+      "ConnectorName": "Out",
+      "ID": 3,
+      "ConnectorIndex": 0
+    }
+  ],
+  "23": [
+    {
+      "ConnectorName": "Env",
+      "ID": 17,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out",
+      "ID": 14,
+      "ConnectorIndex": 1
+    }
+  ],
+  "24": [
+    {
+      "ConnectorName": "Out",
+      "ID": 7,
+      "ConnectorIndex": 0
+    }
+  ],
+  "25": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Snc",
+      "ID": 32,
+      "ConnectorIndex": 1
+    }
+  ],
+  "26": [
+    {
+      "ConnectorName": "Out",
+      "ID": 8,
+      "ConnectorIndex": 0
+    }
+  ],
+  "27": [
+    {
+      "ConnectorName": "Out",
+      "ID": 6,
+      "ConnectorIndex": 0
+    }
+  ],
+  "28": [
+    {
+      "ConnectorName": "Out",
+      "ID": 5,
+      "ConnectorIndex": 0
+    }
+  ],
+  "29": [
+    {
+      "ConnectorName": "Out",
+      "ID": 4,
+      "ConnectorIndex": 0
+    }
+  ],
+  "30": [
+    {
+      "ConnectorName": "Wheel",
+      "ID": 6,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "AftTouch",
+      "ID": 9,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "ControlPedal",
+      "ID": 12,
+      "ConnectorIndex": 2
+    },
+    {
+      "ConnectorName": "SustainPedal",
+      "ID": 3,
+      "ConnectorIndex": 3
+    },
+    {
+      "ConnectorName": "PitchStick",
+      "ID": 0,
+      "ConnectorIndex": 4
+    },
+    {
+      "ConnectorName": "GlobalWheel1",
+      "ID": 11,
+      "ConnectorIndex": 5
+    },
+    {
+      "ConnectorName": "GlobalWheel2",
+      "ID": 14,
+      "ConnectorIndex": 6
+    }
+  ],
+  "31": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0
+    }
+  ],
+  "32": [
+    {
+      "ConnectorName": "Out",
+      "ID": 10,
+      "ConnectorIndex": 0
+    }
+  ],
+  "33": [
+    {
+      "ConnectorName": "Out",
+      "ID": 10,
+      "ConnectorIndex": 0
+    }
+  ],
+  "34": [
+    {
+      "ConnectorName": "Out",
+      "ID": 5,
+      "ConnectorIndex": 0
+    }
+  ],
+  "35": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 5,
+      "ConnectorIndex": 0
+    }
+  ],
+  "36": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Ctrl",
+      "ID": 2,
+      "ConnectorIndex": 1
+    }
+  ],
+  "38": [
+    {
+      "ConnectorName": "Out",
+      "ID": 8,
+      "ConnectorIndex": 0
+    }
+  ],
+  "40": [
+    {
+      "ConnectorName": "Out",
+      "ID": 23,
+      "ConnectorIndex": 0
+    }
+  ],
+  "41": [
+    {
+      "ConnectorName": "Env",
+      "ID": 13,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out",
+      "ID": 10,
+      "ConnectorIndex": 1
+    }
+  ],
+  "42": [
+    {
+      "ConnectorName": "Out",
+      "ID": 9,
+      "ConnectorIndex": 0
+    }
+  ],
+  "43": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0
+    }
+  ],
+  "44": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0
+    }
+  ],
+  "45": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0
+    }
+  ],
+  "46": [
+    {
+      "ConnectorName": "Env",
+      "ID": 13,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out",
+      "ID": 10,
+      "ConnectorIndex": 1
+    }
+  ],
+  "47": [
+    {
+      "ConnectorName": "OutL",
+      "ID": 5,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "OutR",
+      "ID": 7,
+      "ConnectorIndex": 1
+    }
+  ],
+  "48": [
+    {
+      "ConnectorName": "OutL",
+      "ID": 36,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "OutR",
+      "ID": 35,
+      "ConnectorIndex": 1
+    }
+  ],
+  "49": [
+    {
+      "ConnectorName": "LP",
+      "ID": 16,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "BP",
+      "ID": 17,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "HP",
+      "ID": 18,
+      "ConnectorIndex": 2
+    }
+  ],
+  "50": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0
+    }
+  ],
+  "51": [
+    {
+      "ConnectorName": "Out",
+      "ID": 22,
+      "ConnectorIndex": 0
+    }
+  ],
+  "52": [
+    {
+      "ConnectorName": "Env",
+      "ID": 5,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out",
+      "ID": 2,
+      "ConnectorIndex": 1
+    }
+  ],
+  "53": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0
+    }
+  ],
+  "54": [
+    {
+      "ConnectorName": "Out",
+      "ID": 22,
+      "ConnectorIndex": 0
+    }
+  ],
+  "55": [
+    {
+      "ConnectorName": "Env",
+      "ID": 12,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out",
+      "ID": 11,
+      "ConnectorIndex": 1
+    }
+  ],
+  "56": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 23,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 22,
+      "ConnectorIndex": 1
+    }
+  ],
+  "57": [
+    {
+      "ConnectorName": "Out",
+      "ID": 11,
+      "ConnectorIndex": 0
+    }
+  ],
+  "58": [
+    {
+      "ConnectorName": "Out",
+      "ID": 23,
+      "ConnectorIndex": 0
+    }
+  ],
+  "59": [
+    {
+      "ConnectorName": "Out",
+      "ID": 3,
+      "ConnectorIndex": 0
+    }
+  ],
+  "60": [
+    {
+      "ConnectorName": "Out",
+      "ID": 17,
+      "ConnectorIndex": 0
+    }
+  ],
+  "61": [
+    {
+      "ConnectorName": "Out",
+      "ID": 9,
+      "ConnectorIndex": 0
+    }
+  ],
+  "62": [
+    {
+      "ConnectorName": "Out",
+      "ID": 6,
+      "ConnectorIndex": 0
+    }
+  ],
+  "63": [
+    {
+      "ConnectorName": "Out",
+      "ID": 2,
+      "ConnectorIndex": 0
+    }
+  ],
+  "64": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 8,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 1,
+      "ConnectorIndex": 1
+    }
+  ],
+  "66": [
+    {
+      "ConnectorName": "Out",
+      "ID": 11,
+      "ConnectorIndex": 0
+    }
+  ],
+  "68": [
+    {
+      "ConnectorName": "1/96",
+      "ID": 6,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "1/16",
+      "ID": 7,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "ClkActive",
+      "ID": 8,
+      "ConnectorIndex": 2
+    },
+    {
+      "ConnectorName": "Sync",
+      "ID": 16,
+      "ConnectorIndex": 3
+    }
+  ],
+  "69": [
+    {
+      "ConnectorName": "Out",
+      "ID": 9,
+      "ConnectorIndex": 0
+    }
+  ],
+  "71": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0
+    }
+  ],
+  "72": [
+    {
+      "ConnectorName": "Out",
+      "ID": 2,
+      "ConnectorIndex": 0
+    }
+  ],
+  "74": [
+    {
+      "ConnectorName": "Out",
+      "ID": 7,
+      "ConnectorIndex": 0
+    }
+  ],
+  "75": [
+    {
+      "ConnectorName": "Out",
+      "ID": 7,
+      "ConnectorIndex": 0
+    }
+  ],
+  "76": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Ctrl",
+      "ID": 3,
+      "ConnectorIndex": 1
+    }
+  ],
+  "78": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 16,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 23,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "Out3",
+      "ID": 24,
+      "ConnectorIndex": 2
+    },
+    {
+      "ConnectorName": "Out4",
+      "ID": 25,
+      "ConnectorIndex": 3
+    },
+    {
+      "ConnectorName": "Out5",
+      "ID": 18,
+      "ConnectorIndex": 4
+    },
+    {
+      "ConnectorName": "Out6",
+      "ID": 19,
+      "ConnectorIndex": 5
+    },
+    {
+      "ConnectorName": "Out7",
+      "ID": 20,
+      "ConnectorIndex": 6
+    },
+    {
+      "ConnectorName": "Out8",
+      "ID": 21,
+      "ConnectorIndex": 7
+    },
+    {
+      "ConnectorName": "Ctrl",
+      "ID": 10,
+      "ConnectorIndex": 8
+    }
+  ],
+  "79": [
+    {
+      "ConnectorName": "Out",
+      "ID": 20,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Ctrl",
+      "ID": 11,
+      "ConnectorIndex": 1
+    }
+  ],
+  "81": [
+    {
+      "ConnectorName": "Out",
+      "ID": 3,
+      "ConnectorIndex": 0
+    }
+  ],
+  "82": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0
+    }
+  ],
+  "83": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0
+    }
+  ],
+  "84": [
+    {
+      "ConnectorName": "Env",
+      "ID": 4,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "End",
+      "ID": 13,
+      "ConnectorIndex": 2
+    }
+  ],
+  "85": [
+    {
+      "ConnectorName": "Out",
+      "ID": 9,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Gate",
+      "ID": 12,
+      "ConnectorIndex": 1
+    }
+  ],
+  "86": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 16,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 33,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "Out3",
+      "ID": 34,
+      "ConnectorIndex": 2
+    },
+    {
+      "ConnectorName": "Out4",
+      "ID": 35,
+      "ConnectorIndex": 3
+    },
+    {
+      "ConnectorName": "Out5",
+      "ID": 36,
+      "ConnectorIndex": 4
+    },
+    {
+      "ConnectorName": "Out6",
+      "ID": 37,
+      "ConnectorIndex": 5
+    },
+    {
+      "ConnectorName": "Out7",
+      "ID": 38,
+      "ConnectorIndex": 6
+    },
+    {
+      "ConnectorName": "Out8",
+      "ID": 39,
+      "ConnectorIndex": 7
+    }
+  ],
+  "87": [
+    {
+      "ConnectorName": "Out",
+      "ID": 10,
+      "ConnectorIndex": 0
+    }
+  ],
+  "88": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 8,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 11,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "Out3",
+      "ID": 12,
+      "ConnectorIndex": 2
+    },
+    {
+      "ConnectorName": "Out4",
+      "ID": 1,
+      "ConnectorIndex": 3
+    },
+    {
+      "ConnectorName": "Ctrl",
+      "ID": 0,
+      "ConnectorIndex": 4
+    }
+  ],
+  "89": [
+    {
+      "ConnectorName": "Out",
+      "ID": 5,
+      "ConnectorIndex": 0
+    }
+  ],
+  "90": [
+    {
+      "ConnectorName": "Out2",
+      "ID": 1,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out1",
+      "ID": 0,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "Ctrl",
+      "ID": 3,
+      "ConnectorIndex": 2
+    }
+  ],
+  "91": [
+    {
+      "ConnectorName": "NotQ",
+      "ID": 7,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Q",
+      "ID": 10,
+      "ConnectorIndex": 1
+    }
+  ],
+  "92": [
+    {
+      "ConnectorName": "Out",
+      "ID": 15,
+      "ConnectorIndex": 0
+    }
+  ],
+  "94": [
+    {
+      "ConnectorName": "OutL",
+      "ID": 2,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "OutR",
+      "ID": 8,
+      "ConnectorIndex": 1
+    }
+  ],
+  "96": [
+    {
+      "ConnectorName": "Out",
+      "ID": 7,
+      "ConnectorIndex": 0
+    }
+  ],
+  "97": [
+    {
+      "ConnectorName": "Out",
+      "ID": 8,
+      "ConnectorIndex": 0
+    }
+  ],
+  "98": [
+    {
+      "ConnectorName": "Dn",
+      "ID": 1,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Up",
+      "ID": 0,
+      "ConnectorIndex": 1
+    }
+  ],
+  "100": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Ctrl",
+      "ID": 2,
+      "ConnectorIndex": 1
+    }
+  ],
+  "102": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0
+    }
+  ],
+  "103": [
+    {
+      "ConnectorName": "Out",
+      "ID": 10,
+      "ConnectorIndex": 0
+    }
+  ],
+  "105": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0
+    }
+  ],
+  "106": [
+    {
+      "ConnectorName": "Out",
+      "ID": 2,
+      "ConnectorIndex": 0
+    }
+  ],
+  "108": [
+    {
+      "ConnectorName": "Out",
+      "ID": 25,
+      "ConnectorIndex": 0
+    }
+  ],
+  "112": [
+    {
+      "ConnectorName": "Out",
+      "ID": 3,
+      "ConnectorIndex": 0
+    }
+  ],
+  "113": [
+    {
+      "ConnectorName": "OutL",
+      "ID": 6,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "OutR",
+      "ID": 2,
+      "ConnectorIndex": 1
+    }
+  ],
+  "114": [
+    {
+      "ConnectorName": "Out",
+      "ID": 2,
+      "ConnectorIndex": 0
+    }
+  ],
+  "115": [
+    {
+      "ConnectorName": "Level",
+      "ID": 7,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out",
+      "ID": 9,
+      "ConnectorIndex": 1
+    }
+  ],
+  "116": [
+    {
+      "ConnectorName": "Out",
+      "ID": 16,
+      "ConnectorIndex": 0
+    }
+  ],
+  "117": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0
+    }
+  ],
+  "118": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0
+    }
+  ],
+  "119": [
+    {
+      "ConnectorName": "Env",
+      "ID": 10,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out",
+      "ID": 8,
+      "ConnectorIndex": 1
+    }
+  ],
+  "121": [
+    {
+      "ConnectorName": "Link",
+      "ID": 8,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Note",
+      "ID": 114,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "Trig",
+      "ID": 58,
+      "ConnectorIndex": 2
+    }
+  ],
+  "123": [
+    {
+      "ConnectorName": "Out",
+      "ID": 12,
+      "ConnectorIndex": 0
+    }
+  ],
+  "124": [
+    {
+      "ConnectorName": "Out",
+      "ID": 16,
+      "ConnectorIndex": 0
+    }
+  ],
+  "125": [
+    {
+      "ConnectorName": "Out",
+      "ID": 3,
+      "ConnectorIndex": 0
+    }
+  ],
+  "127": [
+    {
+      "ConnectorName": "OutL",
+      "ID": 3,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "OutR",
+      "ID": 0,
+      "ConnectorIndex": 1
+    }
+  ],
+  "128": [
+    {
+      "ConnectorName": "Min",
+      "ID": 2,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Max",
+      "ID": 3,
+      "ConnectorIndex": 1
+    }
+  ],
+  "130": [
+    {
+      "ConnectorName": "Out001",
+      "ID": 17,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out002",
+      "ID": 32,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "Out004",
+      "ID": 35,
+      "ConnectorIndex": 2
+    },
+    {
+      "ConnectorName": "Out008",
+      "ID": 34,
+      "ConnectorIndex": 3
+    },
+    {
+      "ConnectorName": "Out016",
+      "ID": 37,
+      "ConnectorIndex": 4
+    },
+    {
+      "ConnectorName": "Out032",
+      "ID": 36,
+      "ConnectorIndex": 5
+    },
+    {
+      "ConnectorName": "Out064",
+      "ID": 39,
+      "ConnectorIndex": 6
+    },
+    {
+      "ConnectorName": "Out128",
+      "ID": 38,
+      "ConnectorIndex": 7
+    }
+  ],
+  "131": [
+    {
+      "ConnectorName": "D0",
+      "ID": 17,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "D1",
+      "ID": 32,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "D2",
+      "ID": 35,
+      "ConnectorIndex": 2
+    },
+    {
+      "ConnectorName": "D3",
+      "ID": 34,
+      "ConnectorIndex": 3
+    },
+    {
+      "ConnectorName": "D4",
+      "ID": 37,
+      "ConnectorIndex": 4
+    },
+    {
+      "ConnectorName": "D5",
+      "ID": 36,
+      "ConnectorIndex": 5
+    },
+    {
+      "ConnectorName": "D6",
+      "ID": 39,
+      "ConnectorIndex": 6
+    },
+    {
+      "ConnectorName": "D7",
+      "ID": 38,
+      "ConnectorIndex": 7
+    }
+  ],
+  "132": [
+    {
+      "ConnectorName": "Out",
+      "ID": 16,
+      "ConnectorIndex": 0
+    }
+  ],
+  "134": [
+    {
+      "ConnectorName": "Out",
+      "ID": 11,
+      "ConnectorIndex": 0
+    }
+  ],
+  "139": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0
+    }
+  ],
+  "140": [
+    {
+      "ConnectorName": "OutL",
+      "ID": 28,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "OutR",
+      "ID": 13,
+      "ConnectorIndex": 1
+    }
+  ],
+  "141": [
+    {
+      "ConnectorName": "Send",
+      "ID": 11,
+      "ConnectorIndex": 0
+    }
+  ],
+  "142": [
+    {
+      "ConnectorName": "Send",
+      "ID": 10,
+      "ConnectorIndex": 0
+    }
+  ],
+  "144": [
+    {
+      "ConnectorName": "Link",
+      "ID": 4,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Trig1",
+      "ID": 59,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "Trig2",
+      "ID": 60,
+      "ConnectorIndex": 2
+    }
+  ],
+  "145": [
+    {
+      "ConnectorName": "Link",
+      "ID": 8,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Val",
+      "ID": 114,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "Trig",
+      "ID": 58,
+      "ConnectorIndex": 2
+    }
+  ],
+  "146": [
+    {
+      "ConnectorName": "Link",
+      "ID": 8,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Val",
+      "ID": 114,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "Trig",
+      "ID": 58,
+      "ConnectorIndex": 2
+    }
+  ],
+  "147": [
+    {
+      "ConnectorName": "Rcv",
+      "ID": 8,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Val",
+      "ID": 2,
+      "ConnectorIndex": 1
+    }
+  ],
+  "148": [
+    {
+      "ConnectorName": "Gate",
+      "ID": 5,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Vel",
+      "ID": 3,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "RelVel",
+      "ID": 11,
+      "ConnectorIndex": 2
+    }
+  ],
+  "150": [
+    {
+      "ConnectorName": "OutR",
+      "ID": 3,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "OutL",
+      "ID": 2,
+      "ConnectorIndex": 1
+    }
+  ],
+  "152": [
+    {
+      "ConnectorName": "Out",
+      "ID": 13,
+      "ConnectorIndex": 0
+    }
+  ],
+  "154": [
+    {
+      "ConnectorName": "Val",
+      "ID": 114,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Trig",
+      "ID": 58,
+      "ConnectorIndex": 1
+    }
+  ],
+  "156": [
+    {
+      "ConnectorName": "Gate",
+      "ID": 6,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Vel",
+      "ID": 4,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "RelVel",
+      "ID": 8,
+      "ConnectorIndex": 2
+    }
+  ],
+  "157": [
+    {
+      "ConnectorName": "Out",
+      "ID": 6,
+      "ConnectorIndex": 0
+    }
+  ],
+  "158": [
+    {
+      "ConnectorName": "Out",
+      "ID": 8,
+      "ConnectorIndex": 0
+    }
+  ],
+  "159": [
+    {
+      "ConnectorName": "Out",
+      "ID": 2,
+      "ConnectorIndex": 0
+    }
+  ],
+  "160": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0
+    }
+  ],
+  "161": [
+    {
+      "ConnectorName": "Out",
+      "ID": 25,
+      "ConnectorIndex": 0
+    }
+  ],
+  "162": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0
+    }
+  ],
+  "163": [
+    {
+      "ConnectorName": "Out",
+      "ID": 17,
+      "ConnectorIndex": 0
+    }
+  ],
+  "164": [
+    {
+      "ConnectorName": "Out",
+      "ID": 17,
+      "ConnectorIndex": 0
+    }
+  ],
+  "165": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 5,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 6,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "Out3",
+      "ID": 7,
+      "ConnectorIndex": 2
+    },
+    {
+      "ConnectorName": "Out4",
+      "ID": 8,
+      "ConnectorIndex": 3
+    },
+    {
+      "ConnectorName": "Out5",
+      "ID": 9,
+      "ConnectorIndex": 4
+    },
+    {
+      "ConnectorName": "Out6",
+      "ID": 11,
+      "ConnectorIndex": 5
+    },
+    {
+      "ConnectorName": "Main",
+      "ID": 12,
+      "ConnectorIndex": 6
+    }
+  ],
+  "167": [
+    {
+      "ConnectorName": "Out",
+      "ID": 2,
+      "ConnectorIndex": 0
+    }
+  ],
+  "169": [
+    {
+      "ConnectorName": "Env",
+      "ID": 13,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out",
+      "ID": 10,
+      "ConnectorIndex": 1
+    }
+  ],
+  "170": [
+    {
+      "ConnectorName": "OutL",
+      "ID": 1,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "OutR",
+      "ID": 0,
+      "ConnectorIndex": 1
+    }
+  ],
+  "171": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 6,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 4,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "Out3",
+      "ID": 1,
+      "ConnectorIndex": 2
+    },
+    {
+      "ConnectorName": "Out4",
+      "ID": 0,
+      "ConnectorIndex": 3
+    }
+  ],
+  "172": [
+    {
+      "ConnectorName": "Out",
+      "ID": 6,
+      "ConnectorIndex": 0
+    }
+  ],
+  "173": [
+    {
+      "ConnectorName": "Out",
+      "ID": 11,
+      "ConnectorIndex": 0
+    }
+  ],
+  "174": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 11,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 10,
+      "ConnectorIndex": 1
+    }
+  ],
+  "175": [
+    {
+      "ConnectorName": "OutMain",
+      "ID": 26,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out1",
+      "ID": 6,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 10,
+      "ConnectorIndex": 2
+    },
+    {
+      "ConnectorName": "Out3",
+      "ID": 16,
+      "ConnectorIndex": 3
+    },
+    {
+      "ConnectorName": "Out4",
+      "ID": 22,
+      "ConnectorIndex": 4
+    }
+  ],
+  "176": [
+    {
+      "ConnectorName": "Out",
+      "ID": 7,
+      "ConnectorIndex": 0
+    }
+  ],
+  "177": [
+    {
+      "ConnectorName": "Out",
+      "ID": 11,
+      "ConnectorIndex": 0
+    }
+  ],
+  "178": [
+    {
+      "ConnectorName": "Out",
+      "ID": 7,
+      "ConnectorIndex": 0
+    }
+  ],
+  "179": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 3,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 4,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "Out3",
+      "ID": 5,
+      "ConnectorIndex": 2
+    },
+    {
+      "ConnectorName": "Out4",
+      "ID": 6,
+      "ConnectorIndex": 3
+    },
+    {
+      "ConnectorName": "Out5",
+      "ID": 7,
+      "ConnectorIndex": 4
+    },
+    {
+      "ConnectorName": "Out6",
+      "ID": 8,
+      "ConnectorIndex": 5
+    },
+    {
+      "ConnectorName": "Out7",
+      "ID": 9,
+      "ConnectorIndex": 6
+    },
+    {
+      "ConnectorName": "Out8",
+      "ID": 10,
+      "ConnectorIndex": 7
+    }
+  ],
+  "180": [
+    {
+      "ConnectorName": "Out",
+      "ID": 61,
+      "ConnectorIndex": 0
+    }
+  ],
+  "181": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 1,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 2,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "Out3",
+      "ID": 3,
+      "ConnectorIndex": 2
+    },
+    {
+      "ConnectorName": "Out4",
+      "ID": 4,
+      "ConnectorIndex": 3
+    },
+    {
+      "ConnectorName": "Out5",
+      "ID": 5,
+      "ConnectorIndex": 4
+    },
+    {
+      "ConnectorName": "Out6",
+      "ID": 6,
+      "ConnectorIndex": 5
+    },
+    {
+      "ConnectorName": "Out7",
+      "ID": 7,
+      "ConnectorIndex": 6
+    },
+    {
+      "ConnectorName": "Out8",
+      "ID": 8,
+      "ConnectorIndex": 7
+    }
+  ],
+  "182": [
+    {
+      "ConnectorName": "OutL",
+      "ID": 12,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "OutR",
+      "ID": 13,
+      "ConnectorIndex": 1
+    }
+  ],
+  "183": [
+    {
+      "ConnectorName": "Out",
+      "ID": 12,
+      "ConnectorIndex": 0
+    }
+  ],
+  "184": [
+    {
+      "ConnectorName": "Out",
+      "ID": 13,
+      "ConnectorIndex": 0
+    }
+  ],
+  "185": [
+    {
+      "ConnectorName": "OutL",
+      "ID": 28,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "OutR",
+      "ID": 13,
+      "ConnectorIndex": 1
+    }
+  ],
+  "186": [
+    {
+      "ConnectorName": "OutOn",
+      "ID": 1,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "OutOff",
+      "ID": 0,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "Ctrl",
+      "ID": 3,
+      "ConnectorIndex": 2
+    }
+  ],
+  "187": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Ctrl",
+      "ID": 2,
+      "ConnectorIndex": 1
+    }
+  ],
+  "188": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0
+    }
+  ],
+  "189": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Env",
+      "ID": 8,
+      "ConnectorIndex": 1
+    }
+  ],
+  "190": [
+    {
+      "ConnectorName": "Out",
+      "ID": 6,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Sync",
+      "ID": 18,
+      "ConnectorIndex": 1
+    }
+  ],
+  "192": [
+    {
+      "ConnectorName": "Out",
+      "ID": 6,
+      "ConnectorIndex": 0
+    }
+  ],
+  "193": [
+    {
+      "ConnectorName": "Out",
+      "ID": 16,
+      "ConnectorIndex": 0
+    }
+  ],
+  "194": [
+    {
+      "ConnectorName": "Out",
+      "ID": 11,
+      "ConnectorIndex": 0
+    }
+  ],
+  "195": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0
+    }
+  ],
+  "196": [
+    {
+      "ConnectorName": "Out",
+      "ID": 16,
+      "ConnectorIndex": 0
+    }
+  ],
+  "197": [
+    {
+      "ConnectorName": "PatchActive",
+      "ID": 3,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "VarActive",
+      "ID": 0,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "VoiceNo",
+      "ID": 5,
+      "ConnectorIndex": 2
+    }
+  ],
+  "198": [
+    {
+      "ConnectorName": "Period",
+      "ID": 6,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Gate",
+      "ID": 3,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "Pitch",
+      "ID": 8,
+      "ConnectorIndex": 2
+    }
+  ],
+  "199": [
+    {
+      "ConnectorName": "Pitch",
+      "ID": 2,
+      "ConnectorIndex": 0
+    },
+    {
+      "ConnectorName": "Gate",
+      "ID": 1,
+      "ConnectorIndex": 1
+    },
+    {
+      "ConnectorName": "Vel",
+      "ID": 3,
+      "ConnectorIndex": 2
+    }
+  ],
+  "200": [
+    {
+      "ConnectorName": "Out",
+      "ID": 7,
+      "ConnectorIndex": 0
+    }
+  ],
+  "201": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 1,
+      "ConnectorIndex": 0
+    }
+  ],
+  "202": [
+    {
+      "ConnectorName": "Out",
+      "ID": 8,
+      "ConnectorIndex": 0
+    }
+  ],
+  "203": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 1,
+      "ConnectorIndex": 0
+    }
+  ],
+  "204": [
+    {
+      "ConnectorName": "Out",
+      "ID": 3,
+      "ConnectorIndex": 0
+    }
+  ],
+  "205": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0
+    }
+  ],
+  "206": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0
+    }
+  ],
+  "208": [
+    {
+      "ConnectorName": "Out",
+      "ID": 3,
+      "ConnectorIndex": 0
+    }
+  ]
+}

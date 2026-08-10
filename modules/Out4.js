@@ -1,0 +1,164 @@
+// Автоматически сгенерированный модуль: Out4
+// Исходный файл: Out4.js
+// Версия: 210
+
+export const Out4Module = {
+    type: 'Out4',
+        typeID: 3,
+    defaultParams: [0, 1, 0],
+    displayName: '4-Out',
+    gridHeight: 2,
+    originalName: '4-Out',
+    tooltip: '4 Outputs',
+    components: [
+        {
+                "componentType": "Input",
+                "id": "1",
+                "x": 162,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Input",
+                "id": "0",
+                "x": 188,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Input",
+                "id": "3",
+                "x": 214,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Input",
+                "id": "2",
+                "x": 240,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "4",
+                "x": 166,
+                "y": 3,
+                "text": "1",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "5",
+                "x": 192,
+                "y": 3,
+                "text": "2",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "6",
+                "x": 218,
+                "y": 3,
+                "text": "3",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "7",
+                "x": 243,
+                "y": 3,
+                "text": "4",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonRadio",
+                "id": "8",
+                "x": 78,
+                "y": 8,
+                "buttonWidth": 20,
+                "buttonCount": 3,
+                "orientation": "horizontal",
+                "labels": [
+                        "Out",
+                        "Fx",
+                        "Bus"
+                ]
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "9",
+                "x": 138,
+                "y": 14,
+                "width": 13,
+                "text": "M"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "11",
+                "x": 5,
+                "y": 16,
+                "text": "Pad",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "10",
+                "x": 23,
+                "y": 14,
+                "width": 30,
+                "height": 12,
+                "labels": [
+                        "0dB",
+                        "+6dB",
+                        "+12dB",
+                        "+18dB"
+                ]
+        },
+        {
+                "componentType": "MiniVU",
+                "id": "12",
+                "x": 153,
+                "y": 10,
+                "width": 6,
+                "height": 15,
+                "orientation": "vertical"
+        },
+        {
+                "componentType": "MiniVU",
+                "id": "13",
+                "x": 179,
+                "y": 10,
+                "width": 6,
+                "height": 15,
+                "orientation": "vertical"
+        },
+        {
+                "componentType": "MiniVU",
+                "id": "14",
+                "x": 205,
+                "y": 10,
+                "width": 6,
+                "height": 15,
+                "orientation": "vertical"
+        },
+        {
+                "componentType": "MiniVU",
+                "id": "15",
+                "x": 231,
+                "y": 10,
+                "width": 6,
+                "height": 15,
+                "orientation": "vertical"
+        }
+]
+};

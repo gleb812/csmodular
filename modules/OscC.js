@@ -1,0 +1,218 @@
+// Автоматически сгенерированный модуль: OscC
+// Исходный файл: OscC.js
+// Версия: 206
+
+export const OscCModule = {
+    type: 'OscC',
+        typeID: 96,
+    mode: [0],
+    defaultParams: [64, 64, 1, 0, 0, 1, 0, 0],
+    displayName: 'OscC',
+    gridHeight: 3,
+    originalName: 'OscC',
+    tooltip: 'Osc C',
+    components: [
+        {
+                "componentType": "Input",
+                "id": "0",
+                "x": 4,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextField",
+                "id": "1",
+                "x": 46,
+                "y": 14,
+                "width": 50,
+                "referenceElementId": 2
+        },
+        {
+                "componentType": "Knob",
+                "id": "2",
+                "x": 102,
+                "y": 18,
+                "infoFunc": 61,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "3",
+                "x": 129,
+                "y": 14,
+                "infoFunc": 59,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "4",
+                "x": 158,
+                "y": 29,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "5",
+                "x": 171,
+                "y": 30,
+                "text": "↑",
+                "fontSize": 10,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Trig 1",
+                "width": 9
+        },
+        {
+                "componentType": "PartSelector",
+                "id": "10",
+                "x": 220,
+                "y": 4,
+                "width": 31,
+                "height": 22,
+                "imageCount": 6,
+                "menuOffset": 0
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "11",
+                "x": 224,
+                "y": 29,
+                "width": 13,
+                "text": "M"
+        },
+        {
+                "componentType": "Output",
+                "id": "12",
+                "x": 240,
+                "y": 30,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "14",
+                "x": 98,
+                "y": 4,
+                "width": 30,
+                "height": 12,
+                "labels": [
+                        "Semi",
+                        "Freq",
+                        "Fac",
+                        "Part"
+                ]
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "15",
+                "x": 17,
+                "y": 13,
+                "text": "Pitch",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "16",
+                "x": 130,
+                "y": 6,
+                "text": "Cent",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "17",
+                "x": 155,
+                "y": 17,
+                "text": "Sync",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "6",
+                "x": 182,
+                "y": 29,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Knob",
+                "id": "7",
+                "x": 196,
+                "y": 22,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "8",
+                "x": 184,
+                "y": 32,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Input",
+                "id": "18",
+                "x": 4,
+                "y": 29,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Knob",
+                "id": "19",
+                "x": 18,
+                "y": 22,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "20",
+                "x": 8,
+                "y": 32,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "9",
+                "x": 181,
+                "y": 5,
+                "width": 36,
+                "height": 12,
+                "labels": [
+                        "FM Lin",
+                        "FM Trk"
+                ]
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "21",
+                "x": 74,
+                "y": 29,
+                "width": 20,
+                "height": 12,
+                "labels": [
+                        "Off",
+                        "On"
+                ]
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "13",
+                "x": 55,
+                "y": 31,
+                "text": "KBT",
+                "fontSize": 9,
+                "color": "#ffffff"
+        }
+]
+};

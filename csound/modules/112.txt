@@ -1,0 +1,37 @@
+;@ map LVLlev LVLpos
+
+;@ ins k
+;@ outs k
+opcode LevAdd, 0, kkkk
+  kLev, kPolSw, kin,kout xin
+  kIn zkr kin
+
+  if kPolSw != 0 goto Uni
+    kLev table kLev, giLVLlev
+    goto Over
+  Uni:
+    kLev table kLev, giLVLpos
+
+  Over:
+    kLev /= 64
+    kOut limit kLev + kIn, -4, 4
+    zkw kOut, kout
+endop
+
+;@ ins a
+;@ outs a
+opcode LevAdd, 0, kkkk
+  kLev, kPolSw, kin,kout xin
+  aIn zar kin
+
+  if kPolSw != 0 goto Uni
+    kLev table kLev, giLVLlev
+    goto Over
+  Uni:
+    kLev table kLev, giLVLpos
+
+  Over:
+    kLev /= 64
+    aOut limit kLev + aIn, -4, 4
+    zaw aOut, kout
+endop

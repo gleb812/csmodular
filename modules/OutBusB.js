@@ -1,0 +1,88 @@
+// Автоматически сгенерированный модуль: OutBusB
+// Исходный файл: OutBusB.js
+// Версия: 208
+
+export const OutBusBModule = {
+    type: 'OutBusB',
+        typeID: 0,
+    displayName: 'OutBusB',
+    gridHeight: 2,
+    originalName: 'OutBusB',
+    tooltip: '2 outputs bus',
+    components: [
+        {
+                "componentType": "Input",
+                "id": "0",
+                "x": 239,
+                "y": 9,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Input",
+                "id": "1",
+                "x": 211,
+                "y": 9,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "2",
+                "x": 204,
+                "y": 12,
+                "text": "L",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "3",
+                "x": 232,
+                "y": 12,
+                "text": "R",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonRadio",
+                "id": "4",
+                "x": 107,
+                "y": 8,
+                "buttonWidth": 25,
+                "buttonCount": 3,
+                "orientation": "horizontal",
+                "labels": [
+                        "1/2",
+                        "3/4",
+                        "CVA"
+                ]
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "5",
+                "x": 188,
+                "y": 9,
+                "width": 13,
+                "text": "M"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "7",
+                "x": 78,
+                "y": 6,
+                "text": "Dest",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "6",
+                "x": 71,
+                "y": 16,
+                "text": "Out bus",
+                "fontSize": 9,
+                "color": "#ffffff"
+        }
+]
+};

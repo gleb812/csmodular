@@ -1,0 +1,319 @@
+// Автоматически сгенерированный модуль: E8Counter
+// Исходный файл: E8Counter.js
+// Версия: 208
+
+export const E8CounterModule = {
+    type: 'E8Counter',
+        typeID: 86,
+    defaultParams: [],
+    displayName: '8Counter',
+    gridHeight: 2,
+    originalName: '8Counter',
+    tooltip: '8 Counter',
+    components: [
+        {
+                "componentType": "TextLabel",
+                "id": "0",
+                "x": 77,
+                "y": 3,
+                "text": "1",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "1",
+                "x": 99,
+                "y": 3,
+                "text": "2",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "2",
+                "x": 122,
+                "y": 3,
+                "text": "3",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "3",
+                "x": 145,
+                "y": 3,
+                "text": "4",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "4",
+                "x": 168,
+                "y": 3,
+                "text": "5",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "5",
+                "x": 191,
+                "y": 3,
+                "text": "6",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "6",
+                "x": 214,
+                "y": 3,
+                "text": "7",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "7",
+                "x": 237,
+                "y": 3,
+                "text": "8",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Output",
+                "id": "16",
+                "x": 79,
+                "y": 13,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "17",
+                "x": 77,
+                "y": 3,
+                "text": "1",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "18",
+                "x": 99,
+                "y": 3,
+                "text": "2",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "19",
+                "x": 122,
+                "y": 3,
+                "text": "3",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "20",
+                "x": 143,
+                "y": 3,
+                "text": "4",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "21",
+                "x": 168,
+                "y": 3,
+                "text": "5",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "22",
+                "x": 191,
+                "y": 3,
+                "text": "6",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "23",
+                "x": 214,
+                "y": 3,
+                "text": "7",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "24",
+                "x": 237,
+                "y": 3,
+                "text": "8",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "LED",
+                "id": "25",
+                "x": 81,
+                "y": 3
+        },
+        {
+                "componentType": "LED",
+                "id": "26",
+                "x": 104,
+                "y": 3
+        },
+        {
+                "componentType": "LED",
+                "id": "27",
+                "x": 127,
+                "y": 3
+        },
+        {
+                "componentType": "LED",
+                "id": "28",
+                "x": 150,
+                "y": 3
+        },
+        {
+                "componentType": "LED",
+                "id": "29",
+                "x": 173,
+                "y": 3
+        },
+        {
+                "componentType": "LED",
+                "id": "30",
+                "x": 196,
+                "y": 3
+        },
+        {
+                "componentType": "LED",
+                "id": "31",
+                "x": 219,
+                "y": 3
+        },
+        {
+                "componentType": "LED",
+                "id": "32",
+                "x": 242,
+                "y": 3
+        },
+        {
+                "componentType": "Output",
+                "id": "33",
+                "x": 102,
+                "y": 13,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "34",
+                "x": 125,
+                "y": 13,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "35",
+                "x": 148,
+                "y": 13,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "36",
+                "x": 171,
+                "y": 13,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "37",
+                "x": 194,
+                "y": 13,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "38",
+                "x": 217,
+                "y": 13,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "39",
+                "x": 240,
+                "y": 13,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Input",
+                "id": "40",
+                "x": 4,
+                "y": 15,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "41",
+                "x": 17,
+                "y": 16,
+                "text": "↑",
+                "fontSize": 10,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Trig 1",
+                "width": 9
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "42",
+                "x": 22,
+                "y": 17,
+                "text": "Clk",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "44",
+                "x": 44,
+                "y": 15,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "45",
+                "x": 58,
+                "y": 17,
+                "text": "Rst",
+                "fontSize": 9,
+                "color": "#ffffff"
+        }
+]
+};

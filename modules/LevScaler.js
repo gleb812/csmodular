@@ -1,0 +1,178 @@
+// Автоматически сгенерированный модуль: LevScaler
+// Исходный файл: LevScaler.js
+// Версия: 208
+
+export const LevScalerModule = {
+    type: 'LevScaler',
+        typeID: 115,
+    defaultParams: [64, 64, 64, 1],
+    displayName: 'LevScaler',
+    gridHeight: 3,
+    originalName: 'LevScaler',
+    tooltip: 'Level Scaler',
+    components: [
+        {
+                "componentType": "TextField",
+                "id": "1",
+                "x": 116,
+                "y": 4,
+                "width": 25,
+                "referenceElementId": 1
+        },
+        {
+                "componentType": "Knob",
+                "id": "2",
+                "x": 154,
+                "y": 20,
+                "infoFunc": 70,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "3",
+                "x": 90,
+                "y": 20,
+                "infoFunc": 70,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextField",
+                "id": "0",
+                "x": 79,
+                "y": 4,
+                "width": 35,
+                "referenceElementId": 3
+        },
+        {
+                "componentType": "TextField",
+                "id": "5",
+                "x": 143,
+                "y": 4,
+                "width": 35,
+                "referenceElementId": 2
+        },
+        {
+                "componentType": "Graph",
+                "id": "6",
+                "x": 180,
+                "y": 4,
+                "width": 56,
+                "height": 24
+        },
+        {
+                "componentType": "Output",
+                "id": "7",
+                "x": 210,
+                "y": 30,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Input",
+                "id": "12",
+                "x": 4,
+                "y": 30,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "14",
+                "x": 4,
+                "y": 20,
+                "text": "Note",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonIncDec",
+                "id": "4",
+                "x": 130,
+                "y": 20,
+                "infoFunc": 13
+        },
+        {
+                "componentType": "Input",
+                "id": "8",
+                "x": 240,
+                "y": 4,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "9",
+                "x": 240,
+                "y": 30,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "10",
+                "x": 117,
+                "y": 20,
+                "text": "BP",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "11",
+                "x": 83,
+                "y": 20,
+                "text": "L",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "13",
+                "x": 147,
+                "y": 20,
+                "text": "R",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "SVG",
+                "id": "15",
+                "x": 240,
+                "y": 10,
+                "width": 11,
+                "height": 24,
+                "color": "#ffffff"
+        ,
+        "svgSrc": "/svg/levscaler_ADSR.svg"},
+        {
+                "componentType": "ButtonFlat",
+                "id": "17",
+                "x": 30,
+                "y": 29,
+                "width": 20,
+                "height": 12,
+                "labels": [
+                        "Off",
+                        "On"
+                ]
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "16",
+                "x": 33,
+                "y": 20,
+                "text": "KBT",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "18",
+                "x": 185,
+                "y": 32,
+                "text": "Level",
+                "fontSize": 9,
+                "color": "#ffffff"
+        }
+]
+};

@@ -1,0 +1,74 @@
+// Автоматически сгенерированный модуль: CompLev
+// Исходный файл: CompLev.js
+// Версия: 208
+
+export const CompLevModule = {
+    type: 'CompLev',
+        typeID: 59,
+    defaultParams: [64],
+    displayName: 'CompLev',
+    gridHeight: 2,
+    originalName: 'CompLev',
+    tooltip: 'Compare to Level',
+    components: [
+        {
+                "componentType": "TextField",
+                "id": "0",
+                "x": 149,
+                "y": 8,
+                "width": 21,
+                "referenceElementId": 1
+        },
+        {
+                "componentType": "Knob",
+                "id": "1",
+                "x": 173,
+                "y": 5,
+                "infoFunc": 17,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "2",
+                "x": 120,
+                "y": 11,
+                "jackType": "control",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "3",
+                "x": 240,
+                "y": 11,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "4",
+                "x": 110,
+                "y": 13,
+                "text": "A",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "5",
+                "x": 214,
+                "y": 13,
+                "text": "A>=C",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "6",
+                "x": 141,
+                "y": 13,
+                "text": "C",
+                "fontSize": 9,
+                "color": "#ffffff"
+        }
+]
+};

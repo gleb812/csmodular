@@ -1,0 +1,16 @@
+;@ map LVLlev LVLpos
+
+;@ outs k
+opcode ConstSwM, 0, kkkk
+kLev, kOn, kPolSw, kout xin
+
+if kPolSw != 0 kgoto Uni
+  kLev table kLev, giLVLlev
+  kgoto Over
+Uni:
+  kLev table kLev, giLVLpos
+Over:
+  zkw kOn * kLev/64, kout
+endop
+
+; Updated 10.04.20 

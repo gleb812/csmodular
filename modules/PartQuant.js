@@ -1,0 +1,70 @@
+// Автоматически сгенерированный модуль: PartQuant
+// Исходный файл: PartQuant.js
+// Версия: 208
+
+export const PartQuantModule = {
+    type: 'PartQuant',
+        typeID: 22,
+    defaultParams: [127],
+    displayName: 'PartQuant',
+    gridHeight: 2,
+    originalName: 'PartQuant',
+    tooltip: 'Partial Quantizer',
+    components: [
+        {
+                "componentType": "TextField",
+                "id": "1",
+                "x": 105,
+                "y": 12,
+                "width": 40,
+                "referenceElementId": 0
+        },
+        {
+                "componentType": "Knob",
+                "id": "0",
+                "x": 148,
+                "y": 5,
+                "infoFunc": 68,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "2",
+                "x": 210,
+                "y": 11,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Output",
+                "id": "3",
+                "x": 240,
+                "y": 11,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "5",
+                "x": 214,
+                "y": 11,
+                "text": "↑",
+                "fontSize": 11,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Box",
+                "width": 102
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "4",
+                "x": 112,
+                "y": 2,
+                "text": "Range",
+                "fontSize": 9,
+                "color": "#ffffff"
+        }
+]
+};

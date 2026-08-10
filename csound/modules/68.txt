@@ -1,0 +1,45 @@
+;@ map RNDbpm CLKswi
+
+;@ ins k
+;@ outs k k k k
+opcode ClkGen,0, kkkkkkkkkk
+kBPM,kOn,kSource,kSync,kSwing, kRsti,k96o,k16o,kClkAo,kSynco xin
+
+krst zkr kRsti
+krst K2Y krst
+kSync = 2^kSync
+kSwing table kSwing, giCLKswi
+kSw = kSwing/50
+
+
+if kSource == 0 goto InterS ; Internal Tempo
+	kBPM = gkBPM ; Master Tempo
+	kgoto Over
+InterS:
+  kBPM table kBPM, giRNDbpm
+Over:
+kBPM /= 60
+
+
+kRst trigger krst,0.00001,0
+kOnT trigger kOn,0.5,0
+kST trigger kSource,0.5,0
+
+arst = a(kRst+kOnT+kST)
+
+a1,aS1 syncphasor kBPM/kSync, arst
+a2,aS2 syncphasor kBPM*24, arst
+a3,aS3 syncphasor kBPM*2, arst
+a3 *= 2
+a3 wrap a3, 0, kSw
+a16 table a3, 23, 1
+a96 table a2, 22, 1
+aSy table a1, 21, 1
+
+
+	zkw kOn, kClkAo
+	zkw k(a96) * kOn, k96o
+	zkw k(a16) * kOn, k16o
+	zkw k(aSy) * kOn, kSynco
+
+endop

@@ -1,0 +1,142 @@
+// Автоматически сгенерированный модуль: Keyboard
+// Исходный файл: Keyboard.js
+// Версия: 208
+
+export const KeyboardModule = {
+    type: 'Keyboard',
+        typeID: 1,
+    defaultParams: [],
+    displayName: 'Keyboard',
+    gridHeight: 2,
+    originalName: 'Keyboard',
+    tooltip: 'Keyboard',
+    components: [
+        {
+                "componentType": "Output",
+                "id": "0",
+                "x": 28,
+                "y": 14,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Output",
+                "id": "1",
+                "x": 118,
+                "y": 14,
+                "jackType": "logic",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Output",
+                "id": "2",
+                "x": 156,
+                "y": 14,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Output",
+                "id": "3",
+                "x": 240,
+                "y": 14,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "4",
+                "x": 4,
+                "y": 16,
+                "text": "Pitch",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "5",
+                "x": 96,
+                "y": 16,
+                "text": "Gate",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "6",
+                "x": 141,
+                "y": 16,
+                "text": "Lin",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "8",
+                "x": 206,
+                "y": 16,
+                "text": "Release",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Output",
+                "id": "7",
+                "x": 74,
+                "y": 14,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "9",
+                "x": 52,
+                "y": 16,
+                "text": "Note",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Output",
+                "id": "10",
+                "x": 191,
+                "y": 14,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "11",
+                "x": 173,
+                "y": 16,
+                "text": "Exp",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "12",
+                "x": 152,
+                "y": 4,
+                "text": "Velocity",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Line",
+                "id": "13",
+                "x": 188,
+                "y": 7,
+                "length": 62,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Line",
+                "id": "14",
+                "x": 140,
+                "y": 7,
+                "length": 10,
+                "orientation": "Horizontal"
+        }
+]
+};

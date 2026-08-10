@@ -1,0 +1,49 @@
+Patch file: test_all_modules_2.pch2
+
+Modules
+Name          ID    Type  Parameters                                                              Modes    Area      Hpos    Vpos
+----------  ----  ------  ----------------------------------------------------------------------  -------  ------  ------  ------
+Clip           1      61  [0, 0, 0, 1]                                                            []       VOICE        0       0
+Overdrive      2      62  [0, 0, 1, 0, 1]                                                         []       VOICE        0       2
+saturate       3      28  [0, 0, 1, 0]                                                            []       VOICE        0       4
+shpExp         4      34  [0, 0, 1, 0]                                                            []       VOICE        0       6
+WaveWrap       5      74  [0, 0, 1]                                                               []       VOICE        0       8
+shpStatic      6      83  [1, 1]                                                                  []       VOICE        0      10
+Rect           7      82  [0, 1]                                                                  []       VOICE        0      12
+Mix11A         8     184  [100, 1, 0]                                                             []       VOICE        1       0
+Mix11S         9     185  [100, 1, 0]                                                             []       VOICE        1       2
+Mix21A        10     194  [100, 1, 100, 1, 0]                                                     []       VOICE        1       4
+Mix21B        11      66  [0, 100, 0, 100, 0]                                                     []       VOICE        1       6
+Mix41A        12     193  []                                                                      []       VOICE        1       8
+Mix41B        13      19  [100, 100, 100, 100, 0]                                                 []       VOICE        1      10
+Mix41C        14     123  [100, 100, 100, 100, 1, 1, 1, 1, 0, 0]                                  []       VOICE        1      12
+Mix41S        15     140  [100, 100, 100, 100, 1, 1, 1, 1, 0]                                     []       VOICE        1      16
+Mix81A        16     116  [0]                                                                     []       VOICE        1      20
+Mix81B        17      40  [100, 100, 100, 100, 100, 100, 100, 100, 0, 0]                          []       VOICE        1      22
+MixFader      18     161  [100, 100, 100, 100, 100, 100, 100, 100, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0]  []       VOICE        1      26
+MixStereo     19      48  [100, 100, 100, 100, 100, 100, 64, 64, 64, 64, 64, 64, 100]             []       VOICE        1      35
+Pan           20      47  [0, 64, 0]                                                              []       VOICE        1      40
+XFade         21      18  [0, 64, 0]                                                              []       VOICE        1      42
+Fade1         22     113  [64, 0]                                                                 []       VOICE        1      44
+Fade2         23     114  [64, 0]                                                                 []       VOICE        1      46
+Gate          24      64  []                                                                      [0, 0]   VOICE        2       0
+Invert        25       5  []                                                                      []       VOICE        2       2
+FlipFlop      26      91  []                                                                      [0]      VOICE        2       4
+ClkDiv        27      69  [0]                                                                     [0]      VOICE        2       6
+Pulse         28      38  [1, 0, 0]                                                               [0]      VOICE        2       8
+Delay         29      42  [64, 0, 1]                                                              [0]      VOICE        2      10
+E8Counter     30      86  []                                                                      []       VOICE        2      12
+BinCounter    31     130  []                                                                      []       VOICE        2      14
+ADConv        32     131  []                                                                      []       VOICE        2      16
+DAConv        33     132  []                                                                      []       VOICE        2      18
+CtrlSend      34     141  [1, 0, 0]                                                               []       VOICE        0      15
+PCSend        35     142  [0, 0]                                                                  []       VOICE        0      17
+NoteSend      36     143  [100, 64, 0]                                                            []       VOICE        0      19
+CtrlRcv       37     147  [7, 0]                                                                  []       VOICE        0      21
+NoteRcv       38     148  [64, 0]                                                                 []       VOICE        0      23
+NoteZone      39     149  [0, 0, 127, 64, 0, 0]                                                   []       VOICE        0      25
+Automate      40      57  [7, 64, 0, 0]                                                           []       VOICE        0      28
+
+Cables
+From        To    Color    Type    Area
+------  --  ----  -------  ------  ------

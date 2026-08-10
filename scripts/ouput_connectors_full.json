@@ -1,0 +1,3764 @@
+{
+  "1": [
+    {
+      "ConnectorName": "Pitch",
+      "ID": 0,
+      "ConnectorIndex": 0,
+      "XPos": 28,
+      "YPos": 14,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Gate",
+      "ID": 1,
+      "ConnectorIndex": 1,
+      "XPos": 118,
+      "YPos": 14,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Lin",
+      "ID": 2,
+      "ConnectorIndex": 2,
+      "XPos": 156,
+      "YPos": 14,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Release",
+      "ID": 3,
+      "ConnectorIndex": 3,
+      "XPos": 240,
+      "YPos": 14,
+      "CodeRef": 3,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Note",
+      "ID": 7,
+      "ConnectorIndex": 4,
+      "XPos": 74,
+      "YPos": 14,
+      "CodeRef": 4,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Exp",
+      "ID": 10,
+      "ConnectorIndex": 5,
+      "XPos": 191,
+      "YPos": 14,
+      "CodeRef": 5,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "5": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 147,
+      "YPos": 9,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 4,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 9,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "7": [
+    {
+      "ConnectorName": "Out",
+      "ID": 17,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 60,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "8": [
+    {
+      "ConnectorName": "Out",
+      "ID": 18,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 45,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "9": [
+    {
+      "ConnectorName": "Out",
+      "ID": 12,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "12": [
+    {
+      "ConnectorName": "OutL",
+      "ID": 15,
+      "ConnectorIndex": 0,
+      "XPos": 220,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "OutR",
+      "ID": 19,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "13": [
+    {
+      "ConnectorName": "Out",
+      "ID": 23,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "15": [
+    {
+      "ConnectorName": "Out",
+      "ID": 20,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 45,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Control",
+      "ID": 11,
+      "ConnectorIndex": 1,
+      "XPos": 4,
+      "YPos": 45,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "17": [
+    {
+      "ConnectorName": "OutOn",
+      "ID": 0,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "OutOff",
+      "ID": 5,
+      "ConnectorIndex": 1,
+      "XPos": 210,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "18": [
+    {
+      "ConnectorName": "Out",
+      "ID": 6,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "19": [
+    {
+      "ConnectorName": "Out",
+      "ID": 13,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "20": [
+    {
+      "ConnectorName": "Env",
+      "ID": 4,
+      "ConnectorIndex": 0,
+      "XPos": 223,
+      "YPos": 45,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 45,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "21": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 0,
+      "ConnectorIndex": 0,
+      "XPos": 100,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 1,
+      "ConnectorIndex": 1,
+      "XPos": 120,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out3",
+      "ID": 4,
+      "ConnectorIndex": 2,
+      "XPos": 140,
+      "YPos": 13,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out4",
+      "ID": 10,
+      "ConnectorIndex": 3,
+      "XPos": 160,
+      "YPos": 13,
+      "CodeRef": 3,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out5",
+      "ID": 14,
+      "ConnectorIndex": 4,
+      "XPos": 180,
+      "YPos": 13,
+      "CodeRef": 4,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out6",
+      "ID": 26,
+      "ConnectorIndex": 5,
+      "XPos": 200,
+      "YPos": 13,
+      "CodeRef": 5,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out7",
+      "ID": 29,
+      "ConnectorIndex": 6,
+      "XPos": 220,
+      "YPos": 13,
+      "CodeRef": 6,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out8",
+      "ID": 31,
+      "ConnectorIndex": 7,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 7,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "22": [
+    {
+      "ConnectorName": "Out",
+      "ID": 3,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "23": [
+    {
+      "ConnectorName": "Env",
+      "ID": 17,
+      "ConnectorIndex": 0,
+      "XPos": 223,
+      "YPos": 60,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out",
+      "ID": 14,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 60,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "24": [
+    {
+      "ConnectorName": "Out",
+      "ID": 7,
+      "ConnectorIndex": 0,
+      "XPos": 239,
+      "YPos": 15,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "25": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 60,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Snc",
+      "ID": 32,
+      "ConnectorIndex": 1,
+      "XPos": 4,
+      "YPos": 60,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "26": [
+    {
+      "ConnectorName": "Out",
+      "ID": 8,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "27": [
+    {
+      "ConnectorName": "Out",
+      "ID": 6,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "28": [
+    {
+      "ConnectorName": "Out",
+      "ID": 5,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "29": [
+    {
+      "ConnectorName": "Out",
+      "ID": 4,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 15,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "30": [
+    {
+      "ConnectorName": "Wheel",
+      "ID": 6,
+      "ConnectorIndex": 0,
+      "XPos": 12,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "AftTouch",
+      "ID": 9,
+      "ConnectorIndex": 1,
+      "XPos": 52,
+      "YPos": 30,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "ControlPedal",
+      "ID": 12,
+      "ConnectorIndex": 2,
+      "XPos": 92,
+      "YPos": 30,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "SustainPedal",
+      "ID": 3,
+      "ConnectorIndex": 3,
+      "XPos": 132,
+      "YPos": 30,
+      "CodeRef": 3,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "PitchStick",
+      "ID": 0,
+      "ConnectorIndex": 4,
+      "XPos": 172,
+      "YPos": 30,
+      "CodeRef": 4,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "GlobalWheel1",
+      "ID": 11,
+      "ConnectorIndex": 5,
+      "XPos": 210,
+      "YPos": 30,
+      "CodeRef": 5,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "GlobalWheel2",
+      "ID": 14,
+      "ConnectorIndex": 6,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 6,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "31": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 15,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "32": [
+    {
+      "ConnectorName": "Out",
+      "ID": 10,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "33": [
+    {
+      "ConnectorName": "Out",
+      "ID": 10,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 45,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "34": [
+    {
+      "ConnectorName": "Out",
+      "ID": 5,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "35": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 5,
+      "ConnectorIndex": 0,
+      "XPos": 239,
+      "YPos": 28,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "36": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Ctrl",
+      "ID": 2,
+      "ConnectorIndex": 1,
+      "XPos": 4,
+      "YPos": 15,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "38": [
+    {
+      "ConnectorName": "Out",
+      "ID": 8,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 15,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "40": [
+    {
+      "ConnectorName": "Out",
+      "ID": 23,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 45,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "41": [
+    {
+      "ConnectorName": "Env",
+      "ID": 13,
+      "ConnectorIndex": 0,
+      "XPos": 194,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out",
+      "ID": 10,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "42": [
+    {
+      "ConnectorName": "Out",
+      "ID": 9,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 15,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "43": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 10,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "44": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "45": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 45,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "46": [
+    {
+      "ConnectorName": "Env",
+      "ID": 13,
+      "ConnectorIndex": 0,
+      "XPos": 223,
+      "YPos": 45,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out",
+      "ID": 10,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 45,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "47": [
+    {
+      "ConnectorName": "OutL",
+      "ID": 5,
+      "ConnectorIndex": 0,
+      "XPos": 210,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "OutR",
+      "ID": 7,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "48": [
+    {
+      "ConnectorName": "OutL",
+      "ID": 36,
+      "ConnectorIndex": 0,
+      "XPos": 216,
+      "YPos": 60,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "OutR",
+      "ID": 35,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 60,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "49": [
+    {
+      "ConnectorName": "LP",
+      "ID": 16,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 45,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "BP",
+      "ID": 17,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 31,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "HP",
+      "ID": 18,
+      "ConnectorIndex": 2,
+      "XPos": 240,
+      "YPos": 17,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "50": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 10,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "51": [
+    {
+      "ConnectorName": "Out",
+      "ID": 22,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 60,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "52": [
+    {
+      "ConnectorName": "Env",
+      "ID": 5,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 21,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out",
+      "ID": 2,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 4,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "53": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "54": [
+    {
+      "ConnectorName": "Out",
+      "ID": 22,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "55": [
+    {
+      "ConnectorName": "Env",
+      "ID": 12,
+      "ConnectorIndex": 0,
+      "XPos": 194,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out",
+      "ID": 11,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "56": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 23,
+      "ConnectorIndex": 0,
+      "XPos": 215,
+      "YPos": 5,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 22,
+      "ConnectorIndex": 1,
+      "XPos": 239,
+      "YPos": 57,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "57": [
+    {
+      "ConnectorName": "Out",
+      "ID": 11,
+      "ConnectorIndex": 0,
+      "XPos": 65,
+      "YPos": 15,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "58": [
+    {
+      "ConnectorName": "Out",
+      "ID": 23,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 105,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "59": [
+    {
+      "ConnectorName": "Out",
+      "ID": 3,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "60": [
+    {
+      "ConnectorName": "Out",
+      "ID": 17,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "61": [
+    {
+      "ConnectorName": "Out",
+      "ID": 9,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "62": [
+    {
+      "ConnectorName": "Out",
+      "ID": 6,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "63": [
+    {
+      "ConnectorName": "Out",
+      "ID": 2,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "64": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 8,
+      "ConnectorIndex": 0,
+      "XPos": 147,
+      "YPos": 9,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 1,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 9,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "66": [
+    {
+      "ConnectorName": "Out",
+      "ID": 11,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 15,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "68": [
+    {
+      "ConnectorName": "1/96",
+      "ID": 6,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 17,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "1/16",
+      "ID": 7,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 31,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "ClkActive",
+      "ID": 8,
+      "ConnectorIndex": 2,
+      "XPos": 240,
+      "YPos": 3,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Sync",
+      "ID": 16,
+      "ConnectorIndex": 3,
+      "XPos": 240,
+      "YPos": 45,
+      "CodeRef": 3,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "69": [
+    {
+      "ConnectorName": "Out",
+      "ID": 9,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "71": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "72": [
+    {
+      "ConnectorName": "Out",
+      "ID": 2,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "74": [
+    {
+      "ConnectorName": "Out",
+      "ID": 7,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "75": [
+    {
+      "ConnectorName": "Out",
+      "ID": 7,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "76": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Ctrl",
+      "ID": 3,
+      "ConnectorIndex": 1,
+      "XPos": 4,
+      "YPos": 15,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "78": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 16,
+      "ConnectorIndex": 0,
+      "XPos": 88,
+      "YPos": 33,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 23,
+      "ConnectorIndex": 1,
+      "XPos": 131,
+      "YPos": 33,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out3",
+      "ID": 24,
+      "ConnectorIndex": 2,
+      "XPos": 174,
+      "YPos": 33,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out4",
+      "ID": 25,
+      "ConnectorIndex": 3,
+      "XPos": 217,
+      "YPos": 33,
+      "CodeRef": 3,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out5",
+      "ID": 18,
+      "ConnectorIndex": 4,
+      "XPos": 111,
+      "YPos": 45,
+      "CodeRef": 4,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out6",
+      "ID": 19,
+      "ConnectorIndex": 5,
+      "XPos": 154,
+      "YPos": 45,
+      "CodeRef": 5,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out7",
+      "ID": 20,
+      "ConnectorIndex": 6,
+      "XPos": 197,
+      "YPos": 45,
+      "CodeRef": 6,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out8",
+      "ID": 21,
+      "ConnectorIndex": 7,
+      "XPos": 240,
+      "YPos": 45,
+      "CodeRef": 7,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Ctrl",
+      "ID": 10,
+      "ConnectorIndex": 8,
+      "XPos": 4,
+      "YPos": 45,
+      "CodeRef": 8,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "79": [
+    {
+      "ConnectorName": "Out",
+      "ID": 20,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Ctrl",
+      "ID": 11,
+      "ConnectorIndex": 1,
+      "XPos": 4,
+      "YPos": 30,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "81": [
+    {
+      "ConnectorName": "Out",
+      "ID": 3,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "82": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "83": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "84": [
+    {
+      "ConnectorName": "Env",
+      "ID": 4,
+      "ConnectorIndex": 0,
+      "XPos": 223,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "End",
+      "ID": 13,
+      "ConnectorIndex": 2,
+      "XPos": 205,
+      "YPos": 30,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "85": [
+    {
+      "ConnectorName": "Out",
+      "ID": 9,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Gate",
+      "ID": 12,
+      "ConnectorIndex": 1,
+      "XPos": 181,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "86": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 16,
+      "ConnectorIndex": 0,
+      "XPos": 79,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 33,
+      "ConnectorIndex": 1,
+      "XPos": 102,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out3",
+      "ID": 34,
+      "ConnectorIndex": 2,
+      "XPos": 125,
+      "YPos": 13,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out4",
+      "ID": 35,
+      "ConnectorIndex": 3,
+      "XPos": 148,
+      "YPos": 13,
+      "CodeRef": 3,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out5",
+      "ID": 36,
+      "ConnectorIndex": 4,
+      "XPos": 171,
+      "YPos": 13,
+      "CodeRef": 4,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out6",
+      "ID": 37,
+      "ConnectorIndex": 5,
+      "XPos": 194,
+      "YPos": 13,
+      "CodeRef": 5,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out7",
+      "ID": 38,
+      "ConnectorIndex": 6,
+      "XPos": 217,
+      "YPos": 13,
+      "CodeRef": 6,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out8",
+      "ID": 39,
+      "ConnectorIndex": 7,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 7,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "87": [
+    {
+      "ConnectorName": "Out",
+      "ID": 10,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "88": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 8,
+      "ConnectorIndex": 0,
+      "XPos": 88,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 11,
+      "ConnectorIndex": 1,
+      "XPos": 131,
+      "YPos": 30,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out3",
+      "ID": 12,
+      "ConnectorIndex": 2,
+      "XPos": 174,
+      "YPos": 30,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out4",
+      "ID": 1,
+      "ConnectorIndex": 3,
+      "XPos": 217,
+      "YPos": 30,
+      "CodeRef": 3,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Ctrl",
+      "ID": 0,
+      "ConnectorIndex": 4,
+      "XPos": 4,
+      "YPos": 30,
+      "CodeRef": 4,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "89": [
+    {
+      "ConnectorName": "Out",
+      "ID": 5,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "90": [
+    {
+      "ConnectorName": "Out2",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out1",
+      "ID": 0,
+      "ConnectorIndex": 1,
+      "XPos": 210,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Ctrl",
+      "ID": 3,
+      "ConnectorIndex": 2,
+      "XPos": 4,
+      "YPos": 15,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "91": [
+    {
+      "ConnectorName": "NotQ",
+      "ID": 7,
+      "ConnectorIndex": 0,
+      "XPos": 214,
+      "YPos": 15,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Q",
+      "ID": 10,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 5,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "92": [
+    {
+      "ConnectorName": "Out",
+      "ID": 15,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 45,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "94": [
+    {
+      "ConnectorName": "OutL",
+      "ID": 2,
+      "ConnectorIndex": 0,
+      "XPos": 216,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "OutR",
+      "ID": 8,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "96": [
+    {
+      "ConnectorName": "Out",
+      "ID": 7,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 15,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "97": [
+    {
+      "ConnectorName": "Out",
+      "ID": 8,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "98": [
+    {
+      "ConnectorName": "Dn",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 216,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Up",
+      "ID": 0,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "100": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Ctrl",
+      "ID": 2,
+      "ConnectorIndex": 1,
+      "XPos": 4,
+      "YPos": 15,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "102": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 60,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "103": [
+    {
+      "ConnectorName": "Out",
+      "ID": 10,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 45,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "105": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "106": [
+    {
+      "ConnectorName": "Out",
+      "ID": 2,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "108": [
+    {
+      "ConnectorName": "Out",
+      "ID": 25,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 102,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "112": [
+    {
+      "ConnectorName": "Out",
+      "ID": 3,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "113": [
+    {
+      "ConnectorName": "OutL",
+      "ID": 6,
+      "ConnectorIndex": 0,
+      "XPos": 210,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "OutR",
+      "ID": 2,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "114": [
+    {
+      "ConnectorName": "Out",
+      "ID": 2,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "115": [
+    {
+      "ConnectorName": "Level",
+      "ID": 7,
+      "ConnectorIndex": 0,
+      "XPos": 210,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out",
+      "ID": 9,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "116": [
+    {
+      "ConnectorName": "Out",
+      "ID": 16,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "117": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 28,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "118": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "119": [
+    {
+      "ConnectorName": "Env",
+      "ID": 10,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 21,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out",
+      "ID": 8,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 4,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "121": [
+    {
+      "ConnectorName": "Link",
+      "ID": 8,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 26,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Note",
+      "ID": 114,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 104,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Trig",
+      "ID": 58,
+      "ConnectorIndex": 2,
+      "XPos": 240,
+      "YPos": 120,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "123": [
+    {
+      "ConnectorName": "Out",
+      "ID": 12,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 45,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "124": [
+    {
+      "ConnectorName": "Out",
+      "ID": 16,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "125": [
+    {
+      "ConnectorName": "Out",
+      "ID": 3,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "127": [
+    {
+      "ConnectorName": "OutL",
+      "ID": 3,
+      "ConnectorIndex": 0,
+      "XPos": 214,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "OutR",
+      "ID": 0,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "128": [
+    {
+      "ConnectorName": "Min",
+      "ID": 2,
+      "ConnectorIndex": 0,
+      "XPos": 210,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Max",
+      "ID": 3,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "130": [
+    {
+      "ConnectorName": "Out001",
+      "ID": 17,
+      "ConnectorIndex": 0,
+      "XPos": 79,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out002",
+      "ID": 32,
+      "ConnectorIndex": 1,
+      "XPos": 102,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out004",
+      "ID": 35,
+      "ConnectorIndex": 2,
+      "XPos": 125,
+      "YPos": 13,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out008",
+      "ID": 34,
+      "ConnectorIndex": 3,
+      "XPos": 148,
+      "YPos": 13,
+      "CodeRef": 3,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out016",
+      "ID": 37,
+      "ConnectorIndex": 4,
+      "XPos": 171,
+      "YPos": 13,
+      "CodeRef": 4,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out032",
+      "ID": 36,
+      "ConnectorIndex": 5,
+      "XPos": 194,
+      "YPos": 13,
+      "CodeRef": 5,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out064",
+      "ID": 39,
+      "ConnectorIndex": 6,
+      "XPos": 217,
+      "YPos": 13,
+      "CodeRef": 6,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out128",
+      "ID": 38,
+      "ConnectorIndex": 7,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 7,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "131": [
+    {
+      "ConnectorName": "D0",
+      "ID": 17,
+      "ConnectorIndex": 0,
+      "XPos": 79,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "D1",
+      "ID": 32,
+      "ConnectorIndex": 1,
+      "XPos": 102,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "D2",
+      "ID": 35,
+      "ConnectorIndex": 2,
+      "XPos": 125,
+      "YPos": 13,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "D3",
+      "ID": 34,
+      "ConnectorIndex": 3,
+      "XPos": 148,
+      "YPos": 13,
+      "CodeRef": 3,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "D4",
+      "ID": 37,
+      "ConnectorIndex": 4,
+      "XPos": 171,
+      "YPos": 13,
+      "CodeRef": 4,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "D5",
+      "ID": 36,
+      "ConnectorIndex": 5,
+      "XPos": 194,
+      "YPos": 13,
+      "CodeRef": 5,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "D6",
+      "ID": 39,
+      "ConnectorIndex": 6,
+      "XPos": 217,
+      "YPos": 13,
+      "CodeRef": 6,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "D7",
+      "ID": 38,
+      "ConnectorIndex": 7,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 7,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "132": [
+    {
+      "ConnectorName": "Out",
+      "ID": 16,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "134": [
+    {
+      "ConnectorName": "Out",
+      "ID": 11,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "139": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "140": [
+    {
+      "ConnectorName": "OutL",
+      "ID": 28,
+      "ConnectorIndex": 0,
+      "XPos": 223,
+      "YPos": 45,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "OutR",
+      "ID": 13,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 45,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "141": [
+    {
+      "ConnectorName": "Send",
+      "ID": 11,
+      "ConnectorIndex": 0,
+      "XPos": 65,
+      "YPos": 15,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "142": [
+    {
+      "ConnectorName": "Send",
+      "ID": 10,
+      "ConnectorIndex": 0,
+      "XPos": 65,
+      "YPos": 15,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "144": [
+    {
+      "ConnectorName": "Link",
+      "ID": 4,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 27,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Trig1",
+      "ID": 59,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 44,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Trig2",
+      "ID": 60,
+      "ConnectorIndex": 2,
+      "XPos": 240,
+      "YPos": 60,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "145": [
+    {
+      "ConnectorName": "Link",
+      "ID": 8,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 26,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Val",
+      "ID": 114,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 84,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Trig",
+      "ID": 58,
+      "ConnectorIndex": 2,
+      "XPos": 240,
+      "YPos": 105,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "146": [
+    {
+      "ConnectorName": "Link",
+      "ID": 8,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 26,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Val",
+      "ID": 114,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 87,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Trig",
+      "ID": 58,
+      "ConnectorIndex": 2,
+      "XPos": 240,
+      "YPos": 105,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "147": [
+    {
+      "ConnectorName": "Rcv",
+      "ID": 8,
+      "ConnectorIndex": 0,
+      "XPos": 210,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Val",
+      "ID": 2,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "148": [
+    {
+      "ConnectorName": "Gate",
+      "ID": 5,
+      "ConnectorIndex": 0,
+      "XPos": 188,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Vel",
+      "ID": 3,
+      "ConnectorIndex": 1,
+      "XPos": 210,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "RelVel",
+      "ID": 11,
+      "ConnectorIndex": 2,
+      "XPos": 232,
+      "YPos": 13,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "150": [
+    {
+      "ConnectorName": "OutR",
+      "ID": 3,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 60,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "OutL",
+      "ID": 2,
+      "ConnectorIndex": 1,
+      "XPos": 225,
+      "YPos": 60,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "152": [
+    {
+      "ConnectorName": "Out",
+      "ID": 13,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "154": [
+    {
+      "ConnectorName": "Val",
+      "ID": 114,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 86,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Trig",
+      "ID": 58,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 105,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "156": [
+    {
+      "ConnectorName": "Gate",
+      "ID": 6,
+      "ConnectorIndex": 0,
+      "XPos": 172,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Vel",
+      "ID": 4,
+      "ConnectorIndex": 1,
+      "XPos": 202,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "RelVel",
+      "ID": 8,
+      "ConnectorIndex": 2,
+      "XPos": 232,
+      "YPos": 13,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "157": [
+    {
+      "ConnectorName": "Out",
+      "ID": 6,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "158": [
+    {
+      "ConnectorName": "Out",
+      "ID": 8,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "159": [
+    {
+      "ConnectorName": "Out",
+      "ID": 2,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "160": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "161": [
+    {
+      "ConnectorName": "Out",
+      "ID": 25,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 120,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "162": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 45,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "163": [
+    {
+      "ConnectorName": "Out",
+      "ID": 17,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 60,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "164": [
+    {
+      "ConnectorName": "Out",
+      "ID": 17,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 60,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "165": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 5,
+      "ConnectorIndex": 0,
+      "XPos": 21,
+      "YPos": 75,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 6,
+      "ConnectorIndex": 1,
+      "XPos": 58,
+      "YPos": 75,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out3",
+      "ID": 7,
+      "ConnectorIndex": 2,
+      "XPos": 95,
+      "YPos": 75,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out4",
+      "ID": 8,
+      "ConnectorIndex": 3,
+      "XPos": 132,
+      "YPos": 75,
+      "CodeRef": 3,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out5",
+      "ID": 9,
+      "ConnectorIndex": 4,
+      "XPos": 169,
+      "YPos": 75,
+      "CodeRef": 4,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out6",
+      "ID": 11,
+      "ConnectorIndex": 5,
+      "XPos": 206,
+      "YPos": 75,
+      "CodeRef": 5,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Main",
+      "ID": 12,
+      "ConnectorIndex": 6,
+      "XPos": 240,
+      "YPos": 75,
+      "CodeRef": 6,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "167": [
+    {
+      "ConnectorName": "Out",
+      "ID": 2,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "169": [
+    {
+      "ConnectorName": "Env",
+      "ID": 13,
+      "ConnectorIndex": 0,
+      "XPos": 223,
+      "YPos": 60,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out",
+      "ID": 10,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 60,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "170": [
+    {
+      "ConnectorName": "OutL",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 214,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "OutR",
+      "ID": 0,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "171": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 6,
+      "ConnectorIndex": 0,
+      "XPos": 162,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 4,
+      "ConnectorIndex": 1,
+      "XPos": 188,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out3",
+      "ID": 1,
+      "ConnectorIndex": 2,
+      "XPos": 214,
+      "YPos": 13,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out4",
+      "ID": 0,
+      "ConnectorIndex": 3,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 3,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "172": [
+    {
+      "ConnectorName": "Out",
+      "ID": 6,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "173": [
+    {
+      "ConnectorName": "Out",
+      "ID": 11,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "174": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 11,
+      "ConnectorIndex": 0,
+      "XPos": 138,
+      "YPos": 29,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 10,
+      "ConnectorIndex": 1,
+      "XPos": 213,
+      "YPos": 29,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "175": [
+    {
+      "ConnectorName": "OutMain",
+      "ID": 26,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 60,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out1",
+      "ID": 6,
+      "ConnectorIndex": 1,
+      "XPos": 74,
+      "YPos": 36,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 10,
+      "ConnectorIndex": 2,
+      "XPos": 122,
+      "YPos": 36,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out3",
+      "ID": 16,
+      "ConnectorIndex": 3,
+      "XPos": 169,
+      "YPos": 36,
+      "CodeRef": 3,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out4",
+      "ID": 22,
+      "ConnectorIndex": 4,
+      "XPos": 216,
+      "YPos": 35,
+      "CodeRef": 4,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "176": [
+    {
+      "ConnectorName": "Out",
+      "ID": 7,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "177": [
+    {
+      "ConnectorName": "Out",
+      "ID": 11,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 45,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "178": [
+    {
+      "ConnectorName": "Out",
+      "ID": 7,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "179": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 3,
+      "ConnectorIndex": 0,
+      "XPos": 100,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 4,
+      "ConnectorIndex": 1,
+      "XPos": 120,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out3",
+      "ID": 5,
+      "ConnectorIndex": 2,
+      "XPos": 140,
+      "YPos": 13,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out4",
+      "ID": 6,
+      "ConnectorIndex": 3,
+      "XPos": 160,
+      "YPos": 13,
+      "CodeRef": 3,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out5",
+      "ID": 7,
+      "ConnectorIndex": 4,
+      "XPos": 180,
+      "YPos": 13,
+      "CodeRef": 4,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out6",
+      "ID": 8,
+      "ConnectorIndex": 5,
+      "XPos": 200,
+      "YPos": 13,
+      "CodeRef": 5,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out7",
+      "ID": 9,
+      "ConnectorIndex": 6,
+      "XPos": 220,
+      "YPos": 13,
+      "CodeRef": 6,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Out8",
+      "ID": 10,
+      "ConnectorIndex": 7,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 7,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "180": [
+    {
+      "ConnectorName": "Out",
+      "ID": 61,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 165,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "181": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 100,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out2",
+      "ID": 2,
+      "ConnectorIndex": 1,
+      "XPos": 120,
+      "YPos": 30,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out3",
+      "ID": 3,
+      "ConnectorIndex": 2,
+      "XPos": 140,
+      "YPos": 30,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out4",
+      "ID": 4,
+      "ConnectorIndex": 3,
+      "XPos": 160,
+      "YPos": 30,
+      "CodeRef": 3,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out5",
+      "ID": 5,
+      "ConnectorIndex": 4,
+      "XPos": 180,
+      "YPos": 30,
+      "CodeRef": 4,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out6",
+      "ID": 6,
+      "ConnectorIndex": 5,
+      "XPos": 200,
+      "YPos": 30,
+      "CodeRef": 5,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out7",
+      "ID": 7,
+      "ConnectorIndex": 6,
+      "XPos": 220,
+      "YPos": 30,
+      "CodeRef": 6,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Out8",
+      "ID": 8,
+      "ConnectorIndex": 7,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 7,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "182": [
+    {
+      "ConnectorName": "OutL",
+      "ID": 12,
+      "ConnectorIndex": 0,
+      "XPos": 220,
+      "YPos": 60,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "OutR",
+      "ID": 13,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 60,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "183": [
+    {
+      "ConnectorName": "Out",
+      "ID": 12,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "184": [
+    {
+      "ConnectorName": "Out",
+      "ID": 13,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "185": [
+    {
+      "ConnectorName": "OutL",
+      "ID": 28,
+      "ConnectorIndex": 0,
+      "XPos": 220,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "OutR",
+      "ID": 13,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "186": [
+    {
+      "ConnectorName": "OutOn",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "OutOff",
+      "ID": 0,
+      "ConnectorIndex": 1,
+      "XPos": 210,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Ctrl",
+      "ID": 3,
+      "ConnectorIndex": 2,
+      "XPos": 4,
+      "YPos": 15,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "187": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Ctrl",
+      "ID": 2,
+      "ConnectorIndex": 1,
+      "XPos": 4,
+      "YPos": 15,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "188": [
+    {
+      "ConnectorName": "Out",
+      "ID": 0,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 10,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "189": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Env",
+      "ID": 8,
+      "ConnectorIndex": 1,
+      "XPos": 223,
+      "YPos": 30,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "190": [
+    {
+      "ConnectorName": "Out",
+      "ID": 6,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 45,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Sync",
+      "ID": 18,
+      "ConnectorIndex": 1,
+      "XPos": 4,
+      "YPos": 45,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "192": [
+    {
+      "ConnectorName": "Out",
+      "ID": 6,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "193": [
+    {
+      "ConnectorName": "Out",
+      "ID": 16,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "194": [
+    {
+      "ConnectorName": "Out",
+      "ID": 11,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "195": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "196": [
+    {
+      "ConnectorName": "Out",
+      "ID": 16,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "197": [
+    {
+      "ConnectorName": "PatchActive",
+      "ID": 3,
+      "ConnectorIndex": 0,
+      "XPos": 107,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "VarActive",
+      "ID": 0,
+      "ConnectorIndex": 1,
+      "XPos": 166,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "VoiceNo",
+      "ID": 5,
+      "ConnectorIndex": 2,
+      "XPos": 225,
+      "YPos": 13,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "198": [
+    {
+      "ConnectorName": "Period",
+      "ID": 6,
+      "ConnectorIndex": 0,
+      "XPos": 173,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    },
+    {
+      "ConnectorName": "Gate",
+      "ID": 3,
+      "ConnectorIndex": 1,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Pitch",
+      "ID": 8,
+      "ConnectorIndex": 2,
+      "XPos": 199,
+      "YPos": 13,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "199": [
+    {
+      "ConnectorName": "Pitch",
+      "ID": 2,
+      "ConnectorIndex": 0,
+      "XPos": 180,
+      "YPos": 13,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Gate",
+      "ID": 1,
+      "ConnectorIndex": 1,
+      "XPos": 210,
+      "YPos": 13,
+      "CodeRef": 1,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btStatic"
+    },
+    {
+      "ConnectorName": "Vel",
+      "ID": 3,
+      "ConnectorIndex": 2,
+      "XPos": 240,
+      "YPos": 13,
+      "CodeRef": 2,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "200": [
+    {
+      "ConnectorName": "Out",
+      "ID": 7,
+      "ConnectorIndex": 0,
+      "XPos": 239,
+      "YPos": 15,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "201": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 239,
+      "YPos": 9,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "202": [
+    {
+      "ConnectorName": "Out",
+      "ID": 8,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "203": [
+    {
+      "ConnectorName": "Out1",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 11,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctAudio",
+      "BandWidth": "btStatic"
+    }
+  ],
+  "204": [
+    {
+      "ConnectorName": "Out",
+      "ID": 3,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 15,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "205": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 239,
+      "YPos": 15,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctLogic",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "206": [
+    {
+      "ConnectorName": "Out",
+      "ID": 1,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btDynamic"
+    }
+  ],
+  "208": [
+    {
+      "ConnectorName": "Out",
+      "ID": 3,
+      "ConnectorIndex": 0,
+      "XPos": 240,
+      "YPos": 30,
+      "CodeRef": 0,
+      "InfoFunc": 0,
+      "ConnectorType": "ctControl",
+      "BandWidth": "btDynamic"
+    }
+  ]
+}

@@ -1,0 +1,317 @@
+// Автоматически сгенерированный модуль: FltPhase
+// Исходный файл: FltPhase.js
+// Версия: 208
+
+export const FltPhaseModule = {
+    type: 'FltPhase',
+        typeID: 102,
+    defaultParams: [0, 64, 0, 64, 2, 64, 1, 127, 0, 0, 0],
+    displayName: 'FltPhase',
+    gridHeight: 5,
+    originalName: 'FltPhase',
+    tooltip: 'Filter Phase',
+    components: [
+        {
+                "componentType": "Graph",
+                "id": "1",
+                "x": 182,
+                "y": 4,
+                "width": 52,
+                "height": 28
+        },
+        {
+                "componentType": "Output",
+                "id": "0",
+                "x": 240,
+                "y": 60,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Input",
+                "id": "2",
+                "x": 240,
+                "y": 4,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "3",
+                "x": 239,
+                "y": 31,
+                "width": 13,
+                "text": "B"
+        },
+        {
+                "componentType": "Line",
+                "id": "4",
+                "x": 245,
+                "y": 12,
+                "length": 54,
+                "orientation": "Vertical"
+        },
+        {
+                "componentType": "Knob",
+                "id": "5",
+                "x": 91,
+                "y": 21,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "6",
+                "x": 81,
+                "y": 59,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Knob",
+                "id": "7",
+                "x": 95,
+                "y": 52,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "8",
+                "x": 86,
+                "y": 62,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "9",
+                "x": 87,
+                "y": 11,
+                "text": "Spread",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextField",
+                "id": "11",
+                "x": 37,
+                "y": 24,
+                "width": 44,
+                "referenceElementId": 12
+        },
+        {
+                "componentType": "Knob",
+                "id": "12",
+                "x": 48,
+                "y": 41,
+                "infoFunc": 39,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "13",
+                "x": 4,
+                "y": 59,
+                "jackType": "control",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Knob",
+                "id": "14",
+                "x": 18,
+                "y": 52,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "15",
+                "x": 9,
+                "y": 62,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "16",
+                "x": 50,
+                "y": 14,
+                "text": "Freq",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextField",
+                "id": "25",
+                "x": 164,
+                "y": 57,
+                "width": 17,
+                "referenceElementId": 4
+        },
+        {
+                "componentType": "ButtonIncDec",
+                "id": "26",
+                "x": 184,
+                "y": 50,
+                "infoFunc": 2
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "27",
+                "x": 157,
+                "y": 47,
+                "text": "Notch",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Knob",
+                "id": "28",
+                "x": 125,
+                "y": 15,
+                "infoFunc": 17,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "29",
+                "x": 130,
+                "y": 6,
+                "text": "FB",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Knob",
+                "id": "30",
+                "x": 203,
+                "y": 52,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "MiniVU",
+                "id": "31",
+                "x": 227,
+                "y": 55,
+                "width": 6,
+                "height": 15,
+                "orientation": "vertical"
+        },
+        {
+                "componentType": "Input",
+                "id": "10",
+                "x": 122,
+                "y": 59,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Knob",
+                "id": "19",
+                "x": 136,
+                "y": 52,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "20",
+                "x": 124,
+                "y": 62,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Input",
+                "id": "22",
+                "x": 4,
+                "y": 43,
+                "jackType": "control",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "21",
+                "x": 149,
+                "y": 20,
+                "width": 30,
+                "height": 12,
+                "labels": [
+                        "Notch",
+                        "Peak",
+                        "Deep"
+                ]
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "23",
+                "x": 153,
+                "y": 10,
+                "text": "Type",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "17",
+                "x": 17,
+                "y": 43,
+                "text": "Pitch",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "18",
+                "x": 4,
+                "y": 25,
+                "width": 25,
+                "height": 12,
+                "labels": [
+                        "Off",
+                        "25%",
+                        "50%",
+                        "75%",
+                        "100%"
+                ]
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "24",
+                "x": 9,
+                "y": 15,
+                "text": "KBT",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "32",
+                "x": 200,
+                "y": 42,
+                "text": "Level",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "33",
+                "x": 80,
+                "y": 49,
+                "text": "Spr",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "34",
+                "x": 121,
+                "y": 49,
+                "text": "FB",
+                "fontSize": 9,
+                "color": "#ffffff"
+        }
+]
+};

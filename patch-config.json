@@ -1,0 +1,266 @@
+{
+  "patches": {
+    "Clip": [
+      {
+        "componentType": "TextField",
+        "componentId": "3",
+        "changes": {
+          "referenceElementId": 5,
+          "format": "integer"
+        }
+      }
+    ],
+    "CtrlSend": [
+      {
+        "componentType": "TextField",
+        "componentId": "3",
+        "changes": {
+          "referenceElementId": 4,
+          "format": "integer"
+        }
+      },
+      {
+        "componentType": "TextField",
+        "componentId": "2",
+        "changes": {
+          "referenceElementId": 0,
+          "format": "integer"
+        }
+      },
+      {
+        "componentType": "TextField",
+        "componentId": "0",
+        "changes": {
+          "referenceElementId": 0,
+          "format": "integer"
+        }
+      }
+    ],
+    "DelayA": [
+      {
+        "componentType": "TextField",
+        "componentId": "14",
+        "changes": {
+          "referenceElementId": 2,
+          "format": "integer"
+        }
+      }
+    ],
+    "DelayB": [
+      {
+        "componentType": "TextField",
+        "componentId": "14",
+        "changes": {
+          "referenceElementId": 6,
+          "format": "integer"
+        }
+      }
+    ],
+    "DelayDual": [
+      {
+        "componentType": "TextField",
+        "componentId": "6",
+        "changes": {
+          "referenceElementId": 3,
+          "format": "integer"
+        }
+      },
+      {
+        "componentType": "TextField",
+        "componentId": "21",
+        "changes": {
+          "referenceElementId": 16,
+          "format": "integer"
+        }
+      }
+    ],
+    "DelayQuad": [
+      {
+        "componentType": "TextField",
+        "componentId": "5",
+        "changes": {
+          "referenceElementId": 4,
+          "format": "integer"
+        }
+      },
+      {
+        "componentType": "TextField",
+        "componentId": "9",
+        "changes": {
+          "referenceElementId": 8,
+          "format": "integer"
+        }
+      },
+      {
+        "componentType": "TextField",
+        "componentId": "15",
+        "changes": {
+          "referenceElementId": 14,
+          "format": "integer"
+        }
+      },
+      {
+        "componentType": "TextField",
+        "componentId": "21",
+        "changes": {
+          "referenceElementId": 20,
+          "format": "integer"
+        }
+      }
+    ],
+    "DlySingleA": [
+      {
+        "componentType": "TextField",
+        "componentId": "4",
+        "changes": {
+          "referenceElementId": 3,
+          "format": "integer"
+        }
+      }
+    ],
+    "DlySingleB": [
+      {
+        "componentType": "TextField",
+        "componentId": "7",
+        "changes": {
+          "referenceElementId": 2,
+          "format": "integer"
+        }
+      }
+    ],
+    "DlyEight": [
+      {
+        "componentType": "TextField",
+        "componentId": "11",
+        "changes": {
+          "referenceElementId": 10,
+          "format": "integer"
+        }
+      }
+    ],
+
+    "LevAdd": [
+      {
+        "componentType": "TextField", 
+        "componentId": "5",
+        "changes": {
+          "format": "integer"
+        }
+      }
+    ],
+    "NoteSend": [
+      {
+        "componentType": "TextField",
+        "componentId": "1",
+        "changes": {
+          "referenceElementId": 0,
+          "format": "integer"
+        }
+      },
+      {
+        "componentType": "TextField",
+        "componentId": "2",
+        "changes": {
+          "referenceElementId": 3,
+          "format": "integer"
+        }
+      },
+      {
+        "componentType": "TextField",
+        "componentId": "0",
+        "changes": {
+          "referenceElementId": 6,
+          "format": "integer"
+        }
+      }
+    ],
+    "PCSend": [
+      {
+        "componentType": "TextField", 
+        "componentId": "2",
+        "changes": {
+          "referenceElementId": 5,
+          "format": "integer"
+        }
+      },
+      {
+        "componentType": "TextField", 
+        "componentId": "1",
+        "changes": {
+          "referenceElementId": 0,
+          "format": "integer"
+        }
+      }
+    ],
+    "Pulse": [
+      {
+        "componentType": "TextField",
+        "componentId": "5",
+        "changes": {
+          "referenceElementId": 4,
+          "format": "integer"
+        }
+      }
+    ],
+    "RandomA": [
+      {
+        "componentType": "TextField",
+        "componentId": "2",
+        "changes": {
+          "referenceElementId": 3,
+          "format": "integer"
+        }
+      }
+    ],
+    "RandomB": [
+      {
+        "componentType": "TextField",
+        "componentId": "10",
+        "changes": {
+          "referenceElementId": 4,
+          "format": "integer"
+        }
+      }
+    ],
+    "RndClkA": [
+      {
+        "componentType": "TextField",
+        "componentId": "11",
+        "changes": {
+          "referenceElementId": 2,
+          "format": "integer"
+        }
+      }
+    ],
+    "RndClkB": [
+      {
+        "componentType": "TextField",
+        "componentId": "18",
+        "changes": {
+          "referenceElementId": 3,
+          "format": "integer"
+        }
+      }
+    ],
+    "RndPattern": [
+      {
+        "componentType": "TextField",
+        "componentId": "25",
+        "changes": {
+          "referenceElementId": 7,
+          "format": "integer"
+        }
+      }
+    ],
+    "RndTrig": [
+      {
+        "componentType": "TextField",
+        "componentId": "18",
+        "changes": {
+          "referenceElementId": 3,
+          "format": "integer"
+        }
+      }
+    ]
+  }
+}

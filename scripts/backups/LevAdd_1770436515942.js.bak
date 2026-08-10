@@ -1,0 +1,99 @@
+// Автоматически сгенерированный модуль: LevAdd
+// Исходный файл: LevAdd.js
+// Версия: 206
+
+export const LevAddModule = {
+    type: 'LevAdd',
+        typeID: 112,
+    displayName: 'LevAdd',
+    gridHeight: 2,
+    originalName: 'LevAdd',
+    tooltip: 'Level Add',
+    components: [
+        {
+                "componentType": "Knob",
+                "id": "0",
+                "x": 142,
+                "y": 5,
+                "infoFunc": 16,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "1",
+                "x": 210,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "3",
+                "x": 240,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextField",
+                "id": "5",
+                "x": 167,
+                "y": 10,
+                "width": 28,
+                "referenceElementId": 0
+        },
+        {
+                "componentType": "Line",
+                "id": "7",
+                "x": 181,
+                "y": 5,
+                "length": 50,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Line",
+                "id": "6",
+                "x": 180,
+                "y": 5,
+                "length": 10,
+                "orientation": "Vertical"
+        },
+        {
+                "componentType": "SVG",
+                "id": "2",
+                "x": 219,
+                "y": 8,
+                "width": 19,
+                "height": 17,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Line",
+                "id": "8",
+                "x": 230,
+                "y": 6,
+                "length": 4,
+                "orientation": "Vertical"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "9",
+                "x": 54,
+                "y": 14,
+                "width": 23,
+                "height": 12,
+                "labels": [
+                        "BiP",
+                        "Uni"
+                ]
+        },
+        {
+                "componentType": "Line",
+                "id": "4",
+                "x": 235,
+                "y": 18,
+                "length": 10,
+                "orientation": "Horizontal"
+        }
+]
+};

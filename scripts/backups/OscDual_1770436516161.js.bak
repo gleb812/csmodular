@@ -1,0 +1,367 @@
+// Автоматически сгенерированный модуль: OscDual
+// Исходный файл: OscDual.js
+// Версия: 206
+
+export const OscDualModule = {
+    type: 'OscDual',
+        typeID: 164,
+    displayName: 'OscDual',
+    gridHeight: 5,
+    originalName: 'OscDual',
+    tooltip: 'Osc Dual',
+    components: [
+        {
+                "componentType": "Input",
+                "id": "0",
+                "x": 4,
+                "y": 17,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Input",
+                "id": "1",
+                "x": 4,
+                "y": 43,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Input",
+                "id": "2",
+                "x": 4,
+                "y": 59,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Knob",
+                "id": "3",
+                "x": 18,
+                "y": 52,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "4",
+                "x": 8,
+                "y": 62,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Knob",
+                "id": "12",
+                "x": 161,
+                "y": 50,
+                "infoFunc": 185,
+                "size": "medium"
+        },
+        {
+                "componentType": "Output",
+                "id": "17",
+                "x": 240,
+                "y": 60,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "18",
+                "x": 224,
+                "y": 59,
+                "width": 13,
+                "text": "M"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "19",
+                "x": 17,
+                "y": 18,
+                "text": "↑",
+                "fontSize": 10,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Trig 1",
+                "width": 9
+        },
+        {
+                "componentType": "TextField",
+                "id": "20",
+                "x": 48,
+                "y": 17,
+                "width": 50,
+                "referenceElementId": 5
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "21",
+                "x": 48,
+                "y": 34,
+                "width": 30,
+                "height": 12,
+                "labels": [
+                        "Semi",
+                        "Freq",
+                        "Fac",
+                        "Part"
+                ]
+        },
+        {
+                "componentType": "Knob",
+                "id": "5",
+                "x": 50,
+                "y": 48,
+                "infoFunc": 61,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "6",
+                "x": 78,
+                "y": 44,
+                "infoFunc": 59,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "23",
+                "x": 79,
+                "y": 36,
+                "text": "Cent",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "22",
+                "x": 17,
+                "y": 43,
+                "text": "Pitch",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "24",
+                "x": 22,
+                "y": 19,
+                "text": "Sync",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "7",
+                "x": 124,
+                "y": 22,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Knob",
+                "id": "8",
+                "x": 138,
+                "y": 15,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "9",
+                "x": 127,
+                "y": 25,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "25",
+                "x": 163,
+                "y": 4,
+                "text": "PW",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Knob",
+                "id": "10",
+                "x": 189,
+                "y": 13,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "16",
+                "x": 189,
+                "y": 50,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "26",
+                "x": 225,
+                "y": 13,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "27",
+                "x": 222,
+                "y": 4,
+                "text": "Sub",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Line",
+                "id": "28",
+                "x": 123,
+                "y": 38,
+                "length": 93,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "13",
+                "x": 158,
+                "y": 41,
+                "text": "Phase",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Line",
+                "id": "14",
+                "x": 216,
+                "y": 18,
+                "length": 40,
+                "orientation": "Vertical"
+        },
+        {
+                "componentType": "Input",
+                "id": "15",
+                "x": 124,
+                "y": 59,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Knob",
+                "id": "29",
+                "x": 138,
+                "y": 52,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "30",
+                "x": 126,
+                "y": 62,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Knob",
+                "id": "32",
+                "x": 161,
+                "y": 13,
+                "infoFunc": 126,
+                "size": "medium"
+        },
+        {
+                "componentType": "SVG",
+                "id": "33",
+                "x": 201,
+                "y": 39,
+                "width": 14,
+                "height": 11,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "SVG",
+                "id": "34",
+                "x": 201,
+                "y": 2,
+                "width": 14,
+                "height": 11,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "SVG",
+                "id": "35",
+                "x": 237,
+                "y": 2,
+                "width": 14,
+                "height": 11,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "36",
+                "x": 187,
+                "y": 4,
+                "text": "Lvl",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "37",
+                "x": 187,
+                "y": 41,
+                "text": "Lvl",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "38",
+                "x": 101,
+                "y": 42,
+                "width": 20,
+                "height": 12,
+                "labels": [
+                        "Off",
+                        "On"
+                ]
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "11",
+                "x": 103,
+                "y": 33,
+                "text": "KBT",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "39",
+                "x": 226,
+                "y": 45,
+                "width": 20,
+                "height": 12,
+                "labels": [
+                        "Off",
+                        "On"
+                ]
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "31",
+                "x": 227,
+                "y": 36,
+                "text": "Soft",
+                "fontSize": 9,
+                "color": "#ffffff"
+        }
+]
+};

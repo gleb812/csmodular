@@ -1,0 +1,33 @@
+;@ map DLY500
+;@ map CLA001
+;@ map FLTfrq
+
+;@ ins a
+;@ outs a
+opcode DelayA, 0, kkkkkkkk
+	kTime, kFB, kFilter, kDW, kOn, kRange, kIn, kOut xin
+; TODO check filter values
+	ain zar kIn
+
+	if kRange == 0 then
+    kTime table kTime, giDLY500
+  elseif kRange == 1 then
+    kTime table kTime, giDLY_1s
+  elseif kRange == 2 then
+    kTime table kTime, giDLY_2s
+  elseif kRange == 3 then
+    kTime table kTime, giDLY2p7
+	endif
+
+	kFdbk table kFB, giCLA001
+	kDW table kDW, giCLA001
+	kFilter table kFilter, giFLTfrq
+
+	abuf delayr 2.7 ;max time
+	atap deltapi kTime
+	delayw ain+atap*kFdbk
+
+	atap tone atap, kFilter
+
+	zaw atap*kDW+ain*(1-kDW), kOut
+endop

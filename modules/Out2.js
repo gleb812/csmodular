@@ -1,0 +1,142 @@
+// Автоматически сгенерированный модуль: Out2
+// Исходный файл: Out2.js
+// Версия: 210
+
+export const Out2Module = {
+    type: 'Out2',
+        typeID: 4,
+    defaultParams: [0, 1, 0],
+    displayName: '2-Out',
+    gridHeight: 2,
+    originalName: '2-Out',
+    tooltip: '2 Outputs',
+    components: [
+        {
+                "componentType": "ButtonRadio",
+                "id": "0",
+                "x": 78,
+                "y": 12,
+                "buttonWidth": 18,
+                "buttonCount": 6,
+                "orientation": "horizontal",
+                "labels": [
+                        "1/2",
+                        "3/4",
+                        "1/2",
+                        "3/4",
+                        "1/2",
+                        "3/4"
+                ]
+        },
+        {
+                "componentType": "Input",
+                "id": "1",
+                "x": 240,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Input",
+                "id": "2",
+                "x": 214,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "3",
+                "x": 217,
+                "y": 3,
+                "text": "L",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "4",
+                "x": 243,
+                "y": 3,
+                "text": "R",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "5",
+                "x": 124,
+                "y": 2,
+                "text": "Fx",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "6",
+                "x": 155,
+                "y": 2,
+                "text": "Bus",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "7",
+                "x": 88,
+                "y": 2,
+                "text": "Out",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "8",
+                "x": 190,
+                "y": 14,
+                "width": 13,
+                "text": "M"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "10",
+                "x": 5,
+                "y": 16,
+                "text": "Pad",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "12",
+                "x": 23,
+                "y": 14,
+                "width": 30,
+                "height": 12,
+                "labels": [
+                        "0dB",
+                        "+6dB",
+                        "+12dB",
+                        "+18dB"
+                ]
+        },
+        {
+                "componentType": "MiniVU",
+                "id": "9",
+                "x": 205,
+                "y": 10,
+                "width": 6,
+                "height": 15,
+                "orientation": "vertical"
+        },
+        {
+                "componentType": "MiniVU",
+                "id": "11",
+                "x": 231,
+                "y": 10,
+                "width": 6,
+                "height": 15,
+                "orientation": "vertical"
+        }
+]
+};

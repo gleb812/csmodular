@@ -1,0 +1,56 @@
+// Автоматически сгенерированный модуль: Rect
+// Исходный файл: Rect.js
+// Версия: 208
+
+export const RectModule = {
+    type: 'Rect',
+        typeID: 82,
+    defaultParams: [0, 1],
+    displayName: 'Rect',
+    gridHeight: 2,
+    originalName: 'Rect',
+    tooltip: 'Rectifier',
+    components: [
+        {
+                "componentType": "Input",
+                "id": "0",
+                "x": 210,
+                "y": 11,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "1",
+                "x": 240,
+                "y": 11,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "2",
+                "x": 224,
+                "y": 10,
+                "width": 13,
+                "text": "B"
+        },
+        {
+                "componentType": "Line",
+                "id": "3",
+                "x": 212,
+                "y": 16,
+                "length": 36,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "ButtonRadio",
+                "id": "4",
+                "x": 96,
+                "y": 8,
+                "buttonWidth": 22,
+                "buttonCount": 4,
+                "orientation": "horizontal"
+        }
+]
+};

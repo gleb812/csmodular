@@ -1,0 +1,37 @@
+;@ ins k
+;@ outs k
+
+opcode  Rect, 0, kkkk
+  kmode, kOn, kin, kout xin
+  ko zkr kin
+  if (kmode == 0) then
+  	ko limit ko, 0, 4   ; CHECK if Rect has built-in limiter and adjust lev here
+  elseif (kmode == 1) then
+  	ko limit ko, -4, 0
+  elseif (kmode == 2) then
+  	ko = abs(ko)
+  elseif (kmode == 3) then
+  	ko = -abs(ko)
+  endif
+  zkw ko * kOn, kout
+endop
+
+;@ ins a
+;@ outs a
+
+opcode  Rect, 0, kkkk
+  kmode, kOn, kin, kout xin
+  setksmps 1
+  ao zar kin
+  ko = k(ao)
+  if (kmode == 0) then
+  	ko limit ko, 0, 4   ; CHECK if Rect has built-in limiter and adjust lev here
+  elseif (kmode == 1) then
+  	ko limit ko, -4, 0
+  elseif (kmode == 2) then
+  	ko = abs(ko)
+  elseif (kmode == 3) then
+  	ko = -abs(ko)
+  endif
+  zaw a(ko) * kOn, kout
+endop

@@ -1,0 +1,100 @@
+// Автоматически сгенерированный модуль: Mix21A
+// Исходный файл: Mix21A.js
+// Версия: 206
+
+export const Mix21AModule = {
+    type: 'Mix21A',
+        typeID: 194,
+    displayName: 'Mix2-1A',
+    gridHeight: 2,
+    originalName: 'Mix2-1A',
+    tooltip: 'Mixer 2-1 A',
+    components: [
+        {
+                "componentType": "Input",
+                "id": "0",
+                "x": 4,
+                "y": 15,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "1",
+                "x": 18,
+                "y": 17,
+                "text": "Chain",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "4",
+                "x": 120,
+                "y": 11,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Knob",
+                "id": "5",
+                "x": 134,
+                "y": 5,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "8",
+                "x": 202,
+                "y": 11,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Knob",
+                "id": "9",
+                "x": 216,
+                "y": 5,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Output",
+                "id": "11",
+                "x": 240,
+                "y": 11,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextEdit",
+                "id": "3",
+                "x": 77,
+                "y": 8,
+                "width": 40,
+                "text": "Ch 1"
+        },
+        {
+                "componentType": "TextEdit",
+                "id": "6",
+                "x": 159,
+                "y": 8,
+                "width": 40,
+                "text": "Ch 2"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "2",
+                "x": 43,
+                "y": 14,
+                "width": 30,
+                "height": 12,
+                "labels": [
+                        "Exp",
+                        "Lin",
+                        "dB"
+                ]
+        }
+]
+};

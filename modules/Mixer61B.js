@@ -1,0 +1,267 @@
+// Автоматически сгенерированный модуль: Mixer61B
+// Исходный файл: Mixer61B.js
+// Версия: 206
+
+export const Mixer61BModule = {
+    type: 'Mixer6-1B',
+        typeID: 0,
+    displayName: 'Mixer6-1B',
+    gridHeight: 4,
+    originalName: 'Mixer6-1B',
+    tooltip: 'Mixer 6-1B',
+    components: [
+        {
+                "componentType": "ButtonText",
+                "id": "1",
+                "x": 42,
+                "y": 43,
+                "width": 30,
+                "text": "-6dB"
+        },
+        {
+                "componentType": "Input",
+                "id": "2",
+                "x": 86,
+                "y": 4,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Knob",
+                "id": "3",
+                "x": 80,
+                "y": 34,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "4",
+                "x": 81,
+                "y": 6,
+                "text": "1",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "5",
+                "x": 112,
+                "y": 4,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Knob",
+                "id": "6",
+                "x": 106,
+                "y": 34,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "7",
+                "x": 106,
+                "y": 6,
+                "text": "2",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "8",
+                "x": 138,
+                "y": 4,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Knob",
+                "id": "9",
+                "x": 132,
+                "y": 34,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "10",
+                "x": 132,
+                "y": 6,
+                "text": "3",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "11",
+                "x": 164,
+                "y": 4,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Knob",
+                "id": "12",
+                "x": 158,
+                "y": 34,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "13",
+                "x": 158,
+                "y": 6,
+                "text": "4",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "14",
+                "x": 190,
+                "y": 4,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Knob",
+                "id": "15",
+                "x": 184,
+                "y": 34,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "16",
+                "x": 184,
+                "y": 6,
+                "text": "5",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "17",
+                "x": 216,
+                "y": 4,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Knob",
+                "id": "18",
+                "x": 210,
+                "y": 34,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "19",
+                "x": 210,
+                "y": 6,
+                "text": "6",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Output",
+                "id": "20",
+                "x": 239,
+                "y": 42,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "MiniVU",
+                "id": "21",
+                "x": 243,
+                "y": 25,
+                "width": 6,
+                "height": 15,
+                "orientation": "vertical"
+        },
+        {
+                "componentType": "Input",
+                "id": "22",
+                "x": 4,
+                "y": 43,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "23",
+                "x": 3,
+                "y": 34,
+                "text": "Chain",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextField",
+                "id": "24",
+                "x": 80,
+                "y": 18,
+                "width": 21,
+                "referenceElementId": 3
+        },
+        {
+                "componentType": "TextField",
+                "id": "25",
+                "x": 106,
+                "y": 18,
+                "width": 21,
+                "referenceElementId": 6
+        },
+        {
+                "componentType": "TextField",
+                "id": "26",
+                "x": 132,
+                "y": 18,
+                "width": 21,
+                "referenceElementId": 9
+        },
+        {
+                "componentType": "TextField",
+                "id": "27",
+                "x": 158,
+                "y": 18,
+                "width": 21,
+                "referenceElementId": 12
+        },
+        {
+                "componentType": "TextField",
+                "id": "28",
+                "x": 184,
+                "y": 18,
+                "width": 21,
+                "referenceElementId": 15
+        },
+        {
+                "componentType": "TextField",
+                "id": "29",
+                "x": 210,
+                "y": 18,
+                "width": 21,
+                "referenceElementId": 18
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "0",
+                "x": 42,
+                "y": 27,
+                "width": 30,
+                "height": 12,
+                "labels": [
+                        "Exp",
+                        "Lin",
+                        "dB"
+                ]
+        }
+]
+};

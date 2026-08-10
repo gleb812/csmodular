@@ -1,0 +1,182 @@
+// Автоматически сгенерированный модуль: PolarPan
+// Исходный файл: PolarPan.js
+// Версия: 208
+
+export const PolarPanModule = {
+    type: 'PolarPan',
+        typeID: 0,
+    displayName: 'PolarPan',
+    gridHeight: 3,
+    originalName: 'PolarPan',
+    tooltip: 'Quadraphonic panner',
+    components: [
+        {
+                "componentType": "Input",
+                "id": "1",
+                "x": 70,
+                "y": 25,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Knob",
+                "id": "0",
+                "x": 85,
+                "y": 20,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "3",
+                "x": 75,
+                "y": 29,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Knob",
+                "id": "2",
+                "x": 109,
+                "y": 18,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "4",
+                "x": 143,
+                "y": 25,
+                "jackType": "control",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Knob",
+                "id": "5",
+                "x": 158,
+                "y": 20,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "6",
+                "x": 148,
+                "y": 29,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Knob",
+                "id": "7",
+                "x": 182,
+                "y": 16,
+                "infoFunc": 12,
+                "size": "medium"
+        },
+        {
+                "componentType": "Output",
+                "id": "8",
+                "x": 239,
+                "y": 29,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Output",
+                "id": "9",
+                "x": 214,
+                "y": 29,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Output",
+                "id": "10",
+                "x": 239,
+                "y": 3,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Output",
+                "id": "11",
+                "x": 214,
+                "y": 3,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Input",
+                "id": "12",
+                "x": 227,
+                "y": 16,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "13",
+                "x": 79,
+                "y": 6,
+                "text": "Separation",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "14",
+                "x": 155,
+                "y": 6,
+                "text": "Angle",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Stub",
+                "id": "15",
+                "x": 140,
+                "y": 3,
+                "width": 20,
+                "height": 20,
+                "originalType": "Frame",
+                "color": "#ff0000"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "16",
+                "x": 183,
+                "y": 6,
+                "text": "",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "SVG",
+                "id": "17",
+                "x": 214,
+                "y": 4,
+                "width": 19,
+                "height": 36,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "SVG",
+                "id": "18",
+                "x": 233,
+                "y": 4,
+                "width": 17,
+                "height": 36,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "SVG",
+                "id": "19",
+                "x": 190,
+                "y": 5,
+                "width": 11,
+                "height": 9,
+                "color": "#ffffff"
+        }
+]
+};

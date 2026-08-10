@@ -1,0 +1,56 @@
+;@ map AMPEXP CLA001
+;@ map BUT003
+
+;@ ins k k k k k
+;@ outs k
+opcode Mix41B, 0, kkkkkkkkkkk
+kLev1,kLev2,kLev3,kLev4,kExpLin,kI1,kI2,kI3,kI4,kCh,kOut  xin
+	k1 zkr kI1
+	k2 zkr kI2
+	k3 zkr kI3
+	k4 zkr kI4
+	k5 zkr kCh
+
+	if kExpLin == 1 goto Out
+    kLev1 table kLev1, giAMPEXP
+    kLev2 table kLev2, giAMPEXP
+		kLev3 table kLev3, giAMPEXP
+		kLev4 table kLev4, giAMPEXP
+		goto Next
+  Out:
+	kLev1 table kLev1, giCLA001
+	kLev2 table kLev2, giCLA001
+	kLev3 table kLev3, giCLA001
+	kLev4 table kLev4, giCLA001
+	Next:
+	kout = k1*kLev1 + k2*kLev2 + k3*kLev3 + k4*kLev4 + k5
+	kout limit kout, -4, 4
+	zkw kout, kOut
+endop
+
+;@ ins a a a a a
+;@ outs a
+opcode Mix41B, 0, kkkkkkkkkkk
+kLev1,kLev2,kLev3,kLev4,kExpLin,kI1,kI2,kI3,kI4,kCh,kOut  xin
+	a1 zar kI1
+	a2 zar kI2
+	a3 zar kI3
+	a4 zar kI4
+	a5 zar kCh
+
+	if kExpLin == 1 goto Out
+		kLev1 table kLev1, giAMPEXP
+		kLev2 table kLev2, giAMPEXP
+		kLev3 table kLev3, giAMPEXP
+		kLev4 table kLev4, giAMPEXP
+		goto Next
+  Out:
+	kLev1 table kLev1, giCLA001
+	kLev2 table kLev2, giCLA001
+	kLev3 table kLev3, giCLA001
+	kLev4 table kLev4, giCLA001
+	Next:
+	aout = a1*kLev1 + a2*kLev2 + a3*kLev3 + a4*kLev4 + a5
+	aout limit aout, -4, 4
+	zaw aout, kOut
+endop

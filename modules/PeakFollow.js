@@ -1,0 +1,91 @@
+// Автоматически сгенерированный модуль: PeakFollow
+// Исходный файл: PeakFollow.js
+// Версия: 224
+
+export const PeakFollowModule = {
+    type: 'PeakFollow',
+        typeID: 0,
+    displayName: 'PeakFollow',
+    gridHeight: 2,
+    originalName: 'PeakFollow',
+    tooltip: 'Peak follower',
+    components: [
+        {
+                "componentType": "ButtonRadio",
+                "id": "0",
+                "x": 52,
+                "y": 14,
+                "buttonWidth": 27,
+                "buttonCount": 2,
+                "orientation": "horizontal",
+                "labels": [
+                        "Pos",
+                        "Neg"
+                ]
+        },
+        {
+                "componentType": "Knob",
+                "id": "1",
+                "x": 135,
+                "y": 5,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextField",
+                "id": "2",
+                "x": 161,
+                "y": 12,
+                "width": 40,
+                "referenceElementId": 1
+        },
+        {
+                "componentType": "Input",
+                "id": "3",
+                "x": 208,
+                "y": 14,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "4",
+                "x": 239,
+                "y": 14,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "5",
+                "x": 213,
+                "y": 15,
+                "text": "↑",
+                "fontSize": 11,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Box",
+                "width": 102
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "6",
+                "x": 27,
+                "y": 16,
+                "text": "Mode",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "7",
+                "x": 165,
+                "y": 3,
+                "text": "Decay",
+                "fontSize": 9,
+                "color": "#ffffff"
+        }
+]
+};
