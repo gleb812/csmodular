@@ -1,4 +1,3 @@
-```markdown
 # Csound Modular Synthesizer
 
 A web-based modular synthesizer built with Csound, Flask, and vanilla JavaScript + Canvas.
@@ -55,7 +54,7 @@ Start both backend and frontend:
 npm run dev:full
 ```
 
-Open your browser and navigate to: `http://localhost:5173`
+Open your browser and navigate to: `http://localhost:3000`
 
 > **Note:** The Flask API runs on `http://localhost:5000` by default.
 
@@ -137,5 +136,4 @@ MIT License — see the [LICENSE](LICENSE) file for details.
 ## Author
 
 **Gleb Rogozinski** — [GitHub](https://github.com/gleb812)
-```
 
