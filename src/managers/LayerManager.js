@@ -48,6 +48,8 @@ export class LayerManager {
       voice: null,
       fx: null,
     };
+
+    this._gridCacheKey = null;
   }
 
   // === ОСНОВНЫЕ МЕТОДЫ ===
@@ -96,25 +98,59 @@ export class LayerManager {
   }
 
   // 🆕 Метод для получения кеша сетки
-  getGridCache(layerName, offsetX, offsetY, scale) {
-    // Обновляем кеш каждые 30 кадров или при изменении параметров
-    if (
-      !this.gridCache[layerName] ||
-      this.lastGridOffsetX !== offsetX ||
-      this.lastGridOffsetY !== offsetY ||
-      this.lastGridScale !== scale ||
-      this.frameCounter % 30 === 0
-    ) {
-      this.updateGridCache(layerName, offsetX, offsetY, scale);
-      this.lastGridOffsetX = offsetX;
-      this.lastGridOffsetY = offsetY;
-      this.lastGridScale = scale;
-    }
 
-    return this.gridCache[layerName];
+  getGridCache(layerName, offsetX, offsetY, scale) {
+      // Создаем ключ из параметров
+      const key = `${layerName}_${Math.round(offsetX*10)}_${Math.round(offsetY*10)}_${Math.round(scale*100)}`;
+      
+      // Если кеш есть и ключ совпадает - возвращаем существующий
+      if (this.gridCache[layerName] && this._gridCacheKey === key) {
+          return this.gridCache[layerName];
+      }
+      
+      // Иначе обновляем кеш
+      const layer = this.layers[layerName];
+      if (!layer) return null;
+      
+      const cache = document.createElement('canvas');
+      cache.width = this.canvas.width;
+      cache.height = this.canvas.height;
+      const ctx = cache.getContext('2d');
+      
+      ctx.save();
+      ctx.translate(offsetX, offsetY);
+      ctx.scale(scale, scale);
+      
+      ctx.strokeStyle = layerName === 'voice' 
+          ? 'rgba(100, 200, 100, 0.1)' 
+          : 'rgba(200, 100, 100, 0.1)';
+      ctx.lineWidth = 1 / scale;
+      
+      // Вертикальные линии
+      for (let x = 0; x < layer.width; x += GRID_UNITS.X) {
+          ctx.beginPath();
+          ctx.moveTo(layer.x + x, layer.y);
+          ctx.lineTo(layer.x + x, layer.y + layer.totalHeight);
+          ctx.stroke();
+      }
+      
+      // Горизонтальные линии
+      for (let y = 0; y < layer.totalHeight; y += GRID_UNITS.Y) {
+          ctx.beginPath();
+          ctx.moveTo(layer.x, layer.y + y);
+          ctx.lineTo(layer.x + layer.width, layer.y + y);
+          ctx.stroke();
+      }
+      
+      ctx.restore();
+      
+      // Сохраняем в кеш
+      this.gridCache[layerName] = cache;
+      this._gridCacheKey = key;
+      
+      return cache;
   }
 
-  // LayerManager.js - новый метод
   updateBackgroundCache() {
     if (!this.cacheDirty) return;
 
@@ -124,7 +160,7 @@ export class LayerManager {
     voiceCache.height = this.layers.voice.totalHeight;
     const voiceCtx = voiceCache.getContext('2d');
 
-    voiceCtx.fillStyle = 'rgba(75, 80, 75, 0.7)';
+    voiceCtx.fillStyle = 'rgba(75, 80, 75, 1.0)';
     voiceCtx.fillRect(0, 0, voiceCache.width, voiceCache.height);
     this.backgroundCache.voice = voiceCache;
 
@@ -134,7 +170,7 @@ export class LayerManager {
     fxCache.height = this.layers.fx.totalHeight;
     const fxCtx = fxCache.getContext('2d');
 
-    fxCtx.fillStyle = 'rgba(80, 75, 75, 0.7)';
+    fxCtx.fillStyle = 'rgba(80, 75, 75, 1.0)';
     fxCtx.fillRect(0, 0, fxCache.width, fxCache.height);
     this.backgroundCache.fx = fxCache;
 
@@ -194,27 +230,26 @@ export class LayerManager {
   }
 
   // LayerManager.js - updateCanvasSize():
-  // LayerManager.js
   updateCanvasSize() {
     // Используем ФИКСИРОВАННЫЕ размеры canvas
-    const canvasWidth = this.system.baseCanvasWidth || 1800;
-    const canvasHeight = this.system.baseCanvasHeight || 1000;
+    const canvasWidth = this.system.baseCanvasWidth || 1200;
+    const canvasHeight = this.system.baseCanvasHeight || 800;
 
     // UI панель справа (фиксированная ширина)
-    const uiPanelWidth = 250; // пикселей
+    //const uiPanelWidth = 250; // пикселей
 
     // Voice слой
-    this.layers.voice.x = 30; // Отступ от левого края canvas
-    this.layers.voice.y = 30; // Отступ от верхнего края canvas
-    this.layers.voice.width = canvasWidth - uiPanelWidth - 50; // Оставляем место под UI
-    this.layers.voice.visibleHeight = this.divider.y - this.layers.voice.y;
+    this.layers.voice.x = 0; // Отступ от левого края canvas
+    this.layers.voice.y = 0; // Отступ от верхнего края canvas
+    this.layers.voice.width = canvasWidth; // Оставляем место под UI
+    this.layers.voice.visibleHeight = this.divider.y;
     this.layers.voice.totalHeight = 2500;
 
     // FX слой
-    this.layers.fx.x = 30; // ТАКОЙ ЖЕ ОТСТУП
+    this.layers.fx.x = 0; // ТАКОЙ ЖЕ ОТСТУП
     this.layers.fx.y = this.divider.y + 10;
-    this.layers.fx.width = canvasWidth - uiPanelWidth - 50;
-    this.layers.fx.visibleHeight = canvasHeight - this.layers.fx.y - 30;
+    this.layers.fx.width = canvasWidth;
+    this.layers.fx.visibleHeight = canvasHeight - this.layers.fx.y;
     this.layers.fx.totalHeight = 2500;
   }
 

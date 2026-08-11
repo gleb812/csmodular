@@ -203,8 +203,8 @@ export class UIManager {
       user-select: none;
       will-change: transform;
     `;
-    header.textContent = '≡ ПАнель управления';
-    header.title = 'Перетащите для перемещения';
+    header.textContent = '≡ Control Panel';
+    header.title = 'grab to move';
 
     this.container.insertBefore(header, this.container.firstChild);
 
@@ -294,7 +294,7 @@ export class UIManager {
     zoomContainer.style.marginTop = '15px';
 
     zoomContainer.innerHTML = `
-      <div style="margin-bottom: 5px;">Масштаб:</div>
+      <div style="margin-bottom: 5px;">Zoom:</div>
       <div style="display: flex; gap: 5px; margin-bottom: 5px;">
         <button id="zoomOutBtn" style="flex: 1; padding: 8px; background: #444; color: white; border: 1px solid #666; border-radius: 4px; cursor: pointer;">-</button>
         <button id="zoomResetBtn" style="flex: 1; padding: 8px; background: #444; color: white; border: 1px solid #666; border-radius: 4px; cursor: pointer;">100%</button>

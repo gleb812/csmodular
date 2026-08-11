@@ -54,7 +54,7 @@ export class ContextMenu {
         this.menuElement.id = 'context-menu';
         this.menuElement.style.cssText = `
             position: fixed;
-            width: 500px;
+            width: 550px;
             height: 400px;
             background: #1a1a1a;
             border: 1px solid #333;
@@ -250,7 +250,8 @@ export class ContextMenu {
             { text: 'Save', action: 'save-patch' },
             { text: 'Save As', action: 'save-patch-as' },
             { text: 'New', action: 'new-patch' },
-            { text: 'To CSD', action: 'export-csd' } 
+            { text: 'To CSD', action: 'export-csd' },
+            { text: 'About', action: 'about' }  
         ];
         
         const container = document.createElement('div');
@@ -981,13 +982,18 @@ export class ContextMenu {
                 }
                 break;
 
-            case 'export-csd':  // ← НОВЫЙ КЕЙС
+            case 'export-csd': 
                 if (this.system && this.system.csoundGen) {
                     this.system.exportCsd();
                 } else {
                     console.error('❌ csoundGen not available!');
                 }
                 break;
+
+            case 'about': 
+                this.showAboutDialog();
+                break;
+
         }
         
         this.hide();
@@ -1053,4 +1059,88 @@ export class ContextMenu {
         
         document.head.appendChild(style);
     }
+
+
+    showAboutDialog() {
+        // Создаем простой диалог
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 99999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        `;
+        
+        const dialog = document.createElement('div');
+        dialog.style.cssText = `
+            background: #1a1a1a;
+            border: 1px solid #0af;
+            border-radius: 12px;
+            padding: 40px 50px;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.8);
+        `;
+        
+        dialog.innerHTML = `
+            <h1 style="color: #0af; font-size: 28px; margin: 0 0 10px 0; letter-spacing: 2px;">
+                CsModular
+            </h1>
+            <div style="color: #666; font-size: 14px; margin-bottom: 20px;">
+                — Csound Web Inside —
+            </div>
+            <div style="color: #aaa; font-size: 13px; line-height: 1.6; margin-bottom: 30px;">
+                Modular synthesizer environment<br>
+            </div>
+            <div style="color: #555; font-size: 11px; border-top: 1px solid #333; padding-top: 20px; margin-bottom: 20px;">
+                © 2026 Gleb Rogozinski
+            </div>
+            <button id="about-close-btn" style="
+                background: #0af;
+                color: #fff;
+                border: none;
+                padding: 8px 30px;
+                border-radius: 6px;
+                font-size: 14px;
+                cursor: pointer;
+                transition: background 0.2s;
+            ">
+                Close
+            </button>
+        `;
+        
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+        
+        // Закрытие по клику на кнопку или overlay
+        const closeBtn = dialog.querySelector('#about-close-btn');
+        
+        const closeDialog = () => {
+            overlay.remove();
+        };
+        
+        closeBtn.onclick = closeDialog;
+        overlay.onclick = (e) => {
+            if (e.target === overlay) closeDialog();
+        };
+        
+        // Закрытие по Escape
+        const onKeydown = (e) => {
+            if (e.key === 'Escape') {
+                closeDialog();
+                document.removeEventListener('keydown', onKeydown);
+            }
+        };
+        document.addEventListener('keydown', onKeydown);
+    }
+
+
+
 }

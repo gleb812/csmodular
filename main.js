@@ -382,19 +382,19 @@ class ModularSystem {
 
     // 3. ПРИВЯЗКА К ЛЕВОМУ ВЕРХНЕМУ УГЛУ
     this.canvas.style.position = 'fixed';
-    this.canvas.style.left = '20px'; // ← ОТСТУП ОТ ЛЕВОГО КРАЯ
-    this.canvas.style.top = '20px'; // ← ОТСТУП ОТ ВЕРХНЕГО КРАЯ
-    this.canvas.style.right = 'auto';
-    this.canvas.style.bottom = 'auto';
+    this.canvas.style.left = '50%';
+    this.canvas.style.top = '50%';
+    this.canvas.style.transform = 'translate(-50%, -50%)';
+    //this.canvas.style.right = 'auto';
+    //this.canvas.style.bottom = 'auto';
 
     // 4. ФОН И ГРАНИЦА
-    this.canvas.style.backgroundColor = '#111';
-    this.canvas.style.border = '1px solid #333';
+    this.canvas.style.backgroundColor = 'transparent';
+    this.canvas.style.border = 'none';//'1px solid #333';
     this.canvas.style.zIndex = '1';
 
     // 5. НИКАКОГО objectFit, transform, scale!
     this.canvas.style.objectFit = 'none';
-    this.canvas.style.transform = 'none';
 
     // 6. Сохраняем размеры
     this.baseCanvasWidth = FIXED_WIDTH;
@@ -1718,18 +1718,15 @@ class ModularSystem {
       );
     }
 
-    // СЕТКА - используем кеш
-    if (this.frameCount % 3 === 0) {
-      // Каждые 3 кадра
-      const gridCache = this.layerManager.getGridCache(
+    // СЕТКА - используем кеш (всегда, без условий)
+    const gridCache = this.layerManager.getGridCache(
         layerName,
         this.offsetX,
         this.offsetY,
-        this.scale,
-      );
-      if (gridCache) {
+        this.scale
+    );
+    if (gridCache) {
         this.ctx.drawImage(gridCache, 0, 0);
-      }
     }
 
     // Рисуем модули этого слоя с учетом скролла
@@ -2335,30 +2332,6 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('   Stack:', error.stack);
     }
   };
-
-  // Автоматически добавляем кнопку для тестирования
-  setTimeout(() => {
-    const testBtn = document.createElement('button');
-    testBtn.textContent = '🛠️ Debug Load';
-    testBtn.style.cssText = `
-            position: fixed;
-            top: 10px;
-            right: 150px;
-            z-index: 9999;
-            padding: 5px 10px;
-            background: #f0a;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-        `;
-    testBtn.onclick = () => {
-      console.log('=== QUICK DEBUG ===');
-      debugSystem();
-      debugLoadProcess();
-    };
-    document.body.appendChild(testBtn);
-  }, 1000);
 
   window.debugLoadTestPatch = async () => {
     console.log('Loading test patch...');

@@ -20,9 +20,11 @@ body {
 }
 
 #modularCanvas {
-    width: 100%;
-    height: 100%;
-    background: #222;
-    border-radius: 8px;
-    border: 1px solid #333;
+    /* Убираем всё, кроме позиционирования */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    /* НЕТ background, border, border-radius */
 }
