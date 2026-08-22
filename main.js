@@ -65,6 +65,8 @@ endin
 
 class ModularSystem {
   constructor() {
+    this._voiceDirty = true;
+    this._fxDirty = true;
     // Проверяем, не создан ли уже экземпляр
     if (window.modularSystemInstance) {
       console.warn('⚠️ ModularSystem already exists! Reusing...');
@@ -203,6 +205,14 @@ class ModularSystem {
     this.profiler.frameCount = 0;
     this.profiler.lastLogTime = performance.now();
   }
+
+  // Добавь этот метод в класс ModularSystem
+  forceRedraw() {
+      this._forceRedraw = true;
+      this._voiceDirty = true;
+      this._fxDirty = true;
+      this._cablesDirty = true;
+  }  
 
   // logPerformance() {
   //     if (!this.profiler?.enabled) return;
@@ -390,7 +400,7 @@ class ModularSystem {
 
     // 4. ФОН И ГРАНИЦА
     this.canvas.style.backgroundColor = 'transparent';
-    this.canvas.style.border = 'none';//'1px solid #333';
+    this.canvas.style.border = 'none'; //'1px solid #333';
     this.canvas.style.zIndex = '1';
 
     // 5. НИКАКОГО objectFit, transform, scale!
@@ -974,6 +984,12 @@ class ModularSystem {
       console.log(`   Module not found in components array`);
     }
 
+    // ===== ДОБАВИТЬ ЭТОТ БЛОК =====
+    // Устанавливаем dirty-флаги для перерисовки
+    if (module.layer === 'voice') this._voiceDirty = true;
+    else if (module.layer === 'fx') this._fxDirty = true;
+    this._cablesDirty = true; // были удалены кабели
+
     // 4. Обновляем информацию о патче
     this.updatePatchInfo();
 
@@ -1332,103 +1348,101 @@ class ModularSystem {
   }
 
   animate() {
-    const now = performance.now();
+      const now = performance.now();
 
-    // === ПРОСТОЕ ОГРАНИЧЕНИЕ FPS ===
-    if (!this.lastFrameTime) this.lastFrameTime = now;
+      if (!this.lastFrameTime) this.lastFrameTime = now;
+      if (now - this.lastFrameTime < 22) {
+          requestAnimationFrame(() => this.animate());
+          return;
+      }
+      this.lastFrameTime = now;
 
-    // Ограничиваем до 45 FPS (22ms между кадрами)
-    if (now - this.lastFrameTime < 22) {
+      if (!this.profiler) {
+          this.profiler = { enabled: true, marks: {}, times: {}, frameCount: 0, lastLogTime: now };
+      }
+      this.profiler.frameCount = (this.profiler.frameCount || 0) + 1;
+
+      if (typeof this.startMeasure === 'function') this.startMeasure('total');
+
+      this.frameCount++;
+      this.layerManager.frameCounter = this.frameCount;
+
+      // ⚠️ ИЗМЕНЕНИЕ: всегда перерисовываем хотя бы раз в 30 кадров
+      const hasDragging = this.draggingComponent ||
+                          this.patchManager.draggingCable?.isDragging ||
+                          this.layerManager.divider.isDragging;
+
+      // Добавляем флаг, что было перетаскивание и нужна финальная перерисовка
+      if (hasDragging) {
+          this._wasDragging = true;
+      }
+
+      // Перерисовываем если: есть dirty флаги, или перетаскивание, или был драг и нужна финальная отрисовка
+      const needsRedraw = hasDragging ||
+                          this._voiceDirty ||
+                          this._fxDirty ||
+                          this._cablesDirty ||
+                          this._forceRedraw ||  // ← НОВЫЙ ФЛАГ
+                          this.frameCount % 30 === 0;
+
+      if (needsRedraw) {
+          if (typeof this.startMeasure === 'function') this.startMeasure('clear');
+          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+          if (typeof this.endMeasure === 'function') this.endMeasure('clear');
+
+          if (this._voiceDirty || hasDragging || this.frameCount % 30 === 0 || this._forceRedraw) {
+              if (typeof this.startMeasure === 'function') this.startMeasure('drawVoice');
+              this.drawLayer('voice');
+              if (typeof this.endMeasure === 'function') this.endMeasure('drawVoice');
+              this._voiceDirty = false;
+          }
+
+          if (this._fxDirty || hasDragging || this.frameCount % 30 === 0 || this._forceRedraw) {
+              if (typeof this.startMeasure === 'function') this.startMeasure('drawFx');
+              this.drawLayer('fx');
+              if (typeof this.endMeasure === 'function') this.endMeasure('drawFx');
+              this._fxDirty = false;
+          }
+
+          if (typeof this.startMeasure === 'function') this.startMeasure('drawDivider');
+          this.layerManager.drawDivider(this.ctx);
+          if (typeof this.endMeasure === 'function') this.endMeasure('drawDivider');
+
+          if (this.selectedModule) {
+              this.drawModuleSelections();
+          }
+
+          if (this.patchManager.draggingCable?.isDragging) {
+              if (typeof this.startMeasure === 'function') this.startMeasure('drawCables');
+              this.drawDraggingCableIfNeeded();
+              if (typeof this.endMeasure === 'function') this.endMeasure('drawCables');
+          }
+
+          // Сбрасываем forceRedraw после отрисовки
+          if (this._forceRedraw) {
+              this._forceRedraw = false;
+          }
+          if (this._wasDragging && !hasDragging) {
+              this._wasDragging = false;
+          }
+          this._cablesDirty = false;
+      }
+
+      if (typeof this.endMeasure === 'function') this.endMeasure('total');
+
+      if (this.profiler && this.profiler.frameCount % 60 === 0) {
+          if (typeof this.logPerformance === 'function') {
+              this.logPerformance();
+          } else {
+              this.updateFPS(now);
+          }
+      }
+
+      if (this.frameCount % 60 === 0) {
+          this.updateFPS(now);
+      }
+
       requestAnimationFrame(() => this.animate());
-      return;
-    }
-    this.lastFrameTime = now;
-
-    // === БЕЗОПАСНАЯ РАБОТА С ПРОФАЙЛЕРОМ ===
-    // Убеждаемся что profiler существует
-    if (!this.profiler) {
-      this.profiler = {
-        enabled: true,
-        marks: {},
-        times: {},
-        frameCount: 0,
-        lastLogTime: now,
-      };
-    }
-
-    // Увеличиваем счетчик кадров (с проверкой)
-    this.profiler.frameCount = (this.profiler.frameCount || 0) + 1;
-
-    // Начинаем общее измерение
-    if (typeof this.startMeasure === 'function') {
-      this.startMeasure('total');
-    }
-
-    // СЧИТАЕМ FPS
-    this.frameCount++;
-    this.layerManager.frameCounter = this.frameCount;
-
-    // Проверяем, нужно ли перерисовывать
-    const needsRedraw =
-      this.draggingComponent ||
-      this.patchManager.draggingCable?.isDragging ||
-      this.layerManager.divider.isDragging ||
-      this.selectedModule ||
-      this.frameCount % 30 === 0;
-
-    if (needsRedraw) {
-      // Измеряем очистку
-      if (typeof this.startMeasure === 'function') this.startMeasure('clear');
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      if (typeof this.endMeasure === 'function') this.endMeasure('clear');
-
-      // Рисуем слои с измерением
-      if (typeof this.startMeasure === 'function')
-        this.startMeasure('drawVoice');
-      this.drawLayer('voice');
-      if (typeof this.endMeasure === 'function') this.endMeasure('drawVoice');
-
-      if (typeof this.startMeasure === 'function') this.startMeasure('drawFx');
-      this.drawLayer('fx');
-      if (typeof this.endMeasure === 'function') this.endMeasure('drawFx');
-
-      if (typeof this.startMeasure === 'function')
-        this.startMeasure('drawDivider');
-      this.layerManager.drawDivider(this.ctx);
-      if (typeof this.endMeasure === 'function') this.endMeasure('drawDivider');
-
-      if (this.selectedModule) {
-        this.drawModuleSelections();
-      }
-
-      if (this.patchManager.draggingCable?.isDragging) {
-        if (typeof this.startMeasure === 'function')
-          this.startMeasure('drawCables');
-        this.drawDraggingCableIfNeeded();
-        if (typeof this.endMeasure === 'function')
-          this.endMeasure('drawCables');
-      }
-    }
-
-    // Заканчиваем общее измерение
-    if (typeof this.endMeasure === 'function') this.endMeasure('total');
-
-    // Логируем производительность раз в секунду (с проверкой)
-    if (this.profiler && this.profiler.frameCount % 60 === 0) {
-      if (typeof this.logPerformance === 'function') {
-        this.logPerformance();
-      } else {
-        // Fallback если метод не определен
-        this.updateFPS(now);
-      }
-    }
-
-    // Обновляем FPS
-    if (this.frameCount % 60 === 0) {
-      this.updateFPS(now);
-    }
-
-    requestAnimationFrame(() => this.animate());
   }
 
   logPerformance() {
@@ -1603,6 +1617,10 @@ class ModularSystem {
         this.showNotification(
           `✅ ${moduleDef.displayName || moduleType} добавлен в (${gridX}, ${gridY})`,
         );
+        // Устанавливаем dirty-флаги для перерисовки
+        if (layerName === 'voice') this._voiceDirty = true;
+        else this._fxDirty = true;
+        this._cablesDirty = true; // может понадобиться, если модуль имеет выходы/входы
         console.log(`✅ МОДУЛЬ УСПЕШНО ДОБАВЛЕН В (${gridX}, ${gridY})!`);
       }
     } catch (error) {
@@ -1691,13 +1709,18 @@ class ModularSystem {
   }
 
   drawLayer(layerName) {
+    // if (layerName === 'voice' && !this._voiceDirty) {
+    //   // Все равно нужно рисовать фон и сетку? Они кешированы, так что можно пропустить все.
+    //   // Но если dirty false, значит ничего не изменилось, можно полностью пропустить отрисовку слоя.
+    //   return;
+    // }
     const layer = this.layerManager.getLayer(layerName);
     if (!layer) return;
 
     this.ctx.save();
-    this.ctx.beginPath();
-    this.ctx.rect(layer.x, layer.y, layer.width, layer.visibleHeight);
-    this.ctx.clip();
+    // this.ctx.beginPath();
+    // this.ctx.rect(layer.x, layer.y, layer.width, layer.visibleHeight);
+    // this.ctx.clip();
 
     // Фон слоя
     // const bgColor = layerName === 'voice'
@@ -1720,13 +1743,13 @@ class ModularSystem {
 
     // СЕТКА - используем кеш (всегда, без условий)
     const gridCache = this.layerManager.getGridCache(
-        layerName,
-        this.offsetX,
-        this.offsetY,
-        this.scale
+      layerName,
+      this.offsetX,
+      this.offsetY,
+      this.scale,
     );
     if (gridCache) {
-        this.ctx.drawImage(gridCache, 0, 0);
+      this.ctx.drawImage(gridCache, 0, 0);
     }
 
     // Рисуем модули этого слоя с учетом скролла

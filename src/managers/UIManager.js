@@ -37,8 +37,8 @@ export class UIManager {
 
   // === НОВЫЙ МЕТОД: запускает обновления раз в 200 мс ===
   startPeriodicUpdates() {
-    setInterval(() => this.updateBasicInfoIfNeeded(), 200);
-    setInterval(() => this.updateProfilerIfNeeded(), 200);
+    setInterval(() => this.updateBasicInfoIfNeeded(), 500);
+    setInterval(() => this.updateProfilerIfNeeded(), 1000);
   }
 
   // === ОБНОВЛЕНИЕ БАЗОВОЙ ИНФОРМАЦИИ (FPS, модули, кабели) ===

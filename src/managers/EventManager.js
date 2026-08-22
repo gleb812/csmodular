@@ -320,6 +320,11 @@ export class EventManager {
       if (!cableCreated && !endJack) {
         this.system.patchManager.cancelCableDrag();
       }
+
+      if (this.system.forceRedraw) {
+        this.system.forceRedraw();
+      }
+
       e.preventDefault();
       return;
     }
@@ -332,6 +337,11 @@ export class EventManager {
       if (this.system.draggingComponent.endDrag)
         this.system.draggingComponent.endDrag();
       this.system.draggingComponent = null;
+
+      if (this.system.forceRedraw) {
+        this.system.forceRedraw();
+      }
+
       e.preventDefault();
       return;
     }
@@ -344,6 +354,11 @@ export class EventManager {
       if (this.system.draggingComponent.endDrag)
         this.system.draggingComponent.endDrag();
       this.system.draggingComponent = null;
+
+      if (this.system.forceRedraw) {
+        this.system.forceRedraw();
+      }
+
       e.preventDefault();
       return;
     }
@@ -352,6 +367,11 @@ export class EventManager {
     if (this.system.layerManager.divider.isDragging) {
       this.system.layerManager.endDividerDrag();
       this.canvas.style.cursor = 'default';
+
+      if (this.system.forceRedraw) {
+        this.system.forceRedraw();
+      }
+
       e.preventDefault();
       return;
     }
