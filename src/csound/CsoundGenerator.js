@@ -249,9 +249,9 @@ i3 0 [60*60*24*7]
             instanceName,
             instanceId,
             parameters = [],
-            mode = [],           // 👈 ИСПРАВЛЕНО: mode, не modes
+            mode = [],           
             defaultParams = [],
-            defaultMode = [],    // 👈 ИСПРАВЛЕНО: defaultMode, не defaultModes
+            defaultMode = [],    
             inlets,
             outlets
         } = module;
@@ -259,9 +259,9 @@ i3 0 [60*60*24*7]
         console.log('  📦 instanceName:', instanceName);
         console.log('  📦 instanceId:', instanceId);
         console.log('  📦 parameters:', parameters);
-        console.log('  📦 mode:', mode);                    // 👈 ИСПРАВЛЕНО
+        console.log('  📦 mode:', mode);                   
         console.log('  📦 defaultParams:', defaultParams);
-        console.log('  📦 defaultMode:', defaultMode);      // 👈 ИСПРАВЛЕНО
+        console.log('  📦 defaultMode:', defaultMode);      
         console.log('  📦 inlets:', inlets);
         console.log('  📦 outlets:', outlets);
         
@@ -273,13 +273,13 @@ i3 0 [60*60*24*7]
         console.log('  📊 paramsToUse:', paramsToUse);
         
         // Используем реальные моды, если есть, иначе дефолтные
-        const modeToUse = mode.length > 0 ? mode : defaultMode;  // 👈 ИСПРАВЛЕНО
+        const modeToUse = mode.length > 0 ? mode : defaultMode;  
         console.log('  📊 modeToUse:', modeToUse);
         
         // Параметры
         let paramsStr = '0';
         if (paramsToUse.length > 0) {
-            paramsStr = paramsToUse.join(', ');
+            paramsStr = '0,   ' + paramsToUse.join(', ');
         }
         
         // Моды (часто пустые)

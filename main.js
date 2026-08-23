@@ -984,11 +984,14 @@ class ModularSystem {
       console.log(`   Module not found in components array`);
     }
 
-    // ===== ДОБАВИТЬ ЭТОТ БЛОК =====
     // Устанавливаем dirty-флаги для перерисовки
     if (module.layer === 'voice') this._voiceDirty = true;
     else if (module.layer === 'fx') this._fxDirty = true;
     this._cablesDirty = true; // были удалены кабели
+
+    if (this.forceRedraw) {
+        this.forceRedraw();
+    }
 
     // 4. Обновляем информацию о патче
     this.updatePatchInfo();
@@ -1598,7 +1601,10 @@ class ModularSystem {
           instanceId: newModule.jsonId, // уникальный id
           instanceName: newModule.title, // "OscB1"
           layer: layerName, // 'voice' или 'fx'
-          parameters: [0], // пока так
+          parameters: [], // пока так
+          mode: [],
+          defaultParams: moduleDef.defaultParams || [0],
+          defaultMode: moduleDef.mode || [],
           inlets: moduleDef.inputs || 1, // из определения
           outlets: moduleDef.outputs || 1, // из определения
         });

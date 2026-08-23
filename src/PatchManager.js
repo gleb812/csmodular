@@ -211,40 +211,48 @@ export class PatchManager {
   }
 
   removeCable(cable) {
-    const index = this.cables.indexOf(cable);
-    if (index > -1) {
-      // Удаляем ссылки из джеков
-      if (cable.fromJack) {
-        cable.fromJack.removeCable(cable);
-      }
-      if (cable.toJack) {
-        cable.toJack.removeCable(cable);
-      }
+      const index = this.cables.indexOf(cable);
+      if (index > -1) {
+          // Удаляем ссылки из джеков
+          if (cable.fromJack) {
+              cable.fromJack.removeCable(cable);
+          }
+          if (cable.toJack) {
+              cable.toJack.removeCable(cable);
+          }
 
-      // Отключаем кабель
-      cable.disconnect();
-      this.cables.splice(index, 1);
-      // ===== ДОБАВИТЬ =====
-      if (this.system) {
-        this.system._cablesDirty = true;
+          // Отключаем кабель
+          cable.disconnect();
+          this.cables.splice(index, 1);
+          
+          if (this.system) {
+              this.system._cablesDirty = true;
+              // ⬇️⬇️⬇️ ДОБАВЬ ЭТО ⬇️⬇️⬇️
+              // Форсируем полную перерисовку после удаления кабеля
+              if (this.system.forceRedraw) {
+                  this.system.forceRedraw();
+              }
+          }
       }
-    }
   }
 
   clear() {
-    // Отключаем все кабели от джеков
-    this.cables.forEach((cable) => {
-      if (cable.fromJack) cable.fromJack.removeCable(cable);
-      if (cable.toJack) cable.toJack.removeCable(cable);
-      cable.disconnect();
-    });
+      // Отключаем все кабели от джеков
+      this.cables.forEach(cable => {
+          if (cable.fromJack) cable.fromJack.removeCable(cable);
+          if (cable.toJack) cable.toJack.removeCable(cable);
+          cable.disconnect();
+      });
 
-    this.cables = [];
-    // ===== ДОБАВИТЬ =====
-    if (this.system) {
-      this.system._cablesDirty = true;
-    }
-    //console.log('✅ All cables cleared');
+      this.cables = [];
+      
+      if (this.system) {
+          this.system._cablesDirty = true;
+          // ⬇️⬇️⬇️ ДОБАВЬ ЭТО ⬇️⬇️⬇️
+          if (this.system.forceRedraw) {
+              this.system.forceRedraw();
+          }
+      }
   }
 
   // === ПРОВЕРКИ СОЕДИНЕНИЙ ===
