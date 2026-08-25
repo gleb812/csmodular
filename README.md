@@ -2,7 +2,7 @@
 
 A web-based modular synthesizer built with Csound, Flask, and vanilla JavaScript + Canvas.
 
-This project is a next level of pch2csd project  https://github.com/gleb812/pch2csd
+This project is a next level of *pch2csd* project  https://github.com/gleb812/pch2csd
 
 ## Features
 
