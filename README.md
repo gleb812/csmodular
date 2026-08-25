@@ -4,11 +4,12 @@ A web-based modular synthesizer built with Csound, Flask, and vanilla JavaScript
 
 ## Features
 
-- 🎛️ Modular architecture with interchangeable audio modules
-- 🎹 Real-time Csound synthesis engine
-- 🌐 Web-based UI with Canvas rendering
-- 🐍 Flask API backend for communication
-- 🔌 Easy to extend with custom modules
+- Modular architecture with interchangeable audio modules
+- Real-time Csound synthesis engine
+- Web-based UI with Canvas rendering
+- Flask API backend for communication
+- Easy to extend with custom modules
+- Web-based graphical editor for the user modules (localhost:3000/editor)
 
 ## Requirements
 
@@ -66,6 +67,7 @@ Open your browser and navigate to: `http://localhost:3000`
 ├── src/              # Frontend JavaScript + Canvas UI
 ├── csound/           # Csound orchestras and samples
 ├── modules/          # Synthesizer modules
+├── user_modules/     # User modules 
 ├── public/           # Static assets
 ├── scripts/          # Utility scripts
 ├── requirements.txt  # Python dependencies
