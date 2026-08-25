@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: SwOnOffM
-// Исходный файл: SwOnOffM.js
-// Версия: 208
+    // Исходный файл: SwOnOffM.js
+    // Версия: 208
 
-export const SwOnOffMModule = {
-    type: 'SwOnOffM',
-        typeID: 36,
-    displayName: 'SwOnOffM',
-    gridHeight: 2,
-    originalName: 'SwOnOffM',
-    tooltip: 'Switch On/Off Momentary',
-    components: [
-                                                                                                                {
+    export const SwOnOffMModule = {
+        type: 'SwOnOffM',
+            typeID: 36,
+        displayName: 'SwOnOffM',
+        gridHeight: 2,
+        originalName: 'SwOnOffM',
+        tooltip: 'Switch On/Off Momentary',
+        inputs: [1],
+        outputs: [0, 2],
+        components: [
+                {
                 "componentType": "TextLabel",
                 "id": "9",
                 "x": 143,
@@ -20,4 +22,5 @@ export const SwOnOffMModule = {
                 "text": "↕"
         }
 ]
-};
+    };
+    

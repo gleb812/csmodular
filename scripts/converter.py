@@ -177,18 +177,19 @@ class ModuleParser:
         # Извлекаем основные параметры модуля
         module_info = self._extract_module_info(content)
         
-        # Извлекаем все компоненты
-        #components = self._extract_components(content)
-
         # ПЕРВЫЙ ПРОХОД: собираем информацию о всех компонентах, особенно Knob
         self._first_pass_extract(content)
         
         # ВТОРОЙ ПРОХОД: конвертируем компоненты с учетом собранной информации
         components = self._second_pass_extract(content)
         
+        # 🔥 НОВОЕ: извлекаем ID входов и выходов
+        port_ids = self._extract_port_ids(content)
+        
         return {
             "module": module_info,
-            "components": components
+            "components": components,
+            "ports": port_ids  # ← добавляем порты
         }
     
     def _first_pass_extract(self, content: str):
@@ -338,6 +339,34 @@ class ModuleParser:
                             components.append(converted)
         
         return components
+
+    def _extract_port_ids(self, content: str) -> Dict[str, List[int]]:
+        """Извлекает ID всех входов и выходов из содержимого модуля"""
+        inputs = []
+        outputs = []
+        
+        # Ищем все блоки Input
+        input_pattern = r'<#Input\s+(.*?)#>'
+        for match in re.finditer(input_pattern, content, re.DOTALL):
+            attrs = self._parse_attributes(match.group(1))
+            if 'ID' in attrs:
+                inputs.append(int(attrs['ID']))
+        
+        # Ищем все блоки Output
+        output_pattern = r'<#Output\s+(.*?)#>'
+        for match in re.finditer(output_pattern, content, re.DOTALL):
+            attrs = self._parse_attributes(match.group(1))
+            if 'ID' in attrs:
+                outputs.append(int(attrs['ID']))
+        
+        # Сортируем для предсказуемого порядка
+        inputs.sort()
+        outputs.sort()
+        
+        return {
+            'inputs': inputs,
+            'outputs': outputs
+        }
     
     def _parse_attributes(self, text: str) -> Dict[str, str]:
         """Парсит атрибуты вида Key:Value из текста"""
@@ -587,8 +616,9 @@ class ModuleParser:
         """Генерирует JS-файл модуля из распарсенных данных"""
         module_info = parsed_data["module"]
         components = parsed_data["components"]
+        ports = parsed_data.get("ports", {"inputs": [], "outputs": []})  # ← берем порты
         
-        # Получаем JS-имя для модуля (без дефисов и т.д.)
+        # Получаем JS-имя для модуля
         original_name = module_info['originalName']
         js_module_name = None
         
@@ -599,27 +629,32 @@ class ModuleParser:
         
         # Если не нашли, генерируем из оригинального имени
         if not js_module_name:
-            # Удаляем невалидные символы для JS
             js_module_name = re.sub(r'[^a-zA-Z0-9_]', '', original_name)
-            # Убеждаемся, что имя начинается с буквы
             if js_module_name and not js_module_name[0].isalpha():
                 js_module_name = "M" + js_module_name
         
         typeid_str = f"        typeID: {module_info['typeID']}"
+        
+        # 🔥 ФОРМИРУЕМ СТРОКИ ДЛЯ ПОРТОВ
+        inputs_str = f"    inputs: {json.dumps(ports['inputs'])}," if ports['inputs'] else "    inputs: [],"
+        outputs_str = f"    outputs: {json.dumps(ports['outputs'])}," if ports['outputs'] else "    outputs: [],"
+        
         js_content = f"""// Автоматически сгенерированный модуль: {js_module_name}
-// Исходный файл: {js_module_name}.js
-// Версия: {module_info['version']}
+    // Исходный файл: {js_module_name}.js
+    // Версия: {module_info['version']}
 
-export const {js_module_name}Module = {{
-    type: '{module_info['type']}',
-{typeid_str},
-    displayName: '{module_info['displayName']}',
-    gridHeight: {module_info['height']},
-    originalName: '{module_info['originalName']}',
-    tooltip: '{module_info['tooltip']}',
-    components: {json.dumps(components, indent=8, ensure_ascii=False)}
-}};
-"""
+    export const {js_module_name}Module = {{
+        type: '{module_info['type']}',
+    {typeid_str},
+        displayName: '{module_info['displayName']}',
+        gridHeight: {module_info['height']},
+        originalName: '{module_info['originalName']}',
+        tooltip: '{module_info['tooltip']}',
+    {inputs_str}
+    {outputs_str}
+        components: {json.dumps(components, indent=8, ensure_ascii=False)}
+    }};
+    """
         return js_content
 
 def convert_directory(input_dir: str, output_dir: str, typeid_file: str = "ModID2Name.txt"):

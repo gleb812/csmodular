@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: TH
-// Исходный файл: TH.js
-// Версия: 208
+    // Исходный файл: TH.js
+    // Версия: 208
 
-export const THModule = {
-    type: 'TH',
-        typeID: 139,
+    export const THModule = {
+        type: 'TH',
+            typeID: 139,
     defaultParams: [],
-    displayName: 'T&H',
-    gridHeight: 2,
-    originalName: 'T&H',
-    tooltip: 'Track & Hold',
-    components: [
+        displayName: 'T&H',
+        gridHeight: 2,
+        originalName: 'T&H',
+        tooltip: 'Track & Hold',
+        inputs: [0, 4],
+        outputs: [1],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 192,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -25,7 +29,9 @@ export const THModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "SVG",
@@ -35,8 +41,7 @@ export const THModule = {
                 "width": 23,
                 "height": 16,
                 "color": "#ffffff"
-        ,
-        "svgSrc": "/svg/SW_onoffM_T.svg"},
+        },
         {
                 "componentType": "Line",
                 "id": "2",
@@ -59,7 +64,9 @@ export const THModule = {
                 "x": 162,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Ctrl",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -78,8 +85,7 @@ export const THModule = {
                 "width": 11,
                 "height": 12,
                 "color": "#ffffff"
-        ,
-        "svgSrc": "/svg/TH_SH.svg"},
+        },
         {
                 "componentType": "Line",
                 "id": "8",
@@ -107,4 +113,5 @@ export const THModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

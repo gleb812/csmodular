@@ -1,17 +1,19 @@
 // Автоматически сгенерированный модуль: OscC
-// Исходный файл: OscC.js
-// Версия: 206
+    // Исходный файл: OscC.js
+    // Версия: 206
 
-export const OscCModule = {
-    type: 'OscC',
-        typeID: 96,
+    export const OscCModule = {
+        type: 'OscC',
+            typeID: 96,
     mode: [0],
     defaultParams: [64, 64, 1, 0, 0, 1, 0, 0],
-    displayName: 'OscC',
-    gridHeight: 3,
-    originalName: 'OscC',
-    tooltip: 'Osc C',
-    components: [
+        displayName: 'OscC',
+        gridHeight: 3,
+        originalName: 'OscC',
+        tooltip: 'Osc C',
+        inputs: [0, 4, 6, 18],
+        outputs: [12],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
@@ -147,7 +149,9 @@ export const OscCModule = {
                 "x": 196,
                 "y": 22,
                 "infoFunc": 0,
-                "size": "medium"
+                "size": "medium",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Line",
@@ -188,7 +192,9 @@ export const OscCModule = {
                 "y": 5,
                 "width": 36,
                 "height": 12,
-                "labels": [
+                "labels": [,
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 0
                         "FM Lin",
                         "FM Trk"
                 ]
@@ -215,4 +221,5 @@ export const OscCModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

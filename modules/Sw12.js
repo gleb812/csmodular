@@ -1,22 +1,26 @@
 // Автоматически сгенерированный модуль: Sw12
-// Исходный файл: Sw12.js
-// Версия: 206
+    // Исходный файл: Sw12.js
+    // Версия: 206
 
-export const Sw12Module = {
-    type: 'Sw12',
-        typeID: 90,
-    displayName: 'Sw1-2',
-    gridHeight: 2,
-    originalName: 'Sw1-2',
-    tooltip: 'Switch 1-2',
-    components: [
+    export const Sw12Module = {
+        type: 'Sw12',
+            typeID: 90,
+        displayName: 'Sw1-2',
+        gridHeight: 2,
+        originalName: 'Sw1-2',
+        tooltip: 'Switch 1-2',
+        inputs: [4],
+        outputs: [0, 1, 3],
+        components: [
         {
                 "componentType": "Output",
                 "id": "1",
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out2",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -24,7 +28,9 @@ export const Sw12Module = {
                 "x": 4,
                 "y": 15,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Ctrl",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextField",
@@ -49,7 +55,9 @@ export const Sw12Module = {
                 "x": 180,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "SVG",
@@ -83,7 +91,9 @@ export const Sw12Module = {
                 "x": 210,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out1",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Stub",
@@ -114,4 +124,5 @@ export const Sw12Module = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

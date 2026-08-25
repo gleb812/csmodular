@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: In2
-// Исходный файл: In2.js
-// Версия: 210
+    // Исходный файл: In2.js
+    // Версия: 210
 
-export const In2Module = {
-    type: 'In2',
-        typeID: 170,
+    export const In2Module = {
+        type: 'In2',
+            typeID: 170,
     defaultParams: [0, 1, 1],
-    displayName: '2-In',
-    gridHeight: 2,
-    originalName: '2-In',
-    tooltip: '2 Inputs',
-    components: [
+        displayName: '2-In',
+        gridHeight: 2,
+        originalName: '2-In',
+        tooltip: '2 Inputs',
+        inputs: [],
+        outputs: [0, 1],
+        components: [
         {
                 "componentType": "Output",
                 "id": "0",
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "OutR",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -25,7 +29,9 @@ export const In2Module = {
                 "x": 214,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "OutL",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "MiniVU",
@@ -128,4 +134,5 @@ export const In2Module = {
                 ]
         }
 ]
-};
+    };
+    

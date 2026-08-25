@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: ValSw2
-// Исходный файл: ValSw2.js
-// Версия: 206
+    // Исходный файл: ValSw2.js
+    // Версия: 206
 
-export const ValSw2Module = {
-    type: 'ValSw2',
-        typeID: 105,
+    export const ValSw2Module = {
+        type: 'ValSw2',
+            typeID: 105,
     defaultParams: [0],
-    displayName: 'ValSw2-1',
-    gridHeight: 2,
-    originalName: 'ValSw2-1',
-    tooltip: 'Value Switch 2-1',
-    components: [
+        displayName: 'ValSw2-1',
+        gridHeight: 2,
+        originalName: 'ValSw2-1',
+        tooltip: 'Value Switch 2-1',
+        inputs: [0, 2, 8],
+        outputs: [1],
+        components: [
         {
                 "componentType": "TextLabel",
                 "id": "9",
@@ -26,7 +28,9 @@ export const ValSw2Module = {
                 "x": 4,
                 "y": 15,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Ctrl",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -90,7 +94,9 @@ export const ValSw2Module = {
                 "x": 210,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -98,7 +104,9 @@ export const ValSw2Module = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -106,7 +114,9 @@ export const ValSw2Module = {
                 "x": 180,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "SVG",
@@ -143,4 +153,5 @@ export const ValSw2Module = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

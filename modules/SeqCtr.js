@@ -1,22 +1,26 @@
 // Автоматически сгенерированный модуль: SeqCtr
-// Исходный файл: SeqCtr.js
-// Версия: 210
+    // Исходный файл: SeqCtr.js
+    // Версия: 210
 
-export const SeqCtrModule = {
-    type: 'SeqCtr',
-        typeID: 154,
-    displayName: 'SeqCtr',
-    gridHeight: 8,
-    originalName: 'SeqCtr',
-    tooltip: 'Sequencer Controlled',
-    components: [
+    export const SeqCtrModule = {
+        type: 'SeqCtr',
+            typeID: 154,
+        displayName: 'SeqCtr',
+        gridHeight: 8,
+        originalName: 'SeqCtr',
+        tooltip: 'Sequencer Controlled',
+        inputs: [1, 82, 115],
+        outputs: [58, 114],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 4,
                 "y": 24,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Ctrl",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -248,7 +252,9 @@ export const SeqCtrModule = {
                 "x": 240,
                 "y": 105,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Trig",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Line",
@@ -264,7 +270,9 @@ export const SeqCtrModule = {
                 "x": 240,
                 "y": 86,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Val",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -272,7 +280,9 @@ export const SeqCtrModule = {
                 "x": 4,
                 "y": 105,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Trig",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Input",
@@ -280,7 +290,9 @@ export const SeqCtrModule = {
                 "x": 4,
                 "y": 87,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Val",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -584,7 +596,9 @@ export const SeqCtrModule = {
                 "x": 23,
                 "y": 85,
                 "length": 21,
-                "orientation": "Horizontal"
+                "orientation": "Horizontal",
+                "ConnectorName": "Trig",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Line",
@@ -714,4 +728,5 @@ export const SeqCtrModule = {
                 ]
         }
 ]
-};
+    };
+    

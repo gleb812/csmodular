@@ -1,15 +1,17 @@
 // Автоматически сгенерированный модуль: Eq3band
-// Исходный файл: Eq3band.js
-// Версия: 208
+    // Исходный файл: Eq3band.js
+    // Версия: 208
 
-export const Eq3bandModule = {
-    type: 'Eq3band',
-        typeID: 33,
-    displayName: 'Eq3band',
-    gridHeight: 4,
-    originalName: 'Eq3band',
-    tooltip: 'Eq 3 Band',
-    components: [
+    export const Eq3bandModule = {
+        type: 'Eq3band',
+            typeID: 33,
+        displayName: 'Eq3band',
+        gridHeight: 4,
+        originalName: 'Eq3band',
+        tooltip: 'Eq 3 Band',
+        inputs: [11],
+        outputs: [10],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "1",
@@ -99,7 +101,9 @@ export const Eq3bandModule = {
                 "x": 240,
                 "y": 45,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -107,7 +111,9 @@ export const Eq3bandModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -220,4 +226,5 @@ export const Eq3bandModule = {
                 ]
         }
 ]
-};
+    };
+    

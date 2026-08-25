@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: WaveWrap
-// Исходный файл: WaveWrap.js
-// Версия: 208
+    // Исходный файл: WaveWrap.js
+    // Версия: 208
 
-export const WaveWrapModule = {
-    type: 'WaveWrap',
-        typeID: 74,
+    export const WaveWrapModule = {
+        type: 'WaveWrap',
+            typeID: 74,
     defaultParams: [0, 0, 1],
-    displayName: 'WaveWrap',
-    gridHeight: 2,
-    originalName: 'WaveWrap',
-    tooltip: 'Wave Wrapper',
-    components: [
+        displayName: 'WaveWrap',
+        gridHeight: 2,
+        originalName: 'WaveWrap',
+        tooltip: 'Wave Wrapper',
+        inputs: [0, 4],
+        outputs: [7],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 108,
                 "y": 14,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Mod",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -49,7 +53,9 @@ export const WaveWrapModule = {
                 "x": 210,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Graph",
@@ -65,7 +71,9 @@ export const WaveWrapModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -84,4 +92,5 @@ export const WaveWrapModule = {
                 "orientation": "Horizontal"
         }
 ]
-};
+    };
+    

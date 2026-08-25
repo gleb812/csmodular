@@ -1,24 +1,28 @@
 // Автоматически сгенерированный модуль: DelayQuad
-// Исходный файл: DelayQuad.js
-// Версия: 228
+    // Исходный файл: DelayQuad.js
+    // Версия: 228
 
-export const DelayQuadModule = {
-    type: 'DelayQuad',
-        typeID: 175,
+    export const DelayQuadModule = {
+        type: 'DelayQuad',
+            typeID: 175,
     mode: [0],
     defaultParams: [64, 64, 64, 64, 64, 64, 64, 64, 0],
-    displayName: 'DelayQuad',
-    gridHeight: 5,
-    originalName: 'DelayQuad',
-    tooltip: 'Delay Quad',
-    components: [
+        displayName: 'DelayQuad',
+        gridHeight: 5,
+        originalName: 'DelayQuad',
+        tooltip: 'Delay Quad',
+        inputs: [0, 3, 11, 17, 23],
+        outputs: [6, 10, 16, 22, 26],
+        components: [
         {
                 "componentType": "Input",
                 "id": "3",
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -42,7 +46,9 @@ export const DelayQuadModule = {
                 "x": 74,
                 "y": 36,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out1",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "ButtonFlat",
@@ -62,7 +68,9 @@ export const DelayQuadModule = {
                 "x": 55,
                 "y": 59,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Time1",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -102,7 +110,9 @@ export const DelayQuadModule = {
                 "x": 122,
                 "y": 36,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out2",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Input",
@@ -110,7 +120,9 @@ export const DelayQuadModule = {
                 "x": 101,
                 "y": 59,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Time2",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Knob",
@@ -150,7 +162,9 @@ export const DelayQuadModule = {
                 "x": 169,
                 "y": 36,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out3",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Input",
@@ -158,7 +172,9 @@ export const DelayQuadModule = {
                 "x": 149,
                 "y": 59,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Time3",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Knob",
@@ -198,7 +214,9 @@ export const DelayQuadModule = {
                 "x": 216,
                 "y": 35,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out4",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Input",
@@ -206,7 +224,9 @@ export const DelayQuadModule = {
                 "x": 196,
                 "y": 59,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Time4",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Knob",
@@ -230,7 +250,9 @@ export const DelayQuadModule = {
                 "x": 240,
                 "y": 60,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "OutMain",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -261,4 +283,5 @@ export const DelayQuadModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

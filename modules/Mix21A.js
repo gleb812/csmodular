@@ -1,22 +1,26 @@
 // Автоматически сгенерированный модуль: Mix21A
-// Исходный файл: Mix21A.js
-// Версия: 206
+    // Исходный файл: Mix21A.js
+    // Версия: 206
 
-export const Mix21AModule = {
-    type: 'Mix21A',
-        typeID: 194,
-    displayName: 'Mix2-1A',
-    gridHeight: 2,
-    originalName: 'Mix2-1A',
-    tooltip: 'Mixer 2-1 A',
-    components: [
+    export const Mix21AModule = {
+        type: 'Mix21A',
+            typeID: 194,
+        displayName: 'Mix2-1A',
+        gridHeight: 2,
+        originalName: 'Mix2-1A',
+        tooltip: 'Mixer 2-1 A',
+        inputs: [0, 4, 8],
+        outputs: [11],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 4,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "InChain",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -33,7 +37,9 @@ export const Mix21AModule = {
                 "x": 120,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -49,7 +55,9 @@ export const Mix21AModule = {
                 "x": 202,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -65,7 +73,9 @@ export const Mix21AModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextEdit",
@@ -97,4 +107,5 @@ export const Mix21AModule = {
                 ]
         }
 ]
-};
+    };
+    

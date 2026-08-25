@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: Keyboard
-// Исходный файл: Keyboard.js
-// Версия: 208
+    // Исходный файл: Keyboard.js
+    // Версия: 208
 
-export const KeyboardModule = {
-    type: 'Keyboard',
-        typeID: 1,
+    export const KeyboardModule = {
+        type: 'Keyboard',
+            typeID: 1,
     defaultParams: [],
-    displayName: 'Keyboard',
-    gridHeight: 2,
-    originalName: 'Keyboard',
-    tooltip: 'Keyboard',
-    components: [
+        displayName: 'Keyboard',
+        gridHeight: 2,
+        originalName: 'Keyboard',
+        tooltip: 'Keyboard',
+        inputs: [],
+        outputs: [0, 1, 2, 3, 7, 10],
+        components: [
         {
                 "componentType": "Output",
                 "id": "0",
                 "x": 28,
                 "y": 14,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -25,7 +29,9 @@ export const KeyboardModule = {
                 "x": 118,
                 "y": 14,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Gate",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -33,7 +39,9 @@ export const KeyboardModule = {
                 "x": 156,
                 "y": 14,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Lin",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Output",
@@ -41,7 +49,9 @@ export const KeyboardModule = {
                 "x": 240,
                 "y": 14,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Release",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "TextLabel",
@@ -85,7 +95,9 @@ export const KeyboardModule = {
                 "x": 74,
                 "y": 14,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Note",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "TextLabel",
@@ -102,7 +114,9 @@ export const KeyboardModule = {
                 "x": 191,
                 "y": 14,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Exp",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "TextLabel",
@@ -139,4 +153,5 @@ export const KeyboardModule = {
                 "orientation": "Horizontal"
         }
 ]
-};
+    };
+    

@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: Vocoder
-// Исходный файл: Vocoder.js
-// Версия: 208
+    // Исходный файл: Vocoder.js
+    // Версия: 208
 
-export const VocoderModule = {
-    type: 'Vocoder',
-        typeID: 108,
+    export const VocoderModule = {
+        type: 'Vocoder',
+            typeID: 108,
     defaultParams: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 0],
-    displayName: 'Vocoder',
-    gridHeight: 8,
-    originalName: 'Vocoder',
-    tooltip: 'Vocoder',
-    components: [
+        displayName: 'Vocoder',
+        gridHeight: 8,
+        originalName: 'Vocoder',
+        tooltip: 'Vocoder',
+        inputs: [1, 24],
+        outputs: [25],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 6,
                 "y": 25,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Ctrl",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -194,7 +198,9 @@ export const VocoderModule = {
                 "x": 210,
                 "y": 102,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -202,7 +208,9 @@ export const VocoderModule = {
                 "x": 240,
                 "y": 102,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -537,4 +545,5 @@ export const VocoderModule = {
                 ]
         }
 ]
-};
+    };
+    

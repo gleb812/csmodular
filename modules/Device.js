@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: Device
-// Исходный файл: Device.js
-// Версия: 230
+    // Исходный файл: Device.js
+    // Версия: 230
 
-export const DeviceModule = {
-    type: 'Device',
-        typeID: 30,
+    export const DeviceModule = {
+        type: 'Device',
+            typeID: 30,
     defaultParams: [],
-    displayName: 'Device',
-    gridHeight: 3,
-    originalName: 'Device',
-    tooltip: 'Device',
-    components: [
+        displayName: 'Device',
+        gridHeight: 3,
+        originalName: 'Device',
+        tooltip: 'Device',
+        inputs: [],
+        outputs: [0, 3, 6, 9, 11, 12, 14],
+        components: [
         {
                 "componentType": "Output",
                 "id": "0",
                 "x": 172,
                 "y": 30,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "PitchStick",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "TextLabel",
@@ -34,7 +38,9 @@ export const DeviceModule = {
                 "x": 132,
                 "y": 30,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "SustainPedal",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "TextLabel",
@@ -51,7 +57,9 @@ export const DeviceModule = {
                 "x": 12,
                 "y": 30,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Wheel",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -68,7 +76,9 @@ export const DeviceModule = {
                 "x": 52,
                 "y": 30,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "AftTouch",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -85,7 +95,9 @@ export const DeviceModule = {
                 "x": 92,
                 "y": 30,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "ControlPedal",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -129,7 +141,9 @@ export const DeviceModule = {
                 "x": 210,
                 "y": 30,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "GlobalWheel1",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "Output",
@@ -137,7 +151,9 @@ export const DeviceModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "GlobalWheel2",
+                "ConnectorIndex": 6
         },
         {
                 "componentType": "TextLabel",
@@ -176,4 +192,5 @@ export const DeviceModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

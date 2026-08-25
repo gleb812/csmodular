@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: CompLev
-// Исходный файл: CompLev.js
-// Версия: 208
+    // Исходный файл: CompLev.js
+    // Версия: 208
 
-export const CompLevModule = {
-    type: 'CompLev',
-        typeID: 59,
+    export const CompLevModule = {
+        type: 'CompLev',
+            typeID: 59,
     defaultParams: [64],
-    displayName: 'CompLev',
-    gridHeight: 2,
-    originalName: 'CompLev',
-    tooltip: 'Compare to Level',
-    components: [
+        displayName: 'CompLev',
+        gridHeight: 2,
+        originalName: 'CompLev',
+        tooltip: 'Compare to Level',
+        inputs: [2],
+        outputs: [3],
+        components: [
         {
                 "componentType": "TextField",
                 "id": "0",
@@ -33,7 +35,9 @@ export const CompLevModule = {
                 "x": 120,
                 "y": 11,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -41,7 +45,9 @@ export const CompLevModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -71,4 +77,5 @@ export const CompLevModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

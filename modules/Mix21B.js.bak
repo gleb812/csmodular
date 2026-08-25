@@ -1,0 +1,119 @@
+// Автоматически сгенерированный модуль: Mix21B
+    // Исходный файл: Mix21B.js
+    // Версия: 206
+
+    export const Mix21BModule = {
+        type: 'Mix21B',
+            typeID: 66,
+        displayName: 'Mix2-1B',
+        gridHeight: 2,
+        originalName: 'Mix2-1B',
+        tooltip: 'Mixer 2-1 B',
+        inputs: [0, 4, 8],
+        outputs: [11],
+        components: [
+        {
+                "componentType": "Input",
+                "id": "0",
+                "x": 4,
+                "y": 15,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "1",
+                "x": 17,
+                "y": 17,
+                "text": "Chain",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "3",
+                "x": 82,
+                "y": 14,
+                "width": 18,
+                "text": "Inv"
+        },
+        {
+                "componentType": "Input",
+                "id": "4",
+                "x": 70,
+                "y": 15,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Knob",
+                "id": "5",
+                "x": 131,
+                "y": 5,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextField",
+                "id": "6",
+                "x": 101,
+                "y": 12,
+                "width": 28,
+                "referenceElementId": 5
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "7",
+                "x": 167,
+                "y": 14,
+                "width": 18,
+                "text": "Inv"
+        },
+        {
+                "componentType": "Input",
+                "id": "8",
+                "x": 155,
+                "y": 15,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Knob",
+                "id": "9",
+                "x": 216,
+                "y": 5,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextField",
+                "id": "10",
+                "x": 186,
+                "y": 12,
+                "width": 28,
+                "referenceElementId": 9
+        },
+        {
+                "componentType": "Output",
+                "id": "11",
+                "x": 240,
+                "y": 15,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "2",
+                "x": 41,
+                "y": 14,
+                "width": 25,
+                "height": 12,
+                "labels": [
+                        "Exp",
+                        "Lin",
+                        "dB"
+                ]
+        }
+]
+    };
+    

@@ -1,17 +1,19 @@
 // Автоматически сгенерированный модуль: DlyStereo
-// Исходный файл: DlyStereo.js
-// Версия: 228
+    // Исходный файл: DlyStereo.js
+    // Версия: 228
 
-export const DlyStereoModule = {
-    type: 'DlyStereo',
-        typeID: 182,
+    export const DlyStereoModule = {
+        type: 'DlyStereo',
+            typeID: 182,
     mode: [0],
     defaultParams: [64, 64, 64, 64, 0, 0, 0, 127, 64, 1, 0],
-    displayName: 'DlyStereo',
-    gridHeight: 5,
-    originalName: 'DlyStereo',
-    tooltip: 'Delay Stereo',
-    components: [
+        displayName: 'DlyStereo',
+        gridHeight: 5,
+        originalName: 'DlyStereo',
+        tooltip: 'Delay Stereo',
+        inputs: [20],
+        outputs: [12, 13],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "1",
@@ -118,7 +120,9 @@ export const DlyStereoModule = {
                 "x": 220,
                 "y": 60,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "OutL",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -126,7 +130,9 @@ export const DlyStereoModule = {
                 "x": 240,
                 "y": 60,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "OutR",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -171,7 +177,9 @@ export const DlyStereoModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -278,4 +286,5 @@ export const DlyStereoModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

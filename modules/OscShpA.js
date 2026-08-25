@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: OscShpA
-// Исходный файл: OscShpA.js
-// Версия: 206
+    // Исходный файл: OscShpA.js
+    // Версия: 206
 
-export const OscShpAModule = {
-    type: 'OscShpA',
-        typeID: 163,
+    export const OscShpAModule = {
+        type: 'OscShpA',
+            typeID: 163,
     defaultParams: [64, 64, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-    displayName: 'OscShpA',
-    gridHeight: 5,
-    originalName: 'OscShpA',
-    tooltip: 'Osc Shape A',
-    components: [
+        displayName: 'OscShpA',
+        gridHeight: 5,
+        originalName: 'OscShpA',
+        tooltip: 'Osc Shape A',
+        inputs: [0, 1, 2, 7, 13],
+        outputs: [17],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 4,
                 "y": 17,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Sync",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Input",
@@ -25,7 +29,9 @@ export const OscShpAModule = {
                 "x": 4,
                 "y": 43,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -33,7 +39,9 @@ export const OscShpAModule = {
                 "x": 4,
                 "y": 59,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "PitchVar",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -74,7 +82,9 @@ export const OscShpAModule = {
                 "x": 240,
                 "y": 60,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -160,7 +170,9 @@ export const OscShpAModule = {
                 "x": 115,
                 "y": 59,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "FM",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Knob",
@@ -184,7 +196,9 @@ export const OscShpAModule = {
                 "x": 180,
                 "y": 59,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Shape",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Knob",
@@ -270,4 +284,5 @@ export const OscShpAModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

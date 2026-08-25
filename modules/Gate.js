@@ -1,17 +1,19 @@
 // Автоматически сгенерированный модуль: Gate
-// Исходный файл: Gate.js
-// Версия: 208
+    // Исходный файл: Gate.js
+    // Версия: 208
 
-export const GateModule = {
-    type: 'Gate',
-        typeID: 64,
+    export const GateModule = {
+        type: 'Gate',
+            typeID: 64,
     mode: [0, 0],
     defaultParams: [],
-    displayName: 'Gate',
-    gridHeight: 2,
-    originalName: 'Gate',
-    tooltip: 'Gate',
-    components: [
+        displayName: 'Gate',
+        gridHeight: 2,
+        originalName: 'Gate',
+        tooltip: 'Gate',
+        inputs: [5, 6, 12, 13],
+        outputs: [1, 8],
+        components: [
         {
                 "componentType": "LED",
                 "id": "0",
@@ -24,7 +26,9 @@ export const GateModule = {
                 "x": 240,
                 "y": 9,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "PartSelector",
@@ -58,7 +62,9 @@ export const GateModule = {
                 "x": 163,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In2_2",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Input",
@@ -66,7 +72,9 @@ export const GateModule = {
                 "x": 173,
                 "y": 4,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In2_1",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "LED",
@@ -80,7 +88,9 @@ export const GateModule = {
                 "x": 147,
                 "y": 9,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "PartSelector",
@@ -114,7 +124,9 @@ export const GateModule = {
                 "x": 70,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In1_2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -122,7 +134,9 @@ export const GateModule = {
                 "x": 80,
                 "y": 4,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In1_1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Line",
@@ -141,4 +155,5 @@ export const GateModule = {
                 "orientation": "Horizontal"
         }
 ]
-};
+    };
+    

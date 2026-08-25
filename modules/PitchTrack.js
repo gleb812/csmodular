@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: PitchTrack
-// Исходный файл: PitchTrack.js
-// Версия: 208
+    // Исходный файл: PitchTrack.js
+    // Версия: 208
 
-export const PitchTrackModule = {
-    type: 'PitchTrack',
-        typeID: 198,
+    export const PitchTrackModule = {
+        type: 'PitchTrack',
+            typeID: 198,
     defaultParams: [20],
-    displayName: 'PitchTrack',
-    gridHeight: 2,
-    originalName: 'PitchTrack',
-    tooltip: 'Pitch tracker',
-    components: [
+        displayName: 'PitchTrack',
+        gridHeight: 2,
+        originalName: 'PitchTrack',
+        tooltip: 'Pitch tracker',
+        inputs: [2],
+        outputs: [3, 6, 8],
+        components: [
         {
                 "componentType": "Input",
                 "id": "2",
                 "x": 4,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -25,7 +29,9 @@ export const PitchTrackModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Gate",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -51,7 +57,9 @@ export const PitchTrackModule = {
                 "x": 173,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Period",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -68,7 +76,9 @@ export const PitchTrackModule = {
                 "x": 199,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -111,4 +121,5 @@ export const PitchTrackModule = {
                 "referenceElementId": 12
         }
 ]
-};
+    };
+    

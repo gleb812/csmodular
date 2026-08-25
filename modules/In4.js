@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: In4
-// Исходный файл: In4.js
-// Версия: 210
+    // Исходный файл: In4.js
+    // Версия: 210
 
-export const In4Module = {
-    type: 'In4',
-        typeID: 171,
+    export const In4Module = {
+        type: 'In4',
+            typeID: 171,
     defaultParams: [0, 1, 1],
-    displayName: '4-In',
-    gridHeight: 2,
-    originalName: '4-In',
-    tooltip: '4 Inputs',
-    components: [
+        displayName: '4-In',
+        gridHeight: 2,
+        originalName: '4-In',
+        tooltip: '4 Inputs',
+        inputs: [],
+        outputs: [0, 1, 4, 6],
+        components: [
         {
                 "componentType": "Output",
                 "id": "0",
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out4",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Output",
@@ -25,7 +29,9 @@ export const In4Module = {
                 "x": 214,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "MiniVU",
@@ -51,7 +57,9 @@ export const In4Module = {
                 "x": 188,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "MiniVU",
@@ -68,7 +76,9 @@ export const In4Module = {
                 "x": 162,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "MiniVU",
@@ -160,4 +170,5 @@ export const In4Module = {
                 ]
         }
 ]
-};
+    };
+    

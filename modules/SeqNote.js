@@ -1,22 +1,26 @@
 // Автоматически сгенерированный модуль: SeqNote
-// Исходный файл: SeqNote.js
-// Версия: 210
+    // Исходный файл: SeqNote.js
+    // Версия: 210
 
-export const SeqNoteModule = {
-    type: 'SeqNote',
-        typeID: 121,
-    displayName: 'SeqNote',
-    gridHeight: 9,
-    originalName: 'SeqNote',
-    tooltip: 'Sequencer Note',
-    components: [
+    export const SeqNoteModule = {
+        type: 'SeqNote',
+            typeID: 121,
+        displayName: 'SeqNote',
+        gridHeight: 9,
+        originalName: 'SeqNote',
+        tooltip: 'Sequencer Note',
+        inputs: [0, 1, 3, 5, 22, 23, 82, 115],
+        outputs: [8, 58, 114],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 4,
                 "y": 43,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Clk",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -24,7 +28,9 @@ export const SeqNoteModule = {
                 "x": 4,
                 "y": 66,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Rst",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -32,7 +38,9 @@ export const SeqNoteModule = {
                 "x": 4,
                 "y": 88,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Loop",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Input",
@@ -40,7 +48,9 @@ export const SeqNoteModule = {
                 "x": 204,
                 "y": 4,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Park",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "LED",
@@ -54,7 +64,9 @@ export const SeqNoteModule = {
                 "x": 240,
                 "y": 26,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Link",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -286,7 +298,9 @@ export const SeqNoteModule = {
                 "x": 240,
                 "y": 120,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Trig",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -352,7 +366,9 @@ export const SeqNoteModule = {
                 "x": 240,
                 "y": 104,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Note",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -360,7 +376,9 @@ export const SeqNoteModule = {
                 "x": 4,
                 "y": 120,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Trig",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "Input",
@@ -368,7 +386,9 @@ export const SeqNoteModule = {
                 "x": 4,
                 "y": 104,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Note",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "TextLabel",
@@ -594,7 +614,9 @@ export const SeqNoteModule = {
                 "x": 98,
                 "y": 4,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "RecVal",
+                "ConnectorIndex": 6
         },
         {
                 "componentType": "Input",
@@ -602,7 +624,9 @@ export const SeqNoteModule = {
                 "x": 111,
                 "y": 4,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "RecEnable",
+                "ConnectorIndex": 7
         },
         {
                 "componentType": "Line",
@@ -883,4 +907,5 @@ export const SeqNoteModule = {
                 "width": 9
         }
 ]
-};
+    };
+    

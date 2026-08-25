@@ -1,17 +1,19 @@
 // Автоматически сгенерированный модуль: Reverb
-// Исходный файл: Reverb.js
-// Версия: 208
+    // Исходный файл: Reverb.js
+    // Версия: 208
 
-export const ReverbModule = {
-    type: 'Reverb',
-        typeID: 12,
+    export const ReverbModule = {
+        type: 'Reverb',
+            typeID: 12,
     mode: [0],
     defaultParams: [64, 64, 64, 1],
-    displayName: 'Reverb',
-    gridHeight: 3,
-    originalName: 'Reverb',
-    tooltip: 'Reverb',
-    components: [
+        displayName: 'Reverb',
+        gridHeight: 3,
+        originalName: 'Reverb',
+        tooltip: 'Reverb',
+        inputs: [3, 16],
+        outputs: [15, 19],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "0",
@@ -95,7 +97,9 @@ export const ReverbModule = {
                 "x": 220,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "OutL",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -103,7 +107,9 @@ export const ReverbModule = {
                 "x": 220,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "InL",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -119,7 +125,9 @@ export const ReverbModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "OutR",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -154,7 +162,9 @@ export const ReverbModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "InR",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Line",
@@ -181,4 +191,5 @@ export const ReverbModule = {
                 "orientation": "Horizontal"
         }
 ]
-};
+    };
+    

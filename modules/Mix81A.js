@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: Mix81A
-// Исходный файл: Mix81A.js
-// Версия: 206
+    // Исходный файл: Mix81A.js
+    // Версия: 206
 
-export const Mix81AModule = {
-    type: 'Mix81A',
-        typeID: 116,
+    export const Mix81AModule = {
+        type: 'Mix81A',
+            typeID: 116,
     defaultParams: [0],
-    displayName: 'Mix8-1A',
-    gridHeight: 2,
-    originalName: 'Mix8-1A',
-    tooltip: 'Mixer 8-1 A',
-    components: [
+        displayName: 'Mix8-1A',
+        gridHeight: 2,
+        originalName: 'Mix8-1A',
+        tooltip: 'Mixer 8-1 A',
+        inputs: [0, 1, 4, 6, 8, 10, 12, 14],
+        outputs: [16],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 76,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -25,7 +29,9 @@ export const Mix81AModule = {
                 "x": 95,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -51,7 +57,9 @@ export const Mix81AModule = {
                 "x": 114,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -68,7 +76,9 @@ export const Mix81AModule = {
                 "x": 133,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In4",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "TextLabel",
@@ -85,7 +95,9 @@ export const Mix81AModule = {
                 "x": 152,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In5",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "TextLabel",
@@ -102,7 +114,9 @@ export const Mix81AModule = {
                 "x": 171,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In6",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "TextLabel",
@@ -119,7 +133,9 @@ export const Mix81AModule = {
                 "x": 190,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In7",
+                "ConnectorIndex": 6
         },
         {
                 "componentType": "TextLabel",
@@ -136,7 +152,9 @@ export const Mix81AModule = {
                 "x": 209,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In8",
+                "ConnectorIndex": 7
         },
         {
                 "componentType": "TextLabel",
@@ -153,7 +171,9 @@ export const Mix81AModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "MiniVU",
@@ -187,4 +207,5 @@ export const Mix81AModule = {
                 ]
         }
 ]
-};
+    };
+    

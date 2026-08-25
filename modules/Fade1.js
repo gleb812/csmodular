@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: Fade1
-// Исходный файл: Fade1.js
-// Версия: 206
+    // Исходный файл: Fade1.js
+    // Версия: 206
 
-export const Fade1Module = {
-    type: 'Fade1',
-        typeID: 113,
+    export const Fade1Module = {
+        type: 'Fade1',
+            typeID: 113,
     defaultParams: [64, 0],
-    displayName: 'Fade1-2',
-    gridHeight: 2,
-    originalName: 'Fade1-2',
-    tooltip: 'Fader 1-2',
-    components: [
+        displayName: 'Fade1-2',
+        gridHeight: 2,
+        originalName: 'Fade1-2',
+        tooltip: 'Fader 1-2',
+        inputs: [1, 8],
+        outputs: [2, 6],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "0",
@@ -25,7 +27,9 @@ export const Fade1Module = {
                 "x": 180,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -33,7 +37,9 @@ export const Fade1Module = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "OutR",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -41,7 +47,9 @@ export const Fade1Module = {
                 "x": 210,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "OutL",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -85,7 +93,9 @@ export const Fade1Module = {
                 "x": 87,
                 "y": 14,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Mod",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -111,7 +121,7 @@ export const Fade1Module = {
                 "width": 62,
                 "height": 9,
                 "color": "#ffffff"
-        ,
-        "svgSrc": "/svg/Fade1-2.svg"}
+        }
 ]
-};
+    };
+    

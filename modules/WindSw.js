@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: WindSw
-// Исходный файл: WindSw.js
-// Версия: 206
+    // Исходный файл: WindSw.js
+    // Версия: 206
 
-export const WindSwModule = {
-    type: 'WindSw',
-        typeID: 85,
+    export const WindSwModule = {
+        type: 'WindSw',
+            typeID: 85,
     defaultParams: [40, 80],
-    displayName: 'WindSw',
-    gridHeight: 2,
-    originalName: 'WindSw',
-    tooltip: 'Window Switch',
-    components: [
+        displayName: 'WindSw',
+        gridHeight: 2,
+        originalName: 'WindSw',
+        tooltip: 'Window Switch',
+        inputs: [0, 8],
+        outputs: [9, 12],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 4,
                 "y": 15,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Ctrl",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -84,7 +88,9 @@ export const WindSwModule = {
                 "x": 210,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -92,7 +98,9 @@ export const WindSwModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "SVG",
@@ -117,7 +125,9 @@ export const WindSwModule = {
                 "x": 181,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Gate",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Line",
@@ -134,4 +144,5 @@ export const WindSwModule = {
                 "y": 15
         }
 ]
-};
+    };
+    

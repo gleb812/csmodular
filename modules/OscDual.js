@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: OscDual
-// Исходный файл: OscDual.js
-// Версия: 206
+    // Исходный файл: OscDual.js
+    // Версия: 206
 
-export const OscDualModule = {
-    type: 'OscDual',
-        typeID: 164,
+    export const OscDualModule = {
+        type: 'OscDual',
+            typeID: 164,
     defaultParams: [64, 64, 1, 0, 0, 127, 0, 0, 0, 0, 1, 0, 0, 0],
-    displayName: 'OscDual',
-    gridHeight: 5,
-    originalName: 'OscDual',
-    tooltip: 'Osc Dual',
-    components: [
+        displayName: 'OscDual',
+        gridHeight: 5,
+        originalName: 'OscDual',
+        tooltip: 'Osc Dual',
+        inputs: [0, 1, 2, 7, 15],
+        outputs: [17],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 4,
                 "y": 17,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Sync",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Input",
@@ -25,7 +29,9 @@ export const OscDualModule = {
                 "x": 4,
                 "y": 43,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -33,7 +39,9 @@ export const OscDualModule = {
                 "x": 4,
                 "y": 59,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "PitchVar",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -65,7 +73,9 @@ export const OscDualModule = {
                 "x": 240,
                 "y": 60,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -160,7 +170,9 @@ export const OscDualModule = {
                 "x": 124,
                 "y": 22,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "PW",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Knob",
@@ -251,7 +263,9 @@ export const OscDualModule = {
                 "x": 124,
                 "y": 59,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Phase",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Knob",
@@ -366,4 +380,5 @@ export const OscDualModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

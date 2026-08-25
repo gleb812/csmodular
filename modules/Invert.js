@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: Invert
-// Исходный файл: Invert.js
-// Версия: 208
+    // Исходный файл: Invert.js
+    // Версия: 208
 
-export const InvertModule = {
-    type: 'Invert',
-        typeID: 5,
+    export const InvertModule = {
+        type: 'Invert',
+            typeID: 5,
     defaultParams: [],
-    displayName: 'Invert',
-    gridHeight: 2,
-    originalName: 'Invert',
-    tooltip: 'Logic Inverter',
-    components: [
+        displayName: 'Invert',
+        gridHeight: 2,
+        originalName: 'Invert',
+        tooltip: 'Logic Inverter',
+        inputs: [6, 9],
+        outputs: [1, 4],
+        components: [
         {
                 "componentType": "LED",
                 "id": "0",
@@ -23,7 +25,9 @@ export const InvertModule = {
                 "x": 147,
                 "y": 9,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Line",
@@ -39,7 +43,9 @@ export const InvertModule = {
                 "x": 100,
                 "y": 9,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "SVG",
@@ -71,7 +77,9 @@ export const InvertModule = {
                 "x": 240,
                 "y": 9,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Line",
@@ -87,7 +95,9 @@ export const InvertModule = {
                 "x": 193,
                 "y": 9,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "SVG",
@@ -107,4 +117,5 @@ export const InvertModule = {
                 "orientation": "Horizontal"
         }
 ]
-};
+    };
+    

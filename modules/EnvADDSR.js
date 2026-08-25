@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: EnvADDSR
-// Исходный файл: EnvADDSR.js
-// Версия: 206
+    // Исходный файл: EnvADDSR.js
+    // Версия: 206
 
-export const EnvADDSRModule = {
-    type: 'EnvADDSR',
-        typeID: 119,
+    export const EnvADDSRModule = {
+        type: 'EnvADDSR',
+            typeID: 119,
     defaultParams: [1, 0, 0, 54, 100, 54, 70, 14, 1, 0, 0],
-    displayName: 'EnvADDSR',
-    gridHeight: 5,
-    originalName: 'EnvADDSR',
-    tooltip: 'Envelope ADBDSR',
-    components: [
+        displayName: 'EnvADDSR',
+        gridHeight: 5,
+        originalName: 'EnvADDSR',
+        tooltip: 'Envelope ADBDSR',
+        inputs: [1, 5, 6],
+        outputs: [8, 10],
+        components: [
         {
                 "componentType": "Graph",
                 "id": "0",
@@ -25,7 +27,9 @@ export const EnvADDSRModule = {
                 "x": 4,
                 "y": 60,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "AM",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -42,7 +46,9 @@ export const EnvADDSRModule = {
                 "x": 4,
                 "y": 36,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Gate",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "LED",
@@ -73,7 +79,9 @@ export const EnvADDSRModule = {
                 "x": 210,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Output",
@@ -81,7 +89,9 @@ export const EnvADDSRModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -89,7 +99,9 @@ export const EnvADDSRModule = {
                 "x": 240,
                 "y": 21,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Env",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "LevelShift",
@@ -312,4 +324,5 @@ export const EnvADDSRModule = {
                 "height": 12
         }
 ]
-};
+    };
+    

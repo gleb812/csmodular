@@ -1,15 +1,17 @@
 // Автоматически сгенерированный модуль: Sw81
-// Исходный файл: Sw81.js
-// Версия: 206
+    // Исходный файл: Sw81.js
+    // Версия: 206
 
-export const Sw81Module = {
-    type: 'Sw81',
-        typeID: 15,
-    displayName: 'Sw8-1',
-    gridHeight: 4,
-    originalName: 'Sw8-1',
-    tooltip: 'Switch 8-1',
-    components: [
+    export const Sw81Module = {
+        type: 'Sw81',
+            typeID: 15,
+        displayName: 'Sw8-1',
+        gridHeight: 4,
+        originalName: 'Sw8-1',
+        tooltip: 'Switch 8-1',
+        inputs: [12, 17, 18, 19, 22, 23, 24, 26],
+        outputs: [11, 20],
+        components: [
         {
                 "componentType": "TextLabel",
                 "id": "5",
@@ -34,7 +36,9 @@ export const Sw81Module = {
                 "x": 4,
                 "y": 45,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Control",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextField",
@@ -86,7 +90,9 @@ export const Sw81Module = {
                 "x": 240,
                 "y": 45,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -139,7 +145,9 @@ export const Sw81Module = {
                 "x": 82,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -147,7 +155,9 @@ export const Sw81Module = {
                 "x": 124,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -155,7 +165,9 @@ export const Sw81Module = {
                 "x": 166,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Input",
@@ -163,7 +175,9 @@ export const Sw81Module = {
                 "x": 208,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In4",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Input",
@@ -171,7 +185,9 @@ export const Sw81Module = {
                 "x": 99,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In5",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Input",
@@ -179,7 +195,9 @@ export const Sw81Module = {
                 "x": 141,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In6",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "Input",
@@ -187,7 +205,9 @@ export const Sw81Module = {
                 "x": 183,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In7",
+                "ConnectorIndex": 6
         },
         {
                 "componentType": "Input",
@@ -195,7 +215,9 @@ export const Sw81Module = {
                 "x": 225,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In8",
+                "ConnectorIndex": 7
         },
         {
                 "componentType": "Stub",
@@ -208,4 +230,5 @@ export const Sw81Module = {
                 "color": "#ff0000"
         }
 ]
-};
+    };
+    

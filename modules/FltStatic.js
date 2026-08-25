@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: FltStatic
-// Исходный файл: FltStatic.js
-// Версия: 208
+    // Исходный файл: FltStatic.js
+    // Версия: 208
 
-export const FltStaticModule = {
-    type: 'FltStatic',
-        typeID: 54,
+    export const FltStaticModule = {
+        type: 'FltStatic',
+            typeID: 54,
     defaultParams: [75, 0, 0, 1, 0],
-    displayName: 'FltStatic',
-    gridHeight: 3,
-    originalName: 'FltStatic',
-    tooltip: 'Filter Static',
-    components: [
+        displayName: 'FltStatic',
+        gridHeight: 3,
+        originalName: 'FltStatic',
+        tooltip: 'Filter Static',
+        inputs: [23],
+        outputs: [22],
+        components: [
         {
                 "componentType": "TextField",
                 "id": "9",
@@ -97,7 +99,9 @@ export const FltStaticModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -105,7 +109,9 @@ export const FltStaticModule = {
                 "x": 240,
                 "y": 3,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -124,4 +130,5 @@ export const FltStaticModule = {
                 "orientation": "Vertical"
         }
 ]
-};
+    };
+    

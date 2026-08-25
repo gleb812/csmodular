@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: RndClkA
-// Исходный файл: RndClkA.js
-// Версия: 238
+    // Исходный файл: RndClkA.js
+    // Версия: 238
 
-export const RndClkAModule = {
-    type: 'RndClkA',
-        typeID: 204,
+    export const RndClkAModule = {
+        type: 'RndClkA',
+            typeID: 204,
     defaultParams: [127, 0, 0, 0, 1],
-    displayName: 'RndClkA',
-    gridHeight: 2,
-    originalName: 'RndClkA',
-    tooltip: 'Random Clock A',
-    components: [
+        displayName: 'RndClkA',
+        gridHeight: 2,
+        originalName: 'RndClkA',
+        tooltip: 'Random Clock A',
+        inputs: [1, 10, 14],
+        outputs: [3],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 4,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Clk",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -34,7 +38,9 @@ export const RndClkAModule = {
                 "x": 240,
                 "y": 15,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -117,7 +123,9 @@ export const RndClkAModule = {
                 "x": 68,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Rst",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -148,7 +156,9 @@ export const RndClkAModule = {
                 "x": 103,
                 "y": 14,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Seed",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -160,4 +170,5 @@ export const RndClkAModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

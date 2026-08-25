@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: NoteScaler
-// Исходный файл: NoteScaler.js
-// Версия: 208
+    // Исходный файл: NoteScaler.js
+    // Версия: 208
 
-export const NoteScalerModule = {
-    type: 'NoteScaler',
-        typeID: 72,
+    export const NoteScalerModule = {
+        type: 'NoteScaler',
+            typeID: 72,
     defaultParams: [0],
-    displayName: 'NoteScaler',
-    gridHeight: 2,
-    originalName: 'NoteScaler',
-    tooltip: 'Note Scaler',
-    components: [
+        displayName: 'NoteScaler',
+        gridHeight: 2,
+        originalName: 'NoteScaler',
+        tooltip: 'Note Scaler',
+        inputs: [3],
+        outputs: [2],
+        components: [
         {
                 "componentType": "TextField",
                 "id": "0",
@@ -33,7 +35,9 @@ export const NoteScalerModule = {
                 "x": 210,
                 "y": 11,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -41,7 +45,9 @@ export const NoteScalerModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -67,4 +73,5 @@ export const NoteScalerModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

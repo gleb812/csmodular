@@ -1,22 +1,26 @@
 // Автоматически сгенерированный модуль: Sw12M
-// Исходный файл: Sw12M.js
-// Версия: 206
+    // Исходный файл: Sw12M.js
+    // Версия: 206
 
-export const Sw12MModule = {
-    type: 'Sw12M',
-        typeID: 186,
-    displayName: 'Sw1-2M',
-    gridHeight: 2,
-    originalName: 'Sw1-2M',
-    tooltip: 'Switch 1-2 Momentary',
-    components: [
+    export const Sw12MModule = {
+        type: 'Sw12M',
+            typeID: 186,
+        displayName: 'Sw1-2M',
+        gridHeight: 2,
+        originalName: 'Sw1-2M',
+        tooltip: 'Switch 1-2 Momentary',
+        inputs: [4],
+        outputs: [0, 1, 3],
+        components: [
         {
                 "componentType": "Output",
                 "id": "1",
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "OutOn",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -24,7 +28,9 @@ export const Sw12MModule = {
                 "x": 4,
                 "y": 15,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Ctrl",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextField",
@@ -49,7 +55,9 @@ export const Sw12MModule = {
                 "x": 180,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "SVG",
@@ -83,7 +91,9 @@ export const Sw12MModule = {
                 "x": 210,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "OutOff",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextEdit",
@@ -112,4 +122,5 @@ export const Sw12MModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

@@ -1,15 +1,17 @@
 // Автоматически сгенерированный модуль: Mix11S
-// Исходный файл: Mix11S.js
-// Версия: 206
+    // Исходный файл: Mix11S.js
+    // Версия: 206
 
-export const Mix11SModule = {
-    type: 'Mix11S',
-        typeID: 185,
-    displayName: 'Mix1-1S',
-    gridHeight: 2,
-    originalName: 'Mix1-1S',
-    tooltip: 'Mixer 1-1 Stereo',
-    components: [
+    export const Mix11SModule = {
+        type: 'Mix11S',
+            typeID: 185,
+        displayName: 'Mix1-1S',
+        gridHeight: 2,
+        originalName: 'Mix1-1S',
+        tooltip: 'Mixer 1-1 Stereo',
+        inputs: [1, 2, 15, 30],
+        outputs: [13, 28],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "0",
@@ -24,7 +26,9 @@ export const Mix11SModule = {
                 "x": 202,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "InR",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -32,7 +36,9 @@ export const Mix11SModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "OutR",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -40,7 +46,9 @@ export const Mix11SModule = {
                 "x": 24,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "RChain",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "TextLabel",
@@ -65,7 +73,9 @@ export const Mix11SModule = {
                 "x": 182,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "InL",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -91,7 +101,9 @@ export const Mix11SModule = {
                 "x": 220,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "OutL",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -99,7 +111,9 @@ export const Mix11SModule = {
                 "x": 4,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "LChain",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -151,4 +165,5 @@ export const Mix11SModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: PCSend
-// Исходный файл: PCSend.js
-// Версия: 210
+    // Исходный файл: PCSend.js
+    // Версия: 210
 
-export const PCSendModule = {
-    type: 'PCSend',
-        typeID: 142,
+    export const PCSendModule = {
+        type: 'PCSend',
+            typeID: 142,
     defaultParams: [0, 0],
-    displayName: 'PCSend',
-    gridHeight: 2,
-    originalName: 'PCSend',
-    tooltip: 'MIDI Program Change Send',
-    components: [
+        displayName: 'PCSend',
+        gridHeight: 2,
+        originalName: 'PCSend',
+        tooltip: 'MIDI Program Change Send',
+        inputs: [0, 11],
+        outputs: [10],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 10,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Send",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextField",
@@ -74,7 +78,9 @@ export const PCSendModule = {
                 "x": 65,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Send",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -82,7 +88,9 @@ export const PCSendModule = {
                 "x": 140,
                 "y": 15,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Program",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -118,4 +126,5 @@ export const PCSendModule = {
         ,
         "svgSrc": "/svg/ctrsend_pcsend_automate.svg"}
 ]
-};
+    };
+    

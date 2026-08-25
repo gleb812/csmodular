@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: FltPhase
-// Исходный файл: FltPhase.js
-// Версия: 208
+    // Исходный файл: FltPhase.js
+    // Версия: 208
 
-export const FltPhaseModule = {
-    type: 'FltPhase',
-        typeID: 102,
+    export const FltPhaseModule = {
+        type: 'FltPhase',
+            typeID: 102,
     defaultParams: [0, 64, 0, 64, 2, 64, 1, 127, 0, 0, 0],
-    displayName: 'FltPhase',
-    gridHeight: 5,
-    originalName: 'FltPhase',
-    tooltip: 'Filter Phase',
-    components: [
+        displayName: 'FltPhase',
+        gridHeight: 5,
+        originalName: 'FltPhase',
+        tooltip: 'Filter Phase',
+        inputs: [2, 6, 10, 13, 22],
+        outputs: [0],
+        components: [
         {
                 "componentType": "Graph",
                 "id": "1",
@@ -25,7 +27,9 @@ export const FltPhaseModule = {
                 "x": 240,
                 "y": 60,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -33,7 +37,9 @@ export const FltPhaseModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -65,7 +71,9 @@ export const FltPhaseModule = {
                 "x": 81,
                 "y": 59,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Spr",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Knob",
@@ -114,7 +122,9 @@ export const FltPhaseModule = {
                 "x": 4,
                 "y": 59,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "PitchVar",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -205,7 +215,9 @@ export const FltPhaseModule = {
                 "x": 122,
                 "y": 59,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "FB",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Knob",
@@ -229,7 +241,9 @@ export const FltPhaseModule = {
                 "x": 4,
                 "y": 43,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "ButtonFlat",
@@ -314,4 +328,5 @@ export const FltPhaseModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

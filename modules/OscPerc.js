@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: OscPerc
-// Исходный файл: OscPerc.js
-// Версия: 232
+    // Исходный файл: OscPerc.js
+    // Версия: 232
 
-export const OscPercModule = {
-    type: 'OscPerc',
-        typeID: 196,
+    export const OscPercModule = {
+        type: 'OscPerc',
+            typeID: 196,
     defaultParams: [64, 64, 0, 0, 0, 64, 64, 0, 1],
-    displayName: 'OscPerc',
-    gridHeight: 3,
-    originalName: 'OscPerc',
-    tooltip: 'Osc Percussion',
-    components: [
+        displayName: 'OscPerc',
+        gridHeight: 3,
+        originalName: 'OscPerc',
+        tooltip: 'Osc Percussion',
+        inputs: [0, 1, 5],
+        outputs: [16],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 4,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -34,7 +38,9 @@ export const OscPercModule = {
                 "x": 44,
                 "y": 29,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Trig",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -119,7 +125,9 @@ export const OscPercModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -162,7 +170,9 @@ export const OscPercModule = {
                 "x": 4,
                 "y": 29,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "PitchVar",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -223,4 +233,5 @@ export const OscPercModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

@@ -1,0 +1,173 @@
+// Автоматически сгенерированный модуль: In4
+    // Исходный файл: In4.js
+    // Версия: 210
+
+    export const In4Module = {
+        type: 'In4',
+            typeID: 171,
+        displayName: '4-In',
+        gridHeight: 2,
+        originalName: '4-In',
+        tooltip: '4 Inputs',
+        inputs: [],
+        outputs: [0, 1, 4, 6],
+        components: [
+        {
+                "componentType": "Output",
+                "id": "0",
+                "x": 240,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "static",
+                "ConnectorName": "Out4",
+                "ConnectorIndex": 3
+        },
+        {
+                "componentType": "Output",
+                "id": "1",
+                "x": 214,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "static",
+                "ConnectorName": "Out3",
+                "ConnectorIndex": 2
+        },
+        {
+                "componentType": "MiniVU",
+                "id": "2",
+                "x": 231,
+                "y": 10,
+                "width": 6,
+                "height": 15,
+                "orientation": "vertical"
+        },
+        {
+                "componentType": "MiniVU",
+                "id": "3",
+                "x": 205,
+                "y": 10,
+                "width": 6,
+                "height": 15,
+                "orientation": "vertical"
+        },
+        {
+                "componentType": "Output",
+                "id": "4",
+                "x": 188,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "static",
+                "ConnectorName": "Out2",
+                "ConnectorIndex": 1
+        },
+        {
+                "componentType": "MiniVU",
+                "id": "5",
+                "x": 179,
+                "y": 10,
+                "width": 6,
+                "height": 15,
+                "orientation": "vertical"
+        },
+        {
+                "componentType": "Output",
+                "id": "6",
+                "x": 162,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "static",
+                "ConnectorName": "Out1",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "MiniVU",
+                "id": "7",
+                "x": 153,
+                "y": 10,
+                "width": 6,
+                "height": 15,
+                "orientation": "vertical"
+        },
+        {
+                "componentType": "ButtonRadio",
+                "id": "8",
+                "x": 78,
+                "y": 8,
+                "buttonWidth": 20,
+                "buttonCount": 2,
+                "orientation": "horizontal",
+                "labels": [
+                        "In",
+                        "Bus"
+                ]
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "9",
+                "x": 243,
+                "y": 3,
+                "text": "4",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "10",
+                "x": 217,
+                "y": 3,
+                "text": "3",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "11",
+                "x": 192,
+                "y": 3,
+                "text": "2",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "12",
+                "x": 166,
+                "y": 3,
+                "text": "1",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "13",
+                "x": 138,
+                "y": 14,
+                "width": 13,
+                "text": "M"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "14",
+                "x": 5,
+                "y": 16,
+                "text": "Pad",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "15",
+                "x": 23,
+                "y": 14,
+                "width": 30,
+                "height": 12,
+                "labels": [
+                        "+6dB",
+                        "0dB",
+                        "-6dB",
+                        "-12dB"
+                ]
+        }
+]
+    };
+    

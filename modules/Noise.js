@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: Noise
-// Исходный файл: Noise.js
-// Версия: 208
+    // Исходный файл: Noise.js
+    // Версия: 208
 
-export const NoiseModule = {
-    type: 'Noise',
-        typeID: 106,
+    export const NoiseModule = {
+        type: 'Noise',
+            typeID: 106,
     defaultParams: [0, 1],
-    displayName: 'Noise',
-    gridHeight: 2,
-    originalName: 'Noise',
-    tooltip: 'Noise',
-    components: [
+        displayName: 'Noise',
+        gridHeight: 2,
+        originalName: 'Noise',
+        tooltip: 'Noise',
+        inputs: [],
+        outputs: [1],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "0",
@@ -34,7 +36,9 @@ export const NoiseModule = {
                 "y": 18,
                 "text": "White",
                 "fontSize": 9,
-                "color": "#ffffff"
+                "color": "#ffffff",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -54,4 +58,5 @@ export const NoiseModule = {
                 "text": "M"
         }
 ]
-};
+    };
+    

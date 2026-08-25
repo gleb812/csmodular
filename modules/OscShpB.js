@@ -1,17 +1,19 @@
 // Автоматически сгенерированный модуль: OscShpB
-// Исходный файл: OscShpB.js
-// Версия: 206
+    // Исходный файл: OscShpB.js
+    // Версия: 206
 
-export const OscShpBModule = {
-    type: 'OscShpB',
-        typeID: 9,
+    export const OscShpBModule = {
+        type: 'OscShpB',
+            typeID: 9,
     mode: [0],
     defaultParams: [64, 64, 1, 0, 0, 0, 0, 0, 1, 0],
-    displayName: 'OscShpB',
-    gridHeight: 4,
-    originalName: 'OscShpB',
-    tooltip: 'Osc Shape B',
-    components: [
+        displayName: 'OscShpB',
+        gridHeight: 4,
+        originalName: 'OscShpB',
+        tooltip: 'Osc Shape B',
+        inputs: [0, 1, 3, 12, 15],
+        outputs: [18],
+        components: [
         {
                 "componentType": "TextField",
                 "id": "17",
@@ -26,7 +28,9 @@ export const OscShpBModule = {
                 "x": 240,
                 "y": 45,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "PitchVar",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -69,7 +73,9 @@ export const OscShpBModule = {
                 "x": 4,
                 "y": 28,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Input",
@@ -107,7 +113,9 @@ export const OscShpBModule = {
                 "valign": "middle",
                 "originalType": "Symbol",
                 "symbolType": "Trig 1",
-                "width": 9
+                "width": 9,
+                "ConnectorName": "Sync",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -133,7 +141,9 @@ export const OscShpBModule = {
                 "x": 185,
                 "y": 4,
                 "infoFunc": 126,
-                "size": "medium"
+                "size": "medium",
+                "ConnectorName": "FmMod",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextField",
@@ -179,7 +189,9 @@ export const OscShpBModule = {
                 "x": 137,
                 "y": 44,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -281,4 +293,5 @@ export const OscShpBModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

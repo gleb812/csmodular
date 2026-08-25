@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: ModAmt
-// Исходный файл: ModAmt.js
-// Версия: 230
+    // Исходный файл: ModAmt.js
+    // Версия: 230
 
-export const ModAmtModule = {
-    type: 'ModAmt',
-        typeID: 195,
+    export const ModAmtModule = {
+        type: 'ModAmt',
+            typeID: 195,
     defaultParams: [100, 1, 0, 0],
-    displayName: 'ModAmt',
-    gridHeight: 2,
-    originalName: 'ModAmt',
-    tooltip: 'Modulation Amount',
-    components: [
+        displayName: 'ModAmt',
+        gridHeight: 2,
+        originalName: 'ModAmt',
+        tooltip: 'Modulation Amount',
+        inputs: [2, 5],
+        outputs: [1],
+        components: [
         {
                 "componentType": "TextLabel",
                 "id": "0",
@@ -31,7 +33,9 @@ export const ModAmtModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -39,7 +43,9 @@ export const ModAmtModule = {
                 "x": 210,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextEdit",
@@ -63,7 +69,9 @@ export const ModAmtModule = {
                 "x": 190,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Mod",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -133,4 +141,5 @@ export const ModAmtModule = {
                 ]
         }
 ]
-};
+    };
+    

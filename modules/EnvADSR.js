@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: EnvADSR
-// Исходный файл: EnvADSR.js
-// Версия: 206
+    // Исходный файл: EnvADSR.js
+    // Версия: 206
 
-export const EnvADSRModule = {
-    type: 'EnvADSR',
-        typeID: 20,
+    export const EnvADSRModule = {
+        type: 'EnvADSR',
+            typeID: 20,
     defaultParams: [0, 0, 54, 100, 14, 0, 1, 0],
-    displayName: 'EnvADSR',
-    gridHeight: 4,
-    originalName: 'EnvADSR',
-    tooltip: 'Envelope ADSR',
-    components: [
+        displayName: 'EnvADSR',
+        gridHeight: 4,
+        originalName: 'EnvADSR',
+        tooltip: 'Envelope ADSR',
+        inputs: [0, 10, 18],
+        outputs: [1, 4],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -25,7 +29,9 @@ export const EnvADSRModule = {
                 "x": 240,
                 "y": 45,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "LevelShift",
@@ -39,7 +45,9 @@ export const EnvADSRModule = {
                 "x": 223,
                 "y": 45,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Env",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Graph",
@@ -130,7 +138,9 @@ export const EnvADSRModule = {
                 "x": 4,
                 "y": 30,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Gate",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "LED",
@@ -153,7 +163,9 @@ export const EnvADSRModule = {
                 "x": 4,
                 "y": 45,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "AM",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -258,4 +270,5 @@ export const EnvADSRModule = {
                 "orientation": "Vertical"
         }
 ]
-};
+    };
+    

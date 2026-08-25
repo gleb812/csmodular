@@ -1,0 +1,163 @@
+// Автоматически сгенерированный модуль: Eq2Band
+    // Исходный файл: Eq2Band.js
+    // Версия: 208
+
+    export const Eq2BandModule = {
+        type: 'Eq2Band',
+            typeID: 32,
+        displayName: 'Eq2Band',
+        gridHeight: 3,
+        originalName: 'Eq2Band',
+        tooltip: 'Eq 2 Band',
+        inputs: [11],
+        outputs: [10],
+        components: [
+        {
+                "componentType": "Knob",
+                "id": "1",
+                "x": 148,
+                "y": 20,
+                "infoFunc": 36,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "2",
+                "x": 99,
+                "y": 20,
+                "infoFunc": 36,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextField",
+                "id": "5",
+                "x": 80,
+                "y": 4,
+                "width": 40,
+                "referenceElementId": 2
+        },
+        {
+                "componentType": "Graph",
+                "id": "0",
+                "x": 173,
+                "y": 4,
+                "width": 52,
+                "height": 28
+        },
+        {
+                "componentType": "TextField",
+                "id": "6",
+                "x": 129,
+                "y": 4,
+                "width": 40,
+                "referenceElementId": 1
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "7",
+                "x": 82,
+                "y": 20,
+                "text": "Lo",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "9",
+                "x": 131,
+                "y": 20,
+                "text": "Hi",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Output",
+                "id": "10",
+                "x": 240,
+                "y": 30,
+                "jackType": "audio",
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "Input",
+                "id": "11",
+                "x": 240,
+                "y": 3,
+                "jackType": "audio",
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "12",
+                "x": 239,
+                "y": 16,
+                "width": 13,
+                "text": "B"
+        },
+        {
+                "componentType": "Line",
+                "id": "13",
+                "x": 244,
+                "y": 8,
+                "length": 31,
+                "orientation": "Vertical"
+        },
+        {
+                "componentType": "Knob",
+                "id": "14",
+                "x": 24,
+                "y": 20,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "15",
+                "x": 6,
+                "y": 26,
+                "text": "Lev",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "MiniVU",
+                "id": "16",
+                "x": 227,
+                "y": 25,
+                "width": 6,
+                "height": 15,
+                "orientation": "vertical"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "3",
+                "x": 77,
+                "y": 29,
+                "width": 20,
+                "height": 12,
+                "labels": [
+                        "80",
+                        "110",
+                        "160"
+                ]
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "4",
+                "x": 126,
+                "y": 29,
+                "width": 20,
+                "height": 12,
+                "labels": [
+                        "6k",
+                        "8k",
+                        "12k"
+                ]
+        }
+]
+    };
+    

@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: Flanger
-// Исходный файл: Flanger.js
-// Версия: 208
+    // Исходный файл: Flanger.js
+    // Версия: 208
 
-export const FlangerModule = {
-    type: 'Flanger',
-        typeID: 89,
+    export const FlangerModule = {
+        type: 'Flanger',
+            typeID: 89,
     defaultParams: [64, 64, 64, 1],
-    displayName: 'Flanger',
-    gridHeight: 3,
-    originalName: 'Flanger',
-    tooltip: 'Flanger',
-    components: [
+        displayName: 'Flanger',
+        gridHeight: 3,
+        originalName: 'Flanger',
+        tooltip: 'Flanger',
+        inputs: [6],
+        outputs: [5],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "1",
@@ -59,7 +61,9 @@ export const FlangerModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -67,7 +71,9 @@ export const FlangerModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Line",
@@ -103,4 +109,5 @@ export const FlangerModule = {
                 "referenceElementId": 1
         }
 ]
-};
+    };
+    

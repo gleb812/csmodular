@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: Mux81X
-// Исходный файл: Mux81X.js
-// Версия: 206
+    // Исходный файл: Mux81X.js
+    // Версия: 206
 
-export const Mux81XModule = {
-    type: 'Mux81X',
-        typeID: 60,
+    export const Mux81XModule = {
+        type: 'Mux81X',
+            typeID: 60,
     defaultParams: [0],
-    displayName: 'Mux8-1X',
-    gridHeight: 3,
-    originalName: 'Mux8-1X',
-    tooltip: 'Multiplexer 8-1 with variable X-Fade',
-    components: [
+        displayName: 'Mux8-1X',
+        gridHeight: 3,
+        originalName: 'Mux8-1X',
+        tooltip: 'Multiplexer 8-1 with variable X-Fade',
+        inputs: [0, 1, 4, 6, 8, 10, 12, 14, 24],
+        outputs: [17],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 32,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -25,7 +29,9 @@ export const Mux81XModule = {
                 "x": 52,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -51,7 +57,9 @@ export const Mux81XModule = {
                 "x": 72,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -68,7 +76,9 @@ export const Mux81XModule = {
                 "x": 92,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In4",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "TextLabel",
@@ -85,7 +95,9 @@ export const Mux81XModule = {
                 "x": 112,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In5",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "TextLabel",
@@ -102,7 +114,9 @@ export const Mux81XModule = {
                 "x": 132,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In6",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "TextLabel",
@@ -119,7 +133,9 @@ export const Mux81XModule = {
                 "x": 152,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In7",
+                "ConnectorIndex": 6
         },
         {
                 "componentType": "TextLabel",
@@ -136,7 +152,9 @@ export const Mux81XModule = {
                 "x": 172,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In8",
+                "ConnectorIndex": 7
         },
         {
                 "componentType": "TextLabel",
@@ -153,7 +171,9 @@ export const Mux81XModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "LED",
@@ -209,7 +229,9 @@ export const Mux81XModule = {
                 "x": 4,
                 "y": 30,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Ctrl",
+                "ConnectorIndex": 8
         },
         {
                 "componentType": "TextLabel",
@@ -246,4 +268,5 @@ export const Mux81XModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: ConstSwM
-// Исходный файл: ConstSwM.js
-// Версия: 206
+    // Исходный файл: ConstSwM.js
+    // Версия: 206
 
-export const ConstSwMModule = {
-    type: 'ConstSwM',
-        typeID: 188,
+    export const ConstSwMModule = {
+        type: 'ConstSwM',
+            typeID: 188,
     defaultParams: [64, 0, 0],
-    displayName: 'ConstSwM',
-    gridHeight: 2,
-    originalName: 'ConstSwM',
-    tooltip: 'Constant Switch Momentary',
-    components: [
+        displayName: 'ConstSwM',
+        gridHeight: 2,
+        originalName: 'ConstSwM',
+        tooltip: 'Constant Switch Momentary',
+        inputs: [],
+        outputs: [0],
+        components: [
         {
                 "componentType": "Output",
                 "id": "0",
                 "x": 240,
                 "y": 10,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -83,4 +87,5 @@ export const ConstSwMModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

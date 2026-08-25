@@ -1,0 +1,96 @@
+// Автоматически сгенерированный модуль: WahWah
+    // Исходный файл: WahWah.js
+    // Версия: 202
+
+    export const WahWahModule = {
+        type: 'WahWah',
+            typeID: 125,
+        displayName: 'WahWah',
+        gridHeight: 2,
+        originalName: 'WahWah',
+        tooltip: 'Wah-Wah',
+        inputs: [1, 2],
+        outputs: [3],
+        components: [
+        {
+                "componentType": "Input",
+                "id": "2",
+                "x": 210,
+                "y": 11,
+                "jackType": "audio",
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "Output",
+                "id": "3",
+                "x": 240,
+                "y": 11,
+                "jackType": "audio",
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "Knob",
+                "id": "0",
+                "x": 139,
+                "y": 5,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "5",
+                "x": 163,
+                "y": 5,
+                "text": "Sweep",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Line",
+                "id": "6",
+                "x": 218,
+                "y": 16,
+                "length": 25,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Input",
+                "id": "1",
+                "x": 97,
+                "y": 14,
+                "jackType": "control",
+                "bandwidth": "static",
+                "ConnectorName": "Sweep",
+                "ConnectorIndex": 1
+        },
+        {
+                "componentType": "Knob",
+                "id": "4",
+                "x": 111,
+                "y": 7,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "7",
+                "x": 99,
+                "y": 17,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "8",
+                "x": 224,
+                "y": 10,
+                "width": 13,
+                "text": "B"
+        }
+]
+    };
+    

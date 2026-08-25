@@ -1,22 +1,26 @@
 // Автоматически сгенерированный модуль: Sw41
-// Исходный файл: Sw41.js
-// Версия: 206
+    // Исходный файл: Sw41.js
+    // Версия: 206
 
-export const Sw41Module = {
-    type: 'Sw41',
-        typeID: 79,
-    displayName: 'Sw4-1',
-    gridHeight: 3,
-    originalName: 'Sw4-1',
-    tooltip: 'Switch 4-1',
-    components: [
+    export const Sw41Module = {
+        type: 'Sw41',
+            typeID: 79,
+        displayName: 'Sw4-1',
+        gridHeight: 3,
+        originalName: 'Sw4-1',
+        tooltip: 'Switch 4-1',
+        inputs: [12, 17, 18, 19],
+        outputs: [11, 20],
+        components: [
         {
                 "componentType": "Output",
                 "id": "11",
                 "x": 4,
                 "y": 30,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Ctrl",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextField",
@@ -68,7 +72,9 @@ export const Sw41Module = {
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -85,7 +91,9 @@ export const Sw41Module = {
                 "x": 82,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -93,7 +101,9 @@ export const Sw41Module = {
                 "x": 126,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -101,7 +111,9 @@ export const Sw41Module = {
                 "x": 169,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Input",
@@ -109,7 +121,9 @@ export const Sw41Module = {
                 "x": 212,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In4",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Stub",
@@ -122,4 +136,5 @@ export const Sw41Module = {
                 "color": "#ff0000"
         }
 ]
-};
+    };
+    

@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: LevAdd
-// Исходный файл: LevAdd.js
-// Версия: 206
+    // Исходный файл: LevAdd.js
+    // Версия: 206
 
-export const LevAddModule = {
-    type: 'LevAdd',
-        typeID: 112,
+    export const LevAddModule = {
+        type: 'LevAdd',
+            typeID: 112,
     defaultParams: [64, 1],
-    displayName: 'LevAdd',
-    gridHeight: 2,
-    originalName: 'LevAdd',
-    tooltip: 'Level Add',
-    components: [
+        displayName: 'LevAdd',
+        gridHeight: 2,
+        originalName: 'LevAdd',
+        tooltip: 'Level Add',
+        inputs: [1],
+        outputs: [3],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "0",
@@ -25,7 +27,9 @@ export const LevAddModule = {
                 "x": 210,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -33,7 +37,9 @@ export const LevAddModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextField",
@@ -98,4 +104,5 @@ export const LevAddModule = {
                 "orientation": "Horizontal"
         }
 ]
-};
+    };
+    

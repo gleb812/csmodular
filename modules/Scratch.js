@@ -1,15 +1,17 @@
 // Автоматически сгенерированный модуль: Scratch
-// Исходный файл: Scratch.js
-// Версия: 238
+    // Исходный файл: Scratch.js
+    // Версия: 238
 
-export const ScratchModule = {
-    type: 'Scratch',
-        typeID: 63,
-    displayName: 'Scratch',
-    gridHeight: 3,
-    originalName: 'Scratch',
-    tooltip: 'Scratch',
-    components: [
+    export const ScratchModule = {
+        type: 'Scratch',
+            typeID: 63,
+        displayName: 'Scratch',
+        gridHeight: 3,
+        originalName: 'Scratch',
+        tooltip: 'Scratch',
+        inputs: [1, 6],
+        outputs: [2],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "0",
@@ -24,7 +26,9 @@ export const ScratchModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -32,7 +36,9 @@ export const ScratchModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -40,7 +46,9 @@ export const ScratchModule = {
                 "x": 11,
                 "y": 29,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Mod",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -124,4 +132,5 @@ export const ScratchModule = {
                 "orientation": "Vertical"
         }
 ]
-};
+    };
+    

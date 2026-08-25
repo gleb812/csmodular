@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: DAConv
-// Исходный файл: DAConv.js
-// Версия: 206
+    // Исходный файл: DAConv.js
+    // Версия: 206
 
-export const DAConvModule = {
-    type: 'DAConv',
-        typeID: 132,
+    export const DAConvModule = {
+        type: 'DAConv',
+            typeID: 132,
     defaultParams: [],
-    displayName: 'DAConv',
-    gridHeight: 2,
-    originalName: 'DAConv',
-    tooltip: 'D/A Converter',
-    components: [
+        displayName: 'DAConv',
+        gridHeight: 2,
+        originalName: 'DAConv',
+        tooltip: 'D/A Converter',
+        inputs: [0, 1, 5, 7, 9, 11, 13, 15],
+        outputs: [16],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 80,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "D0",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -25,7 +29,9 @@ export const DAConvModule = {
                 "x": 100,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "D1",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -51,7 +57,9 @@ export const DAConvModule = {
                 "x": 120,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "D2",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -68,7 +76,9 @@ export const DAConvModule = {
                 "x": 140,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "D3",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "TextLabel",
@@ -85,7 +95,9 @@ export const DAConvModule = {
                 "x": 160,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "D4",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "TextLabel",
@@ -102,7 +114,9 @@ export const DAConvModule = {
                 "x": 180,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "D5",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "TextLabel",
@@ -119,7 +133,9 @@ export const DAConvModule = {
                 "x": 200,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "D6",
+                "ConnectorIndex": 6
         },
         {
                 "componentType": "TextLabel",
@@ -136,7 +152,9 @@ export const DAConvModule = {
                 "x": 220,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "D7",
+                "ConnectorIndex": 7
         },
         {
                 "componentType": "TextLabel",
@@ -153,7 +171,10 @@ export const DAConvModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         }
 ]
-};
+    };
+    

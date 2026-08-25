@@ -1,22 +1,26 @@
 // Автоматически сгенерированный модуль: SH
-// Исходный файл: SH.js
-// Версия: 208
+    // Исходный файл: SH.js
+    // Версия: 208
 
-export const SHModule = {
-    type: 'SH',
-        typeID: 53,
-    displayName: 'S&H',
-    gridHeight: 2,
-    originalName: 'S&H',
-    tooltip: 'Sample & Hold',
-    components: [
+    export const SHModule = {
+        type: 'SH',
+            typeID: 53,
+        displayName: 'S&H',
+        gridHeight: 2,
+        originalName: 'S&H',
+        tooltip: 'Sample & Hold',
+        inputs: [1, 5],
+        outputs: [0],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 192,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -24,7 +28,9 @@ export const SHModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "SVG",
@@ -58,7 +64,9 @@ export const SHModule = {
                 "x": 162,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Ctrl",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -111,4 +119,5 @@ export const SHModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

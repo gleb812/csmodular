@@ -1,15 +1,17 @@
 // Автоматически сгенерированный модуль: ShpExp
-// Исходный файл: ShpExp.js
-// Версия: 234
+    // Исходный файл: ShpExp.js
+    // Версия: 234
 
-export const ShpExpModule = {
-    type: 'ShpExp',
-        typeID: 34,
-    displayName: 'ShpExp',
-    gridHeight: 2,
-    originalName: 'ShpExp',
-    tooltip: 'Shape Exp',
-    components: [
+    export const ShpExpModule = {
+        type: 'ShpExp',
+            typeID: 34,
+        displayName: 'ShpExp',
+        gridHeight: 2,
+        originalName: 'ShpExp',
+        tooltip: 'Shape Exp',
+        inputs: [1, 4],
+        outputs: [5],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "0",
@@ -24,7 +26,9 @@ export const ShpExpModule = {
                 "x": 108,
                 "y": 14,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "ModIn",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -48,7 +52,9 @@ export const ShpExpModule = {
                 "x": 210,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -56,7 +62,9 @@ export const ShpExpModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Graph",
@@ -107,4 +115,5 @@ export const ShpExpModule = {
                 "orientation": "Horizontal"
         }
 ]
-};
+    };
+    

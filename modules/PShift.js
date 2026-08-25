@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: PShift
-// Исходный файл: PShift.js
-// Версия: 238
+    // Исходный файл: PShift.js
+    // Версия: 238
 
-export const PShiftModule = {
-    type: 'PShift',
-        typeID: 167,
+    export const PShiftModule = {
+        type: 'PShift',
+            typeID: 167,
     defaultParams: [64, 64, 0, 2, 1],
-    displayName: 'PShift',
-    gridHeight: 3,
-    originalName: 'PShift',
-    tooltip: 'Pitch Shifter',
-    components: [
+        displayName: 'PShift',
+        gridHeight: 3,
+        originalName: 'PShift',
+        tooltip: 'Pitch Shifter',
+        inputs: [1, 6],
+        outputs: [2],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "0",
@@ -25,7 +27,9 @@ export const PShiftModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -33,7 +37,9 @@ export const PShiftModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -49,7 +55,9 @@ export const PShiftModule = {
                 "x": 11,
                 "y": 29,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -151,4 +159,5 @@ export const PShiftModule = {
                 "orientation": "Vertical"
         }
 ]
-};
+    };
+    

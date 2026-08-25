@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: Mix81B
-// Исходный файл: Mix81B.js
-// Версия: 206
+    // Исходный файл: Mix81B.js
+    // Версия: 206
 
-export const Mix81BModule = {
-    type: 'Mix81B',
-        typeID: 40,
+    export const Mix81BModule = {
+        type: 'Mix81B',
+            typeID: 40,
     defaultParams: [100, 100, 100, 100, 100, 100, 100, 100, 0, 0],
-    displayName: 'Mix8-1B',
-    gridHeight: 4,
-    originalName: 'Mix8-1B',
-    tooltip: 'Mixer 8-1 B',
-    components: [
+        displayName: 'Mix8-1B',
+        gridHeight: 4,
+        originalName: 'Mix8-1B',
+        tooltip: 'Mixer 8-1 B',
+        inputs: [0, 5, 6, 11, 12, 17, 18, 24, 27],
+        outputs: [23],
+        components: [
         {
                 "componentType": "Input",
                 "id": "5",
                 "x": 45,
                 "y": 20,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -42,7 +46,9 @@ export const Mix81BModule = {
                 "x": 70,
                 "y": 20,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -67,7 +73,9 @@ export const Mix81BModule = {
                 "x": 95,
                 "y": 20,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Knob",
@@ -92,7 +100,9 @@ export const Mix81BModule = {
                 "x": 120,
                 "y": 20,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In4",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Knob",
@@ -117,7 +127,9 @@ export const Mix81BModule = {
                 "x": 145,
                 "y": 20,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In5",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Knob",
@@ -142,7 +154,9 @@ export const Mix81BModule = {
                 "x": 170,
                 "y": 20,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In6",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "Knob",
@@ -167,7 +181,9 @@ export const Mix81BModule = {
                 "x": 240,
                 "y": 45,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "MiniVU",
@@ -184,7 +200,9 @@ export const Mix81BModule = {
                 "x": 195,
                 "y": 20,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In7",
+                "ConnectorIndex": 6
         },
         {
                 "componentType": "Knob",
@@ -209,7 +227,9 @@ export const Mix81BModule = {
                 "x": 220,
                 "y": 20,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In8",
+                "ConnectorIndex": 7
         },
         {
                 "componentType": "Knob",
@@ -234,7 +254,9 @@ export const Mix81BModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Chain",
+                "ConnectorIndex": 8
         },
         {
                 "componentType": "TextLabel",
@@ -281,4 +303,5 @@ export const Mix81BModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

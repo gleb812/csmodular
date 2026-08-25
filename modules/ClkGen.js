@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: ClkGen
-// Исходный файл: ClkGen.js
-// Версия: 203
+    // Исходный файл: ClkGen.js
+    // Версия: 203
 
-export const ClkGenModule = {
-    type: 'ClkGen',
-        typeID: 68,
+    export const ClkGenModule = {
+        type: 'ClkGen',
+            typeID: 68,
     defaultParams: [64, 1, 0, 2, 0],
-    displayName: 'ClkGen',
-    gridHeight: 4,
-    originalName: 'ClkGen',
-    tooltip: 'Clock Generator',
-    components: [
+        displayName: 'ClkGen',
+        gridHeight: 4,
+        originalName: 'ClkGen',
+        tooltip: 'Clock Generator',
+        inputs: [14],
+        outputs: [6, 7, 8, 16],
+        components: [
         {
                 "componentType": "TextField",
                 "id": "2",
@@ -41,7 +43,9 @@ export const ClkGenModule = {
                 "x": 240,
                 "y": 17,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "1/96",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -49,7 +53,9 @@ export const ClkGenModule = {
                 "x": 240,
                 "y": 31,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "1/16",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -57,7 +63,9 @@ export const ClkGenModule = {
                 "x": 240,
                 "y": 3,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "ClkActive",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -101,7 +109,9 @@ export const ClkGenModule = {
                 "x": 240,
                 "y": 45,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Sync",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "TextLabel",
@@ -172,7 +182,9 @@ export const ClkGenModule = {
                 "x": 4,
                 "y": 16,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Reset",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -215,4 +227,5 @@ export const ClkGenModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

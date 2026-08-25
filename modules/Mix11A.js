@@ -1,15 +1,17 @@
 // Автоматически сгенерированный модуль: Mix11A
-// Исходный файл: Mix11A.js
-// Версия: 206
+    // Исходный файл: Mix11A.js
+    // Версия: 206
 
-export const Mix11AModule = {
-    type: 'Mix11A',
-        typeID: 184,
-    displayName: 'Mix1-1A',
-    gridHeight: 2,
-    originalName: 'Mix1-1A',
-    tooltip: 'Mixer 1-1 A',
-    components: [
+    export const Mix11AModule = {
+        type: 'Mix11A',
+            typeID: 184,
+        displayName: 'Mix1-1A',
+        gridHeight: 2,
+        originalName: 'Mix1-1A',
+        tooltip: 'Mixer 1-1 A',
+        inputs: [1, 30],
+        outputs: [13],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "0",
@@ -24,7 +26,9 @@ export const Mix11AModule = {
                 "x": 210,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -32,7 +36,9 @@ export const Mix11AModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -57,7 +63,9 @@ export const Mix11AModule = {
                 "x": 4,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Chain",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "ButtonFlat",
@@ -81,4 +89,5 @@ export const Mix11AModule = {
                 "orientation": "Horizontal"
         }
 ]
-};
+    };
+    

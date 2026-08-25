@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: NoteDet
-// Исходный файл: NoteDet.js
-// Версия: 210
+    // Исходный файл: NoteDet.js
+    // Версия: 210
 
-export const NoteDetModule = {
-    type: 'NoteDet',
-        typeID: 156,
+    export const NoteDetModule = {
+        type: 'NoteDet',
+            typeID: 156,
     defaultParams: [64],
-    displayName: 'NoteDet',
-    gridHeight: 2,
-    originalName: 'NoteDet',
-    tooltip: 'Note Detector',
-    components: [
+        displayName: 'NoteDet',
+        gridHeight: 2,
+        originalName: 'NoteDet',
+        tooltip: 'Note Detector',
+        inputs: [],
+        outputs: [4, 6, 8],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "0",
@@ -48,7 +50,9 @@ export const NoteDetModule = {
                 "x": 202,
                 "y": 13,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Vel",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -65,7 +69,9 @@ export const NoteDetModule = {
                 "x": 172,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Gate",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -82,7 +88,9 @@ export const NoteDetModule = {
                 "x": 232,
                 "y": 13,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "RelVel",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -94,4 +102,5 @@ export const NoteDetModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

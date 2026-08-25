@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: MixStereo
-// Исходный файл: MixStereo.js
-// Версия: 202
+    // Исходный файл: MixStereo.js
+    // Версия: 202
 
-export const MixStereoModule = {
-    type: 'MixStereo',
-        typeID: 48,
+    export const MixStereoModule = {
+        type: 'MixStereo',
+            typeID: 48,
     defaultParams: [100, 100, 100, 100, 100, 100, 64, 64, 64, 64, 64, 64, 100],
-    displayName: 'MixStereo',
-    gridHeight: 5,
-    originalName: 'MixStereo',
-    tooltip: 'Mixer Stereo',
-    components: [
+        displayName: 'MixStereo',
+        gridHeight: 5,
+        originalName: 'MixStereo',
+        tooltip: 'Mixer Stereo',
+        inputs: [3, 8, 13, 18, 23, 28],
+        outputs: [35, 36],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "0",
@@ -33,7 +35,9 @@ export const MixStereoModule = {
                 "x": 9,
                 "y": 22,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -66,7 +70,9 @@ export const MixStereoModule = {
                 "x": 41,
                 "y": 22,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -99,7 +105,9 @@ export const MixStereoModule = {
                 "x": 73,
                 "y": 22,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -132,7 +140,9 @@ export const MixStereoModule = {
                 "x": 105,
                 "y": 22,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In4",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "TextLabel",
@@ -165,7 +175,9 @@ export const MixStereoModule = {
                 "x": 137,
                 "y": 22,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In5",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "TextLabel",
@@ -198,7 +210,9 @@ export const MixStereoModule = {
                 "x": 169,
                 "y": 22,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In6",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "TextLabel",
@@ -241,7 +255,9 @@ export const MixStereoModule = {
                 "x": 240,
                 "y": 60,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "OutR",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -249,7 +265,9 @@ export const MixStereoModule = {
                 "x": 216,
                 "y": 60,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "OutL",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -306,4 +324,5 @@ export const MixStereoModule = {
                 "orientation": "vertical"
         }
 ]
-};
+    };
+    

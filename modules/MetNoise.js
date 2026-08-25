@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: MetNoise
-// Исходный файл: MetNoise.js
-// Версия: 208
+    // Исходный файл: MetNoise.js
+    // Версия: 208
 
-export const MetNoiseModule = {
-    type: 'MetNoise',
-        typeID: 29,
+    export const MetNoiseModule = {
+        type: 'MetNoise',
+            typeID: 29,
     defaultParams: [64, 64, 1, 0, 0],
-    displayName: 'MetNoise',
-    gridHeight: 2,
-    originalName: 'MetNoise',
-    tooltip: 'Metallic noise oscillator',
-    components: [
+        displayName: 'MetNoise',
+        gridHeight: 2,
+        originalName: 'MetNoise',
+        tooltip: 'Metallic noise oscillator',
+        inputs: [2, 9],
+        outputs: [4],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "0",
@@ -34,7 +36,9 @@ export const MetNoiseModule = {
                 "x": 240,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -67,7 +71,9 @@ export const MetNoiseModule = {
                 "x": 66,
                 "y": 14,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "FreqMod",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -91,7 +97,9 @@ export const MetNoiseModule = {
                 "x": 150,
                 "y": 14,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "ColorMod",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -110,4 +118,5 @@ export const MetNoiseModule = {
                 "orientation": "Horizontal"
         }
 ]
-};
+    };
+    

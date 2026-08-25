@@ -1,17 +1,19 @@
 // Автоматически сгенерированный модуль: DlySingleB
-// Исходный файл: DlySingleB.js
-// Версия: 228
+    // Исходный файл: DlySingleB.js
+    // Версия: 228
 
-export const DlySingleBModule = {
-    type: 'DlySingleB',
-        typeID: 173,
+    export const DlySingleBModule = {
+        type: 'DlySingleB',
+            typeID: 173,
     mode: [0],
     defaultParams: [64, 64],
-    displayName: 'DlySingleB',
-    gridHeight: 2,
-    originalName: 'DlySingleB',
-    tooltip: 'Delay Single',
-    components: [
+        displayName: 'DlySingleB',
+        gridHeight: 2,
+        originalName: 'DlySingleB',
+        tooltip: 'Delay Single',
+        inputs: [4, 8],
+        outputs: [11],
+        components: [
         {
                 "componentType": "TextLabel",
                 "id": "0",
@@ -45,7 +47,9 @@ export const DlySingleBModule = {
                 "x": 101,
                 "y": 14,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Time",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -77,7 +81,9 @@ export const DlySingleBModule = {
                 "x": 210,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -94,7 +100,9 @@ export const DlySingleBModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -111,4 +119,5 @@ export const DlySingleBModule = {
                 "width": 102
         }
 ]
-};
+    };
+    

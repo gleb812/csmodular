@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: NoiseGate
-// Исходный файл: NoiseGate.js
-// Версия: 206
+    // Исходный файл: NoiseGate.js
+    // Версия: 206
 
-export const NoiseGateModule = {
-    type: 'NoiseGate',
-        typeID: 189,
+    export const NoiseGateModule = {
+        type: 'NoiseGate',
+            typeID: 189,
     defaultParams: [20, 0, 64, 1],
-    displayName: 'NoiseGate',
-    gridHeight: 3,
-    originalName: 'NoiseGate',
-    tooltip: 'Noise Gate',
-    components: [
+        displayName: 'NoiseGate',
+        gridHeight: 3,
+        originalName: 'NoiseGate',
+        tooltip: 'Noise Gate',
+        inputs: [0],
+        outputs: [1, 8],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "LED",
@@ -56,7 +60,9 @@ export const NoiseGateModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -106,7 +112,9 @@ export const NoiseGateModule = {
                 "x": 223,
                 "y": 30,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Env",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Line",
@@ -133,4 +141,5 @@ export const NoiseGateModule = {
                 "referenceElementId": 3
         }
 ]
-};
+    };
+    

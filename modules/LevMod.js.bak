@@ -1,0 +1,165 @@
+// Автоматически сгенерированный модуль: LevMod
+    // Исходный файл: LevMod.js
+    // Версия: 206
+
+    export const LevModModule = {
+        type: 'LevMod',
+            typeID: 117,
+        displayName: 'LevMod',
+        gridHeight: 3,
+        originalName: 'LevMod',
+        tooltip: 'Level Modulator',
+        inputs: [0, 2, 6],
+        outputs: [1],
+        components: [
+        {
+                "componentType": "Input",
+                "id": "0",
+                "x": 210,
+                "y": 28,
+                "jackType": "audio",
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "Output",
+                "id": "1",
+                "x": 240,
+                "y": 28,
+                "jackType": "audio",
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "3",
+                "x": 215,
+                "y": 22,
+                "text": "↑",
+                "fontSize": 18,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Amplifier",
+                "width": 102
+        },
+        {
+                "componentType": "Input",
+                "id": "2",
+                "x": 210,
+                "y": 7,
+                "jackType": "audio",
+                "bandwidth": "dynamic",
+                "ConnectorName": "Mod",
+                "ConnectorIndex": 1
+        },
+        {
+                "componentType": "SVG",
+                "id": "4",
+                "x": 220,
+                "y": 9,
+                "width": 18,
+                "height": 7,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Line",
+                "id": "5",
+                "x": 237,
+                "y": 13,
+                "length": 9,
+                "orientation": "Vertical"
+        },
+        {
+                "componentType": "Input",
+                "id": "6",
+                "x": 91,
+                "y": 29,
+                "jackType": "control",
+                "bandwidth": "dynamic",
+                "ConnectorName": "ModDepth",
+                "ConnectorIndex": 2
+        },
+        {
+                "componentType": "Knob",
+                "id": "7",
+                "x": 105,
+                "y": 22,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "8",
+                "x": 95,
+                "y": 32,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Knob",
+                "id": "9",
+                "x": 144,
+                "y": 17,
+                "infoFunc": 55,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "10",
+                "x": 136,
+                "y": 33,
+                "text": "0",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "11",
+                "x": 166,
+                "y": 33,
+                "text": "Bal.",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "12",
+                "x": 146,
+                "y": 7,
+                "text": "AM",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "13",
+                "x": 191,
+                "y": 9,
+                "text": "Mod",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "14",
+                "x": 87,
+                "y": 11,
+                "text": "Mod depth",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Line",
+                "id": "15",
+                "x": 231,
+                "y": 21,
+                "length": 7,
+                "orientation": "Horizontal"
+        }
+]
+    };
+    

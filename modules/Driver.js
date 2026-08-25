@@ -1,15 +1,17 @@
 // Автоматически сгенерированный модуль: Driver
-// Исходный файл: Driver.js
-// Версия: 234
+    // Исходный файл: Driver.js
+    // Версия: 234
 
-export const DriverModule = {
-    type: 'Driver',
-        typeID: 35,
-    displayName: 'Driver',
-    gridHeight: 3,
-    originalName: 'Driver',
-    tooltip: 'Driver',
-    components: [
+    export const DriverModule = {
+        type: 'Driver',
+            typeID: 35,
+        displayName: 'Driver',
+        gridHeight: 3,
+        originalName: 'Driver',
+        tooltip: 'Driver',
+        inputs: [4, 8],
+        outputs: [5],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "0",
@@ -40,7 +42,9 @@ export const DriverModule = {
                 "x": 215,
                 "y": 28,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -48,7 +52,9 @@ export const DriverModule = {
                 "x": 239,
                 "y": 28,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -74,7 +80,9 @@ export const DriverModule = {
                 "x": 8,
                 "y": 28,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -114,4 +122,5 @@ export const DriverModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

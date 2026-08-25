@@ -1,15 +1,17 @@
 // Автоматически сгенерированный модуль: Sw18
-// Исходный файл: Sw18.js
-// Версия: 206
+    // Исходный файл: Sw18.js
+    // Версия: 206
 
-export const Sw18Module = {
-    type: 'Sw18',
-        typeID: 78,
-    displayName: 'Sw1-8',
-    gridHeight: 4,
-    originalName: 'Sw1-8',
-    tooltip: 'Switch 1-8',
-    components: [
+    export const Sw18Module = {
+        type: 'Sw18',
+            typeID: 78,
+        displayName: 'Sw1-8',
+        gridHeight: 4,
+        originalName: 'Sw1-8',
+        tooltip: 'Switch 1-8',
+        inputs: [13],
+        outputs: [10, 16, 18, 19, 20, 21, 23, 24, 25],
+        components: [
         {
                 "componentType": "TextLabel",
                 "id": "4",
@@ -34,7 +36,9 @@ export const Sw18Module = {
                 "x": 4,
                 "y": 45,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Ctrl",
+                "ConnectorIndex": 8
         },
         {
                 "componentType": "TextField",
@@ -59,7 +63,9 @@ export const Sw18Module = {
                 "x": 50,
                 "y": 45,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -94,7 +100,9 @@ export const Sw18Module = {
                 "x": 111,
                 "y": 45,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out5",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Output",
@@ -102,7 +110,9 @@ export const Sw18Module = {
                 "x": 154,
                 "y": 45,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out6",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "Output",
@@ -110,7 +120,9 @@ export const Sw18Module = {
                 "x": 197,
                 "y": 45,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out7",
+                "ConnectorIndex": 6
         },
         {
                 "componentType": "Output",
@@ -118,7 +130,9 @@ export const Sw18Module = {
                 "x": 240,
                 "y": 45,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out8",
+                "ConnectorIndex": 7
         },
         {
                 "componentType": "TextLabel",
@@ -135,7 +149,9 @@ export const Sw18Module = {
                 "x": 88,
                 "y": 33,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -143,7 +159,9 @@ export const Sw18Module = {
                 "x": 131,
                 "y": 33,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -151,7 +169,9 @@ export const Sw18Module = {
                 "x": 174,
                 "y": 33,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Output",
@@ -159,7 +179,9 @@ export const Sw18Module = {
                 "x": 217,
                 "y": 33,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out4",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "TextLabel",
@@ -217,4 +239,5 @@ export const Sw18Module = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

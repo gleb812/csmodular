@@ -1,22 +1,26 @@
 // Автоматически сгенерированный модуль: SeqVal
-// Исходный файл: SeqVal.js
-// Версия: 210
+    // Исходный файл: SeqVal.js
+    // Версия: 210
 
-export const SeqValModule = {
-    type: 'SeqVal',
-        typeID: 145,
-    displayName: 'SeqVal',
-    gridHeight: 8,
-    originalName: 'SeqVal',
-    tooltip: 'Sequencer Values',
-    components: [
+    export const SeqValModule = {
+        type: 'SeqVal',
+            typeID: 145,
+        displayName: 'SeqVal',
+        gridHeight: 8,
+        originalName: 'SeqVal',
+        tooltip: 'Sequencer Values',
+        inputs: [0, 1, 3, 5, 82, 115],
+        outputs: [8, 58, 114],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 4,
                 "y": 25,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Clk",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -24,7 +28,9 @@ export const SeqValModule = {
                 "x": 4,
                 "y": 47,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Rst",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -32,7 +38,9 @@ export const SeqValModule = {
                 "x": 4,
                 "y": 69,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Loop",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -58,7 +66,9 @@ export const SeqValModule = {
                 "x": 204,
                 "y": 4,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Park",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "LED",
@@ -81,7 +91,9 @@ export const SeqValModule = {
                 "x": 240,
                 "y": 26,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Link",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -322,7 +334,9 @@ export const SeqValModule = {
                 "x": 240,
                 "y": 105,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Trig",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Line",
@@ -520,7 +534,9 @@ export const SeqValModule = {
                 "x": 4,
                 "y": 105,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Trig",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "Line",
@@ -904,7 +920,9 @@ export const SeqValModule = {
                 "x": 240,
                 "y": 84,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Val",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -912,7 +930,9 @@ export const SeqValModule = {
                 "x": 4,
                 "y": 84,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Val",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Line",
@@ -1030,4 +1050,5 @@ export const SeqValModule = {
                 "width": 9
         }
 ]
-};
+    };
+    

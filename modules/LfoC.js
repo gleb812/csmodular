@@ -1,17 +1,19 @@
 // Автоматически сгенерированный модуль: LfoC
-// Исходный файл: LfoC.js
-// Версия: 206
+    // Исходный файл: LfoC.js
+    // Версия: 206
 
-export const LfoCModule = {
-    type: 'LfoC',
-        typeID: 24,
+    export const LfoCModule = {
+        type: 'LfoC',
+            typeID: 24,
     mode: [0],
     defaultParams: [64, 0, 4, 1, 1],
-    displayName: 'LfoC',
-    gridHeight: 2,
-    originalName: 'LfoC',
-    tooltip: 'LFO C',
-    components: [
+        displayName: 'LfoC',
+        gridHeight: 2,
+        originalName: 'LfoC',
+        tooltip: 'LFO C',
+        inputs: [9],
+        outputs: [7],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "3",
@@ -36,7 +38,9 @@ export const LfoCModule = {
                 "x": 239,
                 "y": 15,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -52,7 +56,9 @@ export const LfoCModule = {
                 "x": 4,
                 "y": 15,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Rate",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -111,4 +117,5 @@ export const LfoCModule = {
                 ]
         }
 ]
-};
+    };
+    

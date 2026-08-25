@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: Glide
-// Исходный файл: Glide.js
-// Версия: 210
+    // Исходный файл: Glide.js
+    // Версия: 210
 
-export const GlideModule = {
-    type: 'Glide',
-        typeID: 158,
+    export const GlideModule = {
+        type: 'Glide',
+            typeID: 158,
     defaultParams: [64, 1, 0],
-    displayName: 'Glide',
-    gridHeight: 2,
-    originalName: 'Glide',
-    tooltip: 'Glide',
-    components: [
+        displayName: 'Glide',
+        gridHeight: 2,
+        originalName: 'Glide',
+        tooltip: 'Glide',
+        inputs: [3, 7],
+        outputs: [8],
+        components: [
         {
                 "componentType": "Input",
                 "id": "3",
                 "x": 4,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "On",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -41,7 +45,9 @@ export const GlideModule = {
                 "x": 210,
                 "y": 11,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -49,7 +55,9 @@ export const GlideModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -126,4 +134,5 @@ export const GlideModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

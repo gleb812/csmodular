@@ -1,22 +1,26 @@
 // Автоматически сгенерированный модуль: SwOnOffT
-// Исходный файл: SwOnOffT.js
-// Версия: 206
+    // Исходный файл: SwOnOffT.js
+    // Версия: 206
 
-export const SwOnOffTModule = {
-    type: 'SwOnOffT',
-        typeID: 76,
-    displayName: 'SwOnOffT',
-    gridHeight: 2,
-    originalName: 'SwOnOffT',
-    tooltip: 'Switch On/Off Toggling',
-    components: [
+    export const SwOnOffTModule = {
+        type: 'SwOnOffT',
+            typeID: 76,
+        displayName: 'SwOnOffT',
+        gridHeight: 2,
+        originalName: 'SwOnOffT',
+        tooltip: 'Switch On/Off Toggling',
+        inputs: [0],
+        outputs: [1, 3],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 210,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -24,7 +28,9 @@ export const SwOnOffTModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -32,7 +38,9 @@ export const SwOnOffTModule = {
                 "x": 4,
                 "y": 15,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Ctrl",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextField",
@@ -86,4 +94,5 @@ export const SwOnOffTModule = {
                 "text": "On"
         }
 ]
-};
+    };
+    

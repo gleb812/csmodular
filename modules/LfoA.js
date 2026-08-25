@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: LfoA
-// Исходный файл: LfoA.js
-// Версия: 206
+    // Исходный файл: LfoA.js
+    // Версия: 206
 
-export const LfoAModule = {
-    type: 'LfoA',
-        typeID: 26,
+    export const LfoAModule = {
+        type: 'LfoA',
+            typeID: 26,
     defaultParams: [64, 0, 0, 0, 0, 1, 4, 1],
-    displayName: 'LfoA',
-    gridHeight: 3,
-    originalName: 'LfoA',
-    tooltip: 'LFO A',
-    components: [
+        displayName: 'LfoA',
+        gridHeight: 3,
+        originalName: 'LfoA',
+        tooltip: 'LFO A',
+        inputs: [0, 3],
+        outputs: [8],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 4,
                 "y": 29,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "RateVar",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -41,7 +45,9 @@ export const LfoAModule = {
                 "x": 4,
                 "y": 14,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Rate",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -66,7 +72,9 @@ export const LfoAModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -157,4 +165,5 @@ export const LfoAModule = {
                 ]
         }
 ]
-};
+    };
+    

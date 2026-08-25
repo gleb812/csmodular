@@ -1,22 +1,26 @@
 // Автоматически сгенерированный модуль: Mix21B
-// Исходный файл: Mix21B.js
-// Версия: 206
+    // Исходный файл: Mix21B.js
+    // Версия: 206
 
-export const Mix21BModule = {
-    type: 'Mix21B',
-        typeID: 66,
-    displayName: 'Mix2-1B',
-    gridHeight: 2,
-    originalName: 'Mix2-1B',
-    tooltip: 'Mixer 2-1 B',
-    components: [
+    export const Mix21BModule = {
+        type: 'Mix21B',
+            typeID: 66,
+        displayName: 'Mix2-1B',
+        gridHeight: 2,
+        originalName: 'Mix2-1B',
+        tooltip: 'Mixer 2-1 B',
+        inputs: [0, 4, 8],
+        outputs: [11],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 4,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Chain",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -41,7 +45,9 @@ export const Mix21BModule = {
                 "x": 70,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -73,7 +79,9 @@ export const Mix21BModule = {
                 "x": 155,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -97,7 +105,9 @@ export const Mix21BModule = {
                 "x": 240,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonFlat",
@@ -113,4 +123,5 @@ export const Mix21BModule = {
                 ]
         }
 ]
-};
+    };
+    

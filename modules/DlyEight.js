@@ -1,24 +1,28 @@
 // Автоматически сгенерированный модуль: DlyEight
-// Исходный файл: DlyEight.js
-// Версия: 228
+    // Исходный файл: DlyEight.js
+    // Версия: 228
 
-export const DlyEightModule = {
-    type: 'DlyEight',
-        typeID: 181,
+    export const DlyEightModule = {
+        type: 'DlyEight',
+            typeID: 181,
     mode: [0],
     defaultParams: [0],
-    displayName: 'DlyEight',
-    gridHeight: 3,
-    originalName: 'DlyEight',
-    tooltip: 'Delay 8 Tap',
-    components: [
+        displayName: 'DlyEight',
+        gridHeight: 3,
+        originalName: 'DlyEight',
+        tooltip: 'Delay 8 Tap',
+        inputs: [0],
+        outputs: [1, 2, 3, 4, 5, 6, 7, 8],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -26,7 +30,9 @@ export const DlyEightModule = {
                 "x": 100,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -34,7 +40,9 @@ export const DlyEightModule = {
                 "x": 120,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -42,7 +50,9 @@ export const DlyEightModule = {
                 "x": 140,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Output",
@@ -50,7 +60,9 @@ export const DlyEightModule = {
                 "x": 160,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out4",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Output",
@@ -58,7 +70,9 @@ export const DlyEightModule = {
                 "x": 180,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out5",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Output",
@@ -66,7 +80,9 @@ export const DlyEightModule = {
                 "x": 200,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out6",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "Output",
@@ -74,7 +90,9 @@ export const DlyEightModule = {
                 "x": 220,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out7",
+                "ConnectorIndex": 6
         },
         {
                 "componentType": "Output",
@@ -82,7 +100,9 @@ export const DlyEightModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out8",
+                "ConnectorIndex": 7
         },
         {
                 "componentType": "Knob",
@@ -146,4 +166,5 @@ export const DlyEightModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

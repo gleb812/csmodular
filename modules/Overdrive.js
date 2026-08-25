@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: Overdrive
-// Исходный файл: Overdrive.js
-// Версия: 208
+    // Исходный файл: Overdrive.js
+    // Версия: 208
 
-export const OverdriveModule = {
-    type: 'Overdrive',
-        typeID: 62,
+    export const OverdriveModule = {
+        type: 'Overdrive',
+            typeID: 62,
     defaultParams: [0, 0, 1, 0, 1],
-    displayName: 'Overdrive',
-    gridHeight: 2,
-    originalName: 'Overdrive',
-    tooltip: 'Overdrive',
-    components: [
+        displayName: 'Overdrive',
+        gridHeight: 2,
+        originalName: 'Overdrive',
+        tooltip: 'Overdrive',
+        inputs: [0, 5],
+        outputs: [6],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "2",
@@ -25,7 +27,9 @@ export const OverdriveModule = {
                 "x": 210,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Graph",
@@ -41,7 +45,9 @@ export const OverdriveModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -80,7 +86,9 @@ export const OverdriveModule = {
                 "x": 108,
                 "y": 14,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Mod",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -128,4 +136,5 @@ export const OverdriveModule = {
                 "orientation": "Horizontal"
         }
 ]
-};
+    };
+    

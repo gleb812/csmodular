@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: Constant
-// Исходный файл: Constant.js
-// Версия: 206
+    // Исходный файл: Constant.js
+    // Версия: 206
 
-export const ConstantModule = {
-    type: 'Constant',
-        typeID: 43,
+    export const ConstantModule = {
+        type: 'Constant',
+            typeID: 43,
     defaultParams: [64, 0],
-    displayName: 'Constant',
-    gridHeight: 2,
-    originalName: 'Constant',
-    tooltip: 'Constant Value',
-    components: [
+        displayName: 'Constant',
+        gridHeight: 2,
+        originalName: 'Constant',
+        tooltip: 'Constant Value',
+        inputs: [],
+        outputs: [1],
+        components: [
         {
                 "componentType": "Output",
                 "id": "1",
                 "x": 240,
                 "y": 10,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -56,4 +60,5 @@ export const ConstantModule = {
                 ]
         }
 ]
-};
+    };
+    

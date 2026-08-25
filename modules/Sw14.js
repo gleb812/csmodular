@@ -1,22 +1,26 @@
 // Автоматически сгенерированный модуль: Sw14
-// Исходный файл: Sw14.js
-// Версия: 206
+    // Исходный файл: Sw14.js
+    // Версия: 206
 
-export const Sw14Module = {
-    type: 'Sw14',
-        typeID: 88,
-    displayName: 'Sw1-4',
-    gridHeight: 3,
-    originalName: 'Sw1-4',
-    tooltip: 'Switch 1-4',
-    components: [
+    export const Sw14Module = {
+        type: 'Sw14',
+            typeID: 88,
+        displayName: 'Sw1-4',
+        gridHeight: 3,
+        originalName: 'Sw1-4',
+        tooltip: 'Switch 1-4',
+        inputs: [6],
+        outputs: [0, 1, 8, 11, 12],
+        components: [
         {
                 "componentType": "Output",
                 "id": "0",
                 "x": 4,
                 "y": 30,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Ctrl",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "TextField",
@@ -41,7 +45,9 @@ export const Sw14Module = {
                 "x": 50,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -76,7 +82,9 @@ export const Sw14Module = {
                 "x": 88,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -84,7 +92,9 @@ export const Sw14Module = {
                 "x": 131,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -92,7 +102,9 @@ export const Sw14Module = {
                 "x": 174,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Output",
@@ -100,7 +112,9 @@ export const Sw14Module = {
                 "x": 217,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out4",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "TextLabel",
@@ -131,4 +145,5 @@ export const Sw14Module = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

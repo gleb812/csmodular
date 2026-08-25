@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: LevScaler
-// Исходный файл: LevScaler.js
-// Версия: 208
+    // Исходный файл: LevScaler.js
+    // Версия: 208
 
-export const LevScalerModule = {
-    type: 'LevScaler',
-        typeID: 115,
+    export const LevScalerModule = {
+        type: 'LevScaler',
+            typeID: 115,
     defaultParams: [64, 64, 64, 1],
-    displayName: 'LevScaler',
-    gridHeight: 3,
-    originalName: 'LevScaler',
-    tooltip: 'Level Scaler',
-    components: [
+        displayName: 'LevScaler',
+        gridHeight: 3,
+        originalName: 'LevScaler',
+        tooltip: 'Level Scaler',
+        inputs: [8, 12],
+        outputs: [7, 9],
+        components: [
         {
                 "componentType": "TextField",
                 "id": "1",
@@ -65,7 +67,9 @@ export const LevScalerModule = {
                 "x": 210,
                 "y": 30,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Level",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -73,7 +77,9 @@ export const LevScalerModule = {
                 "x": 4,
                 "y": 30,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Note",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -97,7 +103,9 @@ export const LevScalerModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -105,7 +113,9 @@ export const LevScalerModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -175,4 +185,5 @@ export const LevScalerModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

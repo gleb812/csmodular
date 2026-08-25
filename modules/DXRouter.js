@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: DXRouter
-// Исходный файл: DXRouter.js
-// Версия: 220
+    // Исходный файл: DXRouter.js
+    // Версия: 220
 
-export const DXRouterModule = {
-    type: 'DXRouter',
-        typeID: 165,
+    export const DXRouterModule = {
+        type: 'DXRouter',
+            typeID: 165,
     defaultParams: [0, 0],
-    displayName: 'DXRouter',
-    gridHeight: 6,
-    originalName: 'DXRouter',
-    tooltip: 'DX style router',
-    components: [
+        displayName: 'DXRouter',
+        gridHeight: 6,
+        originalName: 'DXRouter',
+        tooltip: 'DX style router',
+        inputs: [0, 1, 2, 3, 4, 10],
+        outputs: [5, 6, 7, 8, 9, 11, 12],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 7,
                 "y": 75,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -25,7 +29,9 @@ export const DXRouterModule = {
                 "x": 44,
                 "y": 75,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -33,7 +39,9 @@ export const DXRouterModule = {
                 "x": 81,
                 "y": 75,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Input",
@@ -41,7 +49,9 @@ export const DXRouterModule = {
                 "x": 118,
                 "y": 75,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In4",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Input",
@@ -49,7 +59,9 @@ export const DXRouterModule = {
                 "x": 155,
                 "y": 75,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In5",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Output",
@@ -57,7 +69,9 @@ export const DXRouterModule = {
                 "x": 21,
                 "y": 75,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -65,7 +79,9 @@ export const DXRouterModule = {
                 "x": 58,
                 "y": 75,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -73,7 +89,9 @@ export const DXRouterModule = {
                 "x": 95,
                 "y": 75,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Output",
@@ -81,7 +99,9 @@ export const DXRouterModule = {
                 "x": 132,
                 "y": 75,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out4",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Output",
@@ -89,7 +109,9 @@ export const DXRouterModule = {
                 "x": 169,
                 "y": 75,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out5",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Input",
@@ -97,7 +119,9 @@ export const DXRouterModule = {
                 "x": 192,
                 "y": 75,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In6",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "Output",
@@ -105,7 +129,9 @@ export const DXRouterModule = {
                 "x": 206,
                 "y": 75,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out6",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "Output",
@@ -113,7 +139,9 @@ export const DXRouterModule = {
                 "x": 240,
                 "y": 75,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Main",
+                "ConnectorIndex": 6
         },
         {
                 "componentType": "TextField",
@@ -235,4 +263,5 @@ export const DXRouterModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

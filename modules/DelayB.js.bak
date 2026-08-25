@@ -1,0 +1,229 @@
+// Автоматически сгенерированный модуль: DelayB
+    // Исходный файл: DelayB.js
+    // Версия: 228
+
+    export const DelayBModule = {
+        type: 'DelayB',
+            typeID: 177,
+        displayName: 'DelayB',
+        gridHeight: 4,
+        originalName: 'DelayB',
+        tooltip: 'Delay B',
+        inputs: [10, 15, 20],
+        outputs: [11],
+        components: [
+        {
+                "componentType": "TextLabel",
+                "id": "0",
+                "x": 5,
+                "y": 18,
+                "text": "Range",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "PartSelector",
+                "id": "1",
+                "x": 4,
+                "y": 28,
+                "width": 40,
+                "height": 14,
+                "imageCount": 4,
+                "menuOffset": 0
+        },
+        {
+                "componentType": "Knob",
+                "id": "6",
+                "x": 95,
+                "y": 21,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "7",
+                "x": 126,
+                "y": 12,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "8",
+                "x": 203,
+                "y": 12,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "9",
+                "x": 239,
+                "y": 24,
+                "width": 13,
+                "text": "B"
+        },
+        {
+                "componentType": "Input",
+                "id": "10",
+                "x": 240,
+                "y": 4,
+                "jackType": "audio",
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "Output",
+                "id": "11",
+                "x": 240,
+                "y": 45,
+                "jackType": "audio",
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "12",
+                "x": 194,
+                "y": 4,
+                "text": "Dry/Wet",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "13",
+                "x": 131,
+                "y": 4,
+                "text": "FB",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextField",
+                "id": "14",
+                "x": 52,
+                "y": 28,
+                "width": 40,
+                "referenceElementId": 6
+        },
+        {
+                "componentType": "Input",
+                "id": "15",
+                "x": 120,
+                "y": 44,
+                "jackType": "control",
+                "bandwidth": "dynamic",
+                "ConnectorName": "FBMod",
+                "ConnectorIndex": 1
+        },
+        {
+                "componentType": "Knob",
+                "id": "16",
+                "x": 134,
+                "y": 37,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "17",
+                "x": 124,
+                "y": 47,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "18",
+                "x": 163,
+                "y": 4,
+                "text": "Filter",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Knob",
+                "id": "19",
+                "x": 170,
+                "y": 37,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "20",
+                "x": 197,
+                "y": 44,
+                "jackType": "control",
+                "bandwidth": "dynamic",
+                "ConnectorName": "DryWetMod",
+                "ConnectorIndex": 2
+        },
+        {
+                "componentType": "Knob",
+                "id": "21",
+                "x": 211,
+                "y": 37,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "22",
+                "x": 200,
+                "y": 47,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Line",
+                "id": "26",
+                "x": 245,
+                "y": 11,
+                "length": 40,
+                "orientation": "Vertical"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "29",
+                "x": 58,
+                "y": 14,
+                "width": 30,
+                "height": 12,
+                "labels": [
+                        "Time",
+                        "Clk"
+                ]
+        },
+        {
+                "componentType": "Knob",
+                "id": "5",
+                "x": 170,
+                "y": 14,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "27",
+                "x": 158,
+                "y": 14,
+                "text": "HP",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "28",
+                "x": 158,
+                "y": 39,
+                "text": "LP",
+                "fontSize": 9,
+                "color": "#ffffff"
+        }
+]
+    };
+    

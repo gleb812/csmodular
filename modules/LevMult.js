@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: LevMult
-// Исходный файл: LevMult.js
-// Версия: 206
+    // Исходный файл: LevMult.js
+    // Версия: 206
 
-export const LevMultModule = {
-    type: 'LevMult',
-        typeID: 44,
+    export const LevMultModule = {
+        type: 'LevMult',
+            typeID: 44,
     defaultParams: [],
-    displayName: 'LevMult',
-    gridHeight: 2,
-    originalName: 'LevMult',
-    tooltip: 'Level Multiplier',
-    components: [
+        displayName: 'LevMult',
+        gridHeight: 2,
+        originalName: 'LevMult',
+        tooltip: 'Level Multiplier',
+        inputs: [1, 6],
+        outputs: [0],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 210,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -25,7 +29,9 @@ export const LevMultModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -63,7 +69,10 @@ export const LevMultModule = {
                 "x": 180,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Mod",
+                "ConnectorIndex": 1
         }
 ]
-};
+    };
+    

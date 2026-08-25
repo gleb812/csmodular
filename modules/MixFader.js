@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: MixFader
-// Исходный файл: MixFader.js
-// Версия: 210
+    // Исходный файл: MixFader.js
+    // Версия: 210
 
-export const MixFaderModule = {
-    type: 'MixFader',
-        typeID: 161,
+    export const MixFaderModule = {
+        type: 'MixFader',
+            typeID: 161,
     defaultParams: [100, 100, 100, 100, 100, 100, 100, 100, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-    displayName: 'MixFader',
-    gridHeight: 9,
-    originalName: 'MixFader',
-    tooltip: 'Mixer 8-1 Fader',
-    components: [
+        displayName: 'MixFader',
+        gridHeight: 9,
+        originalName: 'MixFader',
+        tooltip: 'Mixer 8-1 Fader',
+        inputs: [2, 4, 6, 8, 10, 12, 14, 16, 47],
+        outputs: [25],
+        components: [
         {
                 "componentType": "Slider",
                 "id": "0",
@@ -34,7 +36,9 @@ export const MixFaderModule = {
                 "x": 12,
                 "y": 22,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextField",
@@ -50,7 +54,9 @@ export const MixFaderModule = {
                 "x": 41,
                 "y": 22,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextField",
@@ -66,7 +72,9 @@ export const MixFaderModule = {
                 "x": 70,
                 "y": 22,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextField",
@@ -82,7 +90,9 @@ export const MixFaderModule = {
                 "x": 99,
                 "y": 22,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In4",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "TextField",
@@ -98,7 +108,9 @@ export const MixFaderModule = {
                 "x": 128,
                 "y": 22,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In5",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "TextField",
@@ -114,7 +126,9 @@ export const MixFaderModule = {
                 "x": 157,
                 "y": 22,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In6",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "TextField",
@@ -130,7 +144,9 @@ export const MixFaderModule = {
                 "x": 186,
                 "y": 22,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In7",
+                "ConnectorIndex": 6
         },
         {
                 "componentType": "TextField",
@@ -146,7 +162,9 @@ export const MixFaderModule = {
                 "x": 215,
                 "y": 22,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In8",
+                "ConnectorIndex": 7
         },
         {
                 "componentType": "TextField",
@@ -225,7 +243,9 @@ export const MixFaderModule = {
                 "x": 240,
                 "y": 120,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextEdit",
@@ -388,7 +408,9 @@ export const MixFaderModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Chain",
+                "ConnectorIndex": 8
         },
         {
                 "componentType": "ButtonFlat",
@@ -426,4 +448,5 @@ export const MixFaderModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

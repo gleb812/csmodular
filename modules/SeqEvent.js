@@ -1,22 +1,26 @@
 // Автоматически сгенерированный модуль: SeqEvent
-// Исходный файл: SeqEvent.js
-// Версия: 210
+    // Исходный файл: SeqEvent.js
+    // Версия: 210
 
-export const SeqEventModule = {
-    type: 'SeqEvent',
-        typeID: 144,
-    displayName: 'SeqEvent',
-    gridHeight: 5,
-    originalName: 'SeqEvent',
-    tooltip: 'Sequencer Event',
-    components: [
+    export const SeqEventModule = {
+        type: 'SeqEvent',
+            typeID: 144,
+        displayName: 'SeqEvent',
+        gridHeight: 5,
+        originalName: 'SeqEvent',
+        tooltip: 'Sequencer Event',
+        inputs: [0, 1, 2, 6, 83, 84],
+        outputs: [4, 59, 60],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 4,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Clk",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -24,7 +28,9 @@ export const SeqEventModule = {
                 "x": 4,
                 "y": 37,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Rst",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -32,7 +38,9 @@ export const SeqEventModule = {
                 "x": 4,
                 "y": 60,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Loop",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -58,7 +66,9 @@ export const SeqEventModule = {
                 "x": 204,
                 "y": 4,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Park",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "LED",
@@ -81,7 +91,9 @@ export const SeqEventModule = {
                 "x": 240,
                 "y": 27,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Link",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -450,7 +462,9 @@ export const SeqEventModule = {
                 "x": 240,
                 "y": 44,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Trig1",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -458,7 +472,9 @@ export const SeqEventModule = {
                 "x": 240,
                 "y": 60,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Trig2",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Line",
@@ -664,7 +680,9 @@ export const SeqEventModule = {
                 "x": 21,
                 "y": 44,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Trig1",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Input",
@@ -672,7 +690,9 @@ export const SeqEventModule = {
                 "x": 21,
                 "y": 60,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Trig2",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "Line",
@@ -774,4 +794,5 @@ export const SeqEventModule = {
                 "width": 9
         }
 ]
-};
+    };
+    

@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: Out2
-// Исходный файл: Out2.js
-// Версия: 210
+    // Исходный файл: Out2.js
+    // Версия: 210
 
-export const Out2Module = {
-    type: 'Out2',
-        typeID: 4,
+    export const Out2Module = {
+        type: 'Out2',
+            typeID: 4,
     defaultParams: [0, 1, 0],
-    displayName: '2-Out',
-    gridHeight: 2,
-    originalName: '2-Out',
-    tooltip: '2 Outputs',
-    components: [
+        displayName: '2-Out',
+        gridHeight: 2,
+        originalName: '2-Out',
+        tooltip: '2 Outputs',
+        inputs: [1, 2],
+        outputs: [],
+        components: [
         {
                 "componentType": "ButtonRadio",
                 "id": "0",
@@ -34,7 +36,9 @@ export const Out2Module = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "InR",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -42,7 +46,9 @@ export const Out2Module = {
                 "x": 214,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "InL",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -139,4 +145,5 @@ export const Out2Module = {
                 "orientation": "vertical"
         }
 ]
-};
+    };
+    

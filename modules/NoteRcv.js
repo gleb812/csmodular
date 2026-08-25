@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: NoteRcv
-// Исходный файл: NoteRcv.js
-// Версия: 210
+    // Исходный файл: NoteRcv.js
+    // Версия: 210
 
-export const NoteRcvModule = {
-    type: 'NoteRcv',
-        typeID: 148,
+    export const NoteRcvModule = {
+        type: 'NoteRcv',
+            typeID: 148,
     defaultParams: [64, 0],
-    displayName: 'NoteRcv',
-    gridHeight: 2,
-    originalName: 'NoteRcv',
-    tooltip: 'MIDI Note Receive',
-    components: [
+        displayName: 'NoteRcv',
+        gridHeight: 2,
+        originalName: 'NoteRcv',
+        tooltip: 'MIDI Note Receive',
+        inputs: [],
+        outputs: [3, 5, 11],
+        components: [
         {
                 "componentType": "TextField",
                 "id": "0",
@@ -42,7 +44,9 @@ export const NoteRcvModule = {
                 "x": 210,
                 "y": 13,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Vel",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -59,7 +63,9 @@ export const NoteRcvModule = {
                 "x": 188,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Gate",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -100,7 +106,9 @@ export const NoteRcvModule = {
                 "x": 232,
                 "y": 13,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "RelVel",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -112,4 +120,5 @@ export const NoteRcvModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

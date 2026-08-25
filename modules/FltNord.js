@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: FltNord
-// Исходный файл: FltNord.js
-// Версия: 208
+    // Исходный файл: FltNord.js
+    // Версия: 208
 
-export const FltNordModule = {
-    type: 'FltNord',
-        typeID: 51,
+    export const FltNordModule = {
+        type: 'FltNord',
+            typeID: 51,
     defaultParams: [75, 0, 0, 1, 0, 1, 1, 0, 0, 0],
-    displayName: 'FltNord',
-    gridHeight: 5,
-    originalName: 'FltNord',
-    tooltip: 'Filter Nord',
-    components: [
+        displayName: 'FltNord',
+        gridHeight: 5,
+        originalName: 'FltNord',
+        tooltip: 'Filter Nord',
+        inputs: [0, 3, 4, 23, 26],
+        outputs: [22],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 4,
                 "y": 59,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "PitchVar",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -41,7 +45,9 @@ export const FltNordModule = {
                 "x": 4,
                 "y": 43,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -58,7 +64,9 @@ export const FltNordModule = {
                 "x": 45,
                 "y": 59,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "FMLin",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Knob",
@@ -218,7 +226,9 @@ export const FltNordModule = {
                 "x": 240,
                 "y": 60,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -226,7 +236,9 @@ export const FltNordModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -250,7 +262,9 @@ export const FltNordModule = {
                 "x": 124,
                 "y": 59,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Res",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Knob",
@@ -278,4 +292,5 @@ export const FltNordModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

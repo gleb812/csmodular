@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: NoteQuant
-// Исходный файл: NoteQuant.js
-// Версия: 208
+    // Исходный файл: NoteQuant.js
+    // Версия: 208
 
-export const NoteQuantModule = {
-    type: 'NoteQuant',
-        typeID: 75,
+    export const NoteQuantModule = {
+        type: 'NoteQuant',
+            typeID: 75,
     defaultParams: [127, 0],
-    displayName: 'NoteQuant',
-    gridHeight: 2,
-    originalName: 'NoteQuant',
-    tooltip: 'Note Quantizer',
-    components: [
+        displayName: 'NoteQuant',
+        gridHeight: 2,
+        originalName: 'NoteQuant',
+        tooltip: 'Note Quantizer',
+        inputs: [6],
+        outputs: [7],
+        components: [
         {
                 "componentType": "TextField",
                 "id": "1",
@@ -66,7 +68,9 @@ export const NoteQuantModule = {
                 "x": 210,
                 "y": 11,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -74,7 +78,9 @@ export const NoteQuantModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -91,4 +97,5 @@ export const NoteQuantModule = {
                 "width": 102
         }
 ]
-};
+    };
+    

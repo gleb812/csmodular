@@ -1,15 +1,17 @@
 // Автоматически сгенерированный модуль: StChorus
-// Исходный файл: StChorus.js
-// Версия: 208
+    // Исходный файл: StChorus.js
+    // Версия: 208
 
-export const StChorusModule = {
-    type: 'StChorus',
-        typeID: 94,
-    displayName: 'StChorus',
-    gridHeight: 3,
-    originalName: 'StChorus',
-    tooltip: 'Stereo Chorus',
-    components: [
+    export const StChorusModule = {
+        type: 'StChorus',
+            typeID: 94,
+        displayName: 'StChorus',
+        gridHeight: 3,
+        originalName: 'StChorus',
+        tooltip: 'Stereo Chorus',
+        inputs: [3],
+        outputs: [2, 8],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "0",
@@ -40,7 +42,9 @@ export const StChorusModule = {
                 "x": 216,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "OutL",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -48,7 +52,9 @@ export const StChorusModule = {
                 "x": 228,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Line",
@@ -72,7 +78,9 @@ export const StChorusModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "OutR",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -127,4 +135,5 @@ export const StChorusModule = {
                 "orientation": "Vertical"
         }
 ]
-};
+    };
+    

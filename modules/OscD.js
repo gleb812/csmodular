@@ -1,17 +1,19 @@
 // Автоматически сгенерированный модуль: OscD
-// Исходный файл: OscD.js
-// Версия: 206
+    // Исходный файл: OscD.js
+    // Версия: 206
 
-export const OscDModule = {
-    type: 'OscD',
-        typeID: 96,
+    export const OscDModule = {
+        type: 'OscD',
+            typeID: 96,
     mode: [0],
     defaultParams: [64, 64, 1, 0, 1],
-    displayName: 'OscD',
-    gridHeight: 2,
-    originalName: 'OscD',
-    tooltip: 'Osc D',
-    components: [
+        displayName: 'OscD',
+        gridHeight: 2,
+        originalName: 'OscD',
+        tooltip: 'Osc D',
+        inputs: [9],
+        outputs: [7],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "3",
@@ -44,7 +46,9 @@ export const OscDModule = {
                 "x": 240,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -60,7 +64,9 @@ export const OscDModule = {
                 "x": 4,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -124,4 +130,5 @@ export const OscDModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

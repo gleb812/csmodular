@@ -1,17 +1,19 @@
 // Автоматически сгенерированный модуль: DelayB
-// Исходный файл: DelayB.js
-// Версия: 228
+    // Исходный файл: DelayB.js
+    // Версия: 228
 
-export const DelayBModule = {
-    type: 'DelayB',
-        typeID: 177,
+    export const DelayBModule = {
+        type: 'DelayB',
+            typeID: 177,
     mode: [0],
     defaultParams: [64, 64, 127, 64, 0, 0, 0, 1, 0],
-    displayName: 'DelayB',
-    gridHeight: 4,
-    originalName: 'DelayB',
-    tooltip: 'Delay B',
-    components: [
+        displayName: 'DelayB',
+        gridHeight: 4,
+        originalName: 'DelayB',
+        tooltip: 'Delay B',
+        inputs: [10, 15, 20],
+        outputs: [11],
+        components: [
         {
                 "componentType": "TextLabel",
                 "id": "0",
@@ -69,7 +71,9 @@ export const DelayBModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -77,7 +81,9 @@ export const DelayBModule = {
                 "x": 240,
                 "y": 45,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -111,7 +117,9 @@ export const DelayBModule = {
                 "x": 120,
                 "y": 44,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "FBMod",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -152,7 +160,9 @@ export const DelayBModule = {
                 "x": 197,
                 "y": 44,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "DryWetMod",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Knob",
@@ -217,4 +227,5 @@ export const DelayBModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

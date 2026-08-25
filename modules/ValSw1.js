@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: ValSw1
-// Исходный файл: ValSw1.js
-// Версия: 206
+    // Исходный файл: ValSw1.js
+    // Версия: 206
 
-export const ValSw1Module = {
-    type: 'ValSw1',
-        typeID: 17,
+    export const ValSw1Module = {
+        type: 'ValSw1',
+            typeID: 17,
     defaultParams: [0],
-    displayName: 'ValSw1-2',
-    gridHeight: 2,
-    originalName: 'ValSw1-2',
-    tooltip: 'Value Switch 1-2',
-    components: [
+        displayName: 'ValSw1-2',
+        gridHeight: 2,
+        originalName: 'ValSw1-2',
+        tooltip: 'Value Switch 1-2',
+        inputs: [1, 9],
+        outputs: [0, 5],
+        components: [
         {
                 "componentType": "Output",
                 "id": "0",
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "OutOn",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -25,7 +29,9 @@ export const ValSw1Module = {
                 "x": 180,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Input",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "SVG",
@@ -58,7 +64,9 @@ export const ValSw1Module = {
                 "x": 210,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "OutOff",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -84,7 +92,9 @@ export const ValSw1Module = {
                 "x": 4,
                 "y": 15,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Ctrl",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -143,4 +153,5 @@ export const ValSw1Module = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

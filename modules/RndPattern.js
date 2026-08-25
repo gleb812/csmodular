@@ -1,24 +1,28 @@
 // Автоматически сгенерированный модуль: RndPattern
-// Исходный файл: RndPattern.js
-// Версия: 238
+    // Исходный файл: RndPattern.js
+    // Версия: 238
 
-export const RndPatternModule = {
-    type: 'RndPattern',
-        typeID: 208,
+    export const RndPatternModule = {
+        type: 'RndPattern',
+            typeID: 208,
     mode: [0],
     defaultParams: [64, 64, 127, 15, 0, 0, 1],
-    displayName: 'RndPattern',
-    gridHeight: 3,
-    originalName: 'RndPattern',
-    tooltip: 'Random Pattern',
-    components: [
+        displayName: 'RndPattern',
+        gridHeight: 3,
+        originalName: 'RndPattern',
+        tooltip: 'Random Pattern',
+        inputs: [0, 1, 9, 16, 27],
+        outputs: [3],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 4,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Clk",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -26,7 +30,9 @@ export const RndPatternModule = {
                 "x": 4,
                 "y": 30,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Rst",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -34,7 +40,9 @@ export const RndPatternModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -146,7 +154,9 @@ export const RndPatternModule = {
                 "x": 51,
                 "y": 15,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "A",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "ButtonFlat",
@@ -192,7 +202,9 @@ export const RndPatternModule = {
                 "x": 51,
                 "y": 30,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "B",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "PartSelector",
@@ -245,7 +257,9 @@ export const RndPatternModule = {
                 "x": 117,
                 "y": 29,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Step",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Knob",
@@ -264,4 +278,5 @@ export const RndPatternModule = {
                 "orientation": "Horizontal"
         }
 ]
-};
+    };
+    

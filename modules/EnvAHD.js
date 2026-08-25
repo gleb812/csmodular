@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: EnvAHD
-// Исходный файл: EnvAHD.js
-// Версия: 206
+    // Исходный файл: EnvAHD.js
+    // Версия: 206
 
-export const EnvAHDModule = {
-    type: 'EnvAHD',
-        typeID: 46,
+    export const EnvAHDModule = {
+        type: 'EnvAHD',
+            typeID: 46,
     defaultParams: [0, 0, 32, 0, 14, 0, 1],
-    displayName: 'EnvAHD',
-    gridHeight: 4,
-    originalName: 'EnvAHD',
-    tooltip: 'Envelope AHD',
-    components: [
+        displayName: 'EnvAHD',
+        gridHeight: 4,
+        originalName: 'EnvAHD',
+        tooltip: 'Envelope AHD',
+        inputs: [2, 7, 9],
+        outputs: [10, 13],
+        components: [
         {
                 "componentType": "TextLabel",
                 "id": "0",
@@ -32,7 +34,9 @@ export const EnvAHDModule = {
                 "x": 4,
                 "y": 30,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Trig",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -54,7 +58,9 @@ export const EnvAHDModule = {
                 "x": 4,
                 "y": 45,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "AM",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -71,7 +77,9 @@ export const EnvAHDModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Output",
@@ -79,7 +87,9 @@ export const EnvAHDModule = {
                 "x": 240,
                 "y": 45,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "LevelShift",
@@ -93,7 +103,9 @@ export const EnvAHDModule = {
                 "x": 223,
                 "y": 45,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Env",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Graph",
@@ -246,4 +258,5 @@ export const EnvAHDModule = {
                 "orientation": "Vertical"
         }
 ]
-};
+    };
+    

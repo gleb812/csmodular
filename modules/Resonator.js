@@ -1,22 +1,26 @@
 // Автоматически сгенерированный модуль: Resonator
-// Исходный файл: Resonator.js
-// Версия: 208
+    // Исходный файл: Resonator.js
+    // Версия: 208
 
-export const ResonatorModule = {
-    type: 'Resonator',
-        typeID: 56,
-    displayName: 'Resonator',
-    gridHeight: 5,
-    originalName: 'Resonator',
-    tooltip: 'Resonator',
-    components: [
+    export const ResonatorModule = {
+        type: 'Resonator',
+            typeID: 56,
+        displayName: 'Resonator',
+        gridHeight: 5,
+        originalName: 'Resonator',
+        tooltip: 'Resonator',
+        inputs: [0, 1, 24],
+        outputs: [22, 23],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 5,
                 "y": 54,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -24,7 +28,9 @@ export const ResonatorModule = {
                 "x": 21,
                 "y": 54,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Knob",
@@ -138,7 +144,9 @@ export const ResonatorModule = {
                 "x": 215,
                 "y": 5,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -146,7 +154,9 @@ export const ResonatorModule = {
                 "x": 239,
                 "y": 5,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Line",
@@ -250,7 +260,10 @@ export const ResonatorModule = {
                 "x": 239,
                 "y": 57,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out2",
+                "ConnectorIndex": 1
         }
 ]
-};
+    };
+    

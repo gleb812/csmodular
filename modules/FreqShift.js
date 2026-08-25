@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: FreqShift
-// Исходный файл: FreqShift.js
-// Версия: 208
+    // Исходный файл: FreqShift.js
+    // Версия: 208
 
-export const FreqShiftModule = {
-    type: 'FreqShift',
-        typeID: 98,
+    export const FreqShiftModule = {
+        type: 'FreqShift',
+            typeID: 98,
     defaultParams: [0, 0, 2, 1],
-    displayName: 'FreqShift',
-    gridHeight: 3,
-    originalName: 'FreqShift',
-    tooltip: 'Frequency Shifter',
-    components: [
+        displayName: 'FreqShift',
+        gridHeight: 3,
+        originalName: 'FreqShift',
+        tooltip: 'Frequency Shifter',
+        inputs: [3, 21],
+        outputs: [0, 1],
+        components: [
         {
                 "componentType": "Output",
                 "id": "0",
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Up",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -25,7 +29,9 @@ export const FreqShiftModule = {
                 "x": 216,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Dn",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -33,7 +39,9 @@ export const FreqShiftModule = {
                 "x": 11,
                 "y": 29,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Shift",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -92,7 +100,9 @@ export const FreqShiftModule = {
                 "x": 228,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonFlat",
@@ -174,4 +184,5 @@ export const FreqShiftModule = {
                 "orientation": "Vertical"
         }
 ]
-};
+    };
+    

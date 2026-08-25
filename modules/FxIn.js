@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: FxIn
-// Исходный файл: FxIn.js
-// Версия: 210
+    // Исходный файл: FxIn.js
+    // Версия: 210
 
-export const FxInModule = {
-    type: 'FxIn',
-        typeID: 127,
+    export const FxInModule = {
+        type: 'FxIn',
+            typeID: 127,
     defaultParams: [0, 1, 1],
-    displayName: 'Fx-In',
-    gridHeight: 2,
-    originalName: 'Fx-In',
-    tooltip: 'Fx Input',
-    components: [
+        displayName: 'Fx-In',
+        gridHeight: 2,
+        originalName: 'Fx-In',
+        tooltip: 'Fx Input',
+        inputs: [],
+        outputs: [0, 3],
+        components: [
         {
                 "componentType": "Output",
                 "id": "3",
                 "x": 214,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "OutL",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "MiniVU",
@@ -43,7 +47,9 @@ export const FxInModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "OutR",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "MiniVU",
@@ -117,4 +123,5 @@ export const FxInModule = {
                 "text": "M"
         }
 ]
-};
+    };
+    

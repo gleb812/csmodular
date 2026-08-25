@@ -1,24 +1,28 @@
 // Автоматически сгенерированный модуль: OscPM
-// Исходный файл: OscPM.js
-// Версия: 206
+    // Исходный файл: OscPM.js
+    // Версия: 206
 
-export const OscPMModule = {
-    type: 'OscPM',
-        typeID: 183,
+    export const OscPMModule = {
+        type: 'OscPM',
+            typeID: 183,
     mode: [0],
     defaultParams: [64, 64, 1, 0, 0, 1, 0],
-    displayName: 'OscPM',
-    gridHeight: 3,
-    originalName: 'OscPM',
-    tooltip: 'Osc Phase Mod',
-    components: [
+        displayName: 'OscPM',
+        gridHeight: 3,
+        originalName: 'OscPM',
+        tooltip: 'Osc Phase Mod',
+        inputs: [0, 4, 6, 18],
+        outputs: [12],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 4,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "TextField",
@@ -50,7 +54,9 @@ export const OscPMModule = {
                 "x": 158,
                 "y": 29,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Sync",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -90,7 +96,9 @@ export const OscPMModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonFlat",
@@ -139,7 +147,9 @@ export const OscPMModule = {
                 "x": 182,
                 "y": 29,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Phase M",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Knob",
@@ -163,7 +173,9 @@ export const OscPMModule = {
                 "x": 4,
                 "y": 29,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "PitchVar",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -221,4 +233,5 @@ export const OscPMModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

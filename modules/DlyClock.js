@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: DlyClock
-// Исходный файл: DlyClock.js
-// Версия: 228
+    // Исходный файл: DlyClock.js
+    // Версия: 228
 
-export const DlyClockModule = {
-    type: 'DlyClock',
-        typeID: 178,
+    export const DlyClockModule = {
+        type: 'DlyClock',
+            typeID: 178,
     defaultParams: [0],
-    displayName: 'DlyClock',
-    gridHeight: 2,
-    originalName: 'DlyClock',
-    tooltip: 'Delay Clocked',
-    components: [
+        displayName: 'DlyClock',
+        gridHeight: 2,
+        originalName: 'DlyClock',
+        tooltip: 'Delay Clocked',
+        inputs: [0, 6],
+        outputs: [7],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 4,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Clk",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -68,7 +72,9 @@ export const DlyClockModule = {
                 "x": 210,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -76,7 +82,9 @@ export const DlyClockModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -93,4 +101,5 @@ export const DlyClockModule = {
                 "width": 102
         }
 ]
-};
+    };
+    

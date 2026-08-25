@@ -1,17 +1,19 @@
 // Автоматически сгенерированный модуль: DlySingleA
-// Исходный файл: DlySingleA.js
-// Версия: 228
+    // Исходный файл: DlySingleA.js
+    // Версия: 228
 
-export const DlySingleAModule = {
-    type: 'DlySingleA',
-        typeID: 172,
+    export const DlySingleAModule = {
+        type: 'DlySingleA',
+            typeID: 172,
     mode: [0],
     defaultParams: [64],
-    displayName: 'DlySingleA',
-    gridHeight: 2,
-    originalName: 'DlySingleA',
-    tooltip: 'Delay Static',
-    components: [
+        displayName: 'DlySingleA',
+        gridHeight: 2,
+        originalName: 'DlySingleA',
+        tooltip: 'Delay Static',
+        inputs: [5],
+        outputs: [6],
+        components: [
         {
                 "componentType": "TextLabel",
                 "id": "1",
@@ -53,7 +55,9 @@ export const DlySingleAModule = {
                 "x": 210,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -61,7 +65,9 @@ export const DlySingleAModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -87,4 +93,5 @@ export const DlySingleAModule = {
                 "width": 102
         }
 ]
-};
+    };
+    

@@ -1,24 +1,28 @@
 // Автоматически сгенерированный модуль: FltLP
-// Исходный файл: FltLP.js
-// Версия: 208
+    // Исходный файл: FltLP.js
+    // Версия: 208
 
-export const FltLPModule = {
-    type: 'FltLP',
-        typeID: 87,
+    export const FltLPModule = {
+        type: 'FltLP',
+            typeID: 87,
     mode: [0],
     defaultParams: [75, 0, 0, 1],
-    displayName: 'FltLP',
-    gridHeight: 2,
-    originalName: 'FltLP',
-    tooltip: 'Filter Lowpass',
-    components: [
+        displayName: 'FltLP',
+        gridHeight: 2,
+        originalName: 'FltLP',
+        tooltip: 'Filter Lowpass',
+        inputs: [1, 5],
+        outputs: [10],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 63,
                 "y": 14,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -58,7 +62,9 @@ export const FltLPModule = {
                 "x": 210,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "PartSelector",
@@ -76,7 +82,9 @@ export const FltLPModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -127,4 +135,5 @@ export const FltLPModule = {
                 "orientation": "Horizontal"
         }
 ]
-};
+    };
+    

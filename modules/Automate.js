@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: Automate
-// Исходный файл: Automate.js
-// Версия: 210
+    // Исходный файл: Automate.js
+    // Версия: 210
 
-export const AutomateModule = {
-    type: 'Automate',
-        typeID: 57,
+    export const AutomateModule = {
+        type: 'Automate',
+            typeID: 57,
     defaultParams: [7, 64, 0, 0],
-    displayName: 'Automate',
-    gridHeight: 2,
-    originalName: 'Automate',
-    tooltip: 'MIDI Control Automate',
-    components: [
+        displayName: 'Automate',
+        gridHeight: 2,
+        originalName: 'Automate',
+        tooltip: 'MIDI Control Automate',
+        inputs: [1],
+        outputs: [11],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 10,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextField",
@@ -98,7 +102,9 @@ export const AutomateModule = {
                 "x": 65,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -155,4 +161,5 @@ export const AutomateModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

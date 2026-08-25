@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: RndTrig
-// Исходный файл: RndTrig.js
-// Версия: 238
+    // Исходный файл: RndTrig.js
+    // Версия: 238
 
-export const RndTrigModule = {
-    type: 'RndTrig',
-        typeID: 206,
+    export const RndTrigModule = {
+        type: 'RndTrig',
+            typeID: 206,
     defaultParams: [64, 0, 1, 0],
-    displayName: 'RndTrig',
-    gridHeight: 2,
-    originalName: 'RndTrig',
-    tooltip: 'Random Trig',
-    components: [
+        displayName: 'RndTrig',
+        gridHeight: 2,
+        originalName: 'RndTrig',
+        tooltip: 'Random Trig',
+        inputs: [0, 4, 6, 13],
+        outputs: [1],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 4,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Clk",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -25,7 +29,9 @@ export const RndTrigModule = {
                 "x": 239,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -59,7 +65,9 @@ export const RndTrigModule = {
                 "x": 68,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Rst",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -149,7 +157,9 @@ export const RndTrigModule = {
                 "x": 118,
                 "y": 14,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Seed",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Knob",
@@ -176,4 +186,5 @@ export const RndTrigModule = {
                 "height": 22
         }
 ]
-};
+    };
+    

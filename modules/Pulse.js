@@ -1,24 +1,28 @@
 // Автоматически сгенерированный модуль: Pulse
-// Исходный файл: Pulse.js
-// Версия: 208
+    // Исходный файл: Pulse.js
+    // Версия: 208
 
-export const PulseModule = {
-    type: 'Pulse',
-        typeID: 38,
+    export const PulseModule = {
+        type: 'Pulse',
+            typeID: 38,
     mode: [0],
     defaultParams: [1, 0, 0],
-    displayName: 'Pulse',
-    gridHeight: 2,
-    originalName: 'Pulse',
-    tooltip: 'Pulse',
-    components: [
+        displayName: 'Pulse',
+        gridHeight: 2,
+        originalName: 'Pulse',
+        tooltip: 'Pulse',
+        inputs: [1, 7],
+        outputs: [8],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 64,
                 "y": 14,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Time",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -71,7 +75,9 @@ export const PulseModule = {
                 "x": 192,
                 "y": 4,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "PartSelector",
@@ -95,7 +101,9 @@ export const PulseModule = {
                 "x": 240,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Line",
@@ -114,4 +122,5 @@ export const PulseModule = {
                 "orientation": "Horizontal"
         }
 ]
-};
+    };
+    

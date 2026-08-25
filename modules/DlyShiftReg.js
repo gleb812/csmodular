@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: DlyShiftReg
-// Исходный файл: DlyShiftReg.js
-// Версия: 228
+    // Исходный файл: DlyShiftReg.js
+    // Версия: 228
 
-export const DlyShiftRegModule = {
-    type: 'DlyShiftReg',
-        typeID: 179,
+    export const DlyShiftRegModule = {
+        type: 'DlyShiftReg',
+            typeID: 179,
     defaultParams: [],
-    displayName: 'DlyShiftReg',
-    gridHeight: 2,
-    originalName: 'DlyShiftReg',
-    tooltip: 'Shift Register',
-    components: [
+        displayName: 'DlyShiftReg',
+        gridHeight: 2,
+        originalName: 'DlyShiftReg',
+        tooltip: 'Shift Register',
+        inputs: [0, 1],
+        outputs: [3, 4, 5, 6, 7, 8, 9, 10],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 4,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Clk",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -34,7 +38,9 @@ export const DlyShiftRegModule = {
                 "x": 80,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -42,7 +48,9 @@ export const DlyShiftRegModule = {
                 "x": 100,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -50,7 +58,9 @@ export const DlyShiftRegModule = {
                 "x": 120,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -58,7 +68,9 @@ export const DlyShiftRegModule = {
                 "x": 140,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Output",
@@ -66,7 +78,9 @@ export const DlyShiftRegModule = {
                 "x": 160,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out4",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Output",
@@ -74,7 +88,9 @@ export const DlyShiftRegModule = {
                 "x": 180,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out5",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Output",
@@ -82,7 +98,9 @@ export const DlyShiftRegModule = {
                 "x": 200,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out6",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "Output",
@@ -90,7 +108,9 @@ export const DlyShiftRegModule = {
                 "x": 220,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out7",
+                "ConnectorIndex": 6
         },
         {
                 "componentType": "Output",
@@ -98,7 +118,9 @@ export const DlyShiftRegModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out8",
+                "ConnectorIndex": 7
         },
         {
                 "componentType": "Line",
@@ -181,4 +203,5 @@ export const DlyShiftRegModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

@@ -1,22 +1,26 @@
 // Автоматически сгенерированный модуль: Blue2Red
-// Исходный файл: Blue2Red.js
-// Версия: 238
+    // Исходный файл: Blue2Red.js
+    // Версия: 238
 
-export const Blue2RedModule = {
-    type: 'Blue2Red',
-        typeID: 203,
-    displayName: 'Blue2Red',
-    gridHeight: 2,
-    originalName: 'Blue2Red',
-    tooltip: 'Blue 2 Red',
-    components: [
+    export const Blue2RedModule = {
+        type: 'Blue2Red',
+            typeID: 203,
+        displayName: 'Blue2Red',
+        gridHeight: 2,
+        originalName: 'Blue2Red',
+        tooltip: 'Blue 2 Red',
+        inputs: [0],
+        outputs: [1],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 210,
                 "y": 11,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -24,7 +28,9 @@ export const Blue2RedModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Line",
@@ -44,4 +50,5 @@ export const Blue2RedModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

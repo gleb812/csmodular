@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: OscA
-// Исходный файл: OscA.js
-// Версия: 206
+    // Исходный файл: OscA.js
+    // Версия: 206
 
-export const OscAModule = {
-    type: 'OscA',
-        typeID: 97,
+    export const OscAModule = {
+        type: 'OscA',
+            typeID: 97,
     defaultParams: [64, 64, 1, 0, 2, 1, 0],
-    displayName: 'OscA',
-    gridHeight: 3,
-    originalName: 'OscA',
-    tooltip: 'Osc A',
-    components: [
+        displayName: 'OscA',
+        gridHeight: 3,
+        originalName: 'OscA',
+        tooltip: 'Osc A',
+        inputs: [0, 3],
+        outputs: [8],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 4,
                 "y": 29,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "PitchVar",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -41,7 +45,9 @@ export const OscAModule = {
                 "x": 4,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -74,7 +80,9 @@ export const OscAModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -146,4 +154,5 @@ export const OscAModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

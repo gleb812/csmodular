@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: ZeroCnt
-// Исходный файл: ZeroCnt.js
-// Версия: 210
+    // Исходный файл: ZeroCnt.js
+    // Версия: 210
 
-export const ZeroCntModule = {
-    type: 'ZeroCnt',
-        typeID: 198,
+    export const ZeroCntModule = {
+        type: 'ZeroCnt',
+            typeID: 198,
     defaultParams: [],
-    displayName: 'ZeroCnt',
-    gridHeight: 2,
-    originalName: 'ZeroCnt',
-    tooltip: 'Zero Crossing Counter',
-    components: [
+        displayName: 'ZeroCnt',
+        gridHeight: 2,
+        originalName: 'ZeroCnt',
+        tooltip: 'Zero Crossing Counter',
+        inputs: [0],
+        outputs: [1],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
@@ -34,7 +36,9 @@ export const ZeroCntModule = {
                 "y": 3,
                 "text": "In",
                 "fontSize": 9,
-                "color": "#ffffff"
+                "color": "#ffffff",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -43,7 +47,9 @@ export const ZeroCntModule = {
                 "y": 3,
                 "text": "Pitch",
                 "fontSize": 9,
-                "color": "#ffffff"
+                "color": "#ffffff",
+                "ConnectorName": "Gate",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -60,4 +66,5 @@ export const ZeroCntModule = {
                 "width": 102
         }
 ]
-};
+    };
+    

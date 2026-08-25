@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: Operator
-// Исходный файл: Operator.js
-// Версия: 226
+    // Исходный файл: Operator.js
+    // Версия: 226
 
-export const OperatorModule = {
-    type: 'Operator',
-        typeID: 180,
+    export const OperatorModule = {
+        type: 'Operator',
+            typeID: 180,
     defaultParams: [1, 0, 0, 1, 0, 7, 0, 0, 90, 99, 80, 99, 70, 99, 70, 0, 0, 50, 0, 0, 0, 0, 99, 1, 1],
-    displayName: 'Operator',
-    gridHeight: 12,
-    originalName: 'Operator',
-    tooltip: 'FM Operator',
-    components: [
+        displayName: 'Operator',
+        gridHeight: 12,
+        originalName: 'Operator',
+        tooltip: 'FM Operator',
+        inputs: [26, 27, 40, 51, 74, 75, 77],
+        outputs: [61],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "0",
@@ -225,7 +227,9 @@ export const OperatorModule = {
                 "x": 4,
                 "y": 23,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 6
         },
         {
                 "componentType": "TextLabel",
@@ -319,7 +323,9 @@ export const OperatorModule = {
                 "x": 240,
                 "y": 19,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "FM",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -393,7 +399,9 @@ export const OperatorModule = {
                 "x": 4,
                 "y": 75,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Gate",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -465,7 +473,9 @@ export const OperatorModule = {
                 "x": 240,
                 "y": 165,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Graph",
@@ -581,7 +591,9 @@ export const OperatorModule = {
                 "x": 4,
                 "y": 142,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "AMod",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Input",
@@ -589,7 +601,9 @@ export const OperatorModule = {
                 "x": 4,
                 "y": 165,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Vel",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "TextLabel",
@@ -606,7 +620,9 @@ export const OperatorModule = {
                 "x": 4,
                 "y": 100,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Note",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "TextLabel",
@@ -631,7 +647,9 @@ export const OperatorModule = {
                 "x": 4,
                 "y": 49,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Freq",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -690,4 +708,5 @@ export const OperatorModule = {
                 ]
         }
 ]
-};
+    };
+    

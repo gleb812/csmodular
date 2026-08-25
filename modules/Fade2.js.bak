@@ -1,0 +1,126 @@
+// Автоматически сгенерированный модуль: Fade2
+    // Исходный файл: Fade2.js
+    // Версия: 206
+
+    export const Fade2Module = {
+        type: 'Fade2',
+            typeID: 114,
+        displayName: 'Fade2-1',
+        gridHeight: 2,
+        originalName: 'Fade2-1',
+        tooltip: 'Fader 2-1',
+        inputs: [0, 3, 9],
+        outputs: [2],
+        components: [
+        {
+                "componentType": "Knob",
+                "id": "1",
+                "x": 140,
+                "y": 5,
+                "infoFunc": 52,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "0",
+                "x": 180,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "dynamic",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "Input",
+                "id": "3",
+                "x": 210,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "dynamic",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
+        },
+        {
+                "componentType": "Output",
+                "id": "2",
+                "x": 240,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "6",
+                "x": 176,
+                "y": 16,
+                "text": "1",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "7",
+                "x": 204,
+                "y": 16,
+                "text": "2",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "4",
+                "x": 135,
+                "y": 16,
+                "text": "1",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "5",
+                "x": 163,
+                "y": 16,
+                "text": "2",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "9",
+                "x": 87,
+                "y": 14,
+                "jackType": "audio",
+                "bandwidth": "dynamic",
+                "ConnectorName": "Mod",
+                "ConnectorIndex": 2
+        },
+        {
+                "componentType": "Knob",
+                "id": "8",
+                "x": 101,
+                "y": 7,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "12",
+                "x": 91,
+                "y": 17,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "SVG",
+                "id": "11",
+                "x": 184,
+                "y": 4,
+                "width": 62,
+                "height": 9,
+                "color": "#ffffff"
+        }
+]
+    };
+    

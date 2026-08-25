@@ -1,0 +1,144 @@
+// Автоматически сгенерированный модуль: ModAmt
+    // Исходный файл: ModAmt.js
+    // Версия: 230
+
+    export const ModAmtModule = {
+        type: 'ModAmt',
+            typeID: 195,
+        displayName: 'ModAmt',
+        gridHeight: 2,
+        originalName: 'ModAmt',
+        tooltip: 'Modulation Amount',
+        inputs: [2, 5],
+        outputs: [1],
+        components: [
+        {
+                "componentType": "TextLabel",
+                "id": "0",
+                "x": 214,
+                "y": 7,
+                "text": "↑",
+                "fontSize": 18,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Amplifier",
+                "width": 102
+        },
+        {
+                "componentType": "Output",
+                "id": "1",
+                "x": 240,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "Input",
+                "id": "2",
+                "x": 210,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "TextEdit",
+                "id": "3",
+                "x": 123,
+                "y": 8,
+                "width": 43,
+                "text": "On"
+        },
+        {
+                "componentType": "Knob",
+                "id": "4",
+                "x": 99,
+                "y": 5,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "5",
+                "x": 190,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "dynamic",
+                "ConnectorName": "Mod",
+                "ConnectorIndex": 1
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "6",
+                "x": 79,
+                "y": 7,
+                "text": "Mod",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Line",
+                "id": "8",
+                "x": 195,
+                "y": 7,
+                "length": 36,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Line",
+                "id": "9",
+                "x": 195,
+                "y": 7,
+                "length": 13,
+                "orientation": "Vertical"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "10",
+                "x": 74,
+                "y": 16,
+                "text": "depth",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "11",
+                "x": 170,
+                "y": 14,
+                "text": "Mod",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "13",
+                "x": 4,
+                "y": 14,
+                "width": 30,
+                "height": 12,
+                "labels": [
+                        "Exp",
+                        "Lin"
+                ]
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "7",
+                "x": 38,
+                "y": 14,
+                "width": 30,
+                "height": 12,
+                "labels": [
+                        "m",
+                        "1-m"
+                ]
+        }
+]
+    };
+    

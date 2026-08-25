@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: MonoKey
-// Исходный файл: MonoKey.js
-// Версия: 230
+    // Исходный файл: MonoKey.js
+    // Версия: 230
 
-export const MonoKeyModule = {
-    type: 'MonoKey',
-        typeID: 199,
+    export const MonoKeyModule = {
+        type: 'MonoKey',
+            typeID: 199,
     defaultParams: [0],
-    displayName: 'MonoKey',
-    gridHeight: 2,
-    originalName: 'MonoKey',
-    tooltip: 'Monophonic Keyboard',
-    components: [
+        displayName: 'MonoKey',
+        gridHeight: 2,
+        originalName: 'MonoKey',
+        tooltip: 'Monophonic Keyboard',
+        inputs: [],
+        outputs: [1, 2, 3],
+        components: [
         {
                 "componentType": "Output",
                 "id": "1",
                 "x": 210,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Gate",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -34,7 +38,9 @@ export const MonoKeyModule = {
                 "x": 180,
                 "y": 13,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -51,7 +57,9 @@ export const MonoKeyModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Vel",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -77,4 +85,5 @@ export const MonoKeyModule = {
                 ]
         }
 ]
-};
+    };
+    

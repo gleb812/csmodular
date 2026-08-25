@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: Compress
-// Исходный файл: Compress.js
-// Версия: 210
+    // Исходный файл: Compress.js
+    // Версия: 210
 
-export const CompressModule = {
-    type: 'Compress',
-        typeID: 150,
+    export const CompressModule = {
+        type: 'Compress',
+            typeID: 150,
     defaultParams: [18, 20, 1, 20, 30, 0, 1],
-    displayName: 'Compress',
-    gridHeight: 5,
-    originalName: 'Compress',
-    tooltip: 'Compressor',
-    components: [
+        displayName: 'Compress',
+        gridHeight: 5,
+        originalName: 'Compress',
+        tooltip: 'Compressor',
+        inputs: [0, 1, 15],
+        outputs: [2, 3],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 240,
                 "y": 26,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "InR",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -25,7 +29,9 @@ export const CompressModule = {
                 "x": 225,
                 "y": 26,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "InL",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -33,7 +39,9 @@ export const CompressModule = {
                 "x": 225,
                 "y": 60,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "OutL",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -41,7 +49,9 @@ export const CompressModule = {
                 "x": 240,
                 "y": 60,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "OutR",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -142,7 +152,9 @@ export const CompressModule = {
                 "x": 79,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "SideChain",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -430,4 +442,5 @@ export const CompressModule = {
                 "orientation": "Horizontal"
         }
 ]
-};
+    };
+    

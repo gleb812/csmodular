@@ -1,22 +1,26 @@
 // Автоматически сгенерированный модуль: Status
-// Исходный файл: Status.js
-// Версия: 230
+    // Исходный файл: Status.js
+    // Версия: 230
 
-export const StatusModule = {
-    type: 'Status',
-        typeID: 197,
-    displayName: 'Status',
-    gridHeight: 2,
-    originalName: 'Status',
-    tooltip: 'Status',
-    components: [
+    export const StatusModule = {
+        type: 'Status',
+            typeID: 197,
+        displayName: 'Status',
+        gridHeight: 2,
+        originalName: 'Status',
+        tooltip: 'Status',
+        inputs: [],
+        outputs: [0, 3, 5],
+        components: [
         {
                 "componentType": "Output",
                 "id": "0",
                 "x": 166,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "VarActive",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -42,7 +46,9 @@ export const StatusModule = {
                 "x": 107,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "PatchActive",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -59,7 +65,10 @@ export const StatusModule = {
                 "x": 225,
                 "y": 13,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "VoiceNo",
+                "ConnectorIndex": 2
         }
 ]
-};
+    };
+    

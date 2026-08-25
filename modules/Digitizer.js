@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: Digitizer
-// Исходный файл: Digitizer.js
-// Версия: 208
+    // Исходный файл: Digitizer.js
+    // Версия: 208
 
-export const DigitizerModule = {
-    type: 'Digitizer',
-        typeID: 118,
+    export const DigitizerModule = {
+        type: 'Digitizer',
+            typeID: 118,
     defaultParams: [11, 64, 0, 1],
-    displayName: 'Digitizer',
-    gridHeight: 3,
-    originalName: 'Digitizer',
-    tooltip: 'Digitizer',
-    components: [
+        displayName: 'Digitizer',
+        gridHeight: 3,
+        originalName: 'Digitizer',
+        tooltip: 'Digitizer',
+        inputs: [2, 11],
+        outputs: [1],
+        components: [
         {
                 "componentType": "ButtonText",
                 "id": "0",
@@ -25,7 +27,9 @@ export const DigitizerModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -33,7 +37,9 @@ export const DigitizerModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Line",
@@ -82,7 +88,9 @@ export const DigitizerModule = {
                 "x": 11,
                 "y": 29,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Rate",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -135,4 +143,5 @@ export const DigitizerModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

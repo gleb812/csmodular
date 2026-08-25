@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: LevAmp
-// Исходный файл: LevAmp.js
-// Версия: 206
+    // Исходный файл: LevAmp.js
+    // Версия: 206
 
-export const LevAmpModule = {
-    type: 'LevAmp',
-        typeID: 81,
+    export const LevAmpModule = {
+        type: 'LevAmp',
+            typeID: 81,
     defaultParams: [64, 0],
-    displayName: 'LevAmp',
-    gridHeight: 2,
-    originalName: 'LevAmp',
-    tooltip: 'Level Amplifier',
-    components: [
+        displayName: 'LevAmp',
+        gridHeight: 2,
+        originalName: 'LevAmp',
+        tooltip: 'Level Amplifier',
+        inputs: [1],
+        outputs: [3],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "0",
@@ -25,7 +27,9 @@ export const LevAmpModule = {
                 "x": 210,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -33,7 +37,9 @@ export const LevAmpModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -86,4 +92,5 @@ export const LevAmpModule = {
                 ]
         }
 ]
-};
+    };
+    

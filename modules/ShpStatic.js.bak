@@ -1,0 +1,58 @@
+// Автоматически сгенерированный модуль: ShpStatic
+    // Исходный файл: ShpStatic.js
+    // Версия: 208
+
+    export const ShpStaticModule = {
+        type: 'ShpStatic',
+            typeID: 83,
+        displayName: 'ShpStatic',
+        gridHeight: 2,
+        originalName: 'ShpStatic',
+        tooltip: 'Shape Static',
+        inputs: [1],
+        outputs: [0],
+        components: [
+        {
+                "componentType": "Input",
+                "id": "1",
+                "x": 210,
+                "y": 11,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "0",
+                "x": 240,
+                "y": 11,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "3",
+                "x": 224,
+                "y": 11,
+                "width": 13,
+                "text": "B"
+        },
+        {
+                "componentType": "Line",
+                "id": "2",
+                "x": 210,
+                "y": 16,
+                "length": 40,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "ButtonRadio",
+                "id": "5",
+                "x": 96,
+                "y": 8,
+                "buttonWidth": 22,
+                "buttonCount": 4,
+                "orientation": "horizontal"
+        }
+]
+    };
+    

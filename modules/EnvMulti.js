@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: EnvMulti
-// Исходный файл: EnvMulti.js
-// Версия: 206
+    // Исходный файл: EnvMulti.js
+    // Версия: 206
 
-export const EnvMultiModule = {
-    type: 'EnvMulti',
-        typeID: 52,
+    export const EnvMultiModule = {
+        type: 'EnvMulti',
+            typeID: 52,
     defaultParams: [127, 45, 64, 0, 0, 30, 30, 14, 0, 2, 0, 1, 0],
-    displayName: 'EnvMulti',
-    gridHeight: 6,
-    originalName: 'EnvMulti',
-    tooltip: 'Envelope Multi',
-    components: [
+        displayName: 'EnvMulti',
+        gridHeight: 6,
+        originalName: 'EnvMulti',
+        tooltip: 'Envelope Multi',
+        inputs: [1, 6, 10],
+        outputs: [2, 5],
+        components: [
         {
                 "componentType": "Graph",
                 "id": "0",
@@ -25,7 +27,9 @@ export const EnvMultiModule = {
                 "x": 210,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -33,7 +37,9 @@ export const EnvMultiModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -41,7 +47,9 @@ export const EnvMultiModule = {
                 "x": 240,
                 "y": 21,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Env",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -49,7 +57,9 @@ export const EnvMultiModule = {
                 "x": 4,
                 "y": 28,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Gate",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "LED",
@@ -81,7 +91,9 @@ export const EnvMultiModule = {
                 "x": 42,
                 "y": 28,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "AM",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextField",
@@ -396,4 +408,5 @@ export const EnvMultiModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: XFade
-// Исходный файл: XFade.js
-// Версия: 206
+    // Исходный файл: XFade.js
+    // Версия: 206
 
-export const XFadeModule = {
-    type: 'XFade',
-        typeID: 18,
+    export const XFadeModule = {
+        type: 'XFade',
+            typeID: 18,
     defaultParams: [0, 64, 0],
-    displayName: 'X-Fade',
-    gridHeight: 2,
-    originalName: 'X-Fade',
-    tooltip: 'Cross Fader',
-    components: [
+        displayName: 'X-Fade',
+        gridHeight: 2,
+        originalName: 'X-Fade',
+        tooltip: 'Cross Fader',
+        inputs: [1, 2, 3],
+        outputs: [6],
+        components: [
         {
                 "componentType": "Input",
                 "id": "3",
                 "x": 87,
                 "y": 14,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Mod",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Knob",
@@ -49,7 +53,9 @@ export const XFadeModule = {
                 "x": 180,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -57,7 +63,9 @@ export const XFadeModule = {
                 "x": 210,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -65,7 +73,9 @@ export const XFadeModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -123,7 +133,7 @@ export const XFadeModule = {
                 "width": 62,
                 "height": 9,
                 "color": "#ffffff"
-        ,
-        "svgSrc": "/svg/x-fade.svg"}
+        }
 ]
-};
+    };
+    

@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: LfoB
-// Исходный файл: LfoB.js
-// Версия: 231
+    // Исходный файл: LfoB.js
+    // Версия: 231
 
-export const LfoBModule = {
-    type: 'LfoB',
-        typeID: 190,
+    export const LfoBModule = {
+        type: 'LfoB',
+            typeID: 190,
     defaultParams: [64, 0, 1, 0, 0, 0, 0, 1, 4, 0],
-    displayName: 'LfoB',
-    gridHeight: 4,
-    originalName: 'LfoB',
-    tooltip: 'LFO B',
-    components: [
+        displayName: 'LfoB',
+        gridHeight: 4,
+        originalName: 'LfoB',
+        tooltip: 'LFO B',
+        inputs: [1, 2, 17, 21],
+        outputs: [6, 18],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 45,
                 "y": 44,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "RateVar",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -41,7 +45,9 @@ export const LfoBModule = {
                 "x": 28,
                 "y": 44,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Rate",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -73,7 +79,9 @@ export const LfoBModule = {
                 "x": 240,
                 "y": 45,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -165,7 +173,9 @@ export const LfoBModule = {
                 "x": 4,
                 "y": 16,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Rst",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Output",
@@ -173,7 +183,9 @@ export const LfoBModule = {
                 "x": 4,
                 "y": 45,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Sync",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -204,7 +216,9 @@ export const LfoBModule = {
                 "x": 140,
                 "y": 44,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Phase",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Knob",
@@ -269,4 +283,5 @@ export const LfoBModule = {
                 ]
         }
 ]
-};
+    };
+    

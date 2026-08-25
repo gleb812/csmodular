@@ -1,0 +1,87 @@
+// Автоматически сгенерированный модуль: Mix11A
+    // Исходный файл: Mix11A.js
+    // Версия: 206
+
+    export const Mix11AModule = {
+        type: 'Mix11A',
+            typeID: 184,
+        displayName: 'Mix1-1A',
+        gridHeight: 2,
+        originalName: 'Mix1-1A',
+        tooltip: 'Mixer 1-1 A',
+        inputs: [1, 30],
+        outputs: [13],
+        components: [
+        {
+                "componentType": "Knob",
+                "id": "0",
+                "x": 158,
+                "y": 5,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "1",
+                "x": 210,
+                "y": 11,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "13",
+                "x": 240,
+                "y": 11,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "14",
+                "x": 18,
+                "y": 17,
+                "text": "Chain",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextEdit",
+                "id": "17",
+                "x": 112,
+                "y": 8,
+                "width": 43,
+                "text": "Ch 1"
+        },
+        {
+                "componentType": "Input",
+                "id": "30",
+                "x": 4,
+                "y": 15,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "2",
+                "x": 43,
+                "y": 14,
+                "width": 30,
+                "height": 12,
+                "labels": [
+                        "Exp",
+                        "Lin",
+                        "dB"
+                ]
+        },
+        {
+                "componentType": "Line",
+                "id": "3",
+                "x": 216,
+                "y": 16,
+                "length": 30,
+                "orientation": "Horizontal"
+        }
+]
+    };
+    

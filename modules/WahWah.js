@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: WahWah
-// Исходный файл: WahWah.js
-// Версия: 202
+    // Исходный файл: WahWah.js
+    // Версия: 202
 
-export const WahWahModule = {
-    type: 'WahWah',
-        typeID: 125,
+    export const WahWahModule = {
+        type: 'WahWah',
+            typeID: 125,
     defaultParams: [0, 64, 1],
-    displayName: 'WahWah',
-    gridHeight: 2,
-    originalName: 'WahWah',
-    tooltip: 'Wah-Wah',
-    components: [
+        displayName: 'WahWah',
+        gridHeight: 2,
+        originalName: 'WahWah',
+        tooltip: 'Wah-Wah',
+        inputs: [1, 2],
+        outputs: [3],
+        components: [
         {
                 "componentType": "Input",
                 "id": "2",
                 "x": 210,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -25,7 +29,9 @@ export const WahWahModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -58,7 +64,9 @@ export const WahWahModule = {
                 "x": 97,
                 "y": 14,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Sweep",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -85,4 +93,5 @@ export const WahWahModule = {
                 "text": "B"
         }
 ]
-};
+    };
+    

@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: DrumSynth
-// Исходный файл: DrumSynth.js
-// Версия: 238
+    // Исходный файл: DrumSynth.js
+    // Версия: 238
 
-export const DrumSynthModule = {
-    type: 'DrumSynth',
-        typeID: 58,
+    export const DrumSynthModule = {
+        type: 'DrumSynth',
+            typeID: 58,
     defaultParams: [42, 15, 46, 50, 120, 102, 57, 32, 39, 49, 1, 68, 61, 79, 115, 1],
-    displayName: 'DrumSynth',
-    gridHeight: 8,
-    originalName: 'DrumSynth',
-    tooltip: 'Drum Synthesizer',
-    components: [
+        displayName: 'DrumSynth',
+        gridHeight: 8,
+        originalName: 'DrumSynth',
+        tooltip: 'Drum Synthesizer',
+        inputs: [18, 19, 20],
+        outputs: [23],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "0",
@@ -159,7 +161,9 @@ export const DrumSynthModule = {
                 "x": 4,
                 "y": 26,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Trig",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -167,7 +171,9 @@ export const DrumSynthModule = {
                 "x": 4,
                 "y": 105,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Vel",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -175,7 +181,9 @@ export const DrumSynthModule = {
                 "x": 4,
                 "y": 67,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "LED",
@@ -189,7 +197,9 @@ export const DrumSynthModule = {
                 "x": 240,
                 "y": 105,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -404,4 +414,5 @@ export const DrumSynthModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

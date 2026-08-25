@@ -138,7 +138,7 @@ i3 0 [60*60*24*7]
             defaultParams = [],
             defaultMode = [],  // 👈 ИСПРАВЛЕНО
             inlets = 1,       
-            outlets = 1       
+            outlets = 1     
         } = moduleData;
         
         console.log('  📦 typeId:', typeId);
@@ -249,59 +249,93 @@ i3 0 [60*60*24*7]
             instanceName,
             instanceId,
             parameters = [],
-            mode = [],           
+            mode = [],
             defaultParams = [],
-            defaultMode = [],    
+            defaultMode = [],
             inlets,
             outlets
         } = module;
         
-        console.log('  📦 instanceName:', instanceName);
-        console.log('  📦 instanceId:', instanceId);
-        console.log('  📦 parameters:', parameters);
-        console.log('  📦 mode:', mode);                   
-        console.log('  📦 defaultParams:', defaultParams);
-        console.log('  📦 defaultMode:', defaultMode);      
-        console.log('  📦 inlets:', inlets);
-        console.log('  📦 outlets:', outlets);
+        // Находим панель, чтобы получить реальные inputs/outputs
+        const panel = this.getPanelById(instanceId);
+        
+        // 🔥 ОПРЕДЕЛЯЕМ КОЛИЧЕСТВО ВХОДОВ И ВЫХОДОВ
+        let inputCount = 0;  // по умолчанию 0!
+        let outputCount = 0; // по умолчанию 0!
+        
+        if (panel) {
+            // Берем из панели (из дефиниции модуля)
+            const inputs = panel._inputs || [];
+            const outputs = panel._outputs || [];
+            inputCount = inputs.length;
+            outputCount = outputs.length;
+        } else {
+            // 🔥 ФИКС: inlets/outlets могут быть массивами!
+            if (Array.isArray(inlets)) {
+                inputCount = inlets.length;
+            } else {
+                inputCount = inlets || 0;
+            }
+            
+            if (Array.isArray(outlets)) {
+                outputCount = outlets.length;
+            } else {
+                outputCount = outlets || 0;
+            }
+        }
+        
+        console.log(`  📊 Inputs: ${inputCount}, Outputs: ${outputCount}`);
         
         // Очищаем имя модуля от номера версии
         const cleanModuleName = instanceName.replace(/_\d+$/, '');
         
-        // Используем реальные параметры, если есть, иначе дефолтные
+        // Берем параметры
         const paramsToUse = parameters.length > 0 ? parameters : defaultParams;
-        console.log('  📊 paramsToUse:', paramsToUse);
+        const modeToUse = mode.length > 0 ? mode : defaultMode;
         
-        // Используем реальные моды, если есть, иначе дефолтные
-        const modeToUse = mode.length > 0 ? mode : defaultMode;  
-        console.log('  📊 modeToUse:', modeToUse);
-        
-        // Параметры
+        // ✅ 1. ВСЕГДА начинаем с 0 (заглушка для входа через zak)
         let paramsStr = '0';
         if (paramsToUse.length > 0) {
-            paramsStr = '0,   ' + paramsToUse.join(', ');
+            paramsStr = '0, ' + paramsToUse.join(', ');
         }
         
-        // Моды (часто пустые)
+        // ✅ 2. Моды (если есть)
         let modeStr = '';
         if (modeToUse.length > 0) {
             modeStr = ', ' + modeToUse.join(', ');
         }
         
-        // Формируем строку инлетов (-1 для каждого входа)
-        const inletsStr = Array(inlets).fill('-1').join(', ');
+        // ✅ 3. Всегда добавляем -1 после параметров и модов
+        const separator = '-1';
         
-        // Формируем строку аутлетов (-2 для каждого выхода)
-        const outletsStr = Array(outlets).fill('-2').join(', ');
+        // ✅ 4. Для каждого входа - 1 (подключение к пустой шине)
+        // ✅ 5. Для каждого выхода - 0 (сброс в "землю")
+        const inletsList = Array(inputCount).fill('1');
+        const outletsList = Array(outputCount).fill('0');
         
-        // Финальная строка
-        const result = `${cleanModuleName}   /* ${instanceName} */     ${paramsStr}${modeStr},           ${inletsStr},      ${outletsStr}`;
+        // Объединяем все: сначала инлеты (1,1,1), потом аутлеты (0,0)
+        const allPorts = [...inletsList, ...outletsList];
+        const portsStr = allPorts.join(', ');
+        
+        // ✅ ФИНАЛЬНАЯ СТРОКА: имя, параметры, -1, входы, выходы
+        const result = `${cleanModuleName}   /* ${instanceName} */     ${paramsStr}${modeStr}, ${separator}, ${portsStr}`;
         
         console.log('  ✅ result:', result);
         
         return result;
     }
-    
+
+    getPanelById(instanceId) {
+        // Ищем панель в системе
+        if (this.system) {
+            return this.system.components.find(
+                c => c.jsonId === instanceId && c.constructor.name === 'Panel'
+            );
+        }
+        return null;
+    }
+
+
     /**
      * Показать полный .csd в консоли
      */

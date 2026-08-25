@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: EqPeak
-// Исходный файл: EqPeak.js
-// Версия: 208
+    // Исходный файл: EqPeak.js
+    // Версия: 208
 
-export const EqPeakModule = {
-    type: 'EqPeak',
-        typeID: 103,
+    export const EqPeakModule = {
+        type: 'EqPeak',
+            typeID: 103,
     defaultParams: [60, 64, 64, 1, 127],
-    displayName: 'EqPeak',
-    gridHeight: 4,
-    originalName: 'EqPeak',
-    tooltip: 'Eq Peak',
-    components: [
+        displayName: 'EqPeak',
+        gridHeight: 4,
+        originalName: 'EqPeak',
+        tooltip: 'Eq Peak',
+        inputs: [11],
+        outputs: [10],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "1",
@@ -100,7 +102,9 @@ export const EqPeakModule = {
                 "x": 240,
                 "y": 45,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -108,7 +112,9 @@ export const EqPeakModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -153,4 +159,5 @@ export const EqPeakModule = {
                 "orientation": "vertical"
         }
 ]
-};
+    };
+    

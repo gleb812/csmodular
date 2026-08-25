@@ -1,22 +1,26 @@
 // Автоматически сгенерированный модуль: Sw21
-// Исходный файл: Sw21.js
-// Версия: 206
+    // Исходный файл: Sw21.js
+    // Версия: 206
 
-export const Sw21Module = {
-    type: 'Sw21',
-        typeID: 100,
-    displayName: 'Sw2-1',
-    gridHeight: 2,
-    originalName: 'Sw2-1',
-    tooltip: 'Switch 2-1',
-    components: [
+    export const Sw21Module = {
+        type: 'Sw21',
+            typeID: 100,
+        displayName: 'Sw2-1',
+        gridHeight: 2,
+        originalName: 'Sw2-1',
+        tooltip: 'Switch 2-1',
+        inputs: [1, 3],
+        outputs: [0, 2],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 210,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -24,7 +28,9 @@ export const Sw21Module = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -32,7 +38,9 @@ export const Sw21Module = {
                 "x": 4,
                 "y": 15,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Ctrl",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextField",
@@ -57,7 +65,9 @@ export const Sw21Module = {
                 "x": 180,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "SVG",
@@ -114,4 +124,5 @@ export const Sw21Module = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

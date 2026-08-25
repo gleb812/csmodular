@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: Mux18
-// Исходный файл: Mux18.js
-// Версия: 206
+    // Исходный файл: Mux18.js
+    // Версия: 206
 
-export const Mux18Module = {
-    type: 'Mux18',
-        typeID: 21,
+    export const Mux18Module = {
+        type: 'Mux18',
+            typeID: 21,
     defaultParams: [],
-    displayName: 'Mux1-8',
-    gridHeight: 2,
-    originalName: 'Mux1-8',
-    tooltip: 'Multiplexer 1-8',
-    components: [
+        displayName: 'Mux1-8',
+        gridHeight: 2,
+        originalName: 'Mux1-8',
+        tooltip: 'Multiplexer 1-8',
+        inputs: [33, 44],
+        outputs: [0, 1, 4, 10, 14, 26, 29, 31],
+        components: [
         {
                 "componentType": "TextLabel",
                 "id": "2",
@@ -98,7 +100,9 @@ export const Mux18Module = {
                 "x": 100,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -226,7 +230,9 @@ export const Mux18Module = {
                 "x": 4,
                 "y": 15,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Ctrl",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -243,7 +249,9 @@ export const Mux18Module = {
                 "x": 120,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -251,7 +259,9 @@ export const Mux18Module = {
                 "x": 140,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Output",
@@ -259,7 +269,9 @@ export const Mux18Module = {
                 "x": 160,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out4",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Output",
@@ -267,7 +279,9 @@ export const Mux18Module = {
                 "x": 180,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out5",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Output",
@@ -275,7 +289,9 @@ export const Mux18Module = {
                 "x": 200,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out6",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "Output",
@@ -283,7 +299,9 @@ export const Mux18Module = {
                 "x": 220,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out7",
+                "ConnectorIndex": 6
         },
         {
                 "componentType": "Output",
@@ -291,7 +309,9 @@ export const Mux18Module = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out8",
+                "ConnectorIndex": 7
         },
         {
                 "componentType": "Input",
@@ -299,7 +319,10 @@ export const Mux18Module = {
                 "x": 80,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         }
 ]
-};
+    };
+    

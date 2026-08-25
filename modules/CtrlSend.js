@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: CtrlSend
-// Исходный файл: CtrlSend.js
-// Версия: 210
+    // Исходный файл: CtrlSend.js
+    // Версия: 210
 
-export const CtrlSendModule = {
-    type: 'CtrlSend',
-        typeID: 141,
+    export const CtrlSendModule = {
+        type: 'CtrlSend',
+            typeID: 141,
     defaultParams: [1, 0, 0],
-    displayName: 'CtrlSend',
-    gridHeight: 2,
-    originalName: 'CtrlSend',
-    tooltip: 'MIDI Control Send',
-    components: [
+        displayName: 'CtrlSend',
+        gridHeight: 2,
+        originalName: 'CtrlSend',
+        tooltip: 'MIDI Control Send',
+        inputs: [1, 13],
+        outputs: [11],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 10,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Send",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextField",
@@ -98,7 +102,9 @@ export const CtrlSendModule = {
                 "x": 65,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Send",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -106,7 +112,9 @@ export const CtrlSendModule = {
                 "x": 140,
                 "y": 15,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Value",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -142,4 +150,5 @@ export const CtrlSendModule = {
         ,
         "svgSrc": "/svg/ctrsend_pcsend_automate.svg"}
 ]
-};
+    };
+    

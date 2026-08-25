@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: Phaser
-// Исходный файл: Phaser.js
-// Версия: 230
+    // Исходный файл: Phaser.js
+    // Версия: 230
 
-export const PhaserModule = {
-    type: 'Phaser',
-        typeID: 192,
+    export const PhaserModule = {
+        type: 'Phaser',
+            typeID: 192,
     defaultParams: [0, 64, 0, 1],
-    displayName: 'Phaser',
-    gridHeight: 2,
-    originalName: 'Phaser',
-    tooltip: 'Phaser',
-    components: [
+        displayName: 'Phaser',
+        gridHeight: 2,
+        originalName: 'Phaser',
+        tooltip: 'Phaser',
+        inputs: [5],
+        outputs: [6],
+        components: [
         {
                 "componentType": "ButtonFlat",
                 "id": "0",
@@ -63,7 +65,9 @@ export const PhaserModule = {
                 "x": 210,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -71,7 +75,9 @@ export const PhaserModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Line",
@@ -107,4 +113,5 @@ export const PhaserModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

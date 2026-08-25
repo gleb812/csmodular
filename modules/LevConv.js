@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: LevConv
-// Исходный файл: LevConv.js
-// Версия: 210
+    // Исходный файл: LevConv.js
+    // Версия: 210
 
-export const LevConvModule = {
-    type: 'LevConv',
-        typeID: 157,
+    export const LevConvModule = {
+        type: 'LevConv',
+            typeID: 157,
     defaultParams: [4, 0],
-    displayName: 'LevConv',
-    gridHeight: 2,
-    originalName: 'LevConv',
-    tooltip: 'Level Converter',
-    components: [
+        displayName: 'LevConv',
+        gridHeight: 2,
+        originalName: 'LevConv',
+        tooltip: 'Level Converter',
+        inputs: [4],
+        outputs: [6],
+        components: [
         {
                 "componentType": "LevelShift",
                 "id": "1",
@@ -23,7 +25,9 @@ export const LevConvModule = {
                 "x": 210,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -31,7 +35,9 @@ export const LevConvModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Line",
@@ -65,4 +71,5 @@ export const LevConvModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

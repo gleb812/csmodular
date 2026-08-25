@@ -1,17 +1,19 @@
 // Автоматически сгенерированный модуль: DelayA
-// Исходный файл: DelayA.js
-// Версия: 228
+    // Исходный файл: DelayA.js
+    // Версия: 228
 
-export const DelayAModule = {
-    type: 'DelayA',
-        typeID: 176,
+    export const DelayAModule = {
+        type: 'DelayA',
+            typeID: 176,
     mode: [0],
     defaultParams: [64, 64, 64, 64, 1, 0],
-    displayName: 'DelayA',
-    gridHeight: 3,
-    originalName: 'DelayA',
-    tooltip: 'Delay A',
-    components: [
+        displayName: 'DelayA',
+        gridHeight: 3,
+        originalName: 'DelayA',
+        tooltip: 'Delay A',
+        inputs: [6],
+        outputs: [7],
+        components: [
         {
                 "componentType": "TextLabel",
                 "id": "1",
@@ -69,7 +71,9 @@ export const DelayAModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -77,7 +81,9 @@ export const DelayAModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -143,4 +149,5 @@ export const DelayAModule = {
                 "orientation": "Vertical"
         }
 ]
-};
+    };
+    

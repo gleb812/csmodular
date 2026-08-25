@@ -1,22 +1,26 @@
 // Автоматически сгенерированный модуль: ShpStatic
-// Исходный файл: ShpStatic.js
-// Версия: 208
+    // Исходный файл: ShpStatic.js
+    // Версия: 208
 
-export const ShpStaticModule = {
-    type: 'ShpStatic',
-        typeID: 83,
-    displayName: 'ShpStatic',
-    gridHeight: 2,
-    originalName: 'ShpStatic',
-    tooltip: 'Shape Static',
-    components: [
+    export const ShpStaticModule = {
+        type: 'ShpStatic',
+            typeID: 83,
+        displayName: 'ShpStatic',
+        gridHeight: 2,
+        originalName: 'ShpStatic',
+        tooltip: 'Shape Static',
+        inputs: [1],
+        outputs: [0],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 210,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -24,7 +28,9 @@ export const ShpStaticModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -52,4 +58,5 @@ export const ShpStaticModule = {
                 "orientation": "horizontal"
         }
 ]
-};
+    };
+    

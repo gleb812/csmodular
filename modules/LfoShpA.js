@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: LfoShpA
-// Исходный файл: LfoShpA.js
-// Версия: 231
+    // Исходный файл: LfoShpA.js
+    // Версия: 231
 
-export const LfoShpAModule = {
-    type: 'LfoShpA',
-        typeID: 25,
-    defaultParams: [64, 0, 0, 1, 1, 4, 3],
-    displayName: 'LfoShpA',
-    gridHeight: 5,
-    originalName: 'LfoShpA',
-    tooltip: 'LFO Shape A',
-    components: [
+    export const LfoShpAModule = {
+        type: 'LfoShpA',
+            typeID: 24,
+    defaultParams: [64, 1, 0, 0, 1, 64, 0, 0, 0, 0, 4, 0],
+        displayName: 'LfoShpA',
+        gridHeight: 5,
+        originalName: 'LfoShpA',
+        tooltip: 'LFO Shape A',
+        inputs: [3, 4, 5, 13, 16, 28],
+        outputs: [0, 32],
+        components: [
         {
                 "componentType": "Output",
                 "id": "0",
@@ -74,7 +76,9 @@ export const LfoShpAModule = {
                 "x": 43,
                 "y": 62,
                 "length": 22,
-                "orientation": "Horizontal"
+                "orientation": "Horizontal",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -97,7 +101,9 @@ export const LfoShpAModule = {
                 "y": 50,
                 "text": "Rate",
                 "fontSize": 9,
-                "color": "#ffffff"
+                "color": "#ffffff",
+                "ConnectorName": "Rate",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -327,4 +333,5 @@ export const LfoShpAModule = {
                 ]
         }
 ]
-};
+    };
+    

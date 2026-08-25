@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: CtrlRcv
-// Исходный файл: CtrlRcv.js
-// Версия: 210
+    // Исходный файл: CtrlRcv.js
+    // Версия: 210
 
-export const CtrlRcvModule = {
-    type: 'CtrlRcv',
-        typeID: 147,
+    export const CtrlRcvModule = {
+        type: 'CtrlRcv',
+            typeID: 147,
     defaultParams: [7, 0],
-    displayName: 'CtrlRcv',
-    gridHeight: 2,
-    originalName: 'CtrlRcv',
-    tooltip: 'MIDI Control Receive',
-    components: [
+        displayName: 'CtrlRcv',
+        gridHeight: 2,
+        originalName: 'CtrlRcv',
+        tooltip: 'MIDI Control Receive',
+        inputs: [],
+        outputs: [2, 8],
+        components: [
         {
                 "componentType": "TextField",
                 "id": "0",
@@ -65,7 +67,9 @@ export const CtrlRcvModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Val",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -82,7 +86,9 @@ export const CtrlRcvModule = {
                 "x": 210,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Rcv",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -94,4 +100,5 @@ export const CtrlRcvModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

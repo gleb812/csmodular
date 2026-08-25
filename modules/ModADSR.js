@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: ModADSR
-// Исходный файл: ModADSR.js
-// Версия: 206
+    // Исходный файл: ModADSR.js
+    // Версия: 206
 
-export const ModADSRModule = {
-    type: 'ModADSR',
-        typeID: 23,
+    export const ModADSRModule = {
+        type: 'ModADSR',
+            typeID: 23,
     defaultParams: [0, 54, 100, 14, 0, 0, 0, 0, 0, 1],
-    displayName: 'ModADSR',
-    gridHeight: 5,
-    originalName: 'ModADSR',
-    tooltip: 'Envelope Modulation ADSR',
-    components: [
+        displayName: 'ModADSR',
+        gridHeight: 5,
+        originalName: 'ModADSR',
+        tooltip: 'Envelope Modulation ADSR',
+        inputs: [13, 18, 21, 26, 29, 32, 35],
+        outputs: [14, 17],
+        components: [
         {
                 "componentType": "TextField",
                 "id": "0",
@@ -125,7 +127,9 @@ export const ModADSRModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "Output",
@@ -133,7 +137,9 @@ export const ModADSRModule = {
                 "x": 240,
                 "y": 60,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "LevelShift",
@@ -147,7 +153,9 @@ export const ModADSRModule = {
                 "x": 223,
                 "y": 60,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Env",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -155,7 +163,9 @@ export const ModADSRModule = {
                 "x": 4,
                 "y": 45,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Gate",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "LED",
@@ -178,7 +188,9 @@ export const ModADSRModule = {
                 "x": 4,
                 "y": 60,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "AM",
+                "ConnectorIndex": 6
         },
         {
                 "componentType": "TextLabel",
@@ -195,7 +207,9 @@ export const ModADSRModule = {
                 "x": 43,
                 "y": 59,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "AMod",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -219,7 +233,9 @@ export const ModADSRModule = {
                 "x": 79,
                 "y": 59,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "DMod",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Knob",
@@ -243,7 +259,9 @@ export const ModADSRModule = {
                 "x": 115,
                 "y": 59,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "SMod",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Knob",
@@ -267,7 +285,9 @@ export const ModADSRModule = {
                 "x": 151,
                 "y": 59,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "RMod",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Knob",
@@ -328,4 +348,5 @@ export const ModADSRModule = {
                 "orientation": "Vertical"
         }
 ]
-};
+    };
+    

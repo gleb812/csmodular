@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: E8Counter
-// Исходный файл: E8Counter.js
-// Версия: 208
+    // Исходный файл: E8Counter.js
+    // Версия: 208
 
-export const E8CounterModule = {
-    type: 'E8Counter',
-        typeID: 86,
+    export const E8CounterModule = {
+        type: 'E8Counter',
+            typeID: 86,
     defaultParams: [],
-    displayName: '8Counter',
-    gridHeight: 2,
-    originalName: '8Counter',
-    tooltip: '8 Counter',
-    components: [
+        displayName: '8Counter',
+        gridHeight: 2,
+        originalName: '8Counter',
+        tooltip: '8 Counter',
+        inputs: [40, 44],
+        outputs: [16, 33, 34, 35, 36, 37, 38, 39],
+        components: [
         {
                 "componentType": "TextLabel",
                 "id": "0",
@@ -89,7 +91,9 @@ export const E8CounterModule = {
                 "x": 79,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -217,7 +221,9 @@ export const E8CounterModule = {
                 "x": 102,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -225,7 +231,9 @@ export const E8CounterModule = {
                 "x": 125,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Output",
@@ -233,7 +241,9 @@ export const E8CounterModule = {
                 "x": 148,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out4",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Output",
@@ -241,7 +251,9 @@ export const E8CounterModule = {
                 "x": 171,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out5",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Output",
@@ -249,7 +261,9 @@ export const E8CounterModule = {
                 "x": 194,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out6",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "Output",
@@ -257,7 +271,9 @@ export const E8CounterModule = {
                 "x": 217,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out7",
+                "ConnectorIndex": 6
         },
         {
                 "componentType": "Output",
@@ -265,7 +281,9 @@ export const E8CounterModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out8",
+                "ConnectorIndex": 7
         },
         {
                 "componentType": "Input",
@@ -273,7 +291,9 @@ export const E8CounterModule = {
                 "x": 4,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Clk",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -304,7 +324,9 @@ export const E8CounterModule = {
                 "x": 44,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Rst",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -316,4 +338,5 @@ export const E8CounterModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

@@ -1,17 +1,19 @@
 // Автоматически сгенерированный модуль: FlipFlop
-// Исходный файл: FlipFlop.js
-// Версия: 208
+    // Исходный файл: FlipFlop.js
+    // Версия: 208
 
-export const FlipFlopModule = {
-    type: 'FlipFlop',
-        typeID: 91,
+    export const FlipFlopModule = {
+        type: 'FlipFlop',
+            typeID: 91,
     mode: [0],
     defaultParams: [],
-    displayName: 'FlipFlop',
-    gridHeight: 2,
-    originalName: 'FlipFlop',
-    tooltip: 'Flip Flop',
-    components: [
+        displayName: 'FlipFlop',
+        gridHeight: 2,
+        originalName: 'FlipFlop',
+        tooltip: 'Flip Flop',
+        inputs: [3, 4, 5],
+        outputs: [7, 10],
+        components: [
         {
                 "componentType": "PartSelector",
                 "id": "0",
@@ -44,7 +46,9 @@ export const FlipFlopModule = {
                 "x": 116,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Clk",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -52,7 +56,9 @@ export const FlipFlopModule = {
                 "x": 143,
                 "y": 5,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Res",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -60,7 +66,9 @@ export const FlipFlopModule = {
                 "x": 80,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "LED",
@@ -74,7 +82,9 @@ export const FlipFlopModule = {
                 "x": 214,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "NotQ",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Line",
@@ -96,7 +106,9 @@ export const FlipFlopModule = {
                 "x": 240,
                 "y": 5,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Q",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Line",
@@ -139,4 +151,5 @@ export const FlipFlopModule = {
                 "width": 9
         }
 ]
-};
+    };
+    

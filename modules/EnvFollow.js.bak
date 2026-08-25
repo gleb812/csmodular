@@ -1,0 +1,101 @@
+// Автоматически сгенерированный модуль: EnvFollow
+    // Исходный файл: EnvFollow.js
+    // Версия: 206
+
+    export const EnvFollowModule = {
+        type: 'EnvFollow',
+            typeID: 71,
+        displayName: 'EnvFollow',
+        gridHeight: 2,
+        originalName: 'EnvFollow',
+        tooltip: 'Envelope Follower',
+        inputs: [0],
+        outputs: [1],
+        components: [
+        {
+                "componentType": "Input",
+                "id": "0",
+                "x": 210,
+                "y": 11,
+                "jackType": "audio",
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "Output",
+                "id": "1",
+                "x": 240,
+                "y": 11,
+                "jackType": "control",
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "2",
+                "x": 214,
+                "y": 11,
+                "text": "↑",
+                "fontSize": 11,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Box",
+                "width": 102
+        },
+        {
+                "componentType": "TextField",
+                "id": "3",
+                "x": 80,
+                "y": 12,
+                "width": 32,
+                "referenceElementId": 4
+        },
+        {
+                "componentType": "Knob",
+                "id": "4",
+                "x": 115,
+                "y": 5,
+                "infoFunc": 129,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextField",
+                "id": "5",
+                "x": 148,
+                "y": 12,
+                "width": 32,
+                "referenceElementId": 6
+        },
+        {
+                "componentType": "Knob",
+                "id": "6",
+                "x": 183,
+                "y": 5,
+                "infoFunc": 130,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "7",
+                "x": 81,
+                "y": 2,
+                "text": "Attack",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "8",
+                "x": 148,
+                "y": 2,
+                "text": "Release",
+                "fontSize": 9,
+                "color": "#ffffff"
+        }
+]
+    };
+    

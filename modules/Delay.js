@@ -1,17 +1,19 @@
 // Автоматически сгенерированный модуль: Delay
-// Исходный файл: Delay.js
-// Версия: 208
+    // Исходный файл: Delay.js
+    // Версия: 208
 
-export const DelayModule = {
-    type: 'Delay',
-        typeID: 0,
+    export const DelayModule = {
+        type: 'Delay',
+            typeID: 0,
     mode: [0],
     defaultParams: [64, 0, 1],
-    displayName: 'Delay',
-    gridHeight: 3,
-    originalName: 'Delay',
-    tooltip: 'Audio delay',
-    components: [
+        displayName: 'Delay',
+        gridHeight: 3,
+        originalName: 'Delay',
+        tooltip: 'Audio delay',
+        inputs: [0, 9],
+        outputs: [10],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
@@ -146,4 +148,5 @@ export const DelayModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

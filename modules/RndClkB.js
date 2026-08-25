@@ -1,24 +1,28 @@
 // Автоматически сгенерированный модуль: RndClkB
-// Исходный файл: RndClkB.js
-// Версия: 238
+    // Исходный файл: RndClkB.js
+    // Версия: 238
 
-export const RndClkBModule = {
-    type: 'RndClkB',
-        typeID: 206,
+    export const RndClkBModule = {
+        type: 'RndClkB',
+            typeID: 206,
     mode: [0],
     defaultParams: [127, 0, 1, 0, 0],
-    displayName: 'RndClkB',
-    gridHeight: 3,
-    originalName: 'RndClkB',
-    tooltip: 'Random Clock B',
-    components: [
+        displayName: 'RndClkB',
+        gridHeight: 3,
+        originalName: 'RndClkB',
+        tooltip: 'Random Clock B',
+        inputs: [0, 6, 13, 23],
+        outputs: [1],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 4,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Clk",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -26,7 +30,9 @@ export const RndClkBModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -79,7 +85,9 @@ export const RndClkBModule = {
                 "x": 4,
                 "y": 29,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Rst",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -96,7 +104,9 @@ export const RndClkBModule = {
                 "x": 52,
                 "y": 29,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Seed",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -169,7 +179,9 @@ export const RndClkBModule = {
                 "x": 150,
                 "y": 29,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Step",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Knob",
@@ -196,4 +208,5 @@ export const RndClkBModule = {
                 "height": 12
         }
 ]
-};
+    };
+    

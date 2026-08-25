@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: RandomA
-// Исходный файл: RandomA.js
-// Версия: 206
+    // Исходный файл: RandomA.js
+    // Версия: 206
 
-export const RandomAModule = {
-    type: 'RandomA',
-        typeID: 200,
+    export const RandomAModule = {
+        type: 'RandomA',
+            typeID: 200,
     defaultParams: [64, 0, 0, 1, 1, 4, 3],
-    displayName: 'RandomA',
-    gridHeight: 2,
-    originalName: 'RandomA',
-    tooltip: 'Random A',
-    components: [
+        displayName: 'RandomA',
+        gridHeight: 2,
+        originalName: 'RandomA',
+        tooltip: 'Random A',
+        inputs: [9],
+        outputs: [7],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "3",
@@ -25,7 +27,9 @@ export const RandomAModule = {
                 "x": 239,
                 "y": 15,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -41,7 +45,9 @@ export const RandomAModule = {
                 "x": 4,
                 "y": 15,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Rate",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -158,4 +164,5 @@ export const RandomAModule = {
                 ]
         }
 ]
-};
+    };
+    

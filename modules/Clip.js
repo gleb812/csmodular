@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: Clip
-// Исходный файл: Clip.js
-// Версия: 208
+    // Исходный файл: Clip.js
+    // Версия: 208
 
-export const ClipModule = {
-    type: 'Clip',
-        typeID: 61,
+    export const ClipModule = {
+        type: 'Clip',
+            typeID: 61,
     defaultParams: [0, 0, 0, 1],
-    displayName: 'Clip',
-    gridHeight: 2,
-    originalName: 'Clip',
-    tooltip: 'Clip',
-    components: [
+        displayName: 'Clip',
+        gridHeight: 2,
+        originalName: 'Clip',
+        tooltip: 'Clip',
+        inputs: [0, 4],
+        outputs: [9],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 78,
                 "y": 14,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Mod",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -57,7 +61,9 @@ export const ClipModule = {
                 "x": 210,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Graph",
@@ -73,7 +79,9 @@ export const ClipModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -122,4 +130,5 @@ export const ClipModule = {
                 "orientation": "Horizontal"
         }
 ]
-};
+    };
+    

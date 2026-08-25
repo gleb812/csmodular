@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: NoteSend
-// Исходный файл: NoteSend.js
-// Версия: 210
+    // Исходный файл: NoteSend.js
+    // Версия: 210
 
-export const NoteSendModule = {
-    type: 'NoteSend',
-        typeID: 143,
+    export const NoteSendModule = {
+        type: 'NoteSend',
+            typeID: 143,
     defaultParams: [100, 64, 0],
-    displayName: 'NoteSend',
-    gridHeight: 2,
-    originalName: 'NoteSend',
-    tooltip: 'MIDI Note Send',
-    components: [
+        displayName: 'NoteSend',
+        gridHeight: 2,
+        originalName: 'NoteSend',
+        tooltip: 'MIDI Note Send',
+        inputs: [9, 12, 13],
+        outputs: [],
+        components: [
         {
                 "componentType": "TextField",
                 "id": "1",
@@ -66,7 +68,9 @@ export const NoteSendModule = {
                 "x": 137,
                 "y": 15,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Note",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextField",
@@ -99,7 +103,9 @@ export const NoteSendModule = {
                 "x": 65,
                 "y": 15,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Vel",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -107,7 +113,9 @@ export const NoteSendModule = {
                 "x": 10,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Gate",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -156,4 +164,5 @@ export const NoteSendModule = {
                 "width": 12
         }
 ]
-};
+    };
+    

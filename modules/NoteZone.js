@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: NoteZone
-// Исходный файл: NoteZone.js
-// Версия: 210
+    // Исходный файл: NoteZone.js
+    // Версия: 210
 
-export const NoteZoneModule = {
-    type: 'NoteZone',
-        typeID: 149,
+    export const NoteZoneModule = {
+        type: 'NoteZone',
+            typeID: 149,
     defaultParams: [0, 0, 127, 64, 0, 0],
-    displayName: 'NoteZone',
-    gridHeight: 3,
-    originalName: 'NoteZone',
-    tooltip: 'MIDI Note Zone',
-    components: [
+        displayName: 'NoteZone',
+        gridHeight: 3,
+        originalName: 'NoteZone',
+        tooltip: 'MIDI Note Zone',
+        inputs: [],
+        outputs: [],
+        components: [
         {
                 "componentType": "TextField",
                 "id": "0",
@@ -171,4 +173,5 @@ export const NoteZoneModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

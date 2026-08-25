@@ -1,0 +1,126 @@
+// Автоматически сгенерированный модуль: FxIn
+    // Исходный файл: FxIn.js
+    // Версия: 210
+
+    export const FxInModule = {
+        type: 'FxIn',
+            typeID: 127,
+        displayName: 'Fx-In',
+        gridHeight: 2,
+        originalName: 'Fx-In',
+        tooltip: 'Fx Input',
+        inputs: [],
+        outputs: [0, 3],
+        components: [
+        {
+                "componentType": "Output",
+                "id": "3",
+                "x": 214,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "static",
+                "ConnectorName": "OutL",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "MiniVU",
+                "id": "4",
+                "x": 205,
+                "y": 10,
+                "width": 6,
+                "height": 15,
+                "orientation": "vertical"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "8",
+                "x": 217,
+                "y": 3,
+                "text": "L",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Output",
+                "id": "0",
+                "x": 240,
+                "y": 13,
+                "jackType": "audio",
+                "bandwidth": "static",
+                "ConnectorName": "OutR",
+                "ConnectorIndex": 1
+        },
+        {
+                "componentType": "MiniVU",
+                "id": "1",
+                "x": 231,
+                "y": 10,
+                "width": 6,
+                "height": 15,
+                "orientation": "vertical"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "2",
+                "x": 243,
+                "y": 3,
+                "text": "R",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonRadio",
+                "id": "5",
+                "x": 78,
+                "y": 12,
+                "buttonWidth": 18,
+                "buttonCount": 2,
+                "orientation": "horizontal",
+                "labels": [
+                        "1/2",
+                        "3/4"
+                ]
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "6",
+                "x": 91,
+                "y": 2,
+                "text": "Fx",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "9",
+                "x": 5,
+                "y": 16,
+                "text": "Pad",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "7",
+                "x": 23,
+                "y": 14,
+                "width": 30,
+                "height": 12,
+                "labels": [
+                        "+6dB",
+                        "0dB",
+                        "-6dB",
+                        "-12dB"
+                ]
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "10",
+                "x": 190,
+                "y": 14,
+                "width": 13,
+                "text": "M"
+        }
+]
+    };
+    

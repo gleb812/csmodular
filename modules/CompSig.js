@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: CompSig
-// Исходный файл: CompSig.js
-// Версия: 210
+    // Исходный файл: CompSig.js
+    // Версия: 210
 
-export const CompSigModule = {
-    type: 'CompSig',
-        typeID: 159,
+    export const CompSigModule = {
+        type: 'CompSig',
+            typeID: 159,
     defaultParams: [],
-    displayName: 'CompSig',
-    gridHeight: 2,
-    originalName: 'CompSig',
-    tooltip: 'Compare to Signal',
-    components: [
+        displayName: 'CompSig',
+        gridHeight: 2,
+        originalName: 'CompSig',
+        tooltip: 'Compare to Signal',
+        inputs: [0, 1],
+        outputs: [2],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 150,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "B",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -25,7 +29,9 @@ export const CompSigModule = {
                 "x": 120,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "A",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -33,7 +39,9 @@ export const CompSigModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -63,4 +71,5 @@ export const CompSigModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: FltClassic
-// Исходный файл: FltClassic.js
-// Версия: 210
+    // Исходный файл: FltClassic.js
+    // Версия: 210
 
-export const FltClassicModule = {
-    type: 'FltClassic',
-        typeID: 92,
+    export const FltClassicModule = {
+        type: 'FltClassic',
+            typeID: 92,
     defaultParams: [75, 0, 0, 0, 2, 1],
-    displayName: 'FltClassic',
-    gridHeight: 4,
-    originalName: 'FltClassic',
-    tooltip: 'Filter Classic',
-    components: [
+        displayName: 'FltClassic',
+        gridHeight: 4,
+        originalName: 'FltClassic',
+        tooltip: 'Filter Classic',
+        inputs: [1, 2, 16],
+        outputs: [15],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 4,
                 "y": 44,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "PitchVar",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -41,7 +45,9 @@ export const FltClassicModule = {
                 "x": 4,
                 "y": 28,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -146,7 +152,9 @@ export const FltClassicModule = {
                 "x": 240,
                 "y": 45,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -154,7 +162,9 @@ export const FltClassicModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -190,4 +200,5 @@ export const FltClassicModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

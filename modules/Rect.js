@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: Rect
-// Исходный файл: Rect.js
-// Версия: 208
+    // Исходный файл: Rect.js
+    // Версия: 208
 
-export const RectModule = {
-    type: 'Rect',
-        typeID: 82,
+    export const RectModule = {
+        type: 'Rect',
+            typeID: 82,
     defaultParams: [0, 1],
-    displayName: 'Rect',
-    gridHeight: 2,
-    originalName: 'Rect',
-    tooltip: 'Rectifier',
-    components: [
+        displayName: 'Rect',
+        gridHeight: 2,
+        originalName: 'Rect',
+        tooltip: 'Rectifier',
+        inputs: [0],
+        outputs: [1],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 210,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -25,7 +29,9 @@ export const RectModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -53,4 +59,5 @@ export const RectModule = {
                 "orientation": "horizontal"
         }
 ]
-};
+    };
+    

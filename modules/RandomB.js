@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: RandomB
-// Исходный файл: RandomB.js
-// Версия: 206
+    // Исходный файл: RandomB.js
+    // Версия: 206
 
-export const RandomBModule = {
-    type: 'RandomB',
-        typeID: 202,
+    export const RandomBModule = {
+        type: 'RandomB',
+            typeID: 202,
     defaultParams: [64, 0, 0, 0, 127, 1, 0, 1, 4],
-    displayName: 'RandomB',
-    gridHeight: 3,
-    originalName: 'RandomB',
-    tooltip: 'Random B',
-    components: [
+        displayName: 'RandomB',
+        gridHeight: 3,
+        originalName: 'RandomB',
+        tooltip: 'Random B',
+        inputs: [0, 3],
+        outputs: [8],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 4,
                 "y": 29,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "RateVar",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -41,7 +45,9 @@ export const RandomBModule = {
                 "x": 4,
                 "y": 13,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Rate",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -57,7 +63,9 @@ export const RandomBModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -191,4 +199,5 @@ export const RandomBModule = {
                 "y": 21
         }
 ]
-};
+    };
+    

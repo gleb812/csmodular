@@ -1,22 +1,26 @@
 // Автоматически сгенерированный модуль: Red2Blue
-// Исходный файл: Red2Blue.js
-// Версия: 238
+    // Исходный файл: Red2Blue.js
+    // Версия: 238
 
-export const Red2BlueModule = {
-    type: 'Red2Blue',
-        typeID: 201,
-    displayName: 'Red2Blue',
-    gridHeight: 2,
-    originalName: 'Red2Blue',
-    tooltip: 'Red 2 Blue',
-    components: [
+    export const Red2BlueModule = {
+        type: 'Red2Blue',
+            typeID: 201,
+        displayName: 'Red2Blue',
+        gridHeight: 2,
+        originalName: 'Red2Blue',
+        tooltip: 'Red 2 Blue',
+        inputs: [0],
+        outputs: [1],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 209,
                 "y": 9,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -24,7 +28,9 @@ export const Red2BlueModule = {
                 "x": 239,
                 "y": 9,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Line",
@@ -35,4 +41,5 @@ export const Red2BlueModule = {
                 "orientation": "Horizontal"
         }
 ]
-};
+    };
+    

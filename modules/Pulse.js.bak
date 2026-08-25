@@ -1,0 +1,124 @@
+// Автоматически сгенерированный модуль: Pulse
+    // Исходный файл: Pulse.js
+    // Версия: 208
+
+    export const PulseModule = {
+        type: 'Pulse',
+            typeID: 38,
+        displayName: 'Pulse',
+        gridHeight: 2,
+        originalName: 'Pulse',
+        tooltip: 'Pulse',
+        inputs: [1, 7],
+        outputs: [8],
+        components: [
+        {
+                "componentType": "Input",
+                "id": "1",
+                "x": 64,
+                "y": 14,
+                "jackType": "control",
+                "bandwidth": "dynamic",
+                "ConnectorName": "Time",
+                "ConnectorIndex": 1
+        },
+        {
+                "componentType": "Knob",
+                "id": "0",
+                "x": 78,
+                "y": 7,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "3",
+                "x": 68,
+                "y": 17,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "2",
+                "x": 101,
+                "y": 9,
+                "width": 23,
+                "height": 12,
+                "labels": [
+                        "Sub",
+                        "Lo",
+                        "Hi"
+                ]
+        },
+        {
+                "componentType": "TextField",
+                "id": "5",
+                "x": 126,
+                "y": 8,
+                "width": 38,
+                "referenceElementId": 4
+        },
+        {
+                "componentType": "Knob",
+                "id": "4",
+                "x": 167,
+                "y": 5,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "7",
+                "x": 192,
+                "y": 4,
+                "jackType": "logic",
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "PartSelector",
+                "id": "6",
+                "x": 207,
+                "y": 4,
+                "width": 29,
+                "height": 22,
+                "imageCount": 2,
+                "menuOffset": 0
+        },
+        {
+                "componentType": "LED",
+                "id": "9",
+                "x": 242,
+                "y": 4
+        },
+        {
+                "componentType": "Output",
+                "id": "8",
+                "x": 240,
+                "y": 15,
+                "jackType": "logic",
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "Line",
+                "id": "10",
+                "x": 198,
+                "y": 9,
+                "length": 20,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Line",
+                "id": "11",
+                "x": 226,
+                "y": 20,
+                "length": 20,
+                "orientation": "Horizontal"
+        }
+]
+    };
+    

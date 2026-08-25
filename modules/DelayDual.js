@@ -1,17 +1,19 @@
 // Автоматически сгенерированный модуль: DelayDual
-// Исходный файл: DelayDual.js
-// Версия: 228
+    // Исходный файл: DelayDual.js
+    // Версия: 228
 
-export const DelayDualModule = {
-    type: 'DelayDual',
-        typeID: 174,
+    export const DelayDualModule = {
+        type: 'DelayDual',
+            typeID: 174,
     mode: [0],
     defaultParams: [64, 64, 64, 64],
-    displayName: 'DelayDual',
-    gridHeight: 3,
-    originalName: 'DelayDual',
-    tooltip: 'Delay Dual',
-    components: [
+        displayName: 'DelayDual',
+        gridHeight: 3,
+        originalName: 'DelayDual',
+        tooltip: 'Delay Dual',
+        inputs: [5, 9, 18],
+        outputs: [10, 11],
+        components: [
         {
                 "componentType": "TextLabel",
                 "id": "1",
@@ -45,7 +47,9 @@ export const DelayDualModule = {
                 "x": 93,
                 "y": 29,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Time1",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -77,7 +81,9 @@ export const DelayDualModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -93,7 +99,9 @@ export const DelayDualModule = {
                 "x": 168,
                 "y": 29,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Time2",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Knob",
@@ -125,7 +133,9 @@ export const DelayDualModule = {
                 "x": 213,
                 "y": 29,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -133,7 +143,9 @@ export const DelayDualModule = {
                 "x": 138,
                 "y": 29,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -145,4 +157,5 @@ export const DelayDualModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

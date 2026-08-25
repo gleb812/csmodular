@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: LevMod
-// Исходный файл: LevMod.js
-// Версия: 206
+    // Исходный файл: LevMod.js
+    // Версия: 206
 
-export const LevModModule = {
-    type: 'LevMod',
-        typeID: 117,
+    export const LevModModule = {
+        type: 'LevMod',
+            typeID: 117,
     defaultParams: [0, 64],
-    displayName: 'LevMod',
-    gridHeight: 3,
-    originalName: 'LevMod',
-    tooltip: 'Level Modulator',
-    components: [
+        displayName: 'LevMod',
+        gridHeight: 3,
+        originalName: 'LevMod',
+        tooltip: 'Level Modulator',
+        inputs: [0, 2, 6],
+        outputs: [1],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 210,
                 "y": 28,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -25,7 +29,9 @@ export const LevModModule = {
                 "x": 240,
                 "y": 28,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -47,7 +53,9 @@ export const LevModModule = {
                 "x": 210,
                 "y": 7,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Mod",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "SVG",
@@ -73,7 +81,9 @@ export const LevModModule = {
                 "x": 91,
                 "y": 29,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "ModDepth",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Knob",
@@ -153,4 +163,5 @@ export const LevModModule = {
                 "orientation": "Horizontal"
         }
 ]
-};
+    };
+    

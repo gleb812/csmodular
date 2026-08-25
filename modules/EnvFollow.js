@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: EnvFollow
-// Исходный файл: EnvFollow.js
-// Версия: 206
+    // Исходный файл: EnvFollow.js
+    // Версия: 206
 
-export const EnvFollowModule = {
-    type: 'EnvFollow',
-        typeID: 71,
+    export const EnvFollowModule = {
+        type: 'EnvFollow',
+            typeID: 71,
     defaultParams: [0, 20],
-    displayName: 'EnvFollow',
-    gridHeight: 2,
-    originalName: 'EnvFollow',
-    tooltip: 'Envelope Follower',
-    components: [
+        displayName: 'EnvFollow',
+        gridHeight: 2,
+        originalName: 'EnvFollow',
+        tooltip: 'Envelope Follower',
+        inputs: [0],
+        outputs: [1],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 210,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -25,7 +29,9 @@ export const EnvFollowModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -92,4 +98,5 @@ export const EnvFollowModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

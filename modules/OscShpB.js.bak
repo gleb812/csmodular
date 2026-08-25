@@ -1,0 +1,295 @@
+// Автоматически сгенерированный модуль: OscShpB
+    // Исходный файл: OscShpB.js
+    // Версия: 206
+
+    export const OscShpBModule = {
+        type: 'OscShpB',
+            typeID: 9,
+        displayName: 'OscShpB',
+        gridHeight: 4,
+        originalName: 'OscShpB',
+        tooltip: 'Osc Shape B',
+        inputs: [0, 1, 3, 12, 15],
+        outputs: [18],
+        components: [
+        {
+                "componentType": "TextField",
+                "id": "17",
+                "x": 157,
+                "y": 7,
+                "width": 26,
+                "referenceElementId": 6
+        },
+        {
+                "componentType": "Output",
+                "id": "18",
+                "x": 240,
+                "y": 45,
+                "jackType": "audio",
+                "bandwidth": "static",
+                "ConnectorName": "PitchVar",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "19",
+                "x": 224,
+                "y": 44,
+                "width": 13,
+                "text": "M"
+        },
+        {
+                "componentType": "PartSelector",
+                "id": "20",
+                "x": 210,
+                "y": 4,
+                "width": 41,
+                "height": 22,
+                "imageCount": 8,
+                "menuOffset": -34
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "22",
+                "x": 131,
+                "y": 9,
+                "text": "Shape",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "1",
+                "x": 4,
+                "y": 14,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Input",
+                "id": "0",
+                "x": 4,
+                "y": 28,
+                "jackType": "audio",
+                "bandwidth": "dynamic",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 3
+        },
+        {
+                "componentType": "Input",
+                "id": "3",
+                "x": 4,
+                "y": 44,
+                "jackType": "audio",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Knob",
+                "id": "2",
+                "x": 18,
+                "y": 37,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "23",
+                "x": 8,
+                "y": 47,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "4",
+                "x": 17,
+                "y": 15,
+                "text": "↑",
+                "fontSize": 10,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Trig 1",
+                "width": 9,
+                "ConnectorName": "Sync",
+                "ConnectorIndex": 1
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "24",
+                "x": 17,
+                "y": 28,
+                "text": "Pitch",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "25",
+                "x": 22,
+                "y": 16,
+                "text": "Sync",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Knob",
+                "id": "6",
+                "x": 185,
+                "y": 4,
+                "infoFunc": 126,
+                "size": "medium",
+                "ConnectorName": "FmMod",
+                "ConnectorIndex": 2
+        },
+        {
+                "componentType": "TextField",
+                "id": "7",
+                "x": 79,
+                "y": 4,
+                "width": 50,
+                "referenceElementId": 9
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "8",
+                "x": 77,
+                "y": 19,
+                "width": 30,
+                "height": 12,
+                "labels": [
+                        "Semi",
+                        "Freq",
+                        "Fac",
+                        "Part"
+                ]
+        },
+        {
+                "componentType": "Knob",
+                "id": "9",
+                "x": 80,
+                "y": 33,
+                "infoFunc": 61,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "10",
+                "x": 108,
+                "y": 29,
+                "infoFunc": 59,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "12",
+                "x": 137,
+                "y": 44,
+                "jackType": "audio",
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "Knob",
+                "id": "13",
+                "x": 151,
+                "y": 37,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "14",
+                "x": 140,
+                "y": 47,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Input",
+                "id": "15",
+                "x": 187,
+                "y": 44,
+                "jackType": "audio",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Knob",
+                "id": "16",
+                "x": 201,
+                "y": 37,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "21",
+                "x": 190,
+                "y": 47,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Graph",
+                "id": "26",
+                "x": 208,
+                "y": 4,
+                "width": 35,
+                "height": 22
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "11",
+                "x": 136,
+                "y": 23,
+                "width": 36,
+                "height": 12,
+                "labels": [
+                        "FM Lin",
+                        "FM Trk"
+                ]
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "27",
+                "x": 109,
+                "y": 21,
+                "text": "Cent",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "28",
+                "x": 48,
+                "y": 32,
+                "width": 20,
+                "height": 12,
+                "labels": [
+                        "Off",
+                        "On"
+                ]
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "5",
+                "x": 50,
+                "y": 23,
+                "text": "KBT",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "29",
+                "x": 174,
+                "y": 34,
+                "text": "Shape",
+                "fontSize": 9,
+                "color": "#ffffff"
+        }
+]
+    };
+    

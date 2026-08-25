@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: KeyQuant
-// Исходный файл: KeyQuant.js
-// Версия: 210
+    // Исходный файл: KeyQuant.js
+    // Версия: 210
 
-export const KeyQuantModule = {
-    type: 'KeyQuant',
-        typeID: 152,
+    export const KeyQuantModule = {
+        type: 'KeyQuant',
+            typeID: 152,
     defaultParams: [127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    displayName: 'KeyQuant',
-    gridHeight: 2,
-    originalName: 'KeyQuant',
-    tooltip: 'Key Quantizer',
-    components: [
+        displayName: 'KeyQuant',
+        gridHeight: 2,
+        originalName: 'KeyQuant',
+        tooltip: 'Key Quantizer',
+        inputs: [12],
+        outputs: [13],
+        components: [
         {
                 "componentType": "ButtonText",
                 "id": "0",
@@ -113,7 +115,9 @@ export const KeyQuantModule = {
                 "x": 210,
                 "y": 11,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -121,7 +125,9 @@ export const KeyQuantModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -184,4 +190,5 @@ export const KeyQuantModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

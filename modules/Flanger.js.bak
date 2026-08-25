@@ -1,0 +1,112 @@
+// Автоматически сгенерированный модуль: Flanger
+    // Исходный файл: Flanger.js
+    // Версия: 208
+
+    export const FlangerModule = {
+        type: 'Flanger',
+            typeID: 89,
+        displayName: 'Flanger',
+        gridHeight: 3,
+        originalName: 'Flanger',
+        tooltip: 'Flanger',
+        inputs: [6],
+        outputs: [5],
+        components: [
+        {
+                "componentType": "Knob",
+                "id": "1",
+                "x": 106,
+                "y": 20,
+                "infoFunc": 215,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "0",
+                "x": 152,
+                "y": 20,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "2",
+                "x": 106,
+                "y": 10,
+                "text": "Rate",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "3",
+                "x": 150,
+                "y": 10,
+                "text": "Range",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "4",
+                "x": 239,
+                "y": 17,
+                "width": 13,
+                "text": "B"
+        },
+        {
+                "componentType": "Output",
+                "id": "5",
+                "x": 240,
+                "y": 30,
+                "jackType": "audio",
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "Input",
+                "id": "6",
+                "x": 240,
+                "y": 4,
+                "jackType": "audio",
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "Line",
+                "id": "9",
+                "x": 245,
+                "y": 11,
+                "length": 21,
+                "orientation": "Vertical"
+        },
+        {
+                "componentType": "Knob",
+                "id": "10",
+                "x": 199,
+                "y": 20,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "11",
+                "x": 189,
+                "y": 10,
+                "text": "Feedback",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextField",
+                "id": "12",
+                "x": 62,
+                "y": 23,
+                "width": 40,
+                "referenceElementId": 1
+        }
+]
+    };
+    

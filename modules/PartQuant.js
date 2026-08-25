@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: PartQuant
-// Исходный файл: PartQuant.js
-// Версия: 208
+    // Исходный файл: PartQuant.js
+    // Версия: 208
 
-export const PartQuantModule = {
-    type: 'PartQuant',
-        typeID: 22,
+    export const PartQuantModule = {
+        type: 'PartQuant',
+            typeID: 22,
     defaultParams: [127],
-    displayName: 'PartQuant',
-    gridHeight: 2,
-    originalName: 'PartQuant',
-    tooltip: 'Partial Quantizer',
-    components: [
+        displayName: 'PartQuant',
+        gridHeight: 2,
+        originalName: 'PartQuant',
+        tooltip: 'Partial Quantizer',
+        inputs: [2],
+        outputs: [3],
+        components: [
         {
                 "componentType": "TextField",
                 "id": "1",
@@ -33,7 +35,9 @@ export const PartQuantModule = {
                 "x": 210,
                 "y": 11,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -41,7 +45,9 @@ export const PartQuantModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -67,4 +73,5 @@ export const PartQuantModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

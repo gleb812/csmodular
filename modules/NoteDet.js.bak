@@ -1,0 +1,105 @@
+// Автоматически сгенерированный модуль: NoteDet
+    // Исходный файл: NoteDet.js
+    // Версия: 210
+
+    export const NoteDetModule = {
+        type: 'NoteDet',
+            typeID: 156,
+        displayName: 'NoteDet',
+        gridHeight: 2,
+        originalName: 'NoteDet',
+        tooltip: 'Note Detector',
+        inputs: [],
+        outputs: [4, 6, 8],
+        components: [
+        {
+                "componentType": "Knob",
+                "id": "0",
+                "x": 120,
+                "y": 5,
+                "infoFunc": 13,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextField",
+                "id": "1",
+                "x": 85,
+                "y": 12,
+                "width": 32,
+                "referenceElementId": 0
+        },
+        {
+                "componentType": "LED",
+                "id": "2",
+                "x": 186,
+                "y": 15
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "7",
+                "x": 90,
+                "y": 2,
+                "text": "Note",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Output",
+                "id": "4",
+                "x": 202,
+                "y": 13,
+                "jackType": "control",
+                "bandwidth": "static",
+                "ConnectorName": "Vel",
+                "ConnectorIndex": 1
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "3",
+                "x": 201,
+                "y": 3,
+                "text": "Vel",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Output",
+                "id": "6",
+                "x": 172,
+                "y": 13,
+                "jackType": "logic",
+                "bandwidth": "static",
+                "ConnectorName": "Gate",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "5",
+                "x": 167,
+                "y": 3,
+                "text": "Gate",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Output",
+                "id": "8",
+                "x": 232,
+                "y": 13,
+                "jackType": "control",
+                "bandwidth": "static",
+                "ConnectorName": "RelVel",
+                "ConnectorIndex": 2
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "9",
+                "x": 225,
+                "y": 3,
+                "text": "RelVel",
+                "fontSize": 9,
+                "color": "#ffffff"
+        }
+]
+    };
+    

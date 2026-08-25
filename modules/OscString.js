@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: OscString
-// Исходный файл: OscString.js
-// Версия: 208
+    // Исходный файл: OscString.js
+    // Версия: 208
 
-export const OscStringModule = {
-    type: 'OscString',
-        typeID: 13,
+    export const OscStringModule = {
+        type: 'OscString',
+            typeID: 13,
     defaultParams: [64, 64, 1, 0, 0, 80, 0, 1],
-    displayName: 'OscString',
-    gridHeight: 3,
-    originalName: 'OscString',
-    tooltip: 'Osc String',
-    components: [
+        displayName: 'OscString',
+        gridHeight: 3,
+        originalName: 'OscString',
+        tooltip: 'Osc String',
+        inputs: [0, 1, 24],
+        outputs: [23],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 4,
                 "y": 13,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -25,7 +29,9 @@ export const OscStringModule = {
                 "x": 4,
                 "y": 29,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "PitchVar",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Knob",
@@ -139,7 +145,9 @@ export const OscStringModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -147,7 +155,9 @@ export const OscStringModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Line",
@@ -227,4 +237,5 @@ export const OscStringModule = {
                 "orientation": "Vertical"
         }
 ]
-};
+    };
+    

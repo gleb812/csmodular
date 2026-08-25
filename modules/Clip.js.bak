@@ -1,0 +1,133 @@
+// Автоматически сгенерированный модуль: Clip
+    // Исходный файл: Clip.js
+    // Версия: 208
+
+    export const ClipModule = {
+        type: 'Clip',
+            typeID: 61,
+        displayName: 'Clip',
+        gridHeight: 2,
+        originalName: 'Clip',
+        tooltip: 'Clip',
+        inputs: [0, 4],
+        outputs: [9],
+        components: [
+        {
+                "componentType": "Input",
+                "id": "0",
+                "x": 78,
+                "y": 14,
+                "jackType": "control",
+                "bandwidth": "dynamic",
+                "ConnectorName": "Mod",
+                "ConnectorIndex": 1
+        },
+        {
+                "componentType": "Knob",
+                "id": "1",
+                "x": 92,
+                "y": 7,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Line",
+                "id": "2",
+                "x": 82,
+                "y": 17,
+                "length": 22,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "TextField",
+                "id": "3",
+                "x": 121,
+                "y": 12,
+                "width": 26,
+                "referenceElementId": 5
+        },
+        {
+                "componentType": "Knob",
+                "id": "5",
+                "x": 150,
+                "y": 5,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "4",
+                "x": 210,
+                "y": 11,
+                "jackType": "audio",
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "Graph",
+                "id": "8",
+                "x": 174,
+                "y": 4,
+                "width": 34,
+                "height": 22
+        },
+        {
+                "componentType": "Output",
+                "id": "9",
+                "x": 240,
+                "y": 11,
+                "jackType": "audio",
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "10",
+                "x": 224,
+                "y": 10,
+                "width": 13,
+                "text": "B"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "7",
+                "x": 113,
+                "y": 2,
+                "text": "Clip Lev",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "12",
+                "x": 32,
+                "y": 14,
+                "width": 32,
+                "height": 12,
+                "labels": [
+                        "Asym",
+                        "Sym"
+                ]
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "6",
+                "x": 4,
+                "y": 16,
+                "text": "Shape",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Line",
+                "id": "11",
+                "x": 214,
+                "y": 16,
+                "length": 34,
+                "orientation": "Horizontal"
+        }
+]
+    };
+    

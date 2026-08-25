@@ -1,24 +1,28 @@
 // Автоматически сгенерированный модуль: FltHP
-// Исходный файл: FltHP.js
-// Версия: 208
+    // Исходный файл: FltHP.js
+    // Версия: 208
 
-export const FltHPModule = {
-    type: 'FltHP',
-        typeID: 134,
+    export const FltHPModule = {
+        type: 'FltHP',
+            typeID: 134,
     mode: [0],
     defaultParams: [60, 0, 0, 1],
-    displayName: 'FltHP',
-    gridHeight: 2,
-    originalName: 'FltHP',
-    tooltip: 'Filter Highpass',
-    components: [
+        displayName: 'FltHP',
+        gridHeight: 2,
+        originalName: 'FltHP',
+        tooltip: 'Filter Highpass',
+        inputs: [0, 4],
+        outputs: [11],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 63,
                 "y": 14,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -58,7 +62,9 @@ export const FltHPModule = {
                 "x": 210,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "PartSelector",
@@ -76,7 +82,9 @@ export const FltHPModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -127,4 +135,5 @@ export const FltHPModule = {
                 "orientation": "Horizontal"
         }
 ]
-};
+    };
+    

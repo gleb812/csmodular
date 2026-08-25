@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: BinCounter
-// Исходный файл: BinCounter.js
-// Версия: 208
+    // Исходный файл: BinCounter.js
+    // Версия: 208
 
-export const BinCounterModule = {
-    type: 'BinCounter',
-        typeID: 130,
+    export const BinCounterModule = {
+        type: 'BinCounter',
+            typeID: 130,
     defaultParams: [],
-    displayName: 'BinCounter',
-    gridHeight: 2,
-    originalName: 'BinCounter',
-    tooltip: 'Binary Counter',
-    components: [
+        displayName: 'BinCounter',
+        gridHeight: 2,
+        originalName: 'BinCounter',
+        tooltip: 'Binary Counter',
+        inputs: [41, 42],
+        outputs: [17, 32, 34, 35, 36, 37, 38, 39],
+        components: [
         {
                 "componentType": "Output",
                 "id": "17",
                 "x": 79,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out001",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -145,7 +149,9 @@ export const BinCounterModule = {
                 "x": 102,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out002",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -153,7 +159,9 @@ export const BinCounterModule = {
                 "x": 125,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out004",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Output",
@@ -161,7 +169,9 @@ export const BinCounterModule = {
                 "x": 148,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out008",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Output",
@@ -169,7 +179,9 @@ export const BinCounterModule = {
                 "x": 171,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out016",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Output",
@@ -177,7 +189,9 @@ export const BinCounterModule = {
                 "x": 194,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out032",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "Output",
@@ -185,7 +199,9 @@ export const BinCounterModule = {
                 "x": 217,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out064",
+                "ConnectorIndex": 6
         },
         {
                 "componentType": "Output",
@@ -193,7 +209,9 @@ export const BinCounterModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out128",
+                "ConnectorIndex": 7
         },
         {
                 "componentType": "Input",
@@ -201,7 +219,9 @@ export const BinCounterModule = {
                 "x": 4,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Clk",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -232,7 +252,9 @@ export const BinCounterModule = {
                 "x": 44,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Rst",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -244,4 +266,5 @@ export const BinCounterModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

@@ -1,0 +1,95 @@
+// Автоматически сгенерированный модуль: DlySingleA
+    // Исходный файл: DlySingleA.js
+    // Версия: 228
+
+    export const DlySingleAModule = {
+        type: 'DlySingleA',
+            typeID: 172,
+        displayName: 'DlySingleA',
+        gridHeight: 2,
+        originalName: 'DlySingleA',
+        tooltip: 'Delay Static',
+        inputs: [5],
+        outputs: [6],
+        components: [
+        {
+                "componentType": "TextLabel",
+                "id": "1",
+                "x": 12,
+                "y": 15,
+                "text": "Range",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "PartSelector",
+                "id": "0",
+                "x": 40,
+                "y": 13,
+                "width": 40,
+                "height": 13,
+                "imageCount": 7,
+                "menuOffset": 0
+        },
+        {
+                "componentType": "Knob",
+                "id": "3",
+                "x": 182,
+                "y": 5,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextField",
+                "id": "4",
+                "x": 139,
+                "y": 12,
+                "width": 40,
+                "referenceElementId": 3
+        },
+        {
+                "componentType": "Input",
+                "id": "5",
+                "x": 210,
+                "y": 11,
+                "jackType": "audio",
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "Output",
+                "id": "6",
+                "x": 240,
+                "y": 11,
+                "jackType": "audio",
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "2",
+                "x": 148,
+                "y": 2,
+                "text": "Time",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "8",
+                "x": 214,
+                "y": 11,
+                "text": "↑",
+                "fontSize": 11,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Box",
+                "width": 102
+        }
+]
+    };
+    

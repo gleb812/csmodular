@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: FltComb
-// Исходный файл: FltComb.js
-// Версия: 232
+    // Исходный файл: FltComb.js
+    // Версия: 232
 
-export const FltCombModule = {
-    type: 'FltComb',
-        typeID: 162,
+    export const FltCombModule = {
+        type: 'FltComb',
+            typeID: 162,
     defaultParams: [64, 0, 0, 64, 0, 0, 127, 1],
-    displayName: 'FltComb',
-    gridHeight: 4,
-    originalName: 'FltComb',
-    tooltip: 'Filter Comb',
-    components: [
+        displayName: 'FltComb',
+        gridHeight: 4,
+        originalName: 'FltComb',
+        tooltip: 'Filter Comb',
+        inputs: [1, 7, 15, 20],
+        outputs: [0],
+        components: [
         {
                 "componentType": "Output",
                 "id": "0",
                 "x": 240,
                 "y": 45,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -25,7 +29,9 @@ export const FltCombModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -65,7 +71,9 @@ export const FltCombModule = {
                 "x": 4,
                 "y": 44,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "PitchVar",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Knob",
@@ -140,7 +148,9 @@ export const FltCombModule = {
                 "x": 4,
                 "y": 28,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -190,7 +200,9 @@ export const FltCombModule = {
                 "x": 122,
                 "y": 44,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "FB",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Knob",
@@ -240,4 +252,5 @@ export const FltCombModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

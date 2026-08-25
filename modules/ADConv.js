@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: ADConv
-// Исходный файл: ADConv.js
-// Версия: 208
+    // Исходный файл: ADConv.js
+    // Версия: 208
 
-export const ADConvModule = {
-    type: 'ADConv',
-        typeID: 131,
+    export const ADConvModule = {
+        type: 'ADConv',
+            typeID: 131,
     defaultParams: [],
-    displayName: 'ADConv',
-    gridHeight: 2,
-    originalName: 'ADConv',
-    tooltip: 'A/D Converter',
-    components: [
+        displayName: 'ADConv',
+        gridHeight: 2,
+        originalName: 'ADConv',
+        tooltip: 'A/D Converter',
+        inputs: [40],
+        outputs: [17, 32, 34, 35, 36, 37, 38, 39],
+        components: [
         {
                 "componentType": "Output",
                 "id": "17",
                 "x": 79,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "D0",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -145,7 +149,9 @@ export const ADConvModule = {
                 "x": 102,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "D1",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -153,7 +159,9 @@ export const ADConvModule = {
                 "x": 125,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "D2",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Output",
@@ -161,7 +169,9 @@ export const ADConvModule = {
                 "x": 148,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "D3",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Output",
@@ -169,7 +179,9 @@ export const ADConvModule = {
                 "x": 171,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "D4",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Output",
@@ -177,7 +189,9 @@ export const ADConvModule = {
                 "x": 194,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "D5",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "Output",
@@ -185,7 +199,9 @@ export const ADConvModule = {
                 "x": 217,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "D6",
+                "ConnectorIndex": 6
         },
         {
                 "componentType": "Output",
@@ -193,7 +209,9 @@ export const ADConvModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "D7",
+                "ConnectorIndex": 7
         },
         {
                 "componentType": "Input",
@@ -201,7 +219,9 @@ export const ADConvModule = {
                 "x": 4,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -213,4 +233,5 @@ export const ADConvModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

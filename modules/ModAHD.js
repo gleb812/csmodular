@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: ModAHD
-// Исходный файл: ModAHD.js
-// Версия: 206
+    // Исходный файл: ModAHD.js
+    // Версия: 206
 
-export const ModAHDModule = {
-    type: 'ModAHD',
-        typeID: 169,
+    export const ModAHDModule = {
+        type: 'ModAHD',
+            typeID: 169,
     defaultParams: [0, 32, 14, 0, 0, 0, 0, 1],
-    displayName: 'ModAHD',
-    gridHeight: 5,
-    originalName: 'ModAHD',
-    tooltip: 'Envelope Modulation AHD',
-    components: [
+        displayName: 'ModAHD',
+        gridHeight: 5,
+        originalName: 'ModAHD',
+        tooltip: 'Envelope Modulation AHD',
+        inputs: [2, 4, 7, 9, 19, 27],
+        outputs: [10, 13],
+        components: [
         {
                 "componentType": "TextLabel",
                 "id": "0",
@@ -32,7 +34,9 @@ export const ModAHDModule = {
                 "x": 4,
                 "y": 31,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Trig",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -54,7 +58,9 @@ export const ModAHDModule = {
                 "x": 4,
                 "y": 60,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "AM",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "TextLabel",
@@ -71,7 +77,9 @@ export const ModAHDModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Output",
@@ -79,7 +87,9 @@ export const ModAHDModule = {
                 "x": 240,
                 "y": 60,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "LevelShift",
@@ -93,7 +103,9 @@ export const ModAHDModule = {
                 "x": 223,
                 "y": 60,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Env",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Graph",
@@ -193,7 +205,9 @@ export const ModAHDModule = {
                 "x": 66,
                 "y": 59,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "A",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -217,7 +231,9 @@ export const ModAHDModule = {
                 "x": 110,
                 "y": 59,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "H",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Knob",
@@ -241,7 +257,9 @@ export const ModAHDModule = {
                 "x": 153,
                 "y": 59,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "D",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Knob",
@@ -293,4 +311,5 @@ export const ModAHDModule = {
                 "orientation": "Vertical"
         }
 ]
-};
+    };
+    

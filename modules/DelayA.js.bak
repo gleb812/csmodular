@@ -1,0 +1,151 @@
+// Автоматически сгенерированный модуль: DelayA
+    // Исходный файл: DelayA.js
+    // Версия: 228
+
+    export const DelayAModule = {
+        type: 'DelayA',
+            typeID: 176,
+        displayName: 'DelayA',
+        gridHeight: 3,
+        originalName: 'DelayA',
+        tooltip: 'Delay A',
+        inputs: [6],
+        outputs: [7],
+        components: [
+        {
+                "componentType": "TextLabel",
+                "id": "1",
+                "x": 5,
+                "y": 17,
+                "text": "Range",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "PartSelector",
+                "id": "0",
+                "x": 4,
+                "y": 27,
+                "width": 40,
+                "height": 14,
+                "imageCount": 4,
+                "menuOffset": 0
+        },
+        {
+                "componentType": "Knob",
+                "id": "2",
+                "x": 95,
+                "y": 20,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "3",
+                "x": 126,
+                "y": 20,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "4",
+                "x": 164,
+                "y": 20,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "5",
+                "x": 203,
+                "y": 20,
+                "infoFunc": 0,
+                "size": "medium"
+        },
+        {
+                "componentType": "Input",
+                "id": "6",
+                "x": 240,
+                "y": 4,
+                "jackType": "audio",
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "Output",
+                "id": "7",
+                "x": 240,
+                "y": 30,
+                "jackType": "audio",
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "8",
+                "x": 239,
+                "y": 17,
+                "width": 13,
+                "text": "B"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "10",
+                "x": 131,
+                "y": 10,
+                "text": "FB",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "11",
+                "x": 163,
+                "y": 10,
+                "text": "Filter",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "12",
+                "x": 194,
+                "y": 10,
+                "text": "Dry/Wet",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextField",
+                "id": "14",
+                "x": 52,
+                "y": 27,
+                "width": 40,
+                "referenceElementId": 2
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "15",
+                "x": 58,
+                "y": 13,
+                "width": 30,
+                "height": 12,
+                "labels": [
+                        "Time",
+                        "Clk"
+                ]
+        },
+        {
+                "componentType": "Line",
+                "id": "13",
+                "x": 245,
+                "y": 9,
+                "length": 27,
+                "orientation": "Vertical"
+        }
+]
+    };
+    

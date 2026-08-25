@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: Mix41S
-// Исходный файл: Mix41S.js
-// Версия: 206
+    // Исходный файл: Mix41S.js
+    // Версия: 206
 
-export const Mix41SModule = {
-    type: 'Mix41S',
-        typeID: 140,
+    export const Mix41SModule = {
+        type: 'Mix41S',
+            typeID: 140,
     defaultParams: [100, 100, 100, 100, 1, 1, 1, 1, 0],
-    displayName: 'Mix4-1S',
-    gridHeight: 4,
-    originalName: 'Mix4-1S',
-    tooltip: 'Mixer 4-1 Stereo',
-    components: [
+        displayName: 'Mix4-1S',
+        gridHeight: 4,
+        originalName: 'Mix4-1S',
+        tooltip: 'Mixer 4-1 Stereo',
+        inputs: [1, 2, 6, 8, 15, 16, 19, 23, 25, 30],
+        outputs: [13, 28],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "0",
@@ -25,7 +27,9 @@ export const Mix41SModule = {
                 "x": 19,
                 "y": 24,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In1R",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -33,7 +37,9 @@ export const Mix41SModule = {
                 "x": 240,
                 "y": 45,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "OutR",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "MiniVU",
@@ -50,7 +56,9 @@ export const Mix41SModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "ChainR",
+                "ConnectorIndex": 9
         },
         {
                 "componentType": "TextLabel",
@@ -75,7 +83,9 @@ export const Mix41SModule = {
                 "x": 4,
                 "y": 24,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In1L",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -109,7 +119,9 @@ export const Mix41SModule = {
                 "x": 73,
                 "y": 24,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In2R",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "TextEdit",
@@ -125,7 +137,9 @@ export const Mix41SModule = {
                 "x": 58,
                 "y": 24,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In2L",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -159,7 +173,9 @@ export const Mix41SModule = {
                 "x": 127,
                 "y": 24,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In3R",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "TextEdit",
@@ -175,7 +191,9 @@ export const Mix41SModule = {
                 "x": 112,
                 "y": 24,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In3L",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "TextLabel",
@@ -209,7 +227,9 @@ export const Mix41SModule = {
                 "x": 181,
                 "y": 24,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In4R",
+                "ConnectorIndex": 7
         },
         {
                 "componentType": "TextEdit",
@@ -225,7 +245,9 @@ export const Mix41SModule = {
                 "x": 166,
                 "y": 24,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In4L",
+                "ConnectorIndex": 6
         },
         {
                 "componentType": "TextLabel",
@@ -251,7 +273,9 @@ export const Mix41SModule = {
                 "x": 223,
                 "y": 45,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "OutL",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "MiniVU",
@@ -268,7 +292,9 @@ export const Mix41SModule = {
                 "x": 223,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "ChainL",
+                "ConnectorIndex": 8
         },
         {
                 "componentType": "TextLabel",
@@ -302,4 +328,5 @@ export const Mix41SModule = {
                 ]
         }
 ]
-};
+    };
+    

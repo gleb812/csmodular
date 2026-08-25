@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: Pan
-// Исходный файл: Pan.js
-// Версия: 206
+    // Исходный файл: Pan.js
+    // Версия: 206
 
-export const PanModule = {
-    type: 'Pan',
-        typeID: 47,
+    export const PanModule = {
+        type: 'Pan',
+            typeID: 47,
     defaultParams: [0, 64, 0],
-    displayName: 'Pan',
-    gridHeight: 2,
-    originalName: 'Pan',
-    tooltip: 'Pan',
-    components: [
+        displayName: 'Pan',
+        gridHeight: 2,
+        originalName: 'Pan',
+        tooltip: 'Pan',
+        inputs: [0, 4],
+        outputs: [5, 7],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 87,
                 "y": 14,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Mod",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -49,7 +53,9 @@ export const PanModule = {
                 "x": 180,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -57,7 +63,9 @@ export const PanModule = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "OutR",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -83,7 +91,9 @@ export const PanModule = {
                 "x": 210,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "OutL",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -126,4 +136,5 @@ export const PanModule = {
         ,
         "svgSrc": "/svg/pan.svg"}
 ]
-};
+    };
+    

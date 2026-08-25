@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: FltVoice
-// Исходный файл: FltVoice.js
-// Версия: 208
+    // Исходный файл: FltVoice.js
+    // Версия: 208
 
-export const FltVoiceModule = {
-    type: 'FltVoice',
-        typeID: 0,
+    export const FltVoiceModule = {
+        type: 'FltVoice',
+            typeID: 0,
     defaultParams: [0, 1, 2, 100, 64, 0, 64, 0, 64, 1],
-    displayName: 'FltVoice',
-    gridHeight: 4,
-    originalName: 'FltVoice',
-    tooltip: 'Filter Voice',
-    components: [
+        displayName: 'FltVoice',
+        gridHeight: 4,
+        originalName: 'FltVoice',
+        tooltip: 'Filter Voice',
+        inputs: [1, 12, 19],
+        outputs: [0],
+        components: [
         {
                 "componentType": "Output",
                 "id": "0",
@@ -230,4 +232,5 @@ export const FltVoiceModule = {
                 "orientation": "vertical"
         }
 ]
-};
+    };
+    

@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: Out4
-// Исходный файл: Out4.js
-// Версия: 210
+    // Исходный файл: Out4.js
+    // Версия: 210
 
-export const Out4Module = {
-    type: 'Out4',
-        typeID: 3,
+    export const Out4Module = {
+        type: 'Out4',
+            typeID: 3,
     defaultParams: [0, 1, 0],
-    displayName: '4-Out',
-    gridHeight: 2,
-    originalName: '4-Out',
-    tooltip: '4 Outputs',
-    components: [
+        displayName: '4-Out',
+        gridHeight: 2,
+        originalName: '4-Out',
+        tooltip: '4 Outputs',
+        inputs: [0, 1, 2, 3],
+        outputs: [],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 162,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -25,7 +29,9 @@ export const Out4Module = {
                 "x": 188,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -33,7 +39,9 @@ export const Out4Module = {
                 "x": 214,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Input",
@@ -41,7 +49,9 @@ export const Out4Module = {
                 "x": 240,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In4",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "TextLabel",
@@ -161,4 +171,5 @@ export const Out4Module = {
                 "orientation": "vertical"
         }
 ]
-};
+    };
+    

@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: Eq2Band
-// Исходный файл: Eq2Band.js
-// Версия: 208
+    // Исходный файл: Eq2Band.js
+    // Версия: 208
 
-export const Eq2BandModule = {
-    type: 'Eq2Band',
-        typeID: 32,
+    export const Eq2BandModule = {
+        type: 'Eq2Band',
+            typeID: 32,
     defaultParams: [64, 64, 127, 1, 0, 2],
-    displayName: 'Eq2Band',
-    gridHeight: 3,
-    originalName: 'Eq2Band',
-    tooltip: 'Eq 2 Band',
-    components: [
+        displayName: 'Eq2Band',
+        gridHeight: 3,
+        originalName: 'Eq2Band',
+        tooltip: 'Eq 2 Band',
+        inputs: [11],
+        outputs: [10],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "1",
@@ -75,7 +77,9 @@ export const Eq2BandModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -83,7 +87,9 @@ export const Eq2BandModule = {
                 "x": 240,
                 "y": 3,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -154,4 +160,5 @@ export const Eq2BandModule = {
                 ]
         }
 ]
-};
+    };
+    

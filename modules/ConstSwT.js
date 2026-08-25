@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: ConstSwT
-// Исходный файл: ConstSwT.js
-// Версия: 206
+    // Исходный файл: ConstSwT.js
+    // Версия: 206
 
-export const ConstSwTModule = {
-    type: 'ConstSwT',
-        typeID: 50,
+    export const ConstSwTModule = {
+        type: 'ConstSwT',
+            typeID: 50,
     defaultParams: [64, 0, 0],
-    displayName: 'ConstSwT',
-    gridHeight: 2,
-    originalName: 'ConstSwT',
-    tooltip: 'Constant Switch Toggling',
-    components: [
+        displayName: 'ConstSwT',
+        gridHeight: 2,
+        originalName: 'ConstSwT',
+        tooltip: 'Constant Switch Toggling',
+        inputs: [],
+        outputs: [0],
+        components: [
         {
                 "componentType": "Output",
                 "id": "0",
                 "x": 240,
                 "y": 10,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -74,4 +78,5 @@ export const ConstSwTModule = {
                 ]
         }
 ]
-};
+    };
+    

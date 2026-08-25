@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: OscMaster
-// Исходный файл: OscMaster.js
-// Версия: 234
+    // Исходный файл: OscMaster.js
+    // Версия: 234
 
-export const OscMasterModule = {
-    type: 'OscMaster',
-        typeID: 27,
+    export const OscMasterModule = {
+        type: 'OscMaster',
+            typeID: 27,
     defaultParams: [64, 64, 1, 0, 0],
-    displayName: 'OscMaster',
-    gridHeight: 3,
-    originalName: 'OscMaster',
-    tooltip: 'Osc Master',
-    components: [
+        displayName: 'OscMaster',
+        gridHeight: 3,
+        originalName: 'OscMaster',
+        tooltip: 'Osc Master',
+        inputs: [1, 2],
+        outputs: [6],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 4,
                 "y": 29,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "PitchVar",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -41,7 +45,9 @@ export const OscMasterModule = {
                 "x": 4,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -65,7 +71,9 @@ export const OscMasterModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextField",
@@ -137,4 +145,5 @@ export const OscMasterModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

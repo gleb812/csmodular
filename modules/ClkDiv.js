@@ -1,24 +1,28 @@
 // Автоматически сгенерированный модуль: ClkDiv
-// Исходный файл: ClkDiv.js
-// Версия: 208
+    // Исходный файл: ClkDiv.js
+    // Версия: 208
 
-export const ClkDivModule = {
-    type: 'ClkDiv',
-        typeID: 69,
+    export const ClkDivModule = {
+        type: 'ClkDiv',
+            typeID: 69,
     mode: [0],
     defaultParams: [0],
-    displayName: 'ClkDiv',
-    gridHeight: 2,
-    originalName: 'ClkDiv',
-    tooltip: 'Clock Divider',
-    components: [
+        displayName: 'ClkDiv',
+        gridHeight: 2,
+        originalName: 'ClkDiv',
+        tooltip: 'Clock Divider',
+        inputs: [0, 3],
+        outputs: [9],
+        components: [
         {
                 "componentType": "Input",
                 "id": "0",
                 "x": 78,
                 "y": 11,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Clk",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -35,7 +39,9 @@ export const ClkDivModule = {
                 "x": 116,
                 "y": 11,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Reset",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -90,7 +96,9 @@ export const ClkDivModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -117,4 +125,5 @@ export const ClkDivModule = {
                 "menuOffset": 0
         }
 ]
-};
+    };
+    

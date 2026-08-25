@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: FltMulti
-// Исходный файл: FltMulti.js
-// Версия: 208
+    // Исходный файл: FltMulti.js
+    // Версия: 208
 
-export const FltMultiModule = {
-    type: 'FltMulti',
-        typeID: 49,
+    export const FltMultiModule = {
+        type: 'FltMulti',
+            typeID: 49,
     defaultParams: [75, 0, 0, 1, 0, 1, 1],
-    displayName: 'FltMulti',
-    gridHeight: 4,
-    originalName: 'FltMulti',
-    tooltip: 'Filter Multi-mode',
-    components: [
+        displayName: 'FltMulti',
+        gridHeight: 4,
+        originalName: 'FltMulti',
+        tooltip: 'Filter Multi-mode',
+        inputs: [1, 2, 15],
+        outputs: [16, 17, 18],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 4,
                 "y": 44,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "PitchVar",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -41,7 +45,9 @@ export const FltMultiModule = {
                 "x": 4,
                 "y": 28,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -153,7 +159,9 @@ export const FltMultiModule = {
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -161,7 +169,9 @@ export const FltMultiModule = {
                 "x": 240,
                 "y": 45,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "LP",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -169,7 +179,9 @@ export const FltMultiModule = {
                 "x": 240,
                 "y": 31,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "BP",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Output",
@@ -177,7 +189,9 @@ export const FltMultiModule = {
                 "x": 240,
                 "y": 17,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "HP",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -232,4 +246,5 @@ export const FltMultiModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

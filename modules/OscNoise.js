@@ -1,16 +1,18 @@
 // Автоматически сгенерированный модуль: OscNoise
-// Исходный файл: OscNoise.js
-// Версия: 238
+    // Исходный файл: OscNoise.js
+    // Версия: 238
 
-export const OscNoiseModule = {
-    type: 'OscNoise',
-        typeID: 106,
+    export const OscNoiseModule = {
+        type: 'OscNoise',
+            typeID: 106,
     defaultParams: [64, 64, 1, 0, 0, 0, 0, 1],
-    displayName: 'OscNoise',
-    gridHeight: 3,
-    originalName: 'OscNoise',
-    tooltip: 'Noise oscillator',
-    components: [
+        displayName: 'OscNoise',
+        gridHeight: 3,
+        originalName: 'OscNoise',
+        tooltip: 'Noise oscillator',
+        inputs: [4, 7, 13],
+        outputs: [2],
+        components: [
         {
                 "componentType": "Knob",
                 "id": "0",
@@ -25,7 +27,9 @@ export const OscNoiseModule = {
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -42,7 +46,9 @@ export const OscNoiseModule = {
                 "x": 159,
                 "y": 29,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Width",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Knob",
@@ -74,7 +80,9 @@ export const OscNoiseModule = {
                 "x": 4,
                 "y": 29,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "PitchVar",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -98,7 +106,9 @@ export const OscNoiseModule = {
                 "x": 4,
                 "y": 13,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -186,4 +196,5 @@ export const OscNoiseModule = {
                 "height": 22
         }
 ]
-};
+    };
+    

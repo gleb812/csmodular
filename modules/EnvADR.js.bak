@@ -1,0 +1,236 @@
+// Автоматически сгенерированный модуль: EnvADR
+    // Исходный файл: EnvADR.js
+    // Версия: 206
+
+    export const EnvADRModule = {
+        type: 'EnvADR',
+            typeID: 84,
+        displayName: 'EnvADR',
+        gridHeight: 3,
+        originalName: 'EnvADR',
+        tooltip: 'Envelope AD/R',
+        inputs: [0, 6, 10],
+        outputs: [1, 4, 13],
+        components: [
+        {
+                "componentType": "Input",
+                "id": "0",
+                "x": 240,
+                "y": 4,
+                "jackType": "audio",
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 1
+        },
+        {
+                "componentType": "Output",
+                "id": "1",
+                "x": 240,
+                "y": 30,
+                "jackType": "audio",
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 1
+        },
+        {
+                "componentType": "LevelShift",
+                "id": "3",
+                "x": 167,
+                "y": 29
+        },
+        {
+                "componentType": "Output",
+                "id": "4",
+                "x": 223,
+                "y": 30,
+                "jackType": "control",
+                "bandwidth": "static",
+                "ConnectorName": "Env",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "Graph",
+                "id": "5",
+                "x": 189,
+                "y": 3,
+                "width": 45,
+                "height": 24
+        },
+        {
+                "componentType": "Input",
+                "id": "6",
+                "x": 4,
+                "y": 30,
+                "jackType": "logic",
+                "bandwidth": "static",
+                "ConnectorName": "Gate",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "LED",
+                "id": "9",
+                "x": 6,
+                "y": 18
+        },
+        {
+                "componentType": "Input",
+                "id": "10",
+                "x": 52,
+                "y": 30,
+                "jackType": "control",
+                "bandwidth": "static",
+                "ConnectorName": "AM",
+                "ConnectorIndex": 2
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "11",
+                "x": 50,
+                "y": 20,
+                "text": "AM",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "12",
+                "x": 201,
+                "y": 31,
+                "text": "↑",
+                "fontSize": 10,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Trig 1",
+                "width": 9
+        },
+        {
+                "componentType": "Output",
+                "id": "13",
+                "x": 205,
+                "y": 30,
+                "jackType": "logic",
+                "bandwidth": "static",
+                "ConnectorName": "End",
+                "ConnectorIndex": 2
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "14",
+                "x": 185,
+                "y": 32,
+                "text": "End",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextField",
+                "id": "15",
+                "x": 79,
+                "y": 4,
+                "width": 35,
+                "referenceElementId": 17
+        },
+        {
+                "componentType": "TextField",
+                "id": "16",
+                "x": 123,
+                "y": 4,
+                "width": 35,
+                "referenceElementId": 18
+        },
+        {
+                "componentType": "Knob",
+                "id": "17",
+                "x": 93,
+                "y": 20,
+                "infoFunc": 28,
+                "size": "medium"
+        },
+        {
+                "componentType": "Knob",
+                "id": "18",
+                "x": 142,
+                "y": 20,
+                "infoFunc": 28,
+                "size": "medium"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "21",
+                "x": 81,
+                "y": 20,
+                "text": "A",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "SVG",
+                "id": "2",
+                "x": 240,
+                "y": 12,
+                "width": 11,
+                "height": 21,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "7",
+                "x": 18,
+                "y": 29,
+                "width": 25,
+                "height": 12,
+                "labels": [
+                        "Trig",
+                        "Gate"
+                ]
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "8",
+                "x": 18,
+                "y": 16,
+                "width": 18,
+                "text": "KB"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "23",
+                "x": 165,
+                "y": 14,
+                "width": 20,
+                "height": 12
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "24",
+                "x": 162,
+                "y": 4,
+                "text": "Shape",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "20",
+                "x": 119,
+                "y": 29,
+                "width": 20,
+                "height": 12,
+                "labels": [
+                        "Dcy",
+                        "Rel"
+                ]
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "22",
+                "x": 76,
+                "y": 29,
+                "width": 15,
+                "height": 12
+        }
+]
+    };
+    

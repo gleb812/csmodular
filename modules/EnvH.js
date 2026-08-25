@@ -1,23 +1,27 @@
 // Автоматически сгенерированный модуль: EnvH
-// Исходный файл: EnvH.js
-// Версия: 206
+    // Исходный файл: EnvH.js
+    // Версия: 206
 
-export const EnvHModule = {
-    type: 'EnvH',
-        typeID: 41,
+    export const EnvHModule = {
+        type: 'EnvH',
+            typeID: 41,
     defaultParams: [32, 0],
-    displayName: 'EnvH',
-    gridHeight: 2,
-    originalName: 'EnvH',
-    tooltip: 'Envelope Hold',
-    components: [
+        displayName: 'EnvH',
+        gridHeight: 2,
+        originalName: 'EnvH',
+        tooltip: 'Envelope Hold',
+        inputs: [1, 4, 9],
+        outputs: [10, 13],
+        components: [
         {
                 "componentType": "Input",
                 "id": "1",
                 "x": 4,
                 "y": 15,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Trig",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -54,7 +58,9 @@ export const EnvHModule = {
                 "x": 49,
                 "y": 15,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "AM",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -95,7 +101,9 @@ export const EnvHModule = {
                 "x": 210,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Output",
@@ -103,7 +111,9 @@ export const EnvHModule = {
                 "x": 240,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "LevelShift",
@@ -117,7 +127,9 @@ export const EnvHModule = {
                 "x": 194,
                 "y": 13,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Env",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "SVG",
@@ -139,4 +151,5 @@ export const EnvHModule = {
                 "color": "#ffffff"
         }
 ]
-};
+    };
+    

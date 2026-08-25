@@ -1,0 +1,780 @@
+// Автоматически сгенерированный модуль: SeqEvent
+    // Исходный файл: SeqEvent.js
+    // Версия: 210
+
+    export const SeqEventModule = {
+        type: 'SeqEvent',
+            typeID: 144,
+        displayName: 'SeqEvent',
+        gridHeight: 5,
+        originalName: 'SeqEvent',
+        tooltip: 'Sequencer Event',
+        inputs: [0, 1, 2, 6, 83, 84],
+        outputs: [4, 59, 60],
+        components: [
+        {
+                "componentType": "Input",
+                "id": "0",
+                "x": 4,
+                "y": 15,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Input",
+                "id": "1",
+                "x": 4,
+                "y": 37,
+                "jackType": "logic",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Input",
+                "id": "2",
+                "x": 4,
+                "y": 60,
+                "jackType": "logic",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "3",
+                "x": 21,
+                "y": 17,
+                "text": "Clk",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "5",
+                "x": 4,
+                "y": 28,
+                "text": "Rst",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "6",
+                "x": 204,
+                "y": 4,
+                "jackType": "logic",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "LED",
+                "id": "8",
+                "x": 242,
+                "y": 7
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "9",
+                "x": 218,
+                "y": 6,
+                "text": "Park",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Output",
+                "id": "4",
+                "x": 240,
+                "y": 27,
+                "jackType": "logic",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "7",
+                "x": 235,
+                "y": 17,
+                "text": "Link",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "10",
+                "x": 34,
+                "y": 44,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "12",
+                "x": 46,
+                "y": 44,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "13",
+                "x": 70,
+                "y": 44,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "15",
+                "x": 58,
+                "y": 44,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "16",
+                "x": 82,
+                "y": 44,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "17",
+                "x": 94,
+                "y": 44,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "18",
+                "x": 118,
+                "y": 44,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "19",
+                "x": 106,
+                "y": 44,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "11",
+                "x": 130,
+                "y": 44,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "20",
+                "x": 142,
+                "y": 44,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "21",
+                "x": 166,
+                "y": 44,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "22",
+                "x": 154,
+                "y": 44,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "23",
+                "x": 178,
+                "y": 44,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "24",
+                "x": 190,
+                "y": 44,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "25",
+                "x": 214,
+                "y": 44,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "26",
+                "x": 202,
+                "y": 44,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "27",
+                "x": 34,
+                "y": 59,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "28",
+                "x": 46,
+                "y": 59,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "29",
+                "x": 70,
+                "y": 59,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "30",
+                "x": 58,
+                "y": 59,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "31",
+                "x": 82,
+                "y": 59,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "32",
+                "x": 94,
+                "y": 59,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "33",
+                "x": 118,
+                "y": 59,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "34",
+                "x": 106,
+                "y": 59,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "35",
+                "x": 130,
+                "y": 59,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "36",
+                "x": 142,
+                "y": 59,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "37",
+                "x": 166,
+                "y": 59,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "38",
+                "x": 154,
+                "y": 59,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "39",
+                "x": 178,
+                "y": 59,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "40",
+                "x": 190,
+                "y": 59,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "41",
+                "x": 214,
+                "y": 59,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "ButtonText",
+                "id": "42",
+                "x": 202,
+                "y": 59,
+                "width": 12,
+                "text": ""
+        },
+        {
+                "componentType": "LED",
+                "id": "43",
+                "x": 34,
+                "y": 36
+        },
+        {
+                "componentType": "LED",
+                "id": "44",
+                "x": 46,
+                "y": 36
+        },
+        {
+                "componentType": "LED",
+                "id": "45",
+                "x": 58,
+                "y": 36
+        },
+        {
+                "componentType": "LED",
+                "id": "46",
+                "x": 70,
+                "y": 36
+        },
+        {
+                "componentType": "LED",
+                "id": "47",
+                "x": 178,
+                "y": 36
+        },
+        {
+                "componentType": "LED",
+                "id": "48",
+                "x": 190,
+                "y": 36
+        },
+        {
+                "componentType": "LED",
+                "id": "49",
+                "x": 202,
+                "y": 36
+        },
+        {
+                "componentType": "LED",
+                "id": "50",
+                "x": 214,
+                "y": 36
+        },
+        {
+                "componentType": "LED",
+                "id": "51",
+                "x": 130,
+                "y": 36
+        },
+        {
+                "componentType": "LED",
+                "id": "52",
+                "x": 142,
+                "y": 36
+        },
+        {
+                "componentType": "LED",
+                "id": "53",
+                "x": 154,
+                "y": 36
+        },
+        {
+                "componentType": "LED",
+                "id": "54",
+                "x": 166,
+                "y": 36
+        },
+        {
+                "componentType": "LED",
+                "id": "55",
+                "x": 82,
+                "y": 36
+        },
+        {
+                "componentType": "LED",
+                "id": "56",
+                "x": 94,
+                "y": 36
+        },
+        {
+                "componentType": "LED",
+                "id": "57",
+                "x": 106,
+                "y": 36
+        },
+        {
+                "componentType": "LED",
+                "id": "58",
+                "x": 118,
+                "y": 36
+        },
+        {
+                "componentType": "Output",
+                "id": "59",
+                "x": 240,
+                "y": 44,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Output",
+                "id": "60",
+                "x": 240,
+                "y": 60,
+                "jackType": "logic",
+                "bandwidth": "dynamic"
+        },
+        {
+                "componentType": "Line",
+                "id": "61",
+                "x": 217,
+                "y": 49,
+                "length": 29,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Line",
+                "id": "62",
+                "x": 218,
+                "y": 65,
+                "length": 29,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "63",
+                "x": 16,
+                "y": 38,
+                "text": "⤒",
+                "fontSize": 10,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Trig 2",
+                "width": 12
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "64",
+                "x": 38,
+                "y": 26,
+                "text": "1",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "65",
+                "x": 49,
+                "y": 26,
+                "text": "2",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "66",
+                "x": 61,
+                "y": 26,
+                "text": "3",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "67",
+                "x": 73,
+                "y": 26,
+                "text": "4",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "68",
+                "x": 85,
+                "y": 26,
+                "text": "5",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "69",
+                "x": 97,
+                "y": 26,
+                "text": "6",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "70",
+                "x": 109,
+                "y": 26,
+                "text": "7",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "71",
+                "x": 121,
+                "y": 26,
+                "text": "8",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "72",
+                "x": 133,
+                "y": 26,
+                "text": "9",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "73",
+                "x": 144,
+                "y": 26,
+                "text": "10",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "74",
+                "x": 157,
+                "y": 26,
+                "text": "11",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "75",
+                "x": 168,
+                "y": 26,
+                "text": "12",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "76",
+                "x": 180,
+                "y": 26,
+                "text": "13",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "77",
+                "x": 192,
+                "y": 26,
+                "text": "14",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "78",
+                "x": 204,
+                "y": 26,
+                "text": "15",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "79",
+                "x": 216,
+                "y": 26,
+                "text": "16",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonIncDec",
+                "id": "80",
+                "x": 145,
+                "y": 4,
+                "infoFunc": 2
+        },
+        {
+                "componentType": "TextField",
+                "id": "81",
+                "x": 167,
+                "y": 4,
+                "width": 16,
+                "referenceElementId": 33
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "82",
+                "x": 115,
+                "y": 6,
+                "text": "Length",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "Input",
+                "id": "83",
+                "x": 21,
+                "y": 44,
+                "jackType": "logic",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Input",
+                "id": "84",
+                "x": 21,
+                "y": 60,
+                "jackType": "logic",
+                "bandwidth": "static"
+        },
+        {
+                "componentType": "Line",
+                "id": "85",
+                "x": 25,
+                "y": 49,
+                "length": 21,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "Line",
+                "id": "86",
+                "x": 24,
+                "y": 65,
+                "length": 21,
+                "orientation": "Horizontal"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "87",
+                "x": 5,
+                "y": 50,
+                "text": "Lp",
+                "fontSize": 9,
+                "color": "#ffffff"
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "90",
+                "x": 87,
+                "y": 4,
+                "width": 20,
+                "height": 12
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "14",
+                "x": 227,
+                "y": 44,
+                "width": 11,
+                "height": 12,
+                "labels": [
+                        "T",
+                        "G"
+                ]
+        },
+        {
+                "componentType": "ButtonFlat",
+                "id": "88",
+                "x": 227,
+                "y": 59,
+                "width": 11,
+                "height": 12,
+                "labels": [
+                        "T",
+                        "G"
+                ]
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "91",
+                "x": 200,
+                "y": 5,
+                "text": "↑",
+                "fontSize": 10,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Trig 1",
+                "width": 9
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "89",
+                "x": 16,
+                "y": 60,
+                "text": "⤒",
+                "fontSize": 10,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Trig 2",
+                "width": 12
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "92",
+                "x": 16,
+                "y": 16,
+                "text": "↑",
+                "fontSize": 10,
+                "color": "#ffffff",
+                "align": "center",
+                "valign": "middle",
+                "originalType": "Symbol",
+                "symbolType": "Trig 1",
+                "width": 9
+        }
+]
+    };
+    
