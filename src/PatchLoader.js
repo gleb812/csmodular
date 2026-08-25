@@ -1,6 +1,7 @@
 // src/PatchLoader.js
     
 import { createFileInput, triggerFileInput } from './utils/fileInput.js';
+
 export class PatchLoader {
     constructor(system) {
         this.system = system;
@@ -102,7 +103,6 @@ export class PatchLoader {
         return this.moduleMap;
     }
 
-
     clearCurrentPatch() {
     
         // Удаляем все модули из системы
@@ -184,7 +184,7 @@ export class PatchLoader {
         
         try {
             const modulePath = `../modules/${moduleName}.js`;            
-            const module = await import(modulePath);
+            const module = await import(/* @vite-ignore */ modulePath);
             const moduleKey = Object.keys(module)[0];
 
             if (moduleKey && module[moduleKey]) {
@@ -203,7 +203,7 @@ export class PatchLoader {
                 const modulePath = `./modules/${moduleName}.js`;
                 console.log(`   Alternative path: ${modulePath}`);
                 
-                const module = await import(modulePath);
+                const module = await import(/* @vite-ignore */ modulePath);
                 const moduleKey = Object.keys(module)[0];
                 
                 if (moduleKey && module[moduleKey]) {

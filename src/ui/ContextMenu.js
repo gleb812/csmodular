@@ -10,22 +10,16 @@ export class ContextMenu {
         this.moduleGroups = null;
         this.lastOpenMouseY = null;
         
-        // 1. Сначала инициализируем группы модулей
-        this.initModuleGroups();
-        
-        // 2. Затем создаем элемент меню (который использует moduleGroups)
+        this.initModuleStructure();
         this.createMenuElement();
-        
-        // 3. Настройка событий
         this.setupEventListeners();
-        
-        // 4. Стили
         this.injectStyles();
     }
 
-    initModuleGroups() {
-        // Просто инициализируем группы, НЕ вызываем createModuleGroups()
-        this.moduleGroups = {
+    // Новая структура: два уровня - NM2 и User
+    initModuleStructure() {
+        // Все существующие модули (NM2) - сгруппированы по категориям
+        this.nm2Modules = {
             'In/Out': ['In2', 'Out2', 'In4', 'Out4', 'Device', 'FxIn', 'Keyboard', 'MonoKey', 'Name', 'NoteDet', 'Status'],
             'Logic': ['8Counter', 'ADConv', 'BinCounter', 'ClkDiv', 'DAConv', 'Delay', 'FlipFlop', 'Gate', 'Invert', 'Pulse'],
             'Osc': ['DXRouter', 'Driver', 'DrumSynth', 'MetNoise', 'Noise', 'Operator', 'OscA', 'OscB', 'OscC', 'OscD', 'OscDual', 'OscMaster', 'OscNoise', 'OscPM', 'OscPerc', 'OscShpA', 'OscShpB', 'OscString', 'Resonator'],
@@ -44,11 +38,27 @@ export class ContextMenu {
             'Rnd': ['RandomA', 'RandomB', 'RndClkA', 'RndClkB', 'RndPattern', 'RndTrig'],
             'Test': ['Blue2Red', 'Red2Blue']
         };
-        
-        // createModuleGroups() будет вызван из createMenuElement()
+
+        // Пользовательские модули (User) - пока пусто
+        this.userModules = {
+            'My Modules': []  // Сюда будут добавляться пользовательские модули
+        };
+
+        // Для обратной совместимости - объединяем всё в moduleGroups
+        this.moduleGroups = {
+            ...this.nm2Modules,
+            ...this.userModules
+        };
+
+        // Сохраняем список всех модулей для поиска
+        this.allModules = {};
+        Object.entries(this.moduleGroups).forEach(([group, modules]) => {
+            modules.forEach(module => {
+                this.allModules[module] = group;
+            });
+        });
     }
 
-    // ContextMenu.js - полная переработка стилей
     createMenuElement() {
         this.menuElement = document.createElement('div');
         this.menuElement.id = 'context-menu';
@@ -64,22 +74,19 @@ export class ContextMenu {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             color: #ccc;
             overflow: hidden;
-            
-            /* Скрываем, но оставляем видимым для браузера */
             opacity: 0;
             transform: scale(0.95);
             visibility: hidden;
             transition: opacity 0.1s ease-out, transform 0.1s ease-out;
         `;
         
-        // Контейнер с двумя колонками
         const container = document.createElement('div');
         container.style.cssText = `
             display: flex;
             height: 100%;
         `;
         
-        // ЛЕВАЯ КОЛОНКА - Группы (ширина 30%)
+        // ЛЕВАЯ КОЛОНКА - Два уровня (NM2 и User)
         const leftPanel = document.createElement('div');
         leftPanel.id = 'left-panel';
         leftPanel.style.cssText = `
@@ -90,7 +97,7 @@ export class ContextMenu {
             padding: 0;
         `;
         
-        // ПРАВАЯ КОЛОНКА - Поиск + Модули (ширина 70%)
+        // ПРАВАЯ КОЛОНКА - Поиск + Модули
         const rightPanel = document.createElement('div');
         rightPanel.id = 'right-panel';
         rightPanel.style.cssText = `
@@ -100,7 +107,7 @@ export class ContextMenu {
             overflow: hidden;
         `;
         
-        // СТРОКА ПОИСКА (в правой панели)
+        // Поиск
         const searchContainer = document.createElement('div');
         searchContainer.style.cssText = `
             padding: 8px 12px;
@@ -126,7 +133,7 @@ export class ContextMenu {
         
         searchContainer.appendChild(this.searchInput);
         
-        // КОНТЕЙНЕР ДЛЯ МОДУЛЕЙ (в правой панели)
+        // Контейнер для модулей
         const modulesContainer = document.createElement('div');
         modulesContainer.id = 'modules-container';
         modulesContainer.style.cssText = `
@@ -135,23 +142,280 @@ export class ContextMenu {
             padding: 8px 0;
         `;
         
-        // Патч меню (компактное)
+        // Патч меню
         const patchSection = this.createCompactPatchSection();
         
-        // Собираем правую панель
         rightPanel.appendChild(searchContainer);
         rightPanel.appendChild(patchSection);
         rightPanel.appendChild(modulesContainer);
         
-        // Собираем контейнер
         container.appendChild(leftPanel);
         container.appendChild(rightPanel);
         this.menuElement.appendChild(container);
         
         document.body.appendChild(this.menuElement);
         this.updateMenuPosition();
-        // Создаем группы в левой панели
-        this.createGroupList(leftPanel);
+        
+        // Создаем иерархический список в левой панели
+        this.createHierarchicalGroupList(leftPanel);
+    }
+
+    // НОВЫЙ МЕТОД: создает иерархический список с двумя уровнями
+    createHierarchicalGroupList(container) {
+        container.innerHTML = '';
+
+        // === УРОВЕНЬ 1: NM2 ===
+        const nm2Header = this.createLevelHeader('📦 NM2', true);
+        container.appendChild(nm2Header);
+
+        // Подзаголовки NM2 (все группы NM2)
+        const nm2Groups = document.createElement('div');
+        nm2Groups.className = 'level-groups nm2-groups';
+        nm2Groups.style.cssText = `
+            padding-left: 8px;
+        `;
+
+        Object.keys(this.nm2Modules).forEach((groupName) => {
+            const groupItem = this.createGroupItem(groupName, 'nm2');
+            nm2Groups.appendChild(groupItem);
+        });
+
+        container.appendChild(nm2Groups);
+
+        // === РАЗДЕЛИТЕЛЬ ===
+        const divider = document.createElement('div');
+        divider.style.cssText = `
+            height: 1px;
+            background: #333;
+            margin: 8px 0;
+        `;
+        container.appendChild(divider);
+
+        // === УРОВЕНЬ 1: User ===
+        const userHeader = this.createLevelHeader('👤 User', false);
+        container.appendChild(userHeader);
+
+        // Подзаголовки User
+        const userGroups = document.createElement('div');
+        userGroups.className = 'level-groups user-groups';
+        userGroups.style.cssText = `
+            padding-left: 8px;
+        `;
+
+        Object.keys(this.userModules).forEach((groupName) => {
+            const groupItem = this.createGroupItem(groupName, 'user');
+            userGroups.appendChild(groupItem);
+        });
+
+        container.appendChild(userGroups);
+
+        // По умолчанию открываем NM2
+        this.toggleLevel('nm2', true);
+        this.toggleLevel('user', false);
+        
+        // Выбираем первую группу NM2
+        const firstNm2Group = Object.keys(this.nm2Modules)[0];
+        if (firstNm2Group) {
+            const firstItem = nm2Groups.querySelector('.group-item');
+            if (firstItem) {
+                firstItem.style.background = '#2a2a2a';
+                firstItem.style.borderLeftColor = '#0af';
+                firstItem.style.color = '#fff';
+                this.showModulesForGroup(firstNm2Group);
+            }
+        }
+    }
+
+    // Создает заголовок уровня (NM2 или User)
+    createLevelHeader(title, isOpen = true) {
+        const header = document.createElement('div');
+        header.className = 'level-header';
+        header.dataset.level = title.includes('NM2') ? 'nm2' : 'user';
+        header.style.cssText = `
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #0af;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1f1f1f;
+            border-radius: 4px;
+            margin: 2px 4px;
+        `;
+
+        const arrow = document.createElement('span');
+        arrow.className = 'level-arrow';
+        arrow.textContent = isOpen ? '▼' : '▶';
+        arrow.style.cssText = `
+            font-size: 10px;
+            color: #666;
+        `;
+
+        header.innerHTML = `<span>${title}</span>`;
+        header.appendChild(arrow);
+
+        // Клик для сворачивания/разворачивания
+        header.onclick = (e) => {
+            e.stopPropagation();
+            const level = header.dataset.level;
+            const isCurrentlyOpen = arrow.textContent === '▼';
+            this.toggleLevel(level, !isCurrentlyOpen);
+        };
+
+        return header;
+    }
+
+    // Переключает видимость уровня
+    toggleLevel(level, open) {
+        const groupsContainer = this.menuElement.querySelector(`.${level}-groups`);
+        if (!groupsContainer) return;
+
+        const header = this.menuElement.querySelector(`.level-header[data-level="${level}"]`);
+        if (!header) return;
+
+        const arrow = header.querySelector('.level-arrow');
+        
+        if (open) {
+            groupsContainer.style.display = 'block';
+            if (arrow) arrow.textContent = '▼';
+        } else {
+            groupsContainer.style.display = 'none';
+            if (arrow) arrow.textContent = '▶';
+        }
+    }
+
+    // Создает элемент группы (используется для подзаголовков внутри уровней)
+    createGroupItem(groupName, level) {
+        const groupItem = document.createElement('div');
+        groupItem.className = 'group-item';
+        groupItem.dataset.group = groupName;
+        groupItem.dataset.level = level;
+        groupItem.style.cssText = `
+            padding: 4px 12px;
+            font-size: 11px;
+            color: #aaa;
+            cursor: pointer;
+            user-select: none;
+            border-left: 2px solid transparent;
+            margin: 1px 0;
+            border-radius: 0 3px 3px 0;
+        `;
+        
+        // Добавляем префикс в зависимости от уровня
+        const prefix = level === 'nm2' ? '📁 ' : '👤 ';
+        groupItem.textContent = prefix + groupName;
+        
+        groupItem.onmouseenter = () => {
+            document.querySelectorAll('.group-item').forEach(item => {
+                item.style.background = 'transparent';
+                item.style.borderLeftColor = 'transparent';
+                item.style.color = '#aaa';
+            });
+            
+            groupItem.style.background = '#2a2a2a';
+            groupItem.style.borderLeftColor = '#0af';
+            groupItem.style.color = '#fff';
+            
+            this.showModulesForGroup(groupName);
+        };
+        
+        groupItem.onclick = () => {
+            this.showModulesForGroup(groupName);
+        };
+        
+        return groupItem;
+    }
+
+    // Обновляем showModulesForGroup чтобы показывать модули из обеих групп
+    showModulesForGroup(groupName) {
+        const modulesContainer = this.menuElement.querySelector('#modules-container');
+        if (!modulesContainer) return;
+
+        // Ищем модули в NM2 или User
+        let modules = this.nm2Modules[groupName] || this.userModules[groupName] || [];
+        
+        // Если группа не найдена, пробуем найти по всем группам
+        if (modules.length === 0) {
+            // Проверяем все группы
+            for (const [key, value] of Object.entries(this.nm2Modules)) {
+                if (key.toLowerCase() === groupName.toLowerCase()) {
+                    modules = value;
+                    break;
+                }
+            }
+            if (modules.length === 0) {
+                for (const [key, value] of Object.entries(this.userModules)) {
+                    if (key.toLowerCase() === groupName.toLowerCase()) {
+                        modules = value;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Фильтруем по поиску
+        let searchTerm = '';
+        if (this.searchInput && this.searchInput.value) {
+            searchTerm = this.searchInput.value.toLowerCase();
+        }
+        
+        const filteredModules = searchTerm ? 
+            modules.filter(m => m.toLowerCase().includes(searchTerm)) : 
+            modules;
+        
+        modulesContainer.innerHTML = '';
+        
+        if (filteredModules.length === 0) {
+            const emptyMsg = document.createElement('div');
+            emptyMsg.textContent = searchTerm ? 'No modules found' : 'No modules in this group';
+            emptyMsg.style.cssText = `
+                padding: 20px;
+                text-align: center;
+                color: #666;
+                font-size: 11px;
+                font-style: italic;
+            `;
+            modulesContainer.appendChild(emptyMsg);
+            return;
+        }
+        
+        // Определяем, из какого уровня группа
+        const isUser = !!this.userModules[groupName];
+        const levelPrefix = isUser ? '👤 ' : '📦 ';
+        
+        filteredModules.forEach(moduleName => {
+            const moduleItem = document.createElement('div');
+            moduleItem.className = 'module-item';
+            moduleItem.style.cssText = `
+                padding: 4px 12px;
+                font-size: 11px;
+                color: #ccc;
+                cursor: pointer;
+                user-select: none;
+                display: flex;
+                align-items: center;
+                min-height: 24px;
+            `;
+            
+            moduleItem.textContent = moduleName;
+            
+            moduleItem.onmouseenter = () => {
+                moduleItem.style.background = '#2a2a2a';
+            };
+            
+            moduleItem.onmouseleave = () => {
+                moduleItem.style.background = 'transparent';
+            };
+            
+            moduleItem.onclick = () => {
+                this.handleModuleSelect(moduleName);
+            };
+            
+            modulesContainer.appendChild(moduleItem);
+        });
     }
 
     updateMenuPosition(mouseX = null, mouseY = null) {
@@ -251,6 +515,7 @@ export class ContextMenu {
             { text: 'Save As', action: 'save-patch-as' },
             { text: 'New', action: 'new-patch' },
             { text: 'To CSD', action: 'export-csd' },
+            { text: 'Editor', action: 'open-editor' },
             { text: 'About', action: 'about' }  
         ];
         
@@ -566,6 +831,26 @@ export class ContextMenu {
         
         return button;
     }
+
+
+    // Метод для добавления пользовательского модуля (будет использоваться позже)
+    addUserModule(moduleName, category = 'My Modules') {
+        if (!this.userModules[category]) {
+            this.userModules[category] = [];
+        }
+        
+        if (!this.userModules[category].includes(moduleName)) {
+            this.userModules[category].push(moduleName);
+            this.allModules[moduleName] = category;
+            
+            // Обновляем интерфейс
+            this.updateMenuUI();
+            
+            console.log(`✅ User module added: ${moduleName} -> ${category}`);
+            return true;
+        }
+        return false;
+    }
     
     setupEventListeners() {
         // Запоминаем позицию мыши для открытия меню рядом с курсором
@@ -689,7 +974,6 @@ export class ContextMenu {
             y: rect.top + canvasY
         };
     }
-
 
     navigateGroups(direction) {
         const leftPanel = this.menuElement.querySelector('#left-panel');
@@ -944,7 +1228,6 @@ export class ContextMenu {
         
         this.hide();
     }
-
     
     handlePatchAction(action) {
         
@@ -988,6 +1271,10 @@ export class ContextMenu {
                 } else {
                     console.error('❌ csoundGen not available!');
                 }
+                break;
+
+            case 'open-editor': // ← НОВЫЙ КЕЙС
+                this.openModuleEditor();
                 break;
 
             case 'about': 
@@ -1058,6 +1345,12 @@ export class ContextMenu {
         `;
         
         document.head.appendChild(style);
+    }
+
+    // Новый метод
+    openModuleEditor() {
+        // Открываем редактор в новой вкладке
+        window.open('/editor.html', '_blank');
     }
 
 
@@ -1141,6 +1434,20 @@ export class ContextMenu {
         document.addEventListener('keydown', onKeydown);
     }
 
-
+    // Обновление UI после добавления модуля
+    updateMenuUI() {
+        // Обновляем левую панель
+        const leftPanel = this.menuElement.querySelector('#left-panel');
+        if (leftPanel) {
+            this.createHierarchicalGroupList(leftPanel);
+        }
+        
+        // Обновляем правую панель (если есть активная группа)
+        const activeGroup = this.menuElement.querySelector('.group-item[style*="border-left-color"]');
+        if (activeGroup) {
+            const groupName = activeGroup.dataset.group;
+            this.showModulesForGroup(groupName);
+        }
+    }
 
 }

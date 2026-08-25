@@ -535,7 +535,7 @@ class ModularSystem {
       try {
         // Пробуем загрузить модуль-заглушку
         const modulePath = `./modules/${placeholderName}.js`;
-        const module = await import(modulePath);
+        const module = await import(/* @vite-ignore */ modulePath);
         const moduleKey = Object.keys(module)[0];
 
         if (moduleKey && module[moduleKey]) {
@@ -1162,8 +1162,6 @@ class ModularSystem {
       // Создаем временный div для парсинга
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = htmlText;
-
-      // Ищем все ссылки
       const links = tempDiv.querySelectorAll('a');
       let moduleCount = 0;
 
@@ -1181,7 +1179,8 @@ class ModularSystem {
 
             // Пробуем загрузить модуль для получения названия
             try {
-              const module = await import(`./modules/${filename}`);
+              const modulePath = `./modules/${filename}`;
+              const module = await import(/* @vite-ignore */ modulePath);
               const moduleKey = Object.keys(module)[0];
 
               if (moduleKey && module[moduleKey]) {
@@ -1274,7 +1273,7 @@ class ModularSystem {
           // Пробуем загрузить модуль, чтобы получить его displayName
           try {
             const modulePath = `./modules/${filename}`;
-            const module = await import(modulePath);
+            const module = await import(/* @vite-ignore */ modulePath);
 
             // Находим экспорт (обычно первый ключ)
             const moduleKey = Object.keys(module)[0];
@@ -1535,7 +1534,7 @@ class ModularSystem {
       if (!this.moduleFactory.moduleRegistry[moduleType]) {
         try {
           const modulePath = `./modules/${moduleType}.js`;
-          const module = await import(modulePath);
+          const module = await import(/* @vite-ignore */ modulePath);
           const moduleKey = Object.keys(module)[0];
           if (moduleKey && module[moduleKey]) {
             this.moduleFactory.registerModule(moduleType, module[moduleKey]);
