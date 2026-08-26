@@ -3,6 +3,7 @@
 import { EditorPanel } from './EditorPanel.js';
 import { EditorUIManager } from './EditorUIManager.js';
 import { ModulePropertiesWindow } from './ModulePropertiesWindow.js';
+import { CodeViewerWindow } from './CodeViewerWindow.js';
 
 import { Knob } from '../src/components/Knob.js';
 import { ButtonFlat } from '../src/components/ButtonFlat.js';
@@ -97,6 +98,7 @@ export class EditorApp {
         this.setupCanvas();
         this.uiManager = new EditorUIManager(this);
         this.propertiesWindow = new ModulePropertiesWindow(this);
+        this.codeViewerWindow = new CodeViewerWindow(this);
         this.createDefaultModule();
         this.animate();
         this.setupEvents();
@@ -202,7 +204,11 @@ export class EditorApp {
         this.dropTargetModule = null;
 
         this.components.push(component);
-        
+
+        if (this.codeViewerWindow && this.codeViewerWindow.isVisible) {
+            this.codeViewerWindow.updateCode();
+        }
+
         console.log(`🔄 Started dragging: ${type}`);
     }
 
@@ -642,6 +648,10 @@ export class EditorApp {
                 comp.parent = this.module;
                 comp._editorModule = this.module;
                 comp._isNewDragging = false;
+
+                if (this.codeViewerWindow && this.codeViewerWindow.isVisible) {
+                    this.codeViewerWindow.updateCode();
+                }
                 
                 console.log(`✅ Component placed at (${comp.relX}, ${comp.relY})`);
                 this.uiManager.showNotification(`✅ ${this.draggingNewComponentType} placed`);

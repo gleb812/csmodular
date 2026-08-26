@@ -95,8 +95,22 @@ export class ModulePropertiesWindow {
         this.windowElement.querySelector('#close-properties-btn').onclick = () => this.hide();
         
         this.windowElement.querySelector('#module-name-input').onchange = () => {
+            let name = this.windowElement.querySelector('#module-name-input').value;
+            
+            // Убираем пробелы
+            name = name.replace(/\s/g, '');
+            
+            // Если начинается с цифры - добавляем "M"
+            if (name.match(/^[0-9]/)) {
+                name = 'M' + name;
+            }
+            
+            // Оставляем только буквы, цифры и подчёркивание
+            name = name.replace(/[^a-zA-Z0-9_]/g, '');
+            
             if (this.app.module) {
-                this.app.module.title = this.windowElement.querySelector('#module-name-input').value;
+                this.app.module.title = name;
+                this.windowElement.querySelector('#module-name-input').value = name;
             }
         };
 

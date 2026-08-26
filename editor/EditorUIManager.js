@@ -42,6 +42,10 @@ export class EditorUIManager {
                     <button id="load-module-btn" style="padding: 2px 8px; background: #2a2a2a; border: 1px solid #f90; color: #f90; border-radius: 3px; cursor: pointer; font-size: 10px;">
                         📂 Load
                     </button>
+                    <!-- ⭐ Кнопка Code Viewer -->
+                    <button id="code-viewer-btn" style="padding: 2px 8px; background: #2a2a2a; border: 1px solid #0f0; color: #0f0; border-radius: 3px; cursor: pointer; font-size: 10px;">
+                        🎵 Code
+                    </button>  
                 </div>
             </div>
             
@@ -138,6 +142,11 @@ export class EditorUIManager {
             this.showLoadDialog();
         };
 
+        // ⭐ Обработчик кнопки Code Viewer
+        this.container.querySelector('#code-viewer-btn').onclick = () => {
+            this.app.codeViewerWindow.toggle();
+        };
+        
         // Zoom
         this.container.querySelector('#zoom-in-btn').onclick = () => this.app.zoomIn();
         this.container.querySelector('#zoom-out-btn').onclick = () => this.app.zoomOut();
