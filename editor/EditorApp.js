@@ -44,8 +44,10 @@ const COMPONENT_SIZES = {
     textEdit: { width: 50, height: 16, label: 'Edit' },
     levelShift: { width: 20, height: 16, label: 'Level' },
     led: { width: 16, height: 10, label: 'LED' },
-    input: { width: 14, height: 14, label: 'In' },
-    output: { width: 14, height: 14, label: 'Out' },
+    inputAudio: { width: 14, height: 14, label: 'In(A)' },
+    inputControl: { width: 14, height: 14, label: 'In(C)' },
+    outputAudio: { width: 14, height: 14, label: 'Out(A)' },
+    outputControl: { width: 14, height: 14, label: 'Out(C)' },
     partSelector: { width: 70, height: 16, label: 'Select' },
     svg: { width: 28, height: 28, label: 'SVG' },
     line: { width: 60, height: 2, label: 'Line' },
@@ -162,21 +164,28 @@ export class EditorApp {
     // ========== ДОБАВЛЕНИЕ КОМПОНЕНТОВ (НОВАЯ ВЕРСИЯ) ==========
 
 
-    startDraggingNewComponent(type) {
-        const size = COMPONENT_SIZES[type];
+// editor/EditorApp.js - обновлённый startDraggingNewComponent()
+
+    startDraggingNewComponent(type, jackType = null) {
+        // ⭐ Для джеков используем специальные ключи в размерах
+        let sizeKey = type;
+        if (type === 'input' || type === 'output') {
+            sizeKey = type + (jackType === 'audio' ? 'Audio' : 'Control');
+        }
+        
+        const size = COMPONENT_SIZES[sizeKey];
         if (!size) {
-            console.warn('Unknown component type:', type);
+            console.warn('Unknown component type:', type, jackType);
             return;
         }
-
-        // ⭐ Получаем позицию плавающей панели
+        
+        // Получаем позицию для спавна
         const panel = document.getElementById('editor-ui-panel');
         let spawnX = 100;
         let spawnY = 100;
         
         if (panel) {
             const rect = panel.getBoundingClientRect();
-            // Конвертируем экранные координаты в координаты canvas
             const canvasRect = this.canvas.getBoundingClientRect();
             const scaleX = this.width / canvasRect.width;
             const scaleY = this.height / canvasRect.height;
@@ -184,34 +193,34 @@ export class EditorApp {
             spawnX = (rect.left - canvasRect.left) * scaleX;
             spawnY = (rect.bottom - canvasRect.top) * scaleY + 10;
             
-            // Учитываем zoom и offset
             spawnX = (spawnX - this.offsetX) / this.zoom;
             spawnY = (spawnY - this.offsetY) / this.zoom;
         }
         
+        // ⭐ Передаём jackType в createComponentInstance
         const component = this.createComponentInstance(
             type, 
             spawnX - size.width/2, 
             spawnY - size.height/2, 
-            size
+            size,
+            jackType  // ← передаём тип джека
         );
         if (!component) return;
-
+        
         this.draggingNewComponent = component;
         this.draggingNewComponentType = type;
         this.isDraggingNewComponent = true;
         this.dropValid = false;
         this.dropTargetModule = null;
-
+        
         this.components.push(component);
-
+        
         if (this.codeViewerWindow && this.codeViewerWindow.isVisible) {
             this.codeViewerWindow.updateCode();
         }
-
-        console.log(`🔄 Started dragging: ${type}`);
+        
+        console.log(`🔄 Started dragging: ${type} (${jackType || 'default'})`);
     }
-
     // Получает позицию для спавна (рядом с модулем)
     getSpawnPosition(width, height) {
         if (!this.module) {
@@ -233,7 +242,7 @@ export class EditorApp {
     }
 
     // Создаёт экземпляр компонента по типу
-    createComponentInstance(type, x, y, size) {
+    createComponentInstance(type, x, y, size, jackType = null) {
         let component = null;
         
         switch(type) {
@@ -272,10 +281,30 @@ export class EditorApp {
                 component = new LED(x, y, size.width, size.height);
                 break;
             case 'input':
-                component = new Input(x, y, { jackType: 'audio', label: 'In' });
+                // ⭐ Проверяем тип джека
+                const inputJackType = jackType || 'audio';
+                const inputColor = inputJackType === 'audio' ? '#ff4444' : '#4488ff';
+                component = new Input(x, y, { 
+                    jackType: inputJackType, 
+                    label: inputJackType === 'audio' ? 'In' : 'In(C)',
+                    color: inputColor,
+                    type: inputJackType
+                });
+                component._jackType = inputJackType;
+                component._isAudioJack = inputJackType === 'audio';
                 break;
+                
             case 'output':
-                component = new Output(x, y, { jackType: 'audio', label: 'Out' });
+                const outputJackType = jackType || 'audio';
+                const outputColor = outputJackType === 'audio' ? '#ff4444' : '#4488ff';
+                component = new Output(x, y, { 
+                    jackType: outputJackType, 
+                    label: outputJackType === 'audio' ? 'Out' : 'Out(C)',
+                    color: outputColor,
+                    type: outputJackType
+                });
+                component._jackType = outputJackType;
+                component._isAudioJack = outputJackType === 'audio';
                 break;
             case 'partSelector':
                 component = new PartSelector(x, y, size.width, size.height, 5, 0, 

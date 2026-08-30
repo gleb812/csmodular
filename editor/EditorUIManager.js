@@ -95,9 +95,11 @@ export class EditorUIManager {
             </div>
             
             <div style="font-size: 10px; color: #555; margin-bottom: 4px;">Jacks</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px; margin-bottom: 8px;">
-                <button data-type="input" style="padding: 4px; background: #2a2a2a; border: 1px solid #4a9eff; color: #4a9eff; border-radius: 3px; cursor: pointer; font-size: 9px;">Input</button>
-                <button data-type="output" style="padding: 4px; background: #2a2a2a; border: 1px solid #ff6b6b; color: #ff6b6b; border-radius: 3px; cursor: pointer; font-size: 9px;">Output</button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 3px; margin-bottom: 8px;">
+                <button data-type="input" data-jack-type="audio" style="padding: 3px 2px; background: #2a2a2a; border: 1px solid #ff4444; color: #ff4444; border-radius: 3px; cursor: pointer; font-size: 8px;">In 🔴</button>
+                <button data-type="input" data-jack-type="control" style="padding: 3px 2px; background: #2a2a2a; border: 1px solid #4488ff; color: #4488ff; border-radius: 3px; cursor: pointer; font-size: 8px;">In 🔵</button>
+                <button data-type="output" data-jack-type="audio" style="padding: 3px 2px; background: #2a2a2a; border: 1px solid #ff4444; color: #ff4444; border-radius: 3px; cursor: pointer; font-size: 8px;">Out 🔴</button>
+                <button data-type="output" data-jack-type="control" style="padding: 3px 2px; background: #2a2a2a; border: 1px solid #4488ff; color: #4488ff; border-radius: 3px; cursor: pointer; font-size: 8px;">Out 🔵</button>
             </div>
             
             <div style="font-size: 10px; color: #555; margin-bottom: 4px;">Graphics</div>
@@ -126,8 +128,13 @@ export class EditorUIManager {
         buttons.forEach(btn => {
             btn.onclick = () => {
                 const type = btn.dataset.type;
-                this.app.startDraggingNewComponent(type);
-                this.showNotification(`🔄 Drag ${btn.textContent} into module`);
+                const jackType = btn.dataset.jackType || null;  // ← получаем тип джека
+                
+                // ⭐ Для джеков передаём jackType
+                this.app.startDraggingNewComponent(type, jackType);
+                
+                const label = btn.textContent.trim();
+                this.showNotification(`🔄 Drag ${label} into module`);
             };
         });
         
