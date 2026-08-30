@@ -9,11 +9,20 @@ export class ContextMenu {
         this.searchInput = null;
         this.moduleGroups = null;
         this.lastOpenMouseY = null;
+        this._isLoaded = false;
         
+        window.contextMenu = this;
+
         this.initModuleStructure();
         this.createMenuElement();
         this.setupEventListeners();
         this.injectStyles();
+
+        this.loadUserModules().then(() => {
+            this._isLoaded = true;
+            this.updateUserGroupsInLeftPanel();
+            console.log('✅ ContextMenu fully loaded');
+        });
     }
 
     // Новая структура: два уровня - NM2 и User
@@ -416,6 +425,33 @@ export class ContextMenu {
             
             modulesContainer.appendChild(moduleItem);
         });
+    }
+
+
+// src/ui/ContextMenu.js - добавь метод fetchModuleData
+
+    // Вспомогательный метод для загрузки данных модуля
+    async fetchModuleData(moduleName) {
+        try {
+            const response = await fetch(`/api/load-module/${moduleName}`);
+            if (!response.ok) return null;
+            
+            const data = await response.json();
+            const code = data.code || '';
+            
+            // Парсим displayName из кода
+            const displayNameMatch = code.match(/displayName:\s*['"]([^'"]+)['"]/);
+            const gridHeightMatch = code.match(/gridHeight:\s*(\d+)/);
+            
+            return {
+                displayName: displayNameMatch ? displayNameMatch[1] : moduleName,
+                gridHeight: gridHeightMatch ? parseInt(gridHeightMatch[1]) : 2,
+                code: code
+            };
+        } catch (error) {
+            console.warn(`Failed to fetch module data for ${moduleName}:`, error);
+            return null;
+        }
     }
 
     updateMenuPosition(mouseX = null, mouseY = null) {
@@ -1065,6 +1101,187 @@ export class ContextMenu {
         }
     }
     
+    updateUserGroupsInLeftPanel() {
+        const leftPanel = this.menuElement.querySelector('#left-panel');
+        if (!leftPanel) {
+            console.warn('⚠️ Left panel not found');
+            return;
+        }
+
+        let userCont = leftPanel.querySelector('.user-groups');
+        
+        if (!userCont) {
+            const divider = leftPanel.querySelector('div[style*="height: 1px;"]');
+            userCont = document.createElement('div');
+            userCont.className = 'level-groups user-groups';
+            userCont.style.cssText = 'padding-left: 8px; display: block;';
+            if (divider) {
+                divider.parentNode.insertBefore(userCont, divider.nextSibling);
+            } else {
+                leftPanel.appendChild(userCont);
+            }
+        }
+        
+        userCont.innerHTML = '';
+        
+        // Берём модули
+        const modules = this.userModules?.['My Modules'] || [];
+        const realModules = modules.filter(m => 
+            m !== '(No user modules)' && 
+            m !== '(Error loading)' && 
+            m !== 'Loading...'
+        );
+        
+        if (realModules.length === 0) {
+            const emptyItem = document.createElement('div');
+            emptyItem.className = 'group-item';
+            emptyItem.dataset.group = 'My Modules';
+            emptyItem.dataset.level = 'user';
+            emptyItem.style.cssText = `
+                padding: 4px 12px;
+                font-size: 11px;
+                color: #555;
+                cursor: default;
+                user-select: none;
+                border-left: 2px solid transparent;
+                margin: 1px 0;
+                border-radius: 0 3px 3px 0;
+                font-style: italic;
+            `;
+            emptyItem.textContent = '👤 No user modules available';
+            userCont.appendChild(emptyItem);
+            return;
+        }
+        
+        // Заголовок
+        const groupHeader = document.createElement('div');
+        groupHeader.className = 'group-item';
+        groupHeader.dataset.group = 'My Modules';
+        groupHeader.dataset.level = 'user';
+        groupHeader.style.cssText = `
+            padding: 4px 12px;
+            font-size: 11px;
+            color: #0af;
+            cursor: pointer;
+            user-select: none;
+            border-left: 2px solid #0af;
+            margin: 1px 0;
+            border-radius: 0 3px 3px 0;
+            background: #2a2a2a;
+        `;
+        groupHeader.textContent = `👤 My Modules (${realModules.length})`;
+        userCont.appendChild(groupHeader);
+        
+        // Модули
+        const menu = this;
+        realModules.forEach(moduleName => {
+            const moduleItem = document.createElement('div');
+            moduleItem.className = 'module-item';
+            moduleItem.style.cssText = `
+                padding: 3px 12px 3px 24px;
+                font-size: 10px;
+                color: #aaa;
+                cursor: pointer;
+                user-select: none;
+                border-left: 2px solid transparent;
+                margin: 0;
+                border-radius: 0;
+            `;
+            moduleItem.textContent = '📦 ' + moduleName;
+            
+            moduleItem.onmouseenter = () => {
+                moduleItem.style.background = '#2a2a2a';
+                moduleItem.style.color = '#fff';
+            };
+            moduleItem.onmouseleave = () => {
+                moduleItem.style.background = 'transparent';
+                moduleItem.style.color = '#aaa';
+            };
+            moduleItem.onclick = (e) => {
+                e.stopPropagation();
+                menu.handleModuleSelect(moduleName);
+            };
+            userCont.appendChild(moduleItem);
+        });
+        
+        // Открываем User
+        userCont.style.display = 'block';
+        const userHeader = leftPanel.querySelector('.level-header[data-level="user"]');
+        if (userHeader) {
+            const arrow = userHeader.querySelector('.level-arrow');
+            if (arrow) arrow.textContent = '▼';
+        }
+        
+        console.log(`✅ User groups updated with ${realModules.length} modules`);
+    }
+
+    // src/ui/ContextMenu.js - обновлённый loadUserModules()
+
+// src/ui/ContextMenu.js - проверь конец loadUserModules()
+
+    async loadUserModules() {
+        try {
+            console.log('📂 Loading user modules...');
+            
+            const response = await fetch('/api/list-user-modules');
+            if (!response.ok) {
+                console.warn('Failed to load user modules:', response.status);
+                return;
+            }
+            
+            const data = await response.json();
+            const modules = data.modules || [];
+            
+            console.log(`📦 Found ${modules.length} user modules:`, modules);
+            
+            // Очищаем существующие пользовательские модули
+            this.userModules = {
+                'My Modules': []
+            };
+            
+            if (modules.length === 0) {
+                this.userModules['My Modules'] = ['(No user modules)'];
+                // ⭐ ОБНОВЛЯЕМ UI
+                this.updateUserGroupsInLeftPanel();
+                return;
+            }
+            
+            // Добавляем каждый модуль
+            for (const moduleName of modules) {
+                // Просто добавляем по имени (без fetchModuleData)
+                this.userModules['My Modules'].push(moduleName);
+                if (!this._userModuleMap) {
+                    this._userModuleMap = {};
+                }
+                this._userModuleMap[moduleName] = moduleName;
+                console.log(`✅ Added user module: ${moduleName}`);
+            }
+            
+            // Обновляем allModules
+            Object.entries(this.userModules).forEach(([group, mods]) => {
+                mods.forEach(module => {
+                    this.allModules[module] = group;
+                });
+            });
+            
+            // ⭐⭐⭐ ВАЖНО: ОБНОВЛЯЕМ UI ПОСЛЕ ЗАГРУЗКИ ⭐⭐⭐
+            this.updateUserGroupsInLeftPanel();
+            this.updateMenuUI();
+            
+            console.log('✅ User modules loaded:', this.userModules);
+            console.log('✅ User module map:', this._userModuleMap);
+            
+        } catch (error) {
+            console.error('❌ Error loading user modules:', error);
+            this.userModules = {
+                'My Modules': ['(Error loading)']
+            };
+            this.updateUserGroupsInLeftPanel();
+            this.updateMenuUI();
+        }
+    }
+
+
     show(mouseX = null, mouseY = null) {
         if (this.isVisible) return;
 

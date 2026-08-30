@@ -6,34 +6,40 @@ import tempfile
 import json
 import shutil
 import sys
+import re
 
 print(f"DEBUG: Python executable: {sys.executable}")
 print(f"DEBUG: CWD: {os.getcwd()}")
 
-
 app = Flask(__name__)
-CORS(app)  # Разрешаем запросы от Vite
+CORS(app)
 
-# Настройки
-venv_bin = os.path.dirname(sys.executable)  # /path/to/venv/bin
-PCH2CSD_PATH = os.path.join(venv_bin, "pch2csd")
+# ⭐ ПУТИ ДЛЯ ТВОЕЙ СТРУКТУРЫ
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))  # backend/
+ROOT_DIR = os.path.dirname(PROJECT_ROOT)  # корень проекта
 
-print(f"DEBUG: Looking for pch2csd at: {PCH2CSD_PATH}")
-if not os.path.exists(PCH2CSD_PATH):
-    print(f"DEBUG: pch2csd not found at {PCH2CSD_PATH}, using fallback")
-    PCH2CSD_PATH = "pch2csd"  # fallback
+# Путь к модулям в корне проекта
+MODULES_DIR = os.path.join(ROOT_DIR, 'modules')
 
-# ⭐ Путь к пользовательским модулям
-USER_MODULES_DIR = os.path.join(os.path.dirname(__file__), '..', 'user_modules', 'js')
-USER_MODULES_DSP_DIR = os.path.join(os.path.dirname(__file__), '..', 'user_modules', 'dsp')
+# Путь к пользовательским модулям
+USER_MODULES_DIR = os.path.join(ROOT_DIR, 'user_modules', 'js')
+USER_MODULES_DSP_DIR = os.path.join(ROOT_DIR, 'user_modules', 'dsp')
 
 # Создаём папки если их нет
 os.makedirs(USER_MODULES_DIR, exist_ok=True)
 os.makedirs(USER_MODULES_DSP_DIR, exist_ok=True)
+os.makedirs(MODULES_DIR, exist_ok=True)
 
-print(f"User modules JS: {USER_MODULES_DIR}")
-print(f"User modules DSP: {USER_MODULES_DSP_DIR}")
+print(f"📁 Root dir: {ROOT_DIR}")
+print(f"📁 Modules dir: {MODULES_DIR}")
+print(f"📁 User modules JS: {USER_MODULES_DIR}")
+print(f"📁 User modules DSP: {USER_MODULES_DSP_DIR}")
 
+# Настройки pch2csd
+venv_bin = os.path.dirname(sys.executable)
+PCH2CSD_PATH = os.path.join(venv_bin, "pch2csd")
+if not os.path.exists(PCH2CSD_PATH):
+    PCH2CSD_PATH = "pch2csd"
 
 @app.route('/api/health', methods=['GET'])
 def health():
@@ -41,24 +47,19 @@ def health():
 
 @app.route('/api/convert-patch', methods=['POST'])
 def convert_patch():
-    """Конвертирует .pch2 в JSON"""
     if 'file' not in request.files:
         return jsonify({"error": "No file provided"}), 400
     
     file = request.files['file']
-    
     if not file.filename.lower().endswith('.pch2'):
         return jsonify({"error": "Only .pch2 files supported"}), 400
     
     try:
-        # Создаем временную директорию
         temp_dir = tempfile.mkdtemp()
         input_path = os.path.join(temp_dir, file.filename)
         file.save(input_path)
         
-        # Запускаем pch2csd
         cmd = [sys.executable, '-m', 'pch2csd', '-j', input_path]
-        print(f"DEBUG: Command: {' '.join(cmd)}")
         result = subprocess.run(
             cmd,
             capture_output=True,
@@ -73,18 +74,15 @@ def convert_patch():
                 "details": result.stderr[:500]
             }), 500
         
-        # Ищем JSON результат
         json_files = [f for f in os.listdir(temp_dir) if f.endswith('.json')]
         
         if json_files:
             json_path = os.path.join(temp_dir, json_files[0])
             with open(json_path, 'r', encoding='utf-8') as f:
                 json_data = json.load(f)
-            
             shutil.rmtree(temp_dir, ignore_errors=True)
             return jsonify({"success": True, "data": json_data})
         
-        # Если JSON в stdout
         if result.stdout.strip().startswith('{'):
             try:
                 json_data = json.loads(result.stdout)
@@ -97,11 +95,9 @@ def convert_patch():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-# НОВЫЙ ЭНДПОИНТ - сохраняет пользовательский модуль
 @app.route('/api/save-module', methods=['POST'])
 def save_module():
-    """Сохраняет пользовательский модуль в папку user_modules/js/"""
+    """Сохраняет пользовательский модуль и копирует в modules/ для доступа"""
     try:
         data = request.get_json()
         name = data.get('name')
@@ -110,34 +106,36 @@ def save_module():
         if not name or not code:
             return jsonify({'error': 'Missing name or code'}), 400
         
-        # Проверяем имя на допустимые символы
-        import re
         if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', name):
-            return jsonify({'error': 'Invalid module name. Use letters, numbers, underscore only.'}), 400
+            return jsonify({'error': 'Invalid module name'}), 400
         
-        # Сохраняем файл
         filename = f"{name}.js"
-        filepath = os.path.join(USER_MODULES_DIR, filename)
         
-        with open(filepath, 'w', encoding='utf-8') as f:
+        # Сохраняем в user_modules/js/
+        user_path = os.path.join(USER_MODULES_DIR, filename)
+        os.makedirs(USER_MODULES_DIR, exist_ok=True)
+        with open(user_path, 'w', encoding='utf-8') as f:
             f.write(code)
+        print(f"✅ Saved to user_modules: {user_path}")
         
-        print(f"Module saved: {filepath}")
+        # КОПИРУЕМ В modules/ (для доступа из браузера)
+        os.makedirs(MODULES_DIR, exist_ok=True)
+        modules_path = os.path.join(MODULES_DIR, filename)
+        with open(modules_path, 'w', encoding='utf-8') as f:
+            f.write(code)
+        print(f"✅ Copied to modules: {modules_path}")
+        
         return jsonify({
-            'success': True, 
-            'path': filepath,
+            'success': True,
             'message': f'Module "{name}" saved successfully'
         })
         
     except Exception as e:
-        print(f"Error saving module: {e}")
+        print(f"❌ Error saving module: {e}")
         return jsonify({'error': str(e)}), 500
 
-
-# НОВЫЙ ЭНДПОИНТ - список пользовательских модулей
 @app.route('/api/list-user-modules', methods=['GET'])
 def list_user_modules():
-    """Возвращает список пользовательских модулей"""
     try:
         if not os.path.exists(USER_MODULES_DIR):
             return jsonify({'modules': []})
@@ -145,8 +143,7 @@ def list_user_modules():
         modules = []
         for file in os.listdir(USER_MODULES_DIR):
             if file.endswith('.js'):
-                module_name = file.replace('.js', '')
-                modules.append(module_name)
+                modules.append(file.replace('.js', ''))
         
         modules.sort()
         return jsonify({'modules': modules})
@@ -154,11 +151,8 @@ def list_user_modules():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-# НОВЫЙ ЭНДПОИНТ - удаляет пользовательский модуль
 @app.route('/api/delete-module', methods=['POST'])
 def delete_module():
-    """Удаляет пользовательский модуль"""
     try:
         data = request.get_json()
         name = data.get('name')
@@ -166,58 +160,25 @@ def delete_module():
         if not name:
             return jsonify({'error': 'Missing module name'}), 400
         
-        # Удаляем JS файл
-        js_path = os.path.join(USER_MODULES_DIR, f"{name}.js")
-        if os.path.exists(js_path):
-            os.remove(js_path)
-            print(f"Deleted JS: {js_path}")
+        # Удаляем из user_modules/js/
+        user_path = os.path.join(USER_MODULES_DIR, f"{name}.js")
+        if os.path.exists(user_path):
+            os.remove(user_path)
+            print(f"🗑️ Deleted from user_modules: {user_path}")
         
-        # Удаляем DSP файл если есть
-        dsp_path = os.path.join(USER_MODULES_DSP_DIR, f"{name}.csd")
-        if os.path.exists(dsp_path):
-            os.remove(dsp_path)
-            print(f"Deleted DSP: {dsp_path}")
+        # Удаляем из modules/
+        modules_path = os.path.join(MODULES_DIR, f"{name}.js")
+        if os.path.exists(modules_path):
+            os.remove(modules_path)
+            print(f"🗑️ Deleted from modules: {modules_path}")
         
         return jsonify({'success': True, 'message': f'Module "{name}" deleted'})
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-# НОВЫЙ ЭНДПОИНТ - сохраняет DSP код для модуля
-@app.route('/api/save-module-dsp', methods=['POST'])
-def save_module_dsp():
-    """Сохраняет DSP код для пользовательского модуля в user_modules/dsp/"""
-    try:
-        data = request.get_json()
-        name = data.get('name')
-        code = data.get('code')
-        
-        if not name or not code:
-            return jsonify({'error': 'Missing name or code'}), 400
-        
-        filename = f"{name}.csd"
-        filepath = os.path.join(USER_MODULES_DSP_DIR, filename)
-        
-        with open(filepath, 'w', encoding='utf-8') as f:
-            f.write(code)
-        
-        print(f"DSP saved: {filepath}")
-        return jsonify({
-            'success': True, 
-            'path': filepath,
-            'message': f'DSP for "{name}" saved successfully'
-        })
-        
-    except Exception as e:
-        print(f"Error saving DSP: {e}")
-        return jsonify({'error': str(e)}), 500
-
-
-# НОВЫЙ ЭНДПОИНТ - загружает модуль для редактирования
 @app.route('/api/load-module/<name>', methods=['GET'])
 def load_module(name):
-    """Загружает пользовательский модуль для редактирования"""
     try:
         js_path = os.path.join(USER_MODULES_DIR, f"{name}.js")
         
@@ -236,9 +197,68 @@ def load_module(name):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/save-module-dsp', methods=['POST'])
+def save_module_dsp():
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        code = data.get('code')
+        
+        if not name or not code:
+            return jsonify({'error': 'Missing name or code'}), 400
+        
+        filename = f"{name}.csd"
+        filepath = os.path.join(USER_MODULES_DSP_DIR, filename)
+        os.makedirs(USER_MODULES_DSP_DIR, exist_ok=True)
+        
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(code)
+        
+        print(f"✅ DSP saved: {filepath}")
+        return jsonify({
+            'success': True,
+            'message': f'DSP for "{name}" saved successfully'
+        })
+        
+    except Exception as e:
+        print(f"❌ Error saving DSP: {e}")
+        return jsonify({'error': str(e)}), 500
+
+def sync_user_modules_to_modules():
+    """Копирует все пользовательские модули в modules/ при старте"""
+    try:
+        if not os.path.exists(USER_MODULES_DIR):
+            print("📭 No user_modules/js/ folder found")
+            return
+        
+        os.makedirs(MODULES_DIR, exist_ok=True)
+        
+        copied = 0
+        for file in os.listdir(USER_MODULES_DIR):
+            if file.endswith('.js'):
+                src = os.path.join(USER_MODULES_DIR, file)
+                dst = os.path.join(MODULES_DIR, file)
+                
+                if not os.path.exists(dst) or os.path.getmtime(src) > os.path.getmtime(dst):
+                    import shutil
+                    shutil.copy2(src, dst)
+                    copied += 1
+        
+        if copied > 0:
+            print(f"✅ Synced {copied} user modules to modules/")
+        else:
+            print("✅ All user modules already synced")
+    except Exception as e:
+        print(f"⚠️ Error syncing modules: {e}")
+
+# Синхронизируем при старте
+sync_user_modules_to_modules()
 
 if __name__ == '__main__':
     print("=== Flask PCH2 Converter & Module Manager ===")
+    print(f"📁 Root dir: {ROOT_DIR}")
+    print(f"📁 Modules dir: {MODULES_DIR}")
+    print(f"📁 User modules dir: {USER_MODULES_DIR}")
     print("URL: http://localhost:5050")
     print("API:")
     print("  POST /api/convert-patch     - Convert .pch2 to JSON")
