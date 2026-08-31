@@ -44,6 +44,12 @@ export class PatchManager {
     if (this.system) {
       this.system._cablesDirty = true;
     }
+
+    if (this.system && this.system.csoundGen) {
+        this.system.csoundGen.addCable(cable);
+        this.system.csoundGen.showFullCsd();
+    }
+
     return cable;
   }
 
@@ -227,11 +233,15 @@ export class PatchManager {
           
           if (this.system) {
               this.system._cablesDirty = true;
-              // ⬇️⬇️⬇️ ДОБАВЬ ЭТО ⬇️⬇️⬇️
-              // Форсируем полную перерисовку после удаления кабеля
               if (this.system.forceRedraw) {
                   this.system.forceRedraw();
               }
+          }
+          
+          // ⭐ Удаляем кабель из CsoundGenerator
+          if (this.system && this.system.csoundGen) {
+              this.system.csoundGen.removeCable(cable);
+              this.system.csoundGen.showFullCsd();
           }
       }
   }
@@ -248,10 +258,15 @@ export class PatchManager {
       
       if (this.system) {
           this.system._cablesDirty = true;
-          // ⬇️⬇️⬇️ ДОБАВЬ ЭТО ⬇️⬇️⬇️
           if (this.system.forceRedraw) {
               this.system.forceRedraw();
           }
+      }
+      
+      // ⭐ Очищаем кабели в CsoundGenerator
+      if (this.system && this.system.csoundGen) {
+          this.system.csoundGen.clearCables();
+          this.system.csoundGen.showFullCsd();
       }
   }
 
