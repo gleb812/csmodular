@@ -95,6 +95,44 @@ export class ModuleFactory {
         }
     }
 
+    // src/ModuleFactory.js - добавь метод для загрузки пользовательских модулей
+
+    // В конец класса ModuleFactory добавь:
+
+    async loadUserModule(moduleName) {
+        try {
+            console.log(`📂 Loading user module: ${moduleName}`);
+            
+            // Пробуем загрузить из modules/user/
+            const modulePath = `../modules/user/${moduleName}.js`;
+            const module = await import(/* @vite-ignore */ modulePath);
+            const moduleKey = Object.keys(module)[0];
+            
+            if (moduleKey && module[moduleKey]) {
+                this.registerModule(moduleName, module[moduleKey]);
+                console.log(`✅ User module registered: ${moduleName}`);
+                return true;
+            }
+            
+            console.warn(`❌ No export found in user module: ${moduleName}`);
+            return false;
+        } catch (error) {
+            console.warn(`Failed to load user module ${moduleName}:`, error);
+            return false;
+        }
+    }
+
+    // Проверка, является ли модуль пользовательским
+    isUserModule(moduleName) {
+        // Проверяем через ContextMenu
+        if (window.contextMenu && window.contextMenu._userModuleMap) {
+            return !!window.contextMenu._userModuleMap[moduleName];
+        }
+        // Проверяем по наличию в папке user
+        return false;
+    }
+
+
     // Регистрация нового типа модуля
     registerModule(type, definition) {
         this.moduleRegistry[type] = definition;

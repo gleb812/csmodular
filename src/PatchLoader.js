@@ -180,41 +180,41 @@ export class PatchLoader {
         }
     }
 
+// src/PatchLoader.js - обновлённый loadModuleFile()
+
     async loadModuleFile(moduleName) {
-        
         try {
-            const modulePath = `../modules/${moduleName}.js`;            
+            // ⭐ Сначала пробуем загрузить из modules/user/ (пользовательский)
+            try {
+                const userPath = `../modules/user/${moduleName}.js`;
+                console.log(`   Trying user path: ${userPath}`);
+                const module = await import(/* @vite-ignore */ userPath);
+                const moduleKey = Object.keys(module)[0];
+                if (moduleKey && module[moduleKey]) {
+                    this.moduleFactory.registerModule(moduleName, module[moduleKey]);
+                    console.log(`✅ User module ${moduleName} registered from modules/user/`);
+                    return true;
+                }
+            } catch (userError) {
+                // Не нашли в user — пробуем встроенный
+                console.log(`   Not in user/, trying built-in...`);
+            }
+            
+            // ⭐ Пробуем загрузить из modules/ (встроенный)
+            const modulePath = `../modules/${moduleName}.js`;
+            console.log(`   Trying built-in path: ${modulePath}`);
             const module = await import(/* @vite-ignore */ modulePath);
             const moduleKey = Object.keys(module)[0];
 
             if (moduleKey && module[moduleKey]) {
                 this.moduleFactory.registerModule(moduleName, module[moduleKey]);
+                console.log(`✅ Built-in module ${moduleName} registered`);
                 return true;
             }
+            
             throw new Error('Module not found in file');
         } catch (error) {
             console.error(`❌ Failed to load module ${moduleName}:`, error);
-            console.error(`   Error details: ${error.message}`);
-            console.error(`   Stack: ${error.stack}`);
-            
-            // Попробуем альтернативный путь
-            console.log(`   Trying alternative path...`);
-            try {
-                const modulePath = `./modules/${moduleName}.js`;
-                console.log(`   Alternative path: ${modulePath}`);
-                
-                const module = await import(/* @vite-ignore */ modulePath);
-                const moduleKey = Object.keys(module)[0];
-                
-                if (moduleKey && module[moduleKey]) {
-                    this.moduleFactory.registerModule(moduleName, module[moduleKey]);
-                    console.log(`✅ Module ${moduleName} registered via alternative path`);
-                    return true;
-                }
-            } catch (altError) {
-                console.error(`   Alternative path also failed: ${altError.message}`);
-            }
-            
             throw error;
         }
     }

@@ -1519,119 +1519,135 @@ class ModularSystem {
   })();
 
   async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
-    console.log(
-      `=== ADD NEW MODULE AT POSITION: ${moduleType} to ${layerName} at (${gridX}, ${gridY}) ===`,
-    );
-
-    try {
-      // Проверяем слой
-      if (!layerName || !this.layerManager.layers[layerName]) {
-        console.error(`Ошибка: неверный слой ${layerName}`);
-        return;
-      }
-
-      // Загружаем модуль если нужно
-      if (!this.moduleFactory.moduleRegistry[moduleType]) {
-        try {
-          const modulePath = `./modules/${moduleType}.js`;
-          const module = await import(/* @vite-ignore */ modulePath);
-          const moduleKey = Object.keys(module)[0];
-          if (moduleKey && module[moduleKey]) {
-            this.moduleFactory.registerModule(moduleType, module[moduleKey]);
-          }
-        } catch (error) {
-          console.error(`❌ Ошибка загрузки модуля ${moduleType}:`, error);
-          this.showNotification(`Ошибка: модуль ${moduleType} не найден`);
-          return;
-        }
-      }
-
-      // Получаем определение модуля
-      const moduleDef = this.moduleFactory.moduleRegistry[moduleType];
-      if (!moduleDef) {
-        console.error(`Definition not found for ${moduleType}`);
-        return;
-      }
-
-      // Проверяем, свободно ли место
-      const gridWidth = 1;
-      const gridHeight = moduleDef.gridHeight || 2;
-
-      if (
-        !this.isGridCellFree(layerName, gridX, gridY, gridWidth, gridHeight)
-      ) {
-        console.log(
-          `❌ Position (${gridX}, ${gridY}) is occupied, searching nearby...`,
-        );
-        const freeSpace = this.findFreeSpace(
-          layerName,
-          gridWidth,
-          gridHeight,
-          gridX,
-          gridY,
-        );
-        if (!freeSpace) {
-          this.showNotification(
-            `❌ Нет места в слое ${layerName === 'voice' ? 'VA' : 'FX'}`,
-          );
-          return;
-        }
-        gridX = freeSpace.gridX;
-        gridY = freeSpace.gridY;
-        console.log(`✅ Found alternative position: (${gridX}, ${gridY})`);
-      }
-
-      // Создаем модуль
-      const newModule = this.moduleFactory.createModule(
-        moduleType,
-        gridX,
-        gridY,
-        layerName,
+      console.log(
+        `=== ADD NEW MODULE AT POSITION: ${moduleType} to ${layerName} at (${gridX}, ${gridY}) ===`,
       );
 
-      if (newModule) {
-        newModule.layer = layerName;
-        newModule.parentSystem = this;
-        newModule.jsonId = this.generateJsonId(newModule);
-        newModule.jsonName = moduleType;
-
-        this.csoundGen.addModule({
-          typeId: moduleType, // "7"
-          instanceId: newModule.jsonId, // уникальный id
-          instanceName: newModule.title, // "OscB1"
-          layer: layerName, // 'voice' или 'fx'
-          parameters: [], // пока так
-          mode: [],
-          defaultParams: moduleDef.defaultParams || [0],
-          defaultMode: moduleDef.mode || [],
-          inlets: moduleDef.inputs || 1, // из определения
-          outlets: moduleDef.outputs || 1, // из определения
-        });
-        newModule.typeID = moduleType;
-
-        // Добавляем в слой
-        this.layerManager.addModuleToLayer(newModule, layerName);
-        this.components.push(newModule);
-
-        if (this.patchLoader && this.patchLoader.moduleMap) {
-          this.patchLoader.moduleMap.byId[newModule.jsonId] = newModule;
-          this.patchLoader.moduleMap.byLayer[layerName].push(newModule);
+      try {
+        // Проверяем слой
+        if (!layerName || !this.layerManager.layers[layerName]) {
+          console.error(`Ошибка: неверный слой ${layerName}`);
+          return;
         }
 
-        this.sortComponentsByZIndex();
-        this.showNotification(
-          `✅ ${moduleDef.displayName || moduleType} добавлен в (${gridX}, ${gridY})`,
+        // ⭐⭐⭐ ЗАГРУЖАЕМ МОДУЛЬ ЕСЛИ НУЖНО (НОВАЯ ЛОГИКА) ⭐⭐⭐
+        if (!this.moduleFactory.moduleRegistry[moduleType]) {
+          console.log(`📂 Module ${moduleType} not in registry, trying to load...`);
+          
+          let loaded = false;
+          
+          // ⭐ Проверяем, является ли модуль пользовательским
+          const isUser = this.moduleFactory.isUserModule(moduleType);
+          
+          if (isUser) {
+            // Загружаем из modules/user/
+            loaded = await this.moduleFactory.loadUserModule(moduleType);
+          } else {
+            // Загружаем из modules/ (встроенные)
+            try {
+              const modulePath = `./modules/${moduleType}.js`;
+              const module = await import(/* @vite-ignore */ modulePath);
+              const moduleKey = Object.keys(module)[0];
+              if (moduleKey && module[moduleKey]) {
+                this.moduleFactory.registerModule(moduleType, module[moduleKey]);
+                loaded = true;
+              }
+            } catch (error) {
+              console.warn(`Failed to load module ${moduleType}:`, error);
+            }
+          }
+          
+          if (!loaded) {
+            this.showNotification(`❌ Модуль ${moduleType} не найден`);
+            return;
+          }
+        }
+
+        // Получаем определение модуля
+        const moduleDef = this.moduleFactory.moduleRegistry[moduleType];
+        if (!moduleDef) {
+          console.error(`Definition not found for ${moduleType}`);
+          return;
+        }
+
+        // Проверяем, свободно ли место
+        const gridWidth = 1;
+        const gridHeight = moduleDef.gridHeight || 2;
+
+        if (
+          !this.isGridCellFree(layerName, gridX, gridY, gridWidth, gridHeight)
+        ) {
+          console.log(
+            `❌ Position (${gridX}, ${gridY}) is occupied, searching nearby...`,
+          );
+          const freeSpace = this.findFreeSpace(
+            layerName,
+            gridWidth,
+            gridHeight,
+            gridX,
+            gridY,
+          );
+          if (!freeSpace) {
+            this.showNotification(
+              `❌ Нет места в слое ${layerName === 'voice' ? 'VA' : 'FX'}`,
+            );
+            return;
+          }
+          gridX = freeSpace.gridX;
+          gridY = freeSpace.gridY;
+          console.log(`✅ Found alternative position: (${gridX}, ${gridY})`);
+        }
+
+        // Создаем модуль
+        const newModule = this.moduleFactory.createModule(
+          moduleType,
+          gridX,
+          gridY,
+          layerName,
         );
-        // Устанавливаем dirty-флаги для перерисовки
-        if (layerName === 'voice') this._voiceDirty = true;
-        else this._fxDirty = true;
-        this._cablesDirty = true; // может понадобиться, если модуль имеет выходы/входы
-        console.log(`✅ МОДУЛЬ УСПЕШНО ДОБАВЛЕН В (${gridX}, ${gridY})!`);
+
+        if (newModule) {
+          newModule.layer = layerName;
+          newModule.parentSystem = this;
+          newModule.jsonId = this.generateJsonId(newModule);
+          newModule.jsonName = moduleType;
+
+          this.csoundGen.addModule({
+            typeId: moduleType,
+            instanceId: newModule.jsonId,
+            instanceName: newModule.title,
+            layer: layerName,
+            parameters: [],
+            mode: [],
+            defaultParams: moduleDef.defaultParams || [0],
+            defaultMode: moduleDef.mode || [],
+            inlets: moduleDef.inputs || 1,
+            outlets: moduleDef.outputs || 1,
+          });
+          newModule.typeID = moduleType;
+
+          // Добавляем в слой
+          this.layerManager.addModuleToLayer(newModule, layerName);
+          this.components.push(newModule);
+
+          if (this.patchLoader && this.patchLoader.moduleMap) {
+            this.patchLoader.moduleMap.byId[newModule.jsonId] = newModule;
+            this.patchLoader.moduleMap.byLayer[layerName].push(newModule);
+          }
+
+          this.sortComponentsByZIndex();
+          this.showNotification(
+            `✅ ${moduleDef.displayName || moduleType} добавлен в (${gridX}, ${gridY})`,
+          );
+          if (layerName === 'voice') this._voiceDirty = true;
+          else this._fxDirty = true;
+          this._cablesDirty = true;
+          console.log(`✅ МОДУЛЬ УСПЕШНО ДОБАВЛЕН В (${gridX}, ${gridY})!`);
+        }
+      } catch (error) {
+        console.error(`Ошибка при создании модуля ${moduleType}:`, error);
+        this.showNotification(`❌ Ошибка: ${error.message}`);
       }
-    } catch (error) {
-      console.error(`Ошибка при создании модуля ${moduleType}:`, error);
-      this.showNotification(`❌ Ошибка: ${error.message}`);
-    }
   }
 
   drawDraggingCableIfNeeded() {
