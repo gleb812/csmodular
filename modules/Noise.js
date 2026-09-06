@@ -4,7 +4,7 @@
 
     export const NoiseModule = {
         type: 'Noise',
-            typeID: 106,
+            typeID: 31,
     defaultParams: [0, 1],
         displayName: 'Noise',
         gridHeight: 2,

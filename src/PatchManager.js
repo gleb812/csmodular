@@ -21,36 +21,45 @@ export class PatchManager {
   // === ОСНОВНЫЕ ОПЕРАЦИИ С КАБЕЛЯМИ ===
 
   addCable(fromJack, toJack) {
-    // Проверяем возможность подключения
-    if (!this.canConnect(fromJack, toJack)) {
-      return null;
-    }
+      // Проверяем возможность подключения
+      if (!this.canConnect(fromJack, toJack)) {
+          return null;
+      }
 
-    // Определяем цвет кабеля
-    const cableColor = this.determineCableColor(fromJack, toJack);
+      let actualFrom = fromJack;
+      let actualTo = toJack;
+      
+      if (fromJack.direction === 'input' && toJack.direction === 'output') {
+          actualFrom = toJack;
+          actualTo = fromJack;
+          console.log('🔄 Swapped jacks: input → output corrected to output → input');
+      }
 
-    // Создаем кабель
-    const cable = new Cable(fromJack, toJack, cableColor);
-    this.cables.push(cable);
+      const cableColor = this.determineCableColor(actualFrom, actualTo);
 
-    // Обновляем состояние джеков
-    this.updateJackConnection(fromJack, cable, cableColor);
-    this.updateJackConnection(toJack, cable, cableColor);
+      const cable = new Cable(actualFrom, actualTo, cableColor);
+      this.cables.push(cable);
 
-    console.log(
-      `✅ Cable added (color: ${cableColor}). Total: ${this.cables.length}`,
-    );
-    // ===== ДОБАВИТЬ =====
-    if (this.system) {
-      this.system._cablesDirty = true;
-    }
+      this.updateJackConnection(actualFrom, cable, cableColor);
+      this.updateJackConnection(actualTo, cable, cableColor);
 
-    if (this.system && this.system.csoundGen) {
-        this.system.csoundGen.addCable(cable);
-        this.system.csoundGen.showFullCsd();
-    }
+      console.log(`✅ Cable added (color: ${cableColor}). Total: ${this.cables.length}`);
+      
+      if (this.system) {
+          this.system._cablesDirty = true;
+      }
 
-    return cable;
+      if (this.system && this.system.csoundGen) {
+          this.system.csoundGen.addCable(cable);
+          //this.system.csoundGen.showFullCsd();
+      }
+      
+      // ⭐ Используем window.csound (глобальная переменная)
+      if (this.system && window.csound !== null) {
+          this.system.updateCsoundPatch().catch(e => console.error('Csound update error:', e));
+      }
+
+      return cable;
   }
 
   // PatchManager.js - добавить методы:
@@ -241,7 +250,12 @@ export class PatchManager {
           // ⭐ Удаляем кабель из CsoundGenerator
           if (this.system && this.system.csoundGen) {
               this.system.csoundGen.removeCable(cable);
-              this.system.csoundGen.showFullCsd();
+              //this.system.csoundGen.showFullCsd();
+          }
+          
+          // ⭐ Обновляем Csound если он запущен
+          if (this.system && window.csound !== null) {
+              this.system.updateCsoundPatch().catch(e => console.error('Csound update error:', e));
           }
       }
   }
@@ -266,7 +280,12 @@ export class PatchManager {
       // ⭐ Очищаем кабели в CsoundGenerator
       if (this.system && this.system.csoundGen) {
           this.system.csoundGen.clearCables();
-          this.system.csoundGen.showFullCsd();
+          //this.system.csoundGen.showFullCsd();
+      }
+      
+      // ⭐ Обновляем Csound если он запущен
+      if (this.system && window.csound !== null) {
+          this.system.updateCsoundPatch().catch(e => console.error('Csound update error:', e));
       }
   }
 
@@ -346,33 +365,47 @@ export class PatchManager {
   }
 
   endCableDrag(endJack) {
-    if (!this.startJack) {
-      console.log('❌ No start jack');
+      if (!this.startJack) {
+          console.log('❌ No start jack');
+          this.cancelCableDrag();
+          return null;
+      }
+      
+      if (!endJack) {
+          console.log('❌ No end jack found');
+          this.cancelCableDrag();
+          return null;
+      }
+      
+      // ⭐ Правильное направление: выход → вход
+      let fromJack = this.startJack;
+      let toJack = endJack;
+      
+      // Если начали с входа, а закончили на выходе — меняем местами
+      if (fromJack.direction === 'input' && toJack.direction === 'output') {
+          fromJack = endJack;
+          toJack = this.startJack;
+          console.log('🔄 Swapped: input → output corrected');
+      }
+      
+      // Проверяем, что from — выход, to — вход
+      if (fromJack.direction !== 'output' || toJack.direction !== 'input') {
+          console.log('❌ Invalid connection: from must be output, to must be input');
+          this.cancelCableDrag();
+          return null;
+      }
+      
+      if (!this.canConnect(fromJack, toJack)) {
+          console.log('Connection not allowed');
+          this.cancelCableDrag();
+          return null;
+      }
+      
+      const cable = this.addCable(fromJack, toJack);
       this.cancelCableDrag();
-      return null;
-    }
-
-    if (!endJack) {
-      console.log('❌ No end jack found');
-      this.cancelCableDrag();
-      return null;
-    }
-
-    //console.log('🔍 Attempting to connect:');
-
-    if (!this.canConnect(this.startJack, endJack)) {
-      console.log('Connection not allowed');
-      this.cancelCableDrag();
-      return null;
-    }
-
-    // Создаем кабель
-    const cable = this.addCable(this.startJack, endJack);
-    this.cancelCableDrag();
-
-    return cable;
+      
+      return cable;
   }
-
   cancelCableDrag() {
     this.draggingCable = null;
     this.startJack = null;

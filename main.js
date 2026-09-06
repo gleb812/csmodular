@@ -28,16 +28,34 @@ window.addEventListener('error', (event) => {
   // Не останавливаем распространение
 });
 
-// Обработчик промисов без catch
-window.addEventListener('unhandledrejection', (event) => {
-  console.error('💥 UNHANDLED PROMISE REJECTION:', event.reason);
 
-  if (modularSystem) {
-    modularSystem.showNotification(
-      `💥 Promise rejected: ${event.reason?.message || 'Unknown'}`,
-    );
-  }
+
+// Глобальное логирование для Csound
+window.csoundLog = [];
+
+function logCsound(message, data = null) {
+    const entry = {
+        time: new Date().toISOString(),
+        message: message,
+        data: data,
+        stack: new Error().stack?.split('\n').slice(2, 5).join('\n')
+    };
+    window.csoundLog.push(entry);
+    console.log(`🎵 [Csound] ${message}`, data || '');
+}
+
+// Перехватываем ошибки Csound
+window.addEventListener('unhandledrejection', (event) => {
+    if (event.reason?.message?.includes('csound') || 
+        event.reason?.message?.includes('Csound')) {
+        logCsound('UNHANDLED CSOUND ERROR', {
+            message: event.reason.message,
+            stack: event.reason.stack
+        });
+    }
 });
+
+
 
 // Csound engine object
 let csound = null;
@@ -150,6 +168,7 @@ class ModularSystem {
 
     // IncludeLogger вместо панели
     this.csoundGen = new CsoundGenerator();
+    this.csoundGen.system = this; 
   }
 
   startMeasure(name) {
@@ -938,68 +957,73 @@ class ModularSystem {
     // можно добавить отдельный UI элемент
   }
 
-  removeModule(module) {
-    if (!module) return;
+  async removeModule(module) {
+      if (!module) return;
 
-    // Удаляем из csound генератора
-    this.csoundGen.removeModule(
-      module.jsonId,
-      module.title,
-      module.typeID,
-      module.layer,
-    );
+      // Удаляем из csound генератора
+      this.csoundGen.removeModule(
+          module.jsonId,
+          module.title,
+          module.typeID,
+          module.layer,
+      );
 
-    //console.log(`🗑️ Removing module: ${module.title || 'unnamed'} (id: ${module.moduleId})`);
+      // 1. Удаляем все кабели, подключенные к модулю
+      const cablesToRemove = this.patchManager.findCablesByModule(
+          module.moduleId,
+      );
 
-    // 1. Удаляем все кабели, подключенные к модулю
-    const cablesToRemove = this.patchManager.findCablesByModule(
-      module.moduleId,
-    );
-    //console.log(`   Removing ${cablesToRemove.length} connected cables`);
+      cablesToRemove.forEach((cable) => {
+          this.patchManager.removeCable(cable);
+      });
 
-    cablesToRemove.forEach((cable) => {
-      this.patchManager.removeCable(cable);
-    });
-
-    // 2. Удаляем из слоя через LayerManager
-    if (this.layerManager) {
-      this.layerManager.removeModuleFromLayer(module);
-    } else {
-      // Fallback для старого кода
-      if (module.layer && this.layers[module.layer]) {
-        const layer = this.layers[module.layer];
-        const index = layer.modules.indexOf(module);
-        if (index > -1) {
-          layer.modules.splice(index, 1);
-        }
+      // 2. Удаляем из слоя через LayerManager
+      if (this.layerManager) {
+          this.layerManager.removeModuleFromLayer(module);
+      } else {
+          // Fallback для старого кода
+          if (module.layer && this.layers[module.layer]) {
+              const layer = this.layers[module.layer];
+              const index = layer.modules.indexOf(module);
+              if (index > -1) {
+                  layer.modules.splice(index, 1);
+              }
+          }
       }
-    }
 
-    // 3. Удаляем из общего массива components
-    const compIndex = this.components.indexOf(module);
-    if (compIndex > -1) {
-      this.components.splice(compIndex, 1);
-      //console.log(`   Removed from components array`);
-    } else {
-      console.log(`   Module not found in components array`);
-    }
+      // 3. Удаляем из общего массива components
+      const compIndex = this.components.indexOf(module);
+      if (compIndex > -1) {
+          this.components.splice(compIndex, 1);
+      } else {
+          console.log(`   Module not found in components array`);
+      }
 
-    // Устанавливаем dirty-флаги для перерисовки
-    if (module.layer === 'voice') this._voiceDirty = true;
-    else if (module.layer === 'fx') this._fxDirty = true;
-    this._cablesDirty = true; // были удалены кабели
+      // Устанавливаем dirty-флаги для перерисовки
+      if (module.layer === 'voice') this._voiceDirty = true;
+      else if (module.layer === 'fx') this._fxDirty = true;
+      this._cablesDirty = true;
 
-    if (this.forceRedraw) {
-        this.forceRedraw();
-    }
+      if (this.forceRedraw) {
+          this.forceRedraw();
+      }
 
-    // 4. Обновляем информацию о патче
-    this.updatePatchInfo();
+      // 4. Обновляем информацию о патче
+      this.updatePatchInfo();
 
-    // 5. Если это был выбранный модуль - снимаем выделение
-    if (this.selectedModule === module) {
-      this.deselectModule();
-    }
+      // 5. ⭐ Обновляем Csound если он запущен
+      if (csound !== null) {
+          try {
+              await this.updateCsoundPatch();
+          } catch (error) {
+              console.error('Failed to update Csound after module removal:', error);
+          }
+      }
+
+      // 6. Если это был выбранный модуль - снимаем выделение
+      if (this.selectedModule === module) {
+          this.deselectModule();
+      }
   }
 
   bringModuleToFront(module) {
@@ -1642,6 +1666,12 @@ class ModularSystem {
           if (layerName === 'voice') this._voiceDirty = true;
           else this._fxDirty = true;
           this._cablesDirty = true;
+
+          // После добавления модуля:
+          if (csound !== null) {
+              await this.updateCsoundPatch();
+          }
+
           console.log(`✅ МОДУЛЬ УСПЕШНО ДОБАВЛЕН В (${gridX}, ${gridY})!`);
         }
       } catch (error) {
@@ -1983,77 +2013,193 @@ class ModularSystem {
 
   // ========== CSOUND METHODS ==========
 
-  async initCsound() {
-    try {
-      if (csound === null) {
-        this.uiManager.updateCsoundStatus('INITIALIZING...', '#ff0');
-
-        const { Csound } =
-          await import('https://www.unpkg.com/@csound/browser@6.18.7/dist/csound.js');
-        csound = await Csound();
-        console.log('Csound created:', !!csound);
-        window.csound = csound;
-        console.log('window.csound set:', !!window.csound);
-        await csound.setOption('-odac');
-        await csound.compileOrc(csoundCode);
-        await csound.start();
-
-        this.uiManager.updateCsoundStatus('RUNNING', '#8f8');
-        this.uiManager.updateCsoundInfo('Sample rate: 44100, ksmps: 128');
-        this.showNotification('✅ Csound initialized successfully!');
-
-        console.log('Csound initialized:', csound);
-      } else {
-        this.showNotification('Csound already initialized');
-      }
-    } catch (error) {
-      console.error('Csound init error:', error);
-      this.uiManager.updateCsoundStatus('ERROR', '#f44');
-      this.showNotification('❌ Csound error: ' + error.message);
-    }
-  }
-
   async testCsound() {
-    try {
-      if (csound === null) {
-        await this.initCsound();
-        await new Promise((resolve) => setTimeout(resolve, 100));
+      console.log('🔊 TEST CSOUND');
+      
+      try {
+          if (!this._isCsoundReady()) {
+              console.log('  Csound not ready, initializing...');
+              await this.initCsound();
+              if (!this._isCsoundReady()) {
+                  this.showNotification('❌ Csound not available');
+                  return;
+              }
+              await new Promise(r => setTimeout(r, 200));
+          }
+          
+          console.log('  Sending note...');
+          await window.csound.inputMessage('i1 0 -1 0.3 440');
+          this.showNotification('🔊 Playing test note (440Hz)');
+          console.log('✅ Note sent');
+          
+      } catch (error) {
+          console.error('❌ Test error:', error);
+          this.showNotification('❌ Playback error: ' + error.message);
+          // Если ошибка — пробуем перезапустить
+          window.csound = null;
+          this.csound = null;
+          await this.initCsound();
       }
-
-      await csound.inputMessage('i1 0 534534 0.2 440');
-      this.showNotification('🔊 Playing test tone (A4, 440Hz)');
-    } catch (error) {
-      console.error('Csound test error:', error);
-      this.showNotification('❌ Playback error: ' + error.message);
-    }
   }
 
   async playNote() {
-    try {
-      if (csound === null) {
-        await this.initCsound();
-      }
+      try {
+          if (!this._isCsoundReady()) {
+              console.log('⚠️ Csound not ready, reinitializing...');
+              await this.initCsound();
+              if (!this._isCsoundReady()) {
+                  this.showNotification('❌ Csound not available');
+                  return;
+              }
+              await new Promise(resolve => setTimeout(resolve, 100));
+          }
 
-      await csound.inputMessage('i1 0 654634 0.3 440');
-      this.showNotification('🎹 Note A4 (440Hz)');
-    } catch (error) {
-      console.error('Csound note error:', error);
-      this.showNotification('❌ Note error: ' + error.message);
-    }
+          await window.csound.inputMessage('i1 0 1 0.3 440');
+          this.showNotification('🎹 Note A4 (440Hz)');
+          
+      } catch (error) {
+          console.error('Csound note error:', error);
+          this.showNotification('❌ Note error: ' + error.message);
+          await this.initCsound();
+      }
+  }
+
+  async initCsound() {
+      console.log('🎵 INIT CSOUND');
+      
+      try {
+          // Если csound уже есть — сбрасываем
+          if (window.csound) {
+              console.log('  Csound exists, resetting...');
+              try {
+                  await window.csound.reset();
+              } catch (e) {
+                  console.log('  Reset failed, will create new');
+              }
+              window.csound = null;
+              this.csound = null;
+          }
+          
+          this.uiManager.updateCsoundStatus('INITIALIZING...', '#ff0');
+          
+          // Создаём Csound
+          console.log('  Creating Csound...');
+          const { Csound } = await import('https://www.unpkg.com/@csound/browser@6.18.7/dist/csound.js');
+          const newCsound = await Csound();
+          window.csound = newCsound;
+          this.csound = newCsound;
+          console.log('  Csound created');
+          
+          // Настройка
+          console.log('  Setting options...');
+          await newCsound.setOption('-odac');
+          
+          // Генерируем и компилируем код
+          console.log('  Generating ORC...');
+          const orcCode = await this.csoundGen.generateOrc();
+          console.log('  ORC length:', orcCode.length);
+          console.log('  Compiling ORC...');
+          await newCsound.compileOrc(orcCode);
+          console.log('  ORC compiled');
+          
+          // Запускаем
+          console.log('  Starting Csound...');
+          await newCsound.start();
+          console.log('✅ Csound started!');
+          
+          this.uiManager.updateCsoundStatus('RUNNING', '#8f8');
+          this.uiManager.updateCsoundInfo('Csound running');
+          this.showNotification('✅ Csound initialized!');
+          
+      } catch (error) {
+          console.error('❌ Csound init error:', error);
+          this.uiManager.updateCsoundStatus('ERROR', '#f44');
+          this.showNotification('❌ Csound error: ' + error.message);
+          window.csound = null;
+          this.csound = null;
+      }
   }
 
   async stopCsound() {
-    try {
-      if (csound !== null) {
-        await csound.reset();
-        this.uiManager.updateCsoundStatus('STOPPED', '#f80');
-        this.showNotification('⏹ Csound stopped');
-
-        csound = null;
+      console.log('⏹ STOP CSOUND');
+      
+      try {
+          if (window.csound) {
+              console.log('  Stopping Csound...');
+              // Просто сбрасываем и удаляем
+              try {
+                  await window.csound.reset();
+              } catch (e) {
+                  console.log('  Reset error:', e.message);
+              }
+              window.csound = null;
+              this.csound = null;
+              console.log('✅ Csound stopped');
+          } else {
+              console.log('  Csound already null');
+          }
+          
+          this.uiManager.updateCsoundStatus('STOPPED', '#f80');
+          this.showNotification('⏹ Csound stopped');
+          
+      } catch (error) {
+          console.error('❌ Stop error:', error);
+          window.csound = null;
+          this.csound = null;
+          this.uiManager.updateCsoundStatus('ERROR', '#f44');
       }
-    } catch (error) {
-      console.error('Csound stop error:', error);
-    }
+  }
+
+  // Проверка готовности Csound
+  _isCsoundReady() {
+      return window.csound !== null && 
+             window.csound !== undefined &&
+             typeof window.csound.inputMessage === 'function';
+  }
+
+  async updateCsoundPatch() {
+      console.log('🔄 updateCsoundPatch CALLED');
+      
+      // Просто переинициализируем Csound
+      await this.initCsound();
+      
+      // И воспроизводим ноту
+      if (this._isCsoundReady()) {
+          try {
+              await window.csound.inputMessage('i1 0 -0.5 0.3 440');
+              console.log('✅ Patch updated and note playing');
+          } catch (e) {
+              console.log('Note not played');
+          }
+      }
+  }
+
+  /**
+   * Восстановление Csound после ошибки
+   */
+  async recoverCsound() {
+      console.log('🔄 Attempting to recover Csound...');
+      
+      try {
+          // Полная очистка
+          if (window.csound) {
+              try {
+                  await window.csound.reset();
+              } catch (e) {}
+              window.csound = null;
+              this.csound = null;
+          }
+          
+          // Ждём
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          // Перезапускаем
+          await this.initCsound();
+          this.showNotification('✅ Csound recovered!');
+      } catch (error) {
+          console.error('❌ Recovery failed:', error);
+          this.showNotification('❌ Please refresh the page');
+      }
   }
 
   updateCsoundStatus(text, color = '#fff') {

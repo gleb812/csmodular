@@ -444,11 +444,12 @@ export class UIManager {
     }
   }
 
+  // В UIManager.js, когда ошибка — показываем красный статус
   updateCsoundStatus(text, color = '#fff') {
-    if (this.elements.csoundStatus) {
-      this.elements.csoundStatus.textContent = text;
-      this.elements.csoundStatus.style.color = color;
-    }
+      if (this.elements.csoundStatus) {
+          this.elements.csoundStatus.textContent = text;
+          this.elements.csoundStatus.style.color = color;
+      }
   }
 
   updateCsoundInfo(text) {

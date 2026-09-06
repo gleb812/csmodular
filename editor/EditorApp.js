@@ -244,7 +244,8 @@ export class EditorApp {
     // Создаёт экземпляр компонента по типу
     createComponentInstance(type, x, y, size, jackType = null) {
         let component = null;
-        
+        const newId = this._generateComponentId();
+
         switch(type) {
             case 'knob':
                 component = new Knob(x, y, 'medium', 0, 127, 64, false, 0);
@@ -335,6 +336,10 @@ export class EditorApp {
 
         // Общие настройки
         if (component) {
+            component.id = newId.toString();
+            component.originalID = newId.toString();
+            component.parameterId = newId;
+
             component.width = size.width;
             component.height = size.height;
             component.parent = this.module;
@@ -344,6 +349,41 @@ export class EditorApp {
 
         return component;
     }
+
+    // editor/EditorApp.js - в класс EditorApp добавим
+
+    // ⭐ Генератор ID с переиспользованием
+    _nextComponentId = 1;
+    _availableIds = []; // Список освободившихся ID
+
+    _generateComponentId() {
+        // Если есть освободившиеся ID - используем их
+        if (this._availableIds.length > 0) {
+            // Сортируем по возрастанию и берём минимальный
+            this._availableIds.sort((a, b) => a - b);
+            return this._availableIds.shift();
+        }
+        // Иначе выдаём следующий
+        return this._nextComponentId++;
+    }
+
+    _releaseComponentId(id) {
+        // Добавляем ID в список освободившихся
+        if (!this._availableIds.includes(id)) {
+            this._availableIds.push(id);
+            console.log(`🔄 ID ${id} released, available: [${this._availableIds.join(', ')}]`);
+        }
+    }
+
+    // ⭐ Получить список всех ID компонентов
+    _getAllComponentIds() {
+        return this.components
+            .filter(c => !c._isNewDragging)
+            .map(c => parseInt(c.id))
+            .filter(id => !isNaN(id))
+            .sort((a, b) => a - b);
+    }
+
 
     // ========== СОБЫТИЯ ==========
 
@@ -881,9 +921,40 @@ export class EditorApp {
 
     // ========== УПРАВЛЕНИЕ КОМПОНЕНТАМИ ==========
 
+// editor/EditorApp.js - обновлённый removeComponent()
+// editor/EditorApp.js - добавьте этот метод
+
+    // ⭐ Получить вектора inputs и outputs для сохранения модуля
+    getComponentPorts() {
+        const inputs = [];
+        const outputs = [];
+        
+        // Сортируем компоненты по ID
+        const sortedComponents = [...this.components]
+            .filter(c => !c._isNewDragging)
+            .sort((a, b) => parseInt(a.id) - parseInt(b.id));
+        
+        for (const comp of sortedComponents) {
+            const type = comp.constructor.name;
+            if (type === 'Input') {
+                inputs.push(parseInt(comp.id));
+            } else if (type === 'Output') {
+                outputs.push(parseInt(comp.id));
+            }
+        }
+        
+        return { inputs, outputs };
+    }
+    
     removeComponent(component) {
         const index = this.components.indexOf(component);
         if (index > -1) {
+            // ⭐ Освобождаем ID для переиспользования
+            const id = parseInt(component.id);
+            if (!isNaN(id)) {
+                this._releaseComponentId(id);
+            }
+            
             this.components.splice(index, 1);
             this.selectedComponent = null;
             this.uiManager.showNotification('🗑️ Component removed');
@@ -897,8 +968,6 @@ export class EditorApp {
     }
 
     // ========== ОТРИСОВКА ==========
-
-// editor/EditorApp.js - animate()
 
     animate() {
         this.ctx.clearRect(0, 0, this.width, this.height);

@@ -19,7 +19,9 @@ aR *= 0.125
 aOL = aL*kMute*kpad
 aOR = aR*kMute*kpad
 
-outs kM1[ksource]*aOL,kM1[ksource]*aOR        ; SOURCE 0
+;outs kM1[ksource]*aOL,kM1[ksource]*aOR        ; SOURCE 0
+outs aL,aR
+
 gaFX1 += kM3[ksource]*aOL                     ; SOURCE 2
 gaFX2 += kM3[ksource]*aOR
 gaFX3 += kM4[ksource]*aOL                     ; SOURCE 3

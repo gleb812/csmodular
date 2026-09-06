@@ -319,13 +319,14 @@ export class ModulePropertiesWindow {
         const module = this.app.module;
         let name = this.windowElement.querySelector('#module-name-input').value || 'NewModule';
         
-        // ⭐ Очищаем имя от пробелов и спецсимволов
+        // Очищаем имя от пробелов и спецсимволов
         name = name.replace(/[^a-zA-Z0-9_]/g, '');
         
         if (!name || name.length === 0) {
             name = 'NewModule';
             this.windowElement.querySelector('#module-name-input').value = name;
         }
+        const ports = this.app.getComponentPorts();
         
         // Собираем компоненты
         const components = [];
@@ -336,7 +337,7 @@ export class ModulePropertiesWindow {
             
             const compData = {
                 componentType: comp.constructor.name,
-                id: nextId.toString(),
+                id: comp.id,
                 x: Math.round(comp.relX || comp.x - module.x),
                 y: Math.round(comp.relY || comp.y - module.y),
             };
@@ -404,17 +405,26 @@ export class ModulePropertiesWindow {
             typeID: 999,
             defaultParams: [],
             tooltip: name,
-            inputs: components.filter(c => c.componentType === 'Input').length || 0,
-            outputs: components.filter(c => c.componentType === 'Output').length || 0,
+            inputs: ports.inputs,
+            outputs: ports.outputs,
             components: components
         };
     }
 
-    // editor/ModulePropertiesWindow.js - исправленный generateModuleCode
+// editor/ModulePropertiesWindow.js - обновлённый generateModuleCode()
 
     generateModuleCode(moduleData) {
         const name = moduleData.name || 'NewModule';
         const componentsJSON = JSON.stringify(moduleData.components, null, 8);
+        
+        // ⭐ Формируем строки для inputs и outputs
+        const inputsStr = moduleData.inputs && moduleData.inputs.length > 0 
+            ? `    inputs: [${moduleData.inputs.join(', ')}],`
+            : '    inputs: [],';
+        
+        const outputsStr = moduleData.outputs && moduleData.outputs.length > 0 
+            ? `    outputs: [${moduleData.outputs.join(', ')}],`
+            : '    outputs: [],';
         
         return `// Автоматически сгенерированный модуль: ${name}
     // Создан в Module Editor
@@ -427,8 +437,8 @@ export class ModulePropertiesWindow {
         gridHeight: ${moduleData.gridHeight || 3},
         originalName: '${name}',
         tooltip: '${moduleData.tooltip || name}',
-        inputs: ${moduleData.inputs || 0},
-        outputs: ${moduleData.outputs || 0},
+    ${inputsStr}
+    ${outputsStr}
         components: ${componentsJSON}
     };`;
     }
