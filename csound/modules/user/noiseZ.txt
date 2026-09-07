@@ -1,0 +1,6 @@
+opcode noiseZ, 0, k
+kOut1 xin
+aout1 rand .5,4
+
+zaw aout1, kOut1
+endop

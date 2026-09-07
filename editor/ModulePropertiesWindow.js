@@ -111,6 +111,21 @@ export class ModulePropertiesWindow {
             if (this.app.module) {
                 this.app.module.title = name;
                 this.windowElement.querySelector('#module-name-input').value = name;
+
+                // ⭐ ОБНОВЛЯЕМ КОД CSOUND МГНОВЕННО
+                if (this.app.codeViewerWindow) {
+                    // Если окно открыто - обновляем его содержимое
+                    if (this.app.codeViewerWindow.isVisible) {
+                        const newCode = this.app.codeViewerWindow.generateCsoundCode();
+                        this.app.codeViewerWindow.editor.value = newCode;
+                        this.app.codeViewerWindow.codeContent = newCode;
+                        this.app.codeViewerWindow.isDirty = false;
+                        this.app.codeViewerWindow.updateStatus('saved');
+                    } else {
+                        // Если окно закрыто - просто обновляем сохранённый код
+                        this.app.module._userCsoundCode = this.app.codeViewerWindow.generateCsoundCode();
+                    }
+                }
             }
         };
 
@@ -248,12 +263,8 @@ export class ModulePropertiesWindow {
         }
     }
 
-    // editor/ModulePropertiesWindow.js - добавляем метод сохранения на сервер
-
-    // editor/ModulePropertiesWindow.js - исправленный saveModuleToServer
-
-    async saveModuleToServer(code, name) {
-        console.log('📤 Sending to server:', { name, codeLength: code.length });
+    async saveModuleToServer(jsCode, dspCode, name) {
+        console.log('📤 Sending to server:', { name, jsLength: jsCode.length, dspLength: dspCode ? dspCode.length : 0 });
         
         try {
             const response = await fetch('/api/save-module', {
@@ -263,7 +274,8 @@ export class ModulePropertiesWindow {
                 },
                 body: JSON.stringify({
                     name: name,
-                    code: code
+                    code: jsCode,
+                    dsp_code: dspCode  // ⭐ Добавляем DSP код
                 })
             });
             
@@ -272,7 +284,7 @@ export class ModulePropertiesWindow {
             if (response.ok) {
                 const result = await response.json();
                 console.log('✅ Server response:', result);
-                this.app.uiManager.showNotification(`✅ Module "${name}" saved to user_modules/js/`);
+                this.app.uiManager.showNotification(`✅ Module "${name}" saved to modules/user/ and csound/modules/user/`);
                 return true;
             } else {
                 const error = await response.json();
@@ -287,8 +299,19 @@ export class ModulePropertiesWindow {
         }
     }
 
+    // ⭐ Новый метод для скачивания DSP
+    downloadDSP(code, name) {
+        const blob = new Blob([code], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${name}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
 
-    // editor/ModulePropertiesWindow.js - исправленный saveModule
 
     async saveModule() {
         if (!this.app.module) return;
@@ -296,35 +319,49 @@ export class ModulePropertiesWindow {
         // Собираем данные модуля
         const moduleData = this.collectModuleData();
         
-        // Генерируем код
-        const code = this.generateModuleCode(moduleData);
+        // ⭐ Генерируем JS код
+        const jsCode = this.generateModuleCode(moduleData);
+        
+        // ⭐ Получаем DSP код из CodeViewerWindow (если он есть)
+        let dspCode = null;
+        if (this.app.codeViewerWindow && this.app.codeViewerWindow.isVisible) {
+            // Если окно открыто - берём из редактора
+            dspCode = this.app.codeViewerWindow.editor.value;
+        } else if (this.app.module && this.app.module._userCsoundCode) {
+            // Если сохранён в модуле
+            dspCode = this.app.module._userCsoundCode;
+        } else if (this.app.codeViewerWindow) {
+            // Или генерируем стандартный
+            dspCode = this.app.codeViewerWindow.generateCsoundCode();
+        }
+        
         const name = moduleData.name;
         
-        console.log('📦 Saving module:', { name, codeLength: code.length });
-        console.log('📦 Module data:', moduleData);
+        console.log('📦 Saving module:', { name, jsLength: jsCode.length, dspLength: dspCode ? dspCode.length : 0 });
         
-        // Пробуем сохранить на сервер
-        const saved = await this.saveModuleToServer(code, name);
+        // ⭐ Отправляем оба файла на сервер
+        const saved = await this.saveModuleToServer(jsCode, dspCode, name);
         
         if (!saved) {
             // Если не получилось - скачиваем локально
-            this.downloadModule(code, name);
+            this.downloadModule(jsCode, name);
+            if (dspCode) {
+                this.downloadDSP(dspCode, name);
+            }
             this.app.uiManager.showNotification(`⬇️ Module "${name}" downloaded (server unavailable)`);
         }
     }
-
 // editor/ModulePropertiesWindow.js - исправленный collectModuleData()
 
     collectModuleData() {
         const module = this.app.module;
-        let name = this.windowElement.querySelector('#module-name-input').value || 'NewModule';
-        
-        // Очищаем имя от пробелов и спецсимволов
+        let name = module.title || 'NewModule';
         name = name.replace(/[^a-zA-Z0-9_]/g, '');
-        
+               
         if (!name || name.length === 0) {
             name = 'NewModule';
             this.windowElement.querySelector('#module-name-input').value = name;
+            module.title = name;
         }
         const ports = this.app.getComponentPorts();
         

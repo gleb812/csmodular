@@ -32,10 +32,10 @@ os.makedirs(MODULES_USER_DIR, exist_ok=True)
 os.makedirs(CSOUND_MODULES_DIR, exist_ok=True)
 os.makedirs(CSOUND_USER_DIR, exist_ok=True)
 
-print(f"📁 Modules dir: {MODULES_DIR}")
-print(f"📁 Modules user dir: {MODULES_USER_DIR}")
-print(f"📁 Csound modules dir: {CSOUND_MODULES_DIR}")
-print(f"📁 Csound user dir: {CSOUND_USER_DIR}")
+print(f"Modules dir: {MODULES_DIR}")
+print(f"Modules user dir: {MODULES_USER_DIR}")
+print(f"Csound modules dir: {CSOUND_MODULES_DIR}")
+print(f"Csound user dir: {CSOUND_USER_DIR}")
 
 # Настройки pch2csd
 venv_bin = os.path.dirname(sys.executable)
@@ -123,7 +123,7 @@ def save_module():
         js_path = os.path.join(MODULES_USER_DIR, js_filename)
         with open(js_path, 'w', encoding='utf-8') as f:
             f.write(code)
-        print(f"✅ JS saved: {js_path}")
+        print(f"JS saved: {js_path}")
         
         # 2. ⭐ Сохраняем DSP в csound/modules/user/
         if dsp_code:
@@ -131,9 +131,9 @@ def save_module():
             dsp_path = os.path.join(CSOUND_USER_DIR, dsp_filename)
             with open(dsp_path, 'w', encoding='utf-8') as f:
                 f.write(dsp_code)
-            print(f"✅ DSP saved: {dsp_path}")
+            print(f"DSP saved: {dsp_path}")
         else:
-            print(f"⚠️ No DSP code provided for {name}")
+            print(f"No DSP code provided for {name}")
         
         return jsonify({
             'success': True,
@@ -251,7 +251,7 @@ def save_module_dsp():
         with open(dsp_path, 'w', encoding='utf-8') as f:
             f.write(code)
         
-        print(f"✅ DSP saved: {dsp_path}")
+        print(f"DSP saved: {dsp_path}")
         return jsonify({
             'success': True,
             'message': f'DSP for "{name}" saved successfully'
@@ -264,9 +264,9 @@ def save_module_dsp():
 
 if __name__ == '__main__':
     print("=== Flask Module Manager ===")
-    print(f"📁 Root dir: {ROOT_DIR}")
-    print(f"📁 Modules user: {MODULES_USER_DIR}")
-    print(f"📁 Csound user: {CSOUND_USER_DIR}")
+    print(f"Root dir: {ROOT_DIR}")
+    print(f"Modules user: {MODULES_USER_DIR}")
+    print(f"Csound user: {CSOUND_USER_DIR}")
     print("URL: http://localhost:5050")
     print("API:")
     print("  POST /api/save-module       - Save user module")

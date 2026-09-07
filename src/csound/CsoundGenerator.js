@@ -26,7 +26,7 @@ export class CsoundGenerator {
 
 <CsoundSynthesizer>
 <CsOptions>
--odac -d
+-odac ;-d
 </CsOptions>
 <CsInstruments>
 sr = 48000
@@ -692,7 +692,7 @@ i3 0 [60*60*24*7]
         const orc = await this.generateOrc();
         return `<CsoundSynthesizer>
     <CsOptions>
-    -odac -d
+    -odac ;-d
     </CsOptions>
     <CsInstruments>
     ${orc}

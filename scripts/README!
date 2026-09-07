@@ -26,6 +26,10 @@ python patch_jack_name_id.py ../modules --inputs inputs_connectors_simple.json -
 ЕСЛИ В ОПИСАНИИ МОДУЛЯ JS ОТСУТСТВУЕТ СТРОКА defaulParams, то причины надо искать вот здесь.
 
 
+Для просмотра генерируемого csd-проекта в консоли браузера:
+await modularSystem.csoundGen.showFullCsd();
+
+
 
 ИДЕЯ на будущее: возможно стоит сделать скрипт для последовательного запуска всех патчей!
 
