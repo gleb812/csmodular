@@ -33,7 +33,6 @@ export class EditorUIManager {
         
         this.container.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="color: #0af; font-weight: bold; font-size: 12px;">📝 Module Editor</span>
                 <div style="display: flex; gap: 4px;">
                     <button id="properties-btn" style="padding: 2px 8px; background: #2a2a2a; border: 1px solid #0af; color: #0af; border-radius: 3px; cursor: pointer; font-size: 10px;">
                         ⚙️ Props
@@ -46,6 +45,9 @@ export class EditorUIManager {
                     <button id="code-viewer-btn" style="padding: 2px 8px; background: #2a2a2a; border: 1px solid #0f0; color: #0f0; border-radius: 3px; cursor: pointer; font-size: 10px;">
                         🎵 Code
                     </button>  
+                    <button id="component-props-btn" style="padding: 2px 8px; background: #2a2a2a; border: 1px solid #f0e; color: #f0e; border-radius: 3px; cursor: pointer; font-size: 10px;">
+                        🔧 Comp
+                    </button>
                 </div>
             </div>
             
@@ -153,7 +155,18 @@ export class EditorUIManager {
         this.container.querySelector('#code-viewer-btn').onclick = () => {
             this.app.codeViewerWindow.toggle();
         };
-        
+
+        // ⭐ Кнопка свойств компонента
+        this.container.querySelector('#component-props-btn').onclick = () => {
+            const comp = this.app.selectedComponent;
+            if (!comp) {
+                this.showNotification('⚠️ No component selected');
+                return;
+            }
+            this.app.componentPropertiesWindow.toggle(comp);
+        };
+
+
         // Zoom
         this.container.querySelector('#zoom-in-btn').onclick = () => this.app.zoomIn();
         this.container.querySelector('#zoom-out-btn').onclick = () => this.app.zoomOut();
@@ -325,24 +338,56 @@ export class EditorUIManager {
         }
     }
 
-    // ⭐ НОВЫЙ МЕТОД - загрузка модуля
     async loadModule(name) {
         try {
             const response = await fetch(`/api/load-module/${name}`);
             if (!response.ok) {
-                throw new Error('Failed to load module');
+                throw new Error(`Failed to load module (${response.status})`);
             }
             
             const data = await response.json();
+            const code = data.code;
+            const dspCode = data.dsp_code;
             
-            // Парсим код и восстанавливаем модуль
-            // Для начала - просто показываем уведомление
-            this.showNotification(`📂 Module "${name}" loaded! (parsing not implemented yet)`);
+            console.log(`📂 Loading module "${name}"...`);
+            console.log(`   JS length: ${code.length}, DSP length: ${dspCode ? dspCode.length : 0}`);
             
-            console.log('Loaded module code:', data.code);
+            // ⭐ Парсим JS-код модуля
+            let moduleData;
+            try {
+                moduleData = this._parseModuleCode(code);
+            } catch (e) {
+                console.error('Parse error:', e);
+                this.showNotification(`❌ Parse error: ${e.message}`);
+                return;
+            }
+            
+            console.log('   Parsed moduleData:', moduleData);
+            
+            // ⭐ Восстанавливаем модуль в редакторе
+            this.app.restoreModuleFromData(moduleData, dspCode);
+            
+            this.showNotification(`📂 Module "${name}" loaded`);
             
         } catch (error) {
+            console.error('Load error:', error);
             this.showNotification(`❌ Error: ${error.message}`);
+        }
+    }
+
+    _parseModuleCode(code) {
+        // Ищем: export const XModule = { ... };
+        // [\s\S] — любые символы, включая переносы
+        const match = code.match(/export\s+const\s+\w+\s*=\s*(\{[\s\S]*\});?\s*$/m);
+        if (!match) {
+            throw new Error('Could not find "export const ... = { ... }" in module code');
+        }
+        
+        // Вычисляем объект (для своих модулей безопасно)
+        try {
+            return new Function(`return ${match[1]}`)();
+        } catch (e) {
+            throw new Error(`Could not evaluate module object: ${e.message}`);
         }
     }
 

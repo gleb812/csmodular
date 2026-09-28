@@ -12,7 +12,7 @@
         }
         
         body {
-            background: #111;
+            background: transparent;
             color: #fff;
             font-family: Arial, sans-serif;
             overflow: hidden;
@@ -25,7 +25,23 @@
             top: 0;
             cursor: default;
         }
-        
+
+        #parallax-bg {
+            position: fixed;
+            top: -5%;
+            left: -5%;
+            width: 110%;
+            height: 110%;
+            background-image: url('/public/2017-05-30 (28).png');
+            background-size: cover;
+            background-position: center;
+            z-index: 0;
+            will-change: transform;
+            transition: transform 0.1s ease-out;
+            pointer-events: none;
+        }
+
+
         .instructions {
             position: fixed;
             left: 10px;
@@ -39,6 +55,7 @@
     </style>
 </head>
 <body>
+    <div id="parallax-bg"></div>
     <canvas id="modularCanvas"></canvas>
     <script type="module" src="./main.js"></script>
 </body>

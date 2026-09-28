@@ -1,0 +1,8 @@
+opcode outmulti, 0, kkk
+kIn1, kIn2, kIn3 xin
+ain1 zar kIn1
+ain2 zar kIn2
+ain3 zar kIn3
+
+outs ain2,ain3
+endop

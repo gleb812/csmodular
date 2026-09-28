@@ -205,24 +205,6 @@ export class Knob extends BaseComponent {
         
         let newValue = this.startValue + deltaY * sensitivity;
         
-        // СПОСОБ 2: Угловое вращение (альтернатива, можно переключать)
-        // Раскомментируйте для углового вращения и закомментируйте строки выше
-        /*
-        const currentAngle = Math.atan2(
-            y - (this.y + this.height/2),
-            x - (this.x + this.width/2)
-        );
-        
-        let angleDiff = currentAngle - this.startAngle;
-        
-        // Нормализуем разницу углов
-        if (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-        if (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
-        
-        const angleSensitivity = range / (Math.PI * 2) * this.angularSensitivity;
-        let newValue = this.startValue + angleDiff * angleSensitivity;
-        */
-        
         // Применяем новое значение
         this.setValue(newValue);
         
@@ -310,7 +292,7 @@ export class Knob extends BaseComponent {
             if (this.onChange && typeof this.onChange === 'function') {
                 this.onChange(this.value);
             }
-            
+            // TODO: перенести в CsoundEngine
             // Отправляем в Csound
             if (window.csound && this.csoundChannel) {
                 window.csound.setControlChannel(this.csoundChannel, this.value)

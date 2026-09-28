@@ -156,8 +156,19 @@ export class Panel {
           } else if (this.layer === 'fx') {
               this.parentSystem._fxDirty = true;
           }
-          // ← ДОБАВЬ ЭТО
-          this.parentSystem._cablesDirty = true;
+      }
+  }
+
+
+  setLedDirty() {
+      this.dirty = true;
+      if (this.parentSystem) {
+          if (this.layer === 'voice') {
+              this.parentSystem._voiceDirty = true;
+          } else if (this.layer === 'fx') {
+              this.parentSystem._fxDirty = true;
+          }
+          this.parentSystem._cablesDirty = true;   // ← ВЕРНУТЬ
       }
   }
 

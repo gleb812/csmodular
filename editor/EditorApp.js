@@ -4,6 +4,7 @@ import { EditorPanel } from './EditorPanel.js';
 import { EditorUIManager } from './EditorUIManager.js';
 import { ModulePropertiesWindow } from './ModulePropertiesWindow.js';
 import { CodeViewerWindow } from './CodeViewerWindow.js';
+import { ComponentPropertiesWindow } from './ComponentPropertiesWindow.js';
 
 import { Knob } from '../src/components/Knob.js';
 import { ButtonFlat } from '../src/components/ButtonFlat.js';
@@ -101,6 +102,7 @@ export class EditorApp {
         this.uiManager = new EditorUIManager(this);
         this.propertiesWindow = new ModulePropertiesWindow(this);
         this.codeViewerWindow = new CodeViewerWindow(this);
+        this.componentPropertiesWindow = new ComponentPropertiesWindow(this);
         this.createDefaultModule();
         this.animate();
         this.setupEvents();
@@ -509,6 +511,10 @@ export class EditorApp {
                 
                 // ⭐ Начинаем перетаскивание существующего компонента
                 this.draggingExistingComponent = comp;
+                // ⭐ Обновляем окно свойств
+                if (this.componentPropertiesWindow) {
+                    this.componentPropertiesWindow.show(comp);
+                }
                 this.dragOffsetX = worldX - comp.x;
                 this.dragOffsetY = worldY - comp.y;
                 
@@ -529,10 +535,11 @@ export class EditorApp {
         
         if (this.module && this.module.isInside(worldX, worldY)) {
             this.selectedComponent = null;
+            if (this.componentPropertiesWindow) {
+                this.componentPropertiesWindow.hide();
+            }
         }
     }
-
-// editor/EditorApp.js - полный onMouseMove
 
     onMouseMove(e) {
         const rect = this.canvas.getBoundingClientRect();
@@ -702,7 +709,196 @@ export class EditorApp {
         }
     }
 
-// editor/EditorApp.js - полный onMouseUp
+    restoreModuleFromData(moduleData, dspCode) {
+        console.log('🔄 Restoring module from data:', moduleData);
+        
+        // ⭐ 1. Очищаем текущее состояние
+        this.components = [];
+        this.selectedComponent = null;
+        this._nextComponentId = 1;
+        this._availableIds = [];
+        
+        // ⭐ 2. Восстанавливаем размеры модуля
+        const gridWidth = moduleData.gridWidth || 1;
+        const gridHeight = moduleData.gridHeight || 3;
+        
+        this.module.gridWidth = gridWidth;
+        this.module.gridHeight = gridHeight;
+        this.module.width = gridWidth * GRID_UNITS.X;
+        this.module.height = gridHeight * GRID_UNITS.Y;
+        this.module.title = moduleData.displayName || moduleData.type || 'Module';
+        
+        // ⭐ 3. Восстанавливаем компоненты
+        const components = moduleData.components || [];
+        
+        for (const compData of components) {
+            const component = this._createComponentFromData(compData);
+            if (component) {
+                this.components.push(component);
+                
+                // Обновляем счётчик ID
+                const id = parseInt(component.id);
+                if (!isNaN(id) && id >= this._nextComponentId) {
+                    this._nextComponentId = id + 1;
+                }
+            }
+        }
+        
+        console.log(`   Restored ${this.components.length} components`);
+        
+        // ⭐ 4. Центрируем модуль на экране
+        this.centerModuleInGrid();
+        
+        // ⭐ 5. Загружаем DSP-код в CodeViewerWindow
+        if (dspCode) {
+            this.module._userCsoundCode = dspCode;
+            if (this.codeViewerWindow) {
+                this.codeViewerWindow.codeContent = dspCode;
+                if (this.codeViewerWindow.isVisible) {
+                    this.codeViewerWindow.editor.value = dspCode;
+                    this.codeViewerWindow.isDirty = false;
+                    this.codeViewerWindow.updateStatus('saved');
+                }
+            }
+        }
+        
+        // ⭐ 6. Обновляем PropertiesWindow
+        if (this.propertiesWindow && this.propertiesWindow.isVisible) {
+            this.propertiesWindow.show();
+        }
+        
+        // ⭐ 7. Перерисовка (animate сам)
+    }
+
+    _createComponentFromData(compData) {
+        const type = compData.componentType;
+        const id = compData.id;
+        const relX = compData.x;
+        const relY = compData.y;
+        
+        let component = null;
+        
+        switch (type) {
+            case 'Knob':
+                component = new Knob(0, 0, compData.size || 'medium', 
+                                     compData.min || 0, compData.max || 127, 
+                                     compData.defaultValue || 0, false, compData.infoFunc || 0);
+                break;
+            case 'Slider':
+                component = new Slider(0, 0, compData.width || 10, compData.height || 60,
+                                       compData.min || 0, compData.max || 127, 
+                                       compData.defaultValue || 0);
+                break;
+            case 'ButtonFlat':
+                component = new ButtonFlat(0, 0, compData.width || 40, compData.height || 13,
+                                           (compData.labels || ['Off', 'On']).join(','));
+                break;
+            case 'ButtonRadio':
+                component = new ButtonRadio(0, 0, compData.buttonCount || 4, 
+                                             compData.buttonWidth || 40,
+                                             (compData.labels || ['One','Two','Three','Four']).join(','),
+                                             compData.orientation || 'horizontal');
+                break;
+            case 'ButtonIncDec':
+                component = new ButtonIncDec(0, 0, compData.width || 40,
+                                              (compData.labels || ['One','Two','Three','Four']).join(','),
+                                              0);
+                break;
+            case 'ButtonText':
+                component = new ButtonText(0, 0, compData.width || 40, 
+                                            compData.text || 'M', 
+                                            compData.initialState !== false);
+                break;
+            case 'TextLabel':
+                component = new TextLabel(0, 0, compData.text || 'Label',
+                                           compData.fontSize || 10,
+                                           compData.color || '#888888',
+                                           compData.align || 'left', 'top');
+                break;
+            case 'Input':
+                component = new Input(0, 0, {
+                    jackType: compData.jackType || 'audio',
+                    label: compData.ConnectorName || 'In',
+                    type: compData.jackType || 'audio'
+                });
+                break;
+            case 'Output':
+                component = new Output(0, 0, {
+                    jackType: compData.jackType || 'audio',
+                    label: compData.ConnectorName || 'Out',
+                    type: compData.jackType || 'audio'
+                });
+                break;
+            case 'LevelShift':
+                component = new LevelShift(0, 0, compData.size || 'small');
+                break;
+            case 'LED':
+                component = new LED(0, 0, compData.width || 16, compData.height || 10);
+                if (compData.sourceComponentId !== undefined && compData.sourceComponentId !== null) {
+                    component.sourceComponentId = compData.sourceComponentId;
+                }
+                if (compData.ledType) {
+                    component.ledType = compData.ledType;
+                }
+                break;
+            case 'TextField':
+                component = new TextField(0, 0, compData.width || 50, 
+                                           compData.referenceElementId || null, 'number', null);
+                break;
+            case 'TextEdit':
+                component = new TextEdit(0, 0, compData.width || 50, compData.text || '', false);
+                break;
+            case 'PartSelector':
+                component = new PartSelector(0, 0, compData.width || 70, compData.height || 16,
+                                              compData.imageCount || 5, compData.menuOffset || 0,
+                                              compData.menuItems || ['Item1','Item2','Item3','Item4','Item5']);
+                break;
+            case 'Line':
+                component = new Line(0, 0, compData.length || 60, compData.orientation || 'Horizontal',
+                                      compData.width || 1, compData.color || '#444');
+                break;
+            case 'SVG':
+                component = new SVG(0, 0, compData.width || 28, compData.height || 28,
+                                     compData.svgSrc || '', compData.color || null);
+                break;
+            case 'Graph':
+                component = new Graph(0, 0, compData.width || 60, compData.height || 24);
+                break;
+            case 'MiniVU':
+                component = new MiniVU(0, 0, compData.width || 40, compData.height || 24);
+                break;
+            default:
+                console.warn(`⚠️ Unknown component type: ${type}`);
+                return null;
+        }
+        
+        if (!component) return null;
+        
+        // ⭐ Устанавливаем атрибуты
+        component.id = id;
+        component.originalID = id;
+        component.parameterId = parseInt(id);
+        
+        // ⭐ Позиция — относительно модуля
+        component.relX = relX;
+        component.relY = relY;
+        // Абсолютная позиция — модуль.x + relX
+        component.x = this.module.x + relX;
+        component.y = this.module.y + relY;
+        
+        // ⭐ ConnectorIndex — если есть
+        if (compData.ConnectorIndex !== undefined) {
+            component.ConnectorIndex = compData.ConnectorIndex;
+            component.index = compData.ConnectorIndex;
+        }
+        
+        // ⭐ Parent
+        component.parent = this.module;
+        component._editorModule = this.module;
+        component._isNewDragging = false;
+        
+        return component;
+    }
 
     onMouseUp(e) {
         // ===== ЗАВЕРШЕНИЕ DRAG-AND-DROP НОВОГО КОМПОНЕНТА =====

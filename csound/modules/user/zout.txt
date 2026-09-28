@@ -1,4 +1,4 @@
-opcode xout, 0, k
+opcode zout, 0, k
 kIn1 xin
 ain1 zar kIn1
 

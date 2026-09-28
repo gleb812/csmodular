@@ -1,0 +1,8 @@
+opcode zante, 0, kkkk
+kKnob1, kSlider1, kSlider2, kOut1 xin
+aout1 init 0
+
+; --- module body ---
+; Add your DSP code here
+zaw aout1, kOut1
+endop

@@ -1,0 +1,11 @@
+opcode Zgen, 0, kkk
+kOut1, kOut2, kOut3 xin
+
+aout1 rand 0.5
+aout2 oscil 0.5,220
+aout3 vco2 0.5,440
+
+zaw aout1, kOut1
+zaw aout2, kOut2
+zaw aout3, kOut3
+endop

@@ -316,47 +316,103 @@ export class UIManager {
 
   // === CSOUND КОНТРОЛЫ ===
   createCsoundControls() {
-    const csoundContainer = document.createElement('div');
-    csoundContainer.style.cssText = `
-      margin-top: 15px;
-      padding: 10px;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      border-radius: 8px;
-      border: 1px solid #0af;
-      box-shadow: 0 2px 8px rgba(0, 170, 255, 0.2);
-    `;
+      const csoundContainer = document.createElement('div');
+      csoundContainer.style.cssText = `
+          margin-top: 15px;
+          padding: 10px;
+          background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+          border-radius: 8px;
+          border: 1px solid #0af;
+          box-shadow: 0 2px 8px rgba(0, 170, 255, 0.2);
+      `;
 
-    csoundContainer.innerHTML = `
-      <div style="display: flex; align-items: center; margin-bottom: 10px;">
-        <div style="color: #0af; font-weight: bold; font-size: 14px; flex: 1;">🎵 Csound Engine</div>
-        <div id="csoundStatus" style="font-size: 10px; background: #333; padding: 2px 6px; border-radius: 10px; color: #8f8;">READY</div>
-      </div>
-      <div style="display: flex; gap: 5px; margin-bottom: 8px;">
-        <button id="initCsoundBtn" style="flex: 1; padding: 8px; background: linear-gradient(to bottom, #0a5, #083); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">⚡ Initialize</button>
-        <button id="testCsoundBtn" style="flex: 1; padding: 8px; background: linear-gradient(to bottom, #f80, #d60); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">🔊 Test Tone</button>
-      </div>
-      <div style="display: flex; gap: 5px;">
-        <button id="stopCsoundBtn" style="flex: 1; padding: 8px; background: linear-gradient(to bottom, #a00, #800); color: white; border: none; border-radius: 6px; cursor: pointer;">⏹ Stop</button>
-        <button id="noteBtn" style="flex: 1; padding: 8px; background: linear-gradient(to bottom, #808, #606); color: white; border: none; border-radius: 6px; cursor: pointer;">🎹 Note A4</button>
-      </div>
-      <div style="margin-top: 8px; font-size: 10px; color: #aaa; text-align: center; line-height: 1.3;">
-        <div>Render patch to Csound code</div>
-        <div id="csoundInfo">Not initialized</div>
-      </div>
-    `;
+      csoundContainer.innerHTML = `
+          <div style="display: flex; align-items: center; margin-bottom: 8px;">
+              <div style="color: #0af; font-weight: bold; font-size: 14px; flex: 1;">🎵 Csound</div>
+              <div id="csoundStatus" style="font-size: 10px; background: #333; padding: 2px 6px; border-radius: 10px; color: #8f8;">IDLE</div>
+          </div>
+          
+          <button id="csoundRunBtn" style="
+              width: 100%; 
+              padding: 10px; 
+              background: linear-gradient(to bottom, #0a5, #083); 
+              color: white; 
+              border: none; 
+              border-radius: 6px; 
+              cursor: pointer; 
+              font-weight: bold; 
+              font-size: 13px;
+              transition: all 0.15s;
+          ">
+              ▶ Run
+          </button>
+          
+          <div style="margin-top: 10px; padding: 8px; background: #1a1a1a; border-radius: 4px;">
+              <div style="display: flex; align-items: center; gap: 6px; font-size: 10px; color: #666;">
+                  <span>MIDI</span>
+                  <div id="midiIndicator" style="
+                      width: 8px; 
+                      height: 8px; 
+                      border-radius: 50%; 
+                      background: #333; 
+                      transition: all 0.1s;
+                  "></div>
+                  <span id="midiLastNote" style="color: #0af; font-family: monospace; font-size: 10px;">—</span>
+              </div>
+          </div>
+          
+          <div style="margin-top: 10px; padding: 8px; background: #1a1a1a; border-radius: 4px;">
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 10px;">
+                  <span style="color: #666;">Grid</span>
+                  <button id="gridToggleBtn" style="
+                      flex: 1;
+                      padding: 4px 8px;
+                      background: #2a2a2a;
+                      border: 1px solid #444;
+                      color: #0af;
+                      border-radius: 3px;
+                      cursor: pointer;
+                      font-size: 10px;
+                  ">ON</button>
+              </div>
+          </div>
 
-    csoundContainer.querySelector('#initCsoundBtn').onclick = () =>
-      this.system.initCsound();
-    csoundContainer.querySelector('#testCsoundBtn').onclick = () =>
-      this.system.testCsound();
-    csoundContainer.querySelector('#stopCsoundBtn').onclick = () =>
-      this.system.stopCsound();
-    csoundContainer.querySelector('#noteBtn').onclick = () =>
-      this.system.playNote();
 
-    this.container.appendChild(csoundContainer);
-    this.elements.csoundStatus = csoundContainer.querySelector('#csoundStatus');
-    this.elements.csoundInfo = csoundContainer.querySelector('#csoundInfo');
+          <div style="margin-top: 8px; font-size: 10px; color: #666; text-align: center; line-height: 1.3;">
+              <div id="csoundInfo">Not initialized</div>
+          </div>
+      `;
+
+      this.container.appendChild(csoundContainer);
+
+      // Сохраняем ссылки
+      this.elements.csoundStatus  = csoundContainer.querySelector('#csoundStatus');
+      this.elements.csoundInfo    = csoundContainer.querySelector('#csoundInfo');
+      this.elements.csoundRunBtn  = csoundContainer.querySelector('#csoundRunBtn');
+      this.elements.midiIndicator = csoundContainer.querySelector('#midiIndicator');
+      this.elements.midiLastNote  = csoundContainer.querySelector('#midiLastNote');
+
+      // Логика кнопки Run/Stop
+      this.elements.csoundRunBtn.onclick = async () => {
+          const engine = this.system?.csoundEngine;
+          if (!engine) return;
+          
+          if (engine.state === 'idle' || engine.state === 'error') {
+              await engine.init();
+          } else if (engine.state === 'running') {
+              await engine.stop();
+          }
+      };
+
+      this.elements.gridToggleBtn = csoundContainer.querySelector('#gridToggleBtn');
+
+      this.elements.gridToggleBtn.onclick = () => {
+          const system = this.system;
+          system.showGrid = !system.showGrid;
+          this.elements.gridToggleBtn.textContent = system.showGrid ? 'ON' : 'OFF';
+          this.elements.gridToggleBtn.style.color = system.showGrid ? '#0af' : '#666';
+          system.forceRedraw();
+      };
   }
 
   // === ДЕБАГ ИНФОРМАЦИЯ ===
@@ -457,6 +513,31 @@ export class UIManager {
       this.elements.csoundInfo.textContent = text;
     }
   }
+
+
+  updateCsoundRunButton(state) {
+      const btn = this.elements.csoundRunBtn;
+      if (!btn) return;
+      
+      if (state === 'idle') {
+          btn.textContent = '▶ Run';
+          btn.style.background = 'linear-gradient(to bottom, #0a5, #083)';
+          btn.disabled = false;
+      } else if (state === 'running') {
+          btn.textContent = '■ Stop';
+          btn.style.background = 'linear-gradient(to bottom, #a00, #800)';
+          btn.disabled = false;
+      } else if (state === 'initializing') {
+          btn.textContent = '⏳ Starting...';
+          btn.style.background = 'linear-gradient(to bottom, #666, #444)';
+          btn.disabled = true;
+      } else if (state === 'error') {
+          btn.textContent = '⟳ Retry';
+          btn.style.background = 'linear-gradient(to bottom, #a00, #800)';
+          btn.disabled = false;
+      }
+  }
+
 
   updatePatchInfo(filename, moduleCount, cableCount) {
     if (this.elements.patchInfo) {

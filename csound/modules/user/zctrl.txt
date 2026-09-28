@@ -1,0 +1,8 @@
+opcode zctrl, 0, kkk
+kKnob1, kButton1, kOut1 xin
+
+aout1 vco2 kKnob1, 440
+
+
+zaw aout1*kButton1, kOut1
+endop

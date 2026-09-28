@@ -1,0 +1,15 @@
+; LED RMS indicator
+; Input: kIn  — zak-bus number (a-rate signal source)
+;        SChannel — Csound channel name for chnset
+opcode led_rms, 0, kS
+kIn, SChannel xin
+
+; Read control signal from zak
+kin zkr kIn
+
+; RMS via envelope follower
+;kRms portk kin, 0.1
+kRms = kin
+; Send to channel
+chnset kRms, SChannel
+endop

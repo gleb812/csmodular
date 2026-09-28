@@ -49,7 +49,7 @@ export class LayerManager {
       fx: null,
     };
 
-    this._gridCacheKey = null;
+    this._gridCacheKeys = { voice: null, fx: null };
   }
 
   // === ОСНОВНЫЕ МЕТОДЫ ===
@@ -102,9 +102,8 @@ export class LayerManager {
   getGridCache(layerName, offsetX, offsetY, scale) {
       // Создаем ключ из параметров
       const key = `${layerName}_${Math.round(offsetX*10)}_${Math.round(offsetY*10)}_${Math.round(scale*100)}`;
-      
-      // Если кеш есть и ключ совпадает - возвращаем существующий
-      if (this.gridCache[layerName] && this._gridCacheKey === key) {
+
+      if (this.gridCache[layerName] && this._gridCacheKeys[layerName] === key) {
           return this.gridCache[layerName];
       }
       
@@ -146,7 +145,7 @@ export class LayerManager {
       
       // Сохраняем в кеш
       this.gridCache[layerName] = cache;
-      this._gridCacheKey = key;
+      this._gridCacheKeys[layerName] = key; 
       
       return cache;
   }
@@ -160,7 +159,7 @@ export class LayerManager {
     voiceCache.height = this.layers.voice.totalHeight;
     const voiceCtx = voiceCache.getContext('2d');
 
-    voiceCtx.fillStyle = 'rgba(75, 80, 75, 1.0)';
+    voiceCtx.fillStyle = 'rgba(75, 80, 75, 0.2)';
     voiceCtx.fillRect(0, 0, voiceCache.width, voiceCache.height);
     this.backgroundCache.voice = voiceCache;
 
@@ -170,7 +169,7 @@ export class LayerManager {
     fxCache.height = this.layers.fx.totalHeight;
     const fxCtx = fxCache.getContext('2d');
 
-    fxCtx.fillStyle = 'rgba(80, 75, 75, 1.0)';
+    fxCtx.fillStyle = 'rgba(80, 75, 75, 0.5)';
     fxCtx.fillRect(0, 0, fxCache.width, fxCache.height);
     this.backgroundCache.fx = fxCache;
 

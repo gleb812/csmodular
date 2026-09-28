@@ -25,9 +25,20 @@ python patch_jack_name_id.py ../modules --inputs inputs_connectors_simple.json -
 25.02.26 - в конфигурационный файл patchModules добавлены параметры модулей. Все дефолтные параметры взяты из файла all_proc.txt . Он в свою очередь получен применением скрипта extract_param_from_pch.py к результатам операции pch2csd -p all_modules1.pch2 > a111.txt и pch2csd -p all_modules2.pch2 > all2.txt
 ЕСЛИ В ОПИСАНИИ МОДУЛЯ JS ОТСУТСТВУЕТ СТРОКА defaulParams, то причины надо искать вот здесь.
 
+УДОБНЫЕ КОНСОЛЬНЫЕ КОМАНДЫ:
 
-Для просмотра генерируемого csd-проекта в консоли браузера:
-await modularSystem.csoundGen.showFullCsd();
+await modularSystem.csoundEngine.showCurrentOrc();
+
+/ ORC (то, что идёт в compileOrc)
+const orc = await modularSystem.csoundGen.generateOrc();
+console.log(orc);
+
+// Или полный CSD
+const csd = await modularSystem.csoundGen.generateFullCsd();
+console.log(csd);
+
+// самостоятельная перекомпиляция
+modularSystem._recompileDebounced();
 
 
 

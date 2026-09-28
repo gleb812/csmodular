@@ -1,0 +1,12 @@
+opcode Zledtest, 0, kkk
+kIn1, kIn2, kOut1 xin
+ain1 zar kIn1
+kin2 zkr kIn2
+kout1 init 0
+
+kout1 oscil 1, 0.2
+
+
+; Add your DSP code here
+zkw kout1, kOut1
+endop

@@ -1,14 +1,14 @@
 // Автоматически сгенерированный модуль: xout
     // Создан в Module Editor
 
-    export const xoutModule = {
-        type: 'xout',
+    export const zoutModule = {
+        type: 'zout',
         typeID: 999,
         defaultParams: [],
-        displayName: 'xout',
+        displayName: 'zout',
         gridHeight: 3,
-        originalName: 'xout',
-        tooltip: 'xout',
+        originalName: 'zout',
+        tooltip: 'zout',
         inputs: [1],
         outputs: [],
         components: [

@@ -33,6 +33,8 @@ export class ModuleFactory {
     constructor() {
         this.moduleRegistry = {}; // Здесь будут храниться все определения модулей
         this.nextModuleId = 1; // Для генерации уникальных ID
+        this._userModuleNames = undefined;
+        this.parentSystem = null;
     }
 
     // Проверяем, интерактивный ли компонент
@@ -95,43 +97,115 @@ export class ModuleFactory {
         }
     }
 
-    // src/ModuleFactory.js - добавь метод для загрузки пользовательских модулей
-
-    // В конец класса ModuleFactory добавь:
-
     async loadUserModule(moduleName) {
         try {
-            console.log(`📂 Loading user module: ${moduleName}`);
+            //console.log(`📂 Loading user module: ${moduleName}`);
             
-            // Пробуем загрузить из modules/user/
-            const modulePath = `../modules/user/${moduleName}.js`;
-            const module = await import(/* @vite-ignore */ modulePath);
-            const moduleKey = Object.keys(module)[0];
-            
-            if (moduleKey && module[moduleKey]) {
-                this.registerModule(moduleName, module[moduleKey]);
-                console.log(`✅ User module registered: ${moduleName}`);
-                return true;
+            const response = await fetch(`/api/load-module/${moduleName}`);
+            if (!response.ok) {
+                console.warn(`Failed to load user module: ${moduleName} (status: ${response.status})`);
+                return false;
             }
             
-            console.warn(`❌ No export found in user module: ${moduleName}`);
-            return false;
+            const data = await response.json();
+            
+            // Парсим JS код
+            const moduleDef = this._parseModuleDefinition(data.code);
+
+            if (!moduleDef) {
+                console.warn(`Could not parse module definition for: ${moduleName}`);
+                return false;
+            }
+
+            // ⭐ Помечаем модуль как пользовательский
+            moduleDef.isUser = true;
+
+            // Регистрируем в фабрике
+            this.registerModule(moduleName, moduleDef);
+            
+            if (!moduleDef) {
+                console.warn(`Could not parse module definition for: ${moduleName}`);
+                return false;
+            }
+            
+            // Регистрируем в фабрике
+            this.registerModule(moduleName, moduleDef);
+            
+            // ⭐ Регистрируем в CsoundGenerator
+            if (this.parentSystem?.csoundGen) {
+                this.parentSystem.csoundGen.registerUserModule(moduleName, {
+                    jsCode: data.code,
+                    dspCode: data.dsp_code,
+                    displayName: moduleDef.displayName || moduleName,
+                    gridHeight: moduleDef.gridHeight || 3,
+                    inputs: moduleDef.inputs || [],
+                    outputs: moduleDef.outputs || []
+                });
+            }
+            
+            console.log(`✅ Loaded user module: ${moduleName}`);
+            return true;
+            
         } catch (error) {
-            console.warn(`Failed to load user module ${moduleName}:`, error);
+            console.error(`Error loading user module ${moduleName}:`, error);
             return false;
         }
     }
 
-    // Проверка, является ли модуль пользовательским
-    isUserModule(moduleName) {
-        // Проверяем через ContextMenu
-        if (window.contextMenu && window.contextMenu._userModuleMap) {
-            return !!window.contextMenu._userModuleMap[moduleName];
+    _parseModuleDefinition(code) {
+        try {
+            // Ищем export const NameModule = { ... }
+            const match = code.match(/export\s+const\s+(\w+)\s*=\s*({[\s\S]*?});/);
+            if (!match) return null;
+            
+            const moduleStr = match[2];
+            const moduleDef = new Function(`return ${moduleStr}`)();
+            
+            if (!moduleDef.components || !Array.isArray(moduleDef.components)) {
+                return null;
+            }
+            
+            return moduleDef;
+        } catch (error) {
+            console.error('Error parsing module definition:', error);
+            return null;
         }
-        // Проверяем по наличию в папке user
-        return false;
     }
 
+
+     // ModuleFactory.js - исправленный isUserModule()
+
+    // ⭐ Проверка, является ли модуль пользовательским
+    async isUserModule(moduleName) {
+        // ⭐ Если кеш ещё не загружен — загружаем
+        if (this._userModuleNames === undefined) {
+            await this._loadUserModuleNames();
+        }
+        
+        // ⭐ Если после загрузки кеш всё ещё undefined — возвращаем false
+        if (this._userModuleNames === undefined || !Array.isArray(this._userModuleNames)) {
+            return false;
+        }
+        
+        return this._userModuleNames.includes(moduleName);
+    }
+
+    // ⭐ КЕШ СПИСКА ПОЛЬЗОВАТЕЛЬСКИХ МОДУЛЕЙ
+    async _loadUserModuleNames() {
+        try {
+            const response = await fetch('/api/list-user-modules');
+            if (response.ok) {
+                const data = await response.json();
+                this._userModuleNames = data.modules || [];
+                console.log(`📂 Loaded ${this._userModuleNames.length} user module names:`, this._userModuleNames);
+            } else {
+                this._userModuleNames = [];
+            }
+        } catch (error) {
+            console.warn('Could not load user module names:', error);
+            this._userModuleNames = [];
+        }
+    }
 
     // Регистрация нового типа модуля
     registerModule(type, definition) {
@@ -320,7 +394,23 @@ export class ModuleFactory {
                         compDef.color || '#fff'
                     );
                     break;
-                    
+
+                    case 'LED':
+                        component = new LED(
+                            tempX, tempY,
+                            compDef.width || 16,
+                            compDef.height || 10,
+                        );
+                        // ⭐ Свойства LED
+                        if (compDef.sourceComponentId !== undefined && compDef.sourceComponentId !== null) {
+                            component.sourceComponentId = compDef.sourceComponentId;
+                        }
+                        if (compDef.ledType) {
+                            component.ledType = compDef.ledType;
+                        }
+                        break;
+
+
                 case 'LevelShift':
                     component = new LevelShift(
                         tempX, tempY,

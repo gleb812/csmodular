@@ -1,6 +1,5 @@
 // main.js
 import { ModuleFactory } from './src/ModuleFactory.js';
-import { Csound } from '@csound/browser';
 import { GRID_UNITS } from './constants.js';
 import { Panel } from './src/components/Panel.js';
 import { PatchManager } from './src/PatchManager.js';
@@ -10,9 +9,11 @@ import { EventManager } from './src/managers/EventManager.js';
 import { UIManager } from './src/managers/UIManager.js';
 import { ContextMenu } from './src/ui/ContextMenu.js';
 import { JackContextMenu } from './src/ui/JackContextMenu.js';
-import { ModuleContextMenu } from './src/ui/ModuleContextMenu.js'; // ← ДОБАВЬ ЭТО
-import { CSoundWindow } from './src/ui/CSoundWindow.js'; // ← И ЭТО
-import { CsoundGenerator } from './src/csound/CsoundGenerator.js'; // ← И ЭТО
+import { ModuleContextMenu } from './src/ui/ModuleContextMenu.js'; 
+import { CSoundWindow } from './src/ui/CSoundWindow.js'; 
+import { CsoundGenerator } from './src/csound/CsoundGenerator.js';
+import { CsoundEngine } from './src/csound/CsoundEngine.js';
+import { debounce } from './src/utils/debounce.js';
 
 // Глобальный обработчик ошибок
 window.addEventListener('error', (event) => {
@@ -56,31 +57,6 @@ window.addEventListener('unhandledrejection', (event) => {
 });
 
 
-
-// Csound engine object
-let csound = null;
-
-// Пример Csound кода (позже заменим кодом из патча)
-const csoundCode = `
-sr = 44100
-ksmps = 128
-nchnls = 2
-0dbfs = 1
-
-instr 1
-  k6 chnget "module_DelayB_2_6"
-  k7 chnget "module_DelayB_2_7"
-  k8 chnget "module_DelayB_2_8"
-
-  a1 oscili k6/20, 220
-  a2 oscili k7/20, 500
-  a3 oscili k8/20, 1456
-  aN rand 0.03
-  aS = a1 + a2 + a3 + aN
-  outs aS, aS
-endin
-`;
-
 class ModularSystem {
   constructor() {
     this._voiceDirty = true;
@@ -108,6 +84,7 @@ class ModularSystem {
     this.lastMouseY = null;
     this.debugCables = false;
     this.currentPatchFilename = null;
+    this.showGrid = true;   // ← НОВОЕ
 
     this.layerManager = new LayerManager(this.canvas);
     this.layerManager.system = this;
@@ -135,6 +112,16 @@ class ModularSystem {
     this.setupCanvas();
     this.setupResizeHandler();
     this.animate();
+
+    // ⭐ Parallax фон
+    this.parallaxElement = document.getElementById('parallax-bg');
+    this.parallaxMouseX = 0;
+    this.parallaxMouseY = 0;
+    this.parallaxCurrentX = 0;
+    this.parallaxCurrentY = 0;
+    this.parallaxStrength = 20;   // ← сила смещения в px
+    this.parallaxSmoothing = 0.08; // ← плавность (0..1)
+
 
     // === ДОБАВЛЯЕМ ДЛЯ ОТЛАДКИ ===
     this.frameCount = 0;
@@ -166,10 +153,119 @@ class ModularSystem {
     this.endMeasure = this.endMeasure.bind(this);
     this.logPerformance = this.logPerformance.bind(this);
 
-    // IncludeLogger вместо панели
+     // Csound Generator (генерирует ORC)
     this.csoundGen = new CsoundGenerator();
     this.csoundGen.system = this; 
+    this.csoundGen.loadUserModules();
+
+    // Csound Engine (управляет инстансом Csound)
+    this.csoundEngine = new CsoundEngine(this);
+    this.csoundEngine.onStateChange((state, info) => {
+        this.uiManager.updateCsoundStatus(
+            this._csoundStateLabel(state),
+            this._csoundStateColor(state)
+        );
+        this.uiManager.updateCsoundInfo(info || this._csoundStateInfo(state));
+        this.uiManager.updateCsoundRunButton(state);
+    });
+
+    // Debounce для recompile (не чаще раза в 300мс)
+    this._recompileDebounced = debounce(
+        () => this.csoundEngine.recompile(),
+        300
+    );
+    this.setupParallax();
   }
+
+
+  setupParallax() {
+      if (!this.parallaxElement) return;
+      
+      document.addEventListener('mousemove', (e) => {
+          // Нормализуем: -1..1 от центра экрана
+          this.parallaxMouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+          this.parallaxMouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+      });
+  }
+
+  updateParallax() {
+      if (!this.parallaxElement) return;
+      
+      // Плавное приближение к целевой позиции
+      const targetX = -this.parallaxMouseX * this.parallaxStrength;
+      const targetY = -this.parallaxMouseY * this.parallaxStrength;
+      
+      this.parallaxCurrentX += (targetX - this.parallaxCurrentX) * this.parallaxSmoothing;
+      this.parallaxCurrentY += (targetY - this.parallaxCurrentY) * this.parallaxSmoothing;
+      
+      this.parallaxElement.style.transform = 
+          `translate3d(${this.parallaxCurrentX}px, ${this.parallaxCurrentY}px, 0)`;
+  }
+
+
+  _renderLeds() {
+      const ctx = this.ctx;
+      const layers = this.layerManager.layers;
+      
+      ctx.save();
+      ctx.translate(this.offsetX, this.offsetY);
+      ctx.scale(this.scale, this.scale);
+      
+      ['voice', 'fx'].forEach(layerName => {
+          const layer = layers[layerName];
+          if (!layer) return;
+          
+          layer.modules.forEach(module => {
+              if (!module.components) return;
+              if (module.pixelX === null || module.pixelY === null) return;
+              
+              const leds = module.components.filter(c => c.constructor.name === 'LED');
+              if (leds.length === 0) return;
+              
+              const bgColor = module.customColor || module.defaultColor || '#606060';
+              
+              leds.forEach(led => {
+                  // Затираем область LED цветом панели
+                  ctx.fillStyle = bgColor;
+                  ctx.fillRect(led.x - 1, led.y - 1, led.width + 2, led.height + 2);
+                  
+                  // Перерисовываем LED (внутри draw сам читает значение)
+                  led.draw(ctx);
+              });
+          });
+      });
+      
+      ctx.restore();
+  }
+
+
+  _csoundStateLabel(state) {
+      return {
+          'idle': 'IDLE',
+          'initializing': 'INIT...',
+          'running': 'RUNNING',
+          'error': 'ERROR'
+      }[state] || state.toUpperCase();
+  }
+
+  _csoundStateColor(state) {
+      return {
+          'idle': '#8f8',
+          'initializing': '#ff0',
+          'running': '#0f0',
+          'error': '#f44'
+      }[state] || '#fff';
+  }
+
+  _csoundStateInfo(state) {
+      return {
+          'idle': 'Not running',
+          'initializing': 'Starting Csound...',
+          'running': 'Csound running',
+          'error': 'Csound failed to start'
+      }[state] || '';
+  }
+
 
   startMeasure(name) {
     // Защита от undefined
@@ -225,6 +321,9 @@ class ModularSystem {
     this.profiler.lastLogTime = performance.now();
   }
 
+
+
+
   // Добавь этот метод в класс ModularSystem
   forceRedraw() {
       this._forceRedraw = true;
@@ -232,34 +331,6 @@ class ModularSystem {
       this._fxDirty = true;
       this._cablesDirty = true;
   }  
-
-  // logPerformance() {
-  //     if (!this.profiler?.enabled) return;
-
-  //     const now = performance.now();
-  //     const elapsed = now - this.profiler.lastLogTime;
-
-  //     // Логируем раз в секунду
-  //     if (elapsed < 1000) return;
-
-  //     const times = this.profiler.times;
-  //     const frameCount = this.profiler.frameCount;
-
-  //     console.log('📊 PERFORMANCE METRICS:');
-  //     console.log(`   FPS: ${Math.round(this.currentFPS || 0)}`);
-  //     console.log(`   Frame time: ${Math.round(times.total)}ms`);
-  //     console.log(`   └ Clear: ${Math.round(times.clear)}ms`);
-  //     console.log(`   └ Voice layer: ${Math.round(times.drawVoice)}ms`);
-  //     console.log(`   └ FX layer: ${Math.round(times.drawFx)}ms`);
-  //     console.log(`   └ Divider: ${Math.round(times.drawDivider)}ms`);
-  //     console.log(`   └ Cables: ${Math.round(times.drawCables)}ms`);
-  //     console.log(`   Modules: ${this.components.filter(c => c instanceof Panel).length}`);
-  //     console.log(`   Cables: ${this.patchManager.cables.length}`);
-
-  //     // Сброс для следующей секунды
-  //     this.resetProfiler();
-  //     this.profiler.lastLogTime = now;
-  // }
 
   toggleProfiler(enabled) {
     if (!this.profiler) return;
@@ -397,65 +468,67 @@ class ModularSystem {
   }
 
   setupCanvas() {
-    // 1. ФИКСИРОВАННЫЕ ПИКСЕЛЬНЫЕ РАЗМЕРЫ (для внутренней логики)
-    const FIXED_WIDTH = 1200; // Фиксированно!
-    const FIXED_HEIGHT = 800; // Фиксированно!
+      // ⭐ Canvas = окно браузера
+      this.resizeCanvasToWindow();
 
-    this.canvas.width = FIXED_WIDTH;
-    this.canvas.height = FIXED_HEIGHT;
+      // Прозрачный фон
+      this.canvas.style.backgroundColor = 'transparent';
+      this.canvas.style.border = 'none';
+      this.canvas.style.zIndex = '1';
+      this.canvas.style.position = 'fixed';
+      this.canvas.style.left = '0';
+      this.canvas.style.top = '0';
+      this.canvas.style.transform = 'none';   // ← убираем центрирование
+      this.canvas.style.objectFit = 'none';
 
-    // 2. НИКАКОГО CSS МАСШТАБИРОВАНИЯ!
-    // Canvas всегда одного размера в пикселях
-    this.canvas.style.width = `${FIXED_WIDTH}px`;
-    this.canvas.style.height = `${FIXED_HEIGHT}px`;
+      // Сохраняем базовые размеры (для GridCache и т.д.)
+      this.baseCanvasWidth = this.canvas.width;
+      this.baseCanvasHeight = this.canvas.height;
 
-    // 3. ПРИВЯЗКА К ЛЕВОМУ ВЕРХНЕМУ УГЛУ
-    this.canvas.style.position = 'fixed';
-    this.canvas.style.left = '50%';
-    this.canvas.style.top = '50%';
-    this.canvas.style.transform = 'translate(-50%, -50%)';
-    //this.canvas.style.right = 'auto';
-    //this.canvas.style.bottom = 'auto';
+      // Обновляем LayerManager
+      this.layerManager.updateCanvasSize();
 
-    // 4. ФОН И ГРАНИЦА
-    this.canvas.style.backgroundColor = 'transparent';
-    this.canvas.style.border = 'none'; //'1px solid #333';
-    this.canvas.style.zIndex = '1';
+      // Обновляем UI
+      setTimeout(() => {
+          if (this.uiManager && this.uiManager.updatePosition) {
+              this.uiManager.updatePosition();
+          }
+      }, 100);
 
-    // 5. НИКАКОГО objectFit, transform, scale!
-    this.canvas.style.objectFit = 'none';
+      // ⭐ Ресайз — resize canvas
+      window.addEventListener('resize', () => {
+          this.resizeCanvasToWindow();
+          this.layerManager.updateCanvasSize();
+          this.layerManager.invalidateCache();   // сбросить кеши
+          this.forceRedraw();
+          
+          if (this.uiManager && this.uiManager.updatePosition) {
+              setTimeout(() => this.uiManager.updatePosition(), 50);
+          }
+      });
 
-    // 6. Сохраняем размеры
-    this.baseCanvasWidth = FIXED_WIDTH;
-    this.baseCanvasHeight = FIXED_HEIGHT;
+      // Контекстное меню — запрещено
+      this.canvas.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+      });
+  }
 
-    //console.log(`Canvas: FIXED ${FIXED_WIDTH}x${FIXED_HEIGHT}px at (20, 20)`);
+  // ⭐ Новый метод: подогнать canvas под окно
+  resizeCanvasToWindow() {
+      const dpr = window.devicePixelRatio || 1;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
 
-    // 7. Обновляем LayerManager
-    this.layerManager.updateCanvasSize();
+      // Внутренние размеры — на весь экран (с учётом DPR)
+      this.canvas.width = w * dpr;
+      this.canvas.height = h * dpr;
 
-    // 8. Обновляем UI (будет поверх)
-    setTimeout(() => {
-      if (this.uiManager && this.uiManager.updatePosition) {
-        this.uiManager.updatePosition();
-      }
-    }, 100);
+      // CSS-размеры — на весь экран
+      this.canvas.style.width = `${w}px`;
+      this.canvas.style.height = `${h}px`;
 
-    // 9. ИГНОРИРУЕМ РЕСАЙЗ ОКНА (canvas не меняется!)
-    window.addEventListener('resize', () => {
-      //console.log('Window resized, but canvas remains fixed');
-      // Только обновляем позицию UI
-      if (this.uiManager && this.uiManager.updatePosition) {
-        setTimeout(() => this.uiManager.updatePosition(), 50);
-      }
-    });
-
-    // ВАЖНО: Запрещаем контекстное меню браузера на canvas
-    this.canvas.addEventListener('contextmenu', (e) => {
-      // EventManager.handleContextMenu уже делает e.preventDefault()
-      // Но для надежности можно и здесь
-      e.preventDefault();
-    });
+      // Масштаб контекста — если DPR > 1 (Retina)
+      this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
   openContextMenuAtMousePosition() {
@@ -512,34 +585,27 @@ class ModularSystem {
   }
 
   updateCanvasSize() {
-    // Простой расчет - минимальное из 90% ширины или 90% высоты
-    const maxWidth = window.innerWidth * 0.9;
-    const maxHeight = window.innerHeight * 0.9;
+      // ⭐ Используем актуальные размеры canvas
+      const canvasWidth = this.canvas.width;
+      const canvasHeight = this.canvas.height;
 
-    const aspect = this.baseCanvasWidth / this.baseCanvasHeight;
+      // Voice слой
+      this.layers.voice.x = 0;
+      this.layers.voice.y = 0;
+      this.layers.voice.width = canvasWidth;
+      this.layers.voice.visibleHeight = this.divider.y;
+      this.layers.voice.totalHeight = 2500;
 
-    // Проверяем, какое ограничение сильнее
-    const widthByHeight = maxHeight * aspect;
-    const heightByWidth = maxWidth / aspect;
+      // FX слой
+      this.layers.fx.x = 0;
+      this.layers.fx.y = this.divider.y + 10;
+      this.layers.fx.width = canvasWidth;
+      this.layers.fx.visibleHeight = canvasHeight - this.layers.fx.y;
+      this.layers.fx.totalHeight = 2500;
 
-    if (widthByHeight <= maxWidth) {
-      // Ограничение по высоте
-      this.canvas.style.width = `${widthByHeight}px`;
-      this.canvas.style.height = `${maxHeight}px`;
-    } else {
-      // Ограничение по ширине
-      this.canvas.style.width = `${maxWidth}px`;
-      this.canvas.style.height = `${heightByWidth}px`;
-    }
-
-    this.canvas.style.position = 'fixed';
-    this.canvas.style.left = '50%';
-    this.canvas.style.top = '50%';
-    this.canvas.style.transform = 'translate(-50%, -50%)';
-    this.canvas.style.border = '1px solid #333';
-    this.canvas.style.background = '#111';
-
-    //console.log(`Canvas: ${this.canvas.style.width} x ${this.canvas.style.height}`);
+      // Сбросить кеши (размеры изменились)
+      this.invalidateCache();
+      this._gridCacheKey = null;   // сбросить grid-кеш
   }
 
   async loadPatchFromJson(patchData) {
@@ -910,6 +976,10 @@ class ModularSystem {
     }
 
     this.csoundGen.reset();
+    // ⭐ Очищаем LED-каналы
+    if (this.csoundEngine) {
+        this.csoundEngine.clearLedChannels();
+    }
 
     console.log('System reset complete');
     this.showNotification('🆕 New patch created');
@@ -959,6 +1029,17 @@ class ModularSystem {
 
   async removeModule(module) {
       if (!module) return;
+
+      // ⭐ 0. Снимаем регистрацию LED-каналов (ДО удаления из components)
+      if (this.csoundEngine && module.components) {
+          const leds = module.components.filter(c => c.constructor.name === 'LED');
+          leds.forEach(led => {
+              if (led.sourceChannel) {
+                  this.csoundEngine.unregisterLedChannel(led.sourceChannel);
+                  console.log(`💡 Unregistered LED channel: ${led.sourceChannel}`);
+              }
+          });
+      }
 
       // Удаляем из csound генератора
       this.csoundGen.removeModule(
@@ -1011,13 +1092,9 @@ class ModularSystem {
       // 4. Обновляем информацию о патче
       this.updatePatchInfo();
 
-      // 5. ⭐ Обновляем Csound если он запущен
-      if (csound !== null) {
-          try {
-              await this.updateCsoundPatch();
-          } catch (error) {
-              console.error('Failed to update Csound after module removal:', error);
-          }
+      // 5. Обновляем Csound если он запущен
+      if (this.csoundEngine.state === 'running') {
+          this._recompileDebounced();
       }
 
       // 6. Если это был выбранный модуль - снимаем выделение
@@ -1374,6 +1451,7 @@ class ModularSystem {
   }
 
   animate() {
+      this.updateParallax();
       const now = performance.now();
 
       if (!this.lastFrameTime) this.lastFrameTime = now;
@@ -1393,6 +1471,11 @@ class ModularSystem {
       this.frameCount++;
       this.layerManager.frameCounter = this.frameCount;
 
+      // ⭐ LED — перерисовываем ТОЛЬКО сами LED, без перерисовки слоя
+      if (this.frameCount % 5 === 0) {
+          this._renderLeds();
+      }
+
       // ⚠️ ИЗМЕНЕНИЕ: всегда перерисовываем хотя бы раз в 30 кадров
       const hasDragging = this.draggingComponent ||
                           this.patchManager.draggingCable?.isDragging ||
@@ -1408,7 +1491,7 @@ class ModularSystem {
                           this._voiceDirty ||
                           this._fxDirty ||
                           this._cablesDirty ||
-                          this._forceRedraw ||  // ← НОВЫЙ ФЛАГ
+                          this._forceRedraw ||  
                           this.frameCount % 30 === 0;
 
       if (needsRedraw) {
@@ -1520,14 +1603,6 @@ class ModularSystem {
       this.currentFPS = this.frameCount;
       this.frameCount = 0;
       this.lastFPSUpdate = now;
-
-      // ⚠️ УБИРАЕМ ЭТОТ БЛОК - больше не пишем в debugInfo
-      // if (this.uiManager?.elements?.debugInfo) {
-      //     this.uiManager.elements.debugInfo.innerHTML = ...
-      // }
-
-      // Только для консоли если нужно
-      // console.log(`FPS: ${this.currentFPS}`);
     }
   }
 
@@ -1554,37 +1629,42 @@ class ModularSystem {
           return;
         }
 
-        // ⭐⭐⭐ ЗАГРУЖАЕМ МОДУЛЬ ЕСЛИ НУЖНО (НОВАЯ ЛОГИКА) ⭐⭐⭐
+        // main.js - исправленная часть addNewModuleAtPosition()
+
         if (!this.moduleFactory.moduleRegistry[moduleType]) {
-          console.log(`📂 Module ${moduleType} not in registry, trying to load...`);
-          
-          let loaded = false;
-          
-          // ⭐ Проверяем, является ли модуль пользовательским
-          const isUser = this.moduleFactory.isUserModule(moduleType);
-          
-          if (isUser) {
-            // Загружаем из modules/user/
-            loaded = await this.moduleFactory.loadUserModule(moduleType);
-          } else {
-            // Загружаем из modules/ (встроенные)
-            try {
-              const modulePath = `./modules/${moduleType}.js`;
-              const module = await import(/* @vite-ignore */ modulePath);
-              const moduleKey = Object.keys(module)[0];
-              if (moduleKey && module[moduleKey]) {
-                this.moduleFactory.registerModule(moduleType, module[moduleKey]);
-                loaded = true;
-              }
-            } catch (error) {
-              console.warn(`Failed to load module ${moduleType}:`, error);
+            console.log(`📂 Module ${moduleType} not in registry, trying to load...`);
+            
+            let loaded = false;
+            
+            // ⭐ Проверяем, является ли модуль пользовательским
+            const isUser = await this.moduleFactory.isUserModule(moduleType);
+            console.log(`  isUser: ${isUser}, moduleType: ${moduleType}`);
+            
+            if (isUser) {
+                // ⭐ ПОЛЬЗОВАТЕЛЬСКИЙ → загружаем через API
+                // console.log(`📂 Loading user module: ${moduleType}`);
+                loaded = await this.moduleFactory.loadUserModule(moduleType);
+            } else {
+                // ⭐ ВСТРОЕННЫЙ → загружаем из ./modules/
+                // console.log(`📂 Loading built-in module: ${moduleType}`);
+                try {
+                    const modulePath = `./modules/${moduleType}.js`;
+                    const module = await import(/* @vite-ignore */ modulePath);
+                    const moduleKey = Object.keys(module)[0];
+                    if (moduleKey && module[moduleKey]) {
+                        this.moduleFactory.registerModule(moduleType, module[moduleKey]);
+                        loaded = true;
+                        // console.log(`✅ Built-in module registered: ${moduleType}`);
+                    }
+                } catch (error) {
+                    console.warn(`Failed to load built-in module ${moduleType}:`, error);
+                }
             }
-          }
-          
-          if (!loaded) {
-            this.showNotification(`❌ Модуль ${moduleType} не найден`);
-            return;
-          }
+            
+            if (!loaded) {
+                this.showNotification(`❌ Модуль ${moduleType} не найден`);
+                return;
+            }
         }
 
         // Получаем определение модуля
@@ -1647,6 +1727,7 @@ class ModularSystem {
             defaultMode: moduleDef.mode || [],
             inlets: moduleDef.inputs || 1,
             outlets: moduleDef.outputs || 1,
+            isUser: moduleDef.isUser === true,
           });
           newModule.typeID = moduleType;
 
@@ -1659,6 +1740,20 @@ class ModularSystem {
             this.patchLoader.moduleMap.byLayer[layerName].push(newModule);
           }
 
+
+          // ⭐ Регистрируем LED-каналы
+          if (this.csoundEngine && newModule.components) {
+              const leds = newModule.components.filter(c => c.constructor.name === 'LED');
+              leds.forEach(led => {
+                  if (led.sourceComponentId === null || led.sourceComponentId === undefined) return;
+                  
+                  const channelName = `led_${newModule.title}_${newModule.jsonId}_${led.id}`;
+                  led.sourceChannel = channelName;
+                  this.csoundEngine.registerLedChannel(channelName);
+                  console.log(`💡 Registered LED channel: ${channelName}`);
+              });
+          }
+
           this.sortComponentsByZIndex();
           this.showNotification(
             `✅ ${moduleDef.displayName || moduleType} добавлен в (${gridX}, ${gridY})`,
@@ -1668,11 +1763,10 @@ class ModularSystem {
           this._cablesDirty = true;
 
           // После добавления модуля:
-          if (csound !== null) {
-              await this.updateCsoundPatch();
+          if (this.csoundEngine.state === 'running') {
+              this._recompileDebounced();
           }
-
-          console.log(`✅ МОДУЛЬ УСПЕШНО ДОБАВЛЕН В (${gridX}, ${gridY})!`);
+          //console.log(`✅ МОДУЛЬ УСПЕШНО ДОБАВЛЕН В (${gridX}, ${gridY})!`);
         }
       } catch (error) {
         console.error(`Ошибка при создании модуля ${moduleType}:`, error);
@@ -1769,16 +1863,6 @@ class ModularSystem {
     if (!layer) return;
 
     this.ctx.save();
-    // this.ctx.beginPath();
-    // this.ctx.rect(layer.x, layer.y, layer.width, layer.visibleHeight);
-    // this.ctx.clip();
-
-    // Фон слоя
-    // const bgColor = layerName === 'voice'
-    //     ? 'rgba(75, 80, 75, 0.7)'
-    //     : 'rgba(80, 75, 75, 0.7)';
-    // this.ctx.fillStyle = bgColor;
-    // this.ctx.fillRect(layer.x, layer.y, layer.width, layer.totalHeight);
 
     this.layerManager.updateBackgroundCache(); // обновит только если нужно
     const cache = this.layerManager.backgroundCache[layerName];
@@ -1792,15 +1876,17 @@ class ModularSystem {
       );
     }
 
-    // СЕТКА - используем кеш (всегда, без условий)
-    const gridCache = this.layerManager.getGridCache(
-      layerName,
-      this.offsetX,
-      this.offsetY,
-      this.scale,
-    );
-    if (gridCache) {
-      this.ctx.drawImage(gridCache, 0, 0);
+    // СЕТКА - только если включена
+    if (this.showGrid) {
+        const gridCache = this.layerManager.getGridCache(
+            layerName,
+            this.offsetX,
+            this.offsetY,
+            this.scale,
+        );
+        if (gridCache) {
+            this.ctx.drawImage(gridCache, 0, 0);
+        }
     }
 
     // Рисуем модули этого слоя с учетом скролла
@@ -2011,237 +2097,6 @@ class ModularSystem {
     this.ctx.restore();
   }
 
-  // ========== CSOUND METHODS ==========
-
-  async testCsound() {
-      console.log('🔊 TEST CSOUND');
-      
-      try {
-          if (!this._isCsoundReady()) {
-              console.log('  Csound not ready, initializing...');
-              await this.initCsound();
-              if (!this._isCsoundReady()) {
-                  this.showNotification('❌ Csound not available');
-                  return;
-              }
-              await new Promise(r => setTimeout(r, 200));
-          }
-          
-          console.log('  Sending note...');
-          await window.csound.inputMessage('i1 0 -1 0.3 440');
-          this.showNotification('🔊 Playing test note (440Hz)');
-          console.log('✅ Note sent');
-          
-      } catch (error) {
-          console.error('❌ Test error:', error);
-          this.showNotification('❌ Playback error: ' + error.message);
-          // Если ошибка — пробуем перезапустить
-          window.csound = null;
-          this.csound = null;
-          await this.initCsound();
-      }
-  }
-
-  async playNote() {
-      try {
-          if (!this._isCsoundReady()) {
-              console.log('⚠️ Csound not ready, reinitializing...');
-              await this.initCsound();
-              if (!this._isCsoundReady()) {
-                  this.showNotification('❌ Csound not available');
-                  return;
-              }
-              await new Promise(resolve => setTimeout(resolve, 100));
-          }
-
-          await window.csound.inputMessage('i1 0 1 0.3 440');
-          this.showNotification('🎹 Note A4 (440Hz)');
-          
-      } catch (error) {
-          console.error('Csound note error:', error);
-          this.showNotification('❌ Note error: ' + error.message);
-          await this.initCsound();
-      }
-  }
-
-  async initCsound() {
-      console.log('🎵 INIT CSOUND');
-      
-      try {
-          // Если csound уже есть — сбрасываем
-          if (window.csound) {
-              console.log('  Csound exists, resetting...');
-              try {
-                  await window.csound.reset();
-              } catch (e) {
-                  console.log('  Reset failed, will create new');
-              }
-              window.csound = null;
-              this.csound = null;
-          }
-          
-          this.uiManager.updateCsoundStatus('INITIALIZING...', '#ff0');
-          
-          // Создаём Csound
-          console.log('  Creating Csound...');
-          const { Csound } = await import('https://www.unpkg.com/@csound/browser@6.18.7/dist/csound.js');
-          const newCsound = await Csound();
-          window.csound = newCsound;
-          this.csound = newCsound;
-          console.log('  Csound created');
-          
-          // Настройка
-          console.log('  Setting options...');
-          await newCsound.setOption('-odac');
-          
-          // Генерируем и компилируем код
-          console.log('  Generating ORC...');
-          const orcCode = await this.csoundGen.generateOrc();
-          console.log('  ORC length:', orcCode.length);
-          console.log('  Compiling ORC...');
-          await newCsound.compileOrc(orcCode);
-          console.log('  ORC compiled');
-          
-          // Запускаем
-          console.log('  Starting Csound...');
-          await newCsound.start();
-          console.log('✅ Csound started!');
-          
-          this.uiManager.updateCsoundStatus('RUNNING', '#8f8');
-          this.uiManager.updateCsoundInfo('Csound running');
-          this.showNotification('✅ Csound initialized!');
-          
-      } catch (error) {
-          console.error('❌ Csound init error:', error);
-          this.uiManager.updateCsoundStatus('ERROR', '#f44');
-          this.showNotification('❌ Csound error: ' + error.message);
-          window.csound = null;
-          this.csound = null;
-      }
-  }
-
-  async stopCsound() {
-      console.log('⏹ STOP CSOUND');
-      
-      try {
-          if (window.csound) {
-              console.log('  Stopping Csound...');
-              // Просто сбрасываем и удаляем
-              try {
-                  await window.csound.reset();
-              } catch (e) {
-                  console.log('  Reset error:', e.message);
-              }
-              window.csound = null;
-              this.csound = null;
-              console.log('✅ Csound stopped');
-          } else {
-              console.log('  Csound already null');
-          }
-          
-          this.uiManager.updateCsoundStatus('STOPPED', '#f80');
-          this.showNotification('⏹ Csound stopped');
-          
-      } catch (error) {
-          console.error('❌ Stop error:', error);
-          window.csound = null;
-          this.csound = null;
-          this.uiManager.updateCsoundStatus('ERROR', '#f44');
-      }
-  }
-
-  // Проверка готовности Csound
-  _isCsoundReady() {
-      return window.csound !== null && 
-             window.csound !== undefined &&
-             typeof window.csound.inputMessage === 'function';
-  }
-
-  async updateCsoundPatch() {
-      console.log('🔄 updateCsoundPatch CALLED');
-      
-      // Просто переинициализируем Csound
-      await this.initCsound();
-      
-      // И воспроизводим ноту
-      if (this._isCsoundReady()) {
-          try {
-              await window.csound.inputMessage('i1 0 -0.5 0.3 440');
-              console.log('✅ Patch updated and note playing');
-          } catch (e) {
-              console.log('Note not played');
-          }
-      }
-  }
-
-  /**
-   * Восстановление Csound после ошибки
-   */
-  async recoverCsound() {
-      console.log('🔄 Attempting to recover Csound...');
-      
-      try {
-          // Полная очистка
-          if (window.csound) {
-              try {
-                  await window.csound.reset();
-              } catch (e) {}
-              window.csound = null;
-              this.csound = null;
-          }
-          
-          // Ждём
-          await new Promise(resolve => setTimeout(resolve, 500));
-          
-          // Перезапускаем
-          await this.initCsound();
-          this.showNotification('✅ Csound recovered!');
-      } catch (error) {
-          console.error('❌ Recovery failed:', error);
-          this.showNotification('❌ Please refresh the page');
-      }
-  }
-
-  updateCsoundStatus(text, color = '#fff') {
-    if (this.csoundStatus) {
-      this.csoundStatus.textContent = text;
-      this.csoundStatus.style.color = color;
-    }
-  }
-
-  // Метод для конвертации патча в Csound код
-  generateCsoundFromPatch() {
-    // TODO: Реализуй конвертацию модулей в Csound код
-    // Собирай код из всех активных модулей
-    let code = `
-sr = 44100
-ksmps = 128
-nchnls = 2
-0dbfs = 1
-
-${this.generateModuleCode()}  // Здесь будет код из модулей
-        `;
-    return code;
-  }
-
-  async playCurrentPatch() {
-    if (csound === null) {
-      await this.initCsound();
-    }
-
-    const patchCode = this.generateCsoundFromPatch();
-    await csound.compileOrc(patchCode);
-
-    // Запускаем все инструменты
-    this.components.forEach((panel, index) => {
-      if (panel.isSoundModule) {
-        csound.inputMessage(`i${100 + index} 0 10`);
-      }
-    });
-
-    this.showNotification('🎵 Playing current patch');
-  }
-  // ========== END CSOUND METHODS ==========
 }
 
 let modularSystem; // Объявляем глобально

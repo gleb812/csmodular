@@ -1,0 +1,7 @@
+opcode Zlfo, 0, k
+kOut1 xin
+kout1 oscil 0.5, 1
+kout1 += 0.5
+
+zkw kout1, kOut1
+endop

@@ -408,9 +408,13 @@ export class ModulePropertiesWindow {
                 compData.jackType = comp.type || 'audio';
                 compData.bandwidth = 'dynamic';
                 compData.ConnectorName = comp.label || (comp.constructor.name === 'Input' ? 'In' : 'Out');
-                compData.ConnectorIndex = this.app.components.filter(c => 
-                    c.constructor.name === comp.constructor.name && c !== comp
-                ).length;
+                
+                // ⭐ Позиция этого компонента среди компонентов того же типа.
+                // Для трёх Output'ов: 0, 1, 2. НЕ количество остальных!
+                const sameTypeComponents = this.app.components.filter(c => 
+                    c.constructor.name === comp.constructor.name
+                );
+                compData.ConnectorIndex = sameTypeComponents.indexOf(comp);
             } else if (comp.constructor.name === 'Slider') {
                 compData.width = comp.width || 10;
                 compData.height = comp.height || 60;
@@ -418,8 +422,20 @@ export class ModulePropertiesWindow {
                 compData.max = comp.max || 127;
                 compData.defaultValue = comp.value || 0;
             } else if (comp.constructor.name === 'LED') {
-                compData.width = comp.width || 20;
-                compData.height = comp.height || 10;
+                // ⭐ Свойства LED
+                if (typeof comp.getPropertiesForExport === 'function') {
+                    const ledProps = comp.getPropertiesForExport();
+                    Object.assign(compData, ledProps);
+                } else {
+                    compData.width = comp.width || 16;
+                    compData.height = comp.height || 10;
+                    if (comp.sourceComponentId !== null && comp.sourceComponentId !== undefined) {
+                        compData.sourceComponentId = String(comp.sourceComponentId);
+                    }
+                    if (comp.ledType) {
+                        compData.ledType = comp.ledType;
+                    }
+                }
             } else if (comp.constructor.name === 'LevelShift') {
                 compData.size = comp.sizeParam || 'small';
             } else if (comp.constructor.name === 'PartSelector') {
@@ -434,27 +450,49 @@ export class ModulePropertiesWindow {
             components.push(compData);
         }
         
+        // ⭐ Собираем params: все интерактивные компоненты (не джеки), по id
+        const params = this.app.components
+            .filter(c => !c._isNewDragging)
+            .filter(c => this._isParametricComponent(c.constructor.name))
+            .map(c => parseInt(c.id))
+            .filter(id => !isNaN(id))
+            .sort((a, b) => a - b);
+
         return {
             name: name,
             displayName: name,
             gridHeight: module.gridHeight || 3,
             type: name,
-            typeID: 999,
+            typeID: null,
             defaultParams: [],
             tooltip: name,
+            params: params,                 // ← НОВОЕ
             inputs: ports.inputs,
             outputs: ports.outputs,
             components: components
         };
     }
 
-// editor/ModulePropertiesWindow.js - обновлённый generateModuleCode()
+    _isParametricComponent(type) {
+        return [
+            'Knob',
+            'Slider',
+            'ButtonFlat',
+            'ButtonText',
+            'ButtonRadio',
+            'ButtonIncDec'
+        ].includes(type);
+    }
 
     generateModuleCode(moduleData) {
         const name = moduleData.name || 'NewModule';
         const componentsJSON = JSON.stringify(moduleData.components, null, 8);
         
-        // ⭐ Формируем строки для inputs и outputs
+        // ⭐ Строка для params
+        const paramsStr = moduleData.params && moduleData.params.length > 0
+            ? `    params: [${moduleData.params.join(', ')}],`
+            : '    params: [],';
+        
         const inputsStr = moduleData.inputs && moduleData.inputs.length > 0 
             ? `    inputs: [${moduleData.inputs.join(', ')}],`
             : '    inputs: [],';
@@ -464,20 +502,21 @@ export class ModulePropertiesWindow {
             : '    outputs: [],';
         
         return `// Автоматически сгенерированный модуль: ${name}
-    // Создан в Module Editor
+        // Создан в Module Editor
 
-    export const ${name}Module = {
-        type: '${name}',
-        typeID: ${moduleData.typeID || 999},
-        defaultParams: ${JSON.stringify(moduleData.defaultParams || [])},
-        displayName: '${moduleData.displayName || name}',
-        gridHeight: ${moduleData.gridHeight || 3},
-        originalName: '${name}',
-        tooltip: '${moduleData.tooltip || name}',
-    ${inputsStr}
-    ${outputsStr}
-        components: ${componentsJSON}
-    };`;
+        export const ${name}Module = {
+            type: '${name}',
+            typeID: ${moduleData.typeID || 999},
+            defaultParams: ${JSON.stringify(moduleData.defaultParams || [])},
+            displayName: '${moduleData.displayName || name}',
+            gridHeight: ${moduleData.gridHeight || 3},
+            originalName: '${name}',
+            tooltip: '${moduleData.tooltip || name}',
+        ${paramsStr}
+        ${inputsStr}
+        ${outputsStr}
+            components: ${componentsJSON}
+        };`;
     }
 
     downloadModule(code, name) {

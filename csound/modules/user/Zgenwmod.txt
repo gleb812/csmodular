@@ -1,0 +1,7 @@
+opcode Zgenwmod, 0, kk
+kIn1, kOut1 xin
+kin1 zkr kIn1
+
+aout1 vco2 0.5*kin1,220
+zaw aout1, kOut1
+endop

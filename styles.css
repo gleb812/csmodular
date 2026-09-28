@@ -28,3 +28,25 @@ body {
     height: 100vh;
     /* НЕТ background, border, border-radius */
 }
+
+#parallax-bg {
+    position: fixed;
+    top: -5%;
+    left: -5%;
+    width: 110%;
+    height: 110%;
+    background-image: url('/public/CKTvKS2V0xk.jpg');
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+    will-change: transform;
+    transition: transform 0.1s ease-out;
+    pointer-events: none;
+}
+
+#modularCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}

@@ -15,6 +15,6 @@
     "vite": "^7.2.4"
   },
   "dependencies": {
-    "@csound/browser": "^7.0.0-beta13"
+    
   }
 }

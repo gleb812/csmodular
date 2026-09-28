@@ -16,7 +16,7 @@ export default defineConfig({
     // Перенаправляем /editor на editor.html
     middleware: [
       (req, res, next) => {
-        if (req.url === '/editor') {
+        if (req.url === '/editor' || req.url === '/editor/') {
           req.url = '/editor/editor.html'
         }
         next()

@@ -21,7 +21,7 @@ export class ContextMenu {
         this.loadUserModules().then(() => {
             this._isLoaded = true;
             this.updateUserGroupsInLeftPanel();
-            console.log('✅ ContextMenu fully loaded');
+            //console.log('✅ ContextMenu fully loaded');
         });
     }
 
@@ -600,9 +600,9 @@ export class ContextMenu {
     }
     
     createModuleGroups() {
-        console.log('Creating module groups...');
-        console.log('this.moduleGroups:', this.moduleGroups);
-        console.log('Menu element exists:', !!this.menuElement);
+        //console.log('Creating module groups...');
+        //console.log('this.moduleGroups:', this.moduleGroups);
+        //console.log('Menu element exists:', !!this.menuElement);
         
         if (!this.menuElement) {
             console.error('Menu element not created yet!');
@@ -610,7 +610,7 @@ export class ContextMenu {
         }
         
         const container = this.menuElement.querySelector('#groups-container');
-        console.log('Container found:', !!container);
+        //console.log('Container found:', !!container);
         
         if (!container) {
             console.error('Groups container not found!');
@@ -882,7 +882,7 @@ export class ContextMenu {
             // Обновляем интерфейс
             this.updateMenuUI();
             
-            console.log(`✅ User module added: ${moduleName} -> ${category}`);
+            //console.log(`✅ User module added: ${moduleName} -> ${category}`);
             return true;
         }
         return false;
@@ -1212,12 +1212,8 @@ export class ContextMenu {
             if (arrow) arrow.textContent = '▼';
         }
         
-        console.log(`✅ User groups updated with ${realModules.length} modules`);
+        //console.log(`✅ User groups updated with ${realModules.length} modules`);
     }
-
-    // src/ui/ContextMenu.js - обновлённый loadUserModules()
-
-// src/ui/ContextMenu.js - проверь конец loadUserModules()
 
     async loadUserModules() {
         try {
@@ -1232,7 +1228,7 @@ export class ContextMenu {
             const data = await response.json();
             const modules = data.modules || [];
             
-            console.log(`📦 Found ${modules.length} user modules:`, modules);
+            //console.log(`📦 Found ${modules.length} user modules:`, modules);
             
             // Очищаем существующие пользовательские модули
             this.userModules = {
@@ -1254,7 +1250,7 @@ export class ContextMenu {
                     this._userModuleMap = {};
                 }
                 this._userModuleMap[moduleName] = moduleName;
-                console.log(`✅ Added user module: ${moduleName}`);
+                //console.log(`✅ Added user module: ${moduleName}`);
             }
             
             // Обновляем allModules
@@ -1264,12 +1260,11 @@ export class ContextMenu {
                 });
             });
             
-            // ⭐⭐⭐ ВАЖНО: ОБНОВЛЯЕМ UI ПОСЛЕ ЗАГРУЗКИ ⭐⭐⭐
             this.updateUserGroupsInLeftPanel();
             this.updateMenuUI();
             
-            console.log('✅ User modules loaded:', this.userModules);
-            console.log('✅ User module map:', this._userModuleMap);
+            //console.log('✅ User modules loaded:', this.userModules);
+            //console.log('✅ User module map:', this._userModuleMap);
             
         } catch (error) {
             console.error('❌ Error loading user modules:', error);
@@ -1367,7 +1362,7 @@ export class ContextMenu {
     }
     
     handleModuleSelect(moduleName) {
-        console.log(`Selected module: ${moduleName}`);
+       //console.log(`Selected module: ${moduleName}`);
         
         // Получаем координаты мыши из show() или используем центр canvas
         let targetLayer = 'voice';
@@ -1567,7 +1562,7 @@ export class ContextMenu {
     // Новый метод
     openModuleEditor() {
         // Открываем редактор в новой вкладке
-        window.open('/editor.html', '_blank');
+        window.open('/editor/editor.html', '_blank');
     }
 
 

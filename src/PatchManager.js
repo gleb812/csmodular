@@ -51,12 +51,10 @@ export class PatchManager {
 
       if (this.system && this.system.csoundGen) {
           this.system.csoundGen.addCable(cable);
-          //this.system.csoundGen.showFullCsd();
       }
       
-      // ⭐ Используем window.csound (глобальная переменная)
-      if (this.system && window.csound !== null) {
-          this.system.updateCsoundPatch().catch(e => console.error('Csound update error:', e));
+      if (this.system?.csoundEngine?.state === 'running') {
+          this.system._recompileDebounced();
       }
 
       return cable;
@@ -253,9 +251,8 @@ export class PatchManager {
               //this.system.csoundGen.showFullCsd();
           }
           
-          // ⭐ Обновляем Csound если он запущен
-          if (this.system && window.csound !== null) {
-              this.system.updateCsoundPatch().catch(e => console.error('Csound update error:', e));
+          if (this.system?.csoundEngine?.state === 'running') {
+              this.system._recompileDebounced();
           }
       }
   }
@@ -283,9 +280,8 @@ export class PatchManager {
           //this.system.csoundGen.showFullCsd();
       }
       
-      // ⭐ Обновляем Csound если он запущен
-      if (this.system && window.csound !== null) {
-          this.system.updateCsoundPatch().catch(e => console.error('Csound update error:', e));
+      if (this.system?.csoundEngine?.state === 'running') {
+          this.system._recompileDebounced();
       }
   }
 
