@@ -466,9 +466,10 @@ export class ModulePropertiesWindow {
             typeID: null,
             defaultParams: [],
             tooltip: name,
-            params: params,                 // ← НОВОЕ
+            params: params,                 
             inputs: ports.inputs,
             outputs: ports.outputs,
+            customColor: module.customColor || null,
             components: components
         };
     }
@@ -500,6 +501,10 @@ export class ModulePropertiesWindow {
         const outputsStr = moduleData.outputs && moduleData.outputs.length > 0 
             ? `    outputs: [${moduleData.outputs.join(', ')}],`
             : '    outputs: [],';
+
+        const customColorStr = moduleData.customColor 
+            ? `    customColor: '${moduleData.customColor}',`
+            : `    customColor: null,`;
         
         return `// Автоматически сгенерированный модуль: ${name}
         // Создан в Module Editor
@@ -512,6 +517,7 @@ export class ModulePropertiesWindow {
             gridHeight: ${moduleData.gridHeight || 3},
             originalName: '${name}',
             tooltip: '${moduleData.tooltip || name}',
+        ${customColorStr}
         ${paramsStr}
         ${inputsStr}
         ${outputsStr}

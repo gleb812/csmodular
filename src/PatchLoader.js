@@ -274,20 +274,26 @@ export class PatchLoader {
             }
         });
         
-        //console.log(`     parentModule set for ${parentModuleSetCount} components`);
-        
-        if (moduleDef.parameters) {
-                try {
-                    const parameters = JSON.parse(moduleDef.parameters);
-                    // Если последний параметр - строка, начинающаяся с #, это цвет
-                    const lastParam = parameters[parameters.length - 1];
-                    if (typeof lastParam === 'string' && lastParam.startsWith('#')) {
-                        module.customColor = lastParam;
-                    }
-                } catch (error) {
-                    // Игнорируем
+        if (moduleDef.customColor) {
+            // ⭐ Новый формат: отдельное поле
+            module.customColor = moduleDef.customColor;
+            //console.log(`🎨 Loaded color from customColor field: ${moduleDef.customColor}`);
+        } else if (moduleDef.parameters) {
+            // Fallback: старый формат — цвет в конце parameters
+            try {
+                const parameters = JSON.parse(moduleDef.parameters);
+                const lastParam = parameters[parameters.length - 1];
+                // ⭐ Принимаем hex, hsl, rgb
+                if (typeof lastParam === 'string' && (
+                    lastParam.startsWith('#') ||
+                    lastParam.startsWith('hsl') ||
+                    lastParam.startsWith('rgb')
+                )) {
+                    module.customColor = lastParam;
+                    //console.log(`🎨 Loaded color from parameters: ${lastParam}`);
                 }
-            }
+            } catch (error) {}
+        }
     }
     
     applyParameters(module, parametersString) {

@@ -95,13 +95,13 @@ export class Slider extends BaseComponent {
             this.isHovered = nowHovered;
             
             if (this.isHovered && !wasHovered) {
-                console.log("Slider: Mouse entered");
+                //console.log("Slider: Mouse entered");
                 this.clearTooltipTimeout();
                 this.tooltipTimeout = setTimeout(() => {
                     this.showTooltip = true;
                 }, 300);
             } else if (!this.isHovered && wasHovered) {
-                console.log("Slider: Mouse left");
+                //console.log("Slider: Mouse left");
                 this.hideTooltip();
             }
         }
@@ -111,7 +111,7 @@ export class Slider extends BaseComponent {
     
     // === ПРОСТОЙ CLICK И DRAG ===
     handleClick(x, y) {
-        console.log(`Slider handleClick: x=${x}, y=${y}, inside=${this.isPointInside(x, y)}`);
+        //console.log(`Slider handleClick: x=${x}, y=${y}, inside=${this.isPointInside(x, y)}`);
         
         if (this.isPointInside(x, y)) {
             this.startDrag(x, y);
@@ -131,7 +131,7 @@ export class Slider extends BaseComponent {
     }
     
     startDrag(x, y) {
-        console.log("Slider startDrag");
+        //console.log("Slider startDrag");
         this.isDragging = true;
         this.startValue = this.value;
         this.startMouseY = y;
@@ -141,7 +141,7 @@ export class Slider extends BaseComponent {
     
     handleDrag(x, y) {
         if (!this.isDragging) return;
-        console.log(`Slider handleDrag: y=${y}`);
+        //console.log(`Slider handleDrag: y=${y}`);
         this.updateFromMouse(x, y);
     }
     
@@ -151,13 +151,13 @@ export class Slider extends BaseComponent {
         const normalized = 1 - Math.max(0, Math.min(1, relativeY / this.height));
         const newValue = this.min + normalized * (this.max - this.min);
         
-        console.log(`Slider update: relativeY=${relativeY}, normalized=${normalized.toFixed(2)}, newValue=${newValue.toFixed(2)}`);
+        //console.log(`Slider update: relativeY=${relativeY}, normalized=${normalized.toFixed(2)}, newValue=${newValue.toFixed(2)}`);
         
         this.setValue(newValue);
     }
     
     endDrag() {
-        console.log("Slider endDrag");
+        //console.log("Slider endDrag");
         this.isDragging = false;
         
         // Через 0.5 сек скрываем тултип если не ховер

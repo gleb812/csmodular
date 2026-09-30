@@ -35,22 +35,22 @@ export class ModuleContextMenu {
   }
 
   show(module, x, y) {
-    console.log(
-      '🎯 ModuleContextMenu.show called with module:',
-      module,
-      'at',
-      x,
-      y,
-    );
+    // console.log(
+    //   '🎯 ModuleContextMenu.show called with module:',
+    //   module,
+    //   'at',
+    //   x,
+    //   y,
+    // );
     this.currentModule = module;
     this.updateMenuContent();
 
     // Проверяем, есть ли элемент в DOM
-    console.log(
-      'Menu element in DOM:',
-      document.body.contains(this.menuElement),
-    );
-    console.log('Menu element parent:', this.menuElement.parentNode);
+    // console.log(
+    //   'Menu element in DOM:',
+    //   document.body.contains(this.menuElement),
+    // );
+    // console.log('Menu element parent:', this.menuElement.parentNode);
 
     // Позиционируем
     this.menuElement.style.left = `${x}px`;
@@ -59,11 +59,11 @@ export class ModuleContextMenu {
 
     // Проверяем размеры и видимость
     const rect = this.menuElement.getBoundingClientRect();
-    console.log('Menu rect:', rect);
-    console.log(
-      'Menu computed style:',
-      window.getComputedStyle(this.menuElement),
-    );
+    // console.log('Menu rect:', rect);
+    // console.log(
+    //   'Menu computed style:',
+    //   window.getComputedStyle(this.menuElement),
+    // );
 
     // Закрываем другие меню
     if (this.system.contextMenu?.hide) this.system.contextMenu.hide();
@@ -76,11 +76,6 @@ export class ModuleContextMenu {
     }
   }
 
-  // src/ui/ModuleContextMenu.js - обновленный updateMenuContent()
-
-  // В ModuleContextMenu.js - обновленный updateMenuContent()
-
-  // В ModuleContextMenu.js - правильный updateMenuContent()
 
   updateMenuContent() {
     if (!this.currentModule) return;
@@ -261,11 +256,12 @@ export class ModuleContextMenu {
     this.currentModule.customColor = colorHex;
 
     // Перерисовываем
-    if (this.system) {
-      this.system.needsRedraw = true;
-      requestAnimationFrame(() => this.system.animate());
+    if (this.currentModule.layer === 'voice') {
+        this.system._voiceDirty = true;
+    } else {
+        this.system._fxDirty = true;
     }
-
+    this.system.forceRedraw?.();
     this.system.showNotification(`🎨 Panel color changed`);
 
     // 🚫 НЕ обновляем меню! Оно и так актуально

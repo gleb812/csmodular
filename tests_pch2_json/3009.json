@@ -1,0 +1,46 @@
+{
+  "filename": "export.json",
+  "modules": [
+    {
+      "name": "Zledtest",
+      "id": 1,
+      "type": "Zledtest",
+      "parameters": "[0,0,0,0,0,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 7
+    },
+    {
+      "name": "Zlfo",
+      "id": 2,
+      "type": "Zlfo",
+      "parameters": "[0,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 13
+    }
+  ],
+  "cables": [
+    {
+      "from": {
+        "module": "Zlfo",
+        "id": 2,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "Zledtest",
+        "id": 1,
+        "jack": 1,
+        "pin": "in"
+      },
+      "color": "#3b82f6",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    }
+  ],
+  "textpad": ""
+}

@@ -14,15 +14,6 @@ export class UIManager {
       modules: 0,
       cables: 0,
       fps: 0,
-      times: {
-        total: 0,
-        clear: 0,
-        drawVoice: 0,
-        drawFx: 0,
-        drawDivider: 0,
-        drawCables: 0,
-      },
-      profilerEnabled: false,
     };
 
     this.createUIContainer();
@@ -38,7 +29,6 @@ export class UIManager {
   // === НОВЫЙ МЕТОД: запускает обновления раз в 200 мс ===
   startPeriodicUpdates() {
     setInterval(() => this.updateBasicInfoIfNeeded(), 500);
-    setInterval(() => this.updateProfilerIfNeeded(), 1000);
   }
 
   // === ОБНОВЛЕНИЕ БАЗОВОЙ ИНФОРМАЦИИ (FPS, модули, кабели) ===
@@ -94,95 +84,6 @@ export class UIManager {
     basicDiv._fpsSpan.style.color = fpsColor;
     basicDiv._modulesSpan.textContent = modules;
     basicDiv._cablesSpan.textContent = cables;
-  }
-
-  // === ОБНОВЛЕНИЕ ПРОФАЙЛЕРА ===
-  updateProfilerIfNeeded() {
-    if (!this.elements.profilerMetrics || !this.system?.profiler) return;
-
-    const profiler = this.system.profiler;
-    const enabled = profiler.enabled;
-    const times = profiler.times || {};
-
-    if (
-      this.lastValues.profilerEnabled === enabled &&
-      this.lastValues.times.total === times.total &&
-      this.lastValues.times.clear === times.clear &&
-      this.lastValues.times.drawVoice === times.drawVoice &&
-      this.lastValues.times.drawFx === times.drawFx &&
-      this.lastValues.times.drawDivider === times.drawDivider &&
-      this.lastValues.times.drawCables === times.drawCables
-    ) {
-      return;
-    }
-
-    this.lastValues.profilerEnabled = enabled;
-    this.lastValues.times = { ...times };
-
-    const metricsDiv = this.elements.profilerMetrics;
-
-    if (!enabled) {
-      metricsDiv.innerHTML = `
-        <div style="grid-column: span 2; text-align: center; color: #666;">
-          ⚙️ Profiler disabled
-        </div>
-      `;
-      return;
-    }
-
-    const frameTime = times.total || 0;
-    let frameColor = '#6f6';
-    if (frameTime > 33) frameColor = '#f66';
-    else if (frameTime > 20) frameColor = '#ff6';
-    else if (frameTime > 16) frameColor = '#fa6';
-
-    const bottlenecks = [];
-    if (times.drawVoice > 10) bottlenecks.push('Voice');
-    if (times.drawFx > 10) bottlenecks.push('FX');
-    if (times.drawCables > 8) bottlenecks.push('Cables');
-
-    if (!metricsDiv._spans) {
-      metricsDiv.innerHTML = `
-        <div style="grid-column: span 2; margin-bottom: 4px;">
-          <span id="frameTimeSpan"></span>
-          <span id="bottleneckSpan" style="margin-left: 8px;"></span>
-        </div>
-        <div>Clear:</div><div id="clearSpan" style="text-align: right;"></div>
-        <div>Voice:</div><div id="voiceSpan" style="text-align: right;"></div>
-        <div>FX:</div><div id="fxSpan" style="text-align: right;"></div>
-        <div>Divider:</div><div id="dividerSpan" style="text-align: right;"></div>
-        <div>Cables:</div><div id="cablesSpan" style="text-align: right;"></div>
-      `;
-      metricsDiv._spans = {
-        frameTime: metricsDiv.querySelector('#frameTimeSpan'),
-        bottleneck: metricsDiv.querySelector('#bottleneckSpan'),
-        clear: metricsDiv.querySelector('#clearSpan'),
-        voice: metricsDiv.querySelector('#voiceSpan'),
-        fx: metricsDiv.querySelector('#fxSpan'),
-        divider: metricsDiv.querySelector('#dividerSpan'),
-        cables: metricsDiv.querySelector('#cablesSpan'),
-      };
-    }
-
-    const spans = metricsDiv._spans;
-    spans.frameTime.innerHTML = `⏱️ ${Math.round(frameTime)}ms`;
-    spans.frameTime.style.color = frameColor;
-
-    if (bottlenecks.length) {
-      spans.bottleneck.innerHTML = `⚠️ ${bottlenecks.join('/')}`;
-      spans.bottleneck.style.color = '#f66';
-    } else {
-      spans.bottleneck.innerHTML = '';
-    }
-
-    spans.clear.textContent = `${Math.round(times.clear || 0)}ms`;
-    spans.voice.textContent = `${Math.round(times.drawVoice || 0)}ms`;
-    spans.voice.style.color = times.drawVoice > 10 ? '#f66' : '#6f6';
-    spans.fx.textContent = `${Math.round(times.drawFx || 0)}ms`;
-    spans.fx.style.color = times.drawFx > 10 ? '#f66' : '#6f6';
-    spans.divider.textContent = `${Math.round(times.drawDivider || 0)}ms`;
-    spans.cables.textContent = `${Math.round(times.drawCables || 0)}ms`;
-    spans.cables.style.color = times.drawCables > 8 ? '#f66' : '#6f6';
   }
 
   // === ПЕРЕТАСКИВАНИЕ ПАНЕЛИ (draggable) ===
@@ -417,82 +318,39 @@ export class UIManager {
 
   // === ДЕБАГ ИНФОРМАЦИЯ ===
   createDebugInfo() {
-    const container = document.createElement('div');
-    container.style.cssText = `
-      margin-top: 15px;
-      padding: 10px;
-      background: #222;
-      border-radius: 4px;
-      font-size: 11px;
-      font-family: monospace;
-      max-height: 250px;
-      overflow-y: auto;
-    `;
+      const container = document.createElement('div');
+      container.style.cssText = `
+        margin-top: 15px;
+        padding: 10px;
+        background: #222;
+        border-radius: 4px;
+        font-size: 11px;
+        font-family: monospace;
+      `;
 
-    const header = document.createElement('div');
-    header.style.cssText = `
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-      padding-bottom: 4px;
-      border-bottom: 1px solid #444;
-    `;
+      const title = document.createElement('div');
+      title.textContent = '📊 SYSTEM INFO';
+      title.style.cssText = `
+        color: #0af;
+        margin-bottom: 8px;
+        padding-bottom: 4px;
+        border-bottom: 1px solid #444;
+      `;
 
-    const title = document.createElement('span');
-    title.textContent = '📊 SYSTEM INFO';
-    title.style.color = '#0af';
+      this.elements.basicInfo = document.createElement('div');
+      this.elements.basicInfo.style.cssText = `
+        background: #1a1a1a;
+        padding: 6px;
+        border-radius: 3px;
+        font-weight: bold;
+      `;
 
-    const toggleBtn = document.createElement('button');
-    toggleBtn.textContent = 'Toggle Profiler';
-    toggleBtn.style.cssText = `
-      background: #333;
-      border: 1px solid #555;
-      color: #0af;
-      padding: 2px 8px;
-      border-radius: 3px;
-      cursor: pointer;
-      font-size: 9px;
-    `;
+      container.appendChild(title);
+      container.appendChild(this.elements.basicInfo);
 
-    toggleBtn.onclick = () => {
-      if (this.system.toggleProfiler) {
-        const enabled = this.system.toggleProfiler();
-        toggleBtn.style.color = enabled ? '#0f0' : '#f00';
-        toggleBtn.textContent = enabled ? 'Profiler ON' : 'Profiler OFF';
-        this.lastValues.profilerEnabled = !enabled;
-      }
-    };
-
-    header.appendChild(title);
-    header.appendChild(toggleBtn);
-
-    this.elements.basicInfo = document.createElement('div');
-    this.elements.basicInfo.style.cssText = `
-      background: #1a1a1a;
-      padding: 6px;
-      border-radius: 3px;
-      margin-bottom: 8px;
-      font-weight: bold;
-    `;
-
-    this.elements.profilerMetrics = document.createElement('div');
-    this.elements.profilerMetrics.style.cssText = `
-      background: #1a1a1a;
-      padding: 6px;
-      border-radius: 3px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4px;
-    `;
-
-    container.appendChild(header);
-    container.appendChild(this.elements.basicInfo);
-    container.appendChild(this.elements.profilerMetrics);
-
-    this.elements.debugInfo = container;
-    this.container.appendChild(container);
+      this.elements.debugInfo = container;
+      this.container.appendChild(container);
   }
-
   // === ПРОСТЫЕ МЕТОДЫ ОБНОВЛЕНИЯ ===
   updateZoomInfo(scale) {
     if (this.elements.zoomInfo) {

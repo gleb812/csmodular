@@ -64,7 +64,7 @@ export class ButtonFlat extends BaseComponent {
     // ПРОСТОЙ обработчик клика
     handleClick(x, y) {
         if (this.isPointInside(x, y)) {
-            console.log(`🟦 ButtonFlat.handleClick at (${x}, ${y})`);
+            //console.log(`🟦 ButtonFlat.handleClick at (${x}, ${y})`);
             
             // Переключаем позицию
             this.currentIndex = (this.currentIndex + 1) % this.positions.length;
@@ -89,7 +89,7 @@ export class ButtonFlat extends BaseComponent {
                 this.onChange(this.currentIndex, this.currentLabel);
             }
             
-            console.log(`ButtonFlat clicked: ${this.currentLabel} (index: ${this.currentIndex})`);
+            //console.log(`ButtonFlat clicked: ${this.currentLabel} (index: ${this.currentIndex})`);
             
             // Возвращаем результат
             return {
@@ -108,14 +108,14 @@ export class ButtonFlat extends BaseComponent {
         this.isHovered = this.isPointInside(x, y);
         
         // Логируем только изменение состояния
-        if (wasHovered !== this.isHovered) {
-            console.log(`🎯 ButtonFlat "${this.currentLabel}":`, {
-                state: this.isHovered ? 'HOVERED' : 'UNHOVERED',
-                coordinates: `(${this.x}, ${this.y})`,
-                mouse: `(${x}, ${y})`,
-                isInside: this.isPointInside(x, y) ? '✅' : '❌'
-            });
-        }
+        // if (wasHovered !== this.isHovered) {
+        //     console.log(`🎯 ButtonFlat "${this.currentLabel}":`, {
+        //         state: this.isHovered ? 'HOVERED' : 'UNHOVERED',
+        //         coordinates: `(${this.x}, ${this.y})`,
+        //         mouse: `(${x}, ${y})`,
+        //         isInside: this.isPointInside(x, y) ? '✅' : '❌'
+        //     });
+        // }
         
         return wasHovered !== this.isHovered;
     }

@@ -727,7 +727,14 @@ export class EditorApp {
         this.module.width = gridWidth * GRID_UNITS.X;
         this.module.height = gridHeight * GRID_UNITS.Y;
         this.module.title = moduleData.displayName || moduleData.type || 'Module';
-        
+
+        // ⭐ Цвет модуля из данных
+        if (moduleData.customColor) {
+            this.module.customColor = moduleData.customColor;
+        } else {
+            this.module.customColor = null;
+        }
+
         // ⭐ 3. Восстанавливаем компоненты
         const components = moduleData.components || [];
         

@@ -46,13 +46,11 @@ export class Knob extends BaseComponent {
         
         this.onChange = null;
         this._changeListeners = [];
-
         // Тултип
         this.showTooltip = false;
         this.tooltipTimeout = null;
         this.tooltipDelay = 300;
-
-        console.log(`🌀 Knob created: value = ${this.value}, infoFunc = ${this.infoFunc}`);
+        //console.log(`🌀 Knob created: value = ${this.value}, infoFunc = ${this.infoFunc}`);
     }
 
     draw(ctx) {
@@ -152,7 +150,7 @@ export class Knob extends BaseComponent {
     
     handleClick(x, y) {
         if (this.isPointInside(x, y)) {
-            console.log(`🌀 Knob clicked: infoFunc = ${this.infoFunc}`);
+            //console.log(`🌀 Knob clicked: infoFunc = ${this.infoFunc}`);
             
             // Начинаем перетаскивание
             this.startKnobDrag(x, y);

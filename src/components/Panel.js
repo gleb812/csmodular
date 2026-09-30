@@ -331,9 +331,9 @@ export class Panel {
         this.gridY = targetGridY;
         // ===== ДОБАВИТЬ =====
         this.setDirty(true);
-      } else {
-        console.log(`     ❌ Collision at: [${targetGridX}, ${targetGridY}]`);
-      }
+      } //else {
+        //console.log(`     ❌ Collision at: [${targetGridX}, ${targetGridY}]`);
+      //}
     } else {
       // Без проверки
       this.gridX = targetGridX;

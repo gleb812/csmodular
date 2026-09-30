@@ -1,0 +1,29 @@
+{
+  "filename": "my_patch.json",
+  "modules": [
+    {
+      "name": "Digitizer",
+      "id": 1,
+      "type": 0,
+      "parameters": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 11,
+      "customColor": "hsl(270, 80%, 60%)"
+    },
+    {
+      "name": "zcolor",
+      "id": 2,
+      "type": "zcolor",
+      "parameters": "[0,0,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 8,
+      "customColor": "hsl(0, 80%, 60%)"
+    }
+  ],
+  "cables": [],
+  "textpad": ""
+}

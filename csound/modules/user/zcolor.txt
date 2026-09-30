@@ -1,0 +1,9 @@
+opcode zcolor, 0, kk
+kIn1, kOut1 xin
+ain1 zar kIn1
+kout1 init 0
+
+; --- module body ---
+; Add your DSP code here
+zkw kout1, kOut1
+endop

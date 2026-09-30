@@ -1,0 +1,27 @@
+{
+  "filename": "export.json",
+  "modules": [
+    {
+      "name": "zcolor",
+      "id": 1,
+      "type": "zcolor",
+      "parameters": "[0,0,0,\"hsl(180, 80%, 45%)\"]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 11
+    },
+    {
+      "name": "Zgen",
+      "id": 2,
+      "type": "Zgen",
+      "parameters": "[0,0,0,0,\"hsl(315, 80%, 60%)\"]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 7
+    }
+  ],
+  "cables": [],
+  "textpad": ""
+}

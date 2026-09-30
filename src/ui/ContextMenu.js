@@ -68,12 +68,123 @@ export class ContextMenu {
         });
     }
 
+    searchAllModules(searchTerm) {
+        const modulesContainer = this.menuElement.querySelector('#modules-container');
+        if (!modulesContainer) return;
+        
+        const searchLower = searchTerm.toLowerCase().trim();
+        modulesContainer.innerHTML = '';
+        
+        if (searchLower === '') {
+            // Пустой поиск — вернуть активную группу
+            const activeGroup = this.menuElement.querySelector('.group-item[style*="border-left-color"]');
+            if (activeGroup) {
+                this.showModulesForGroup(activeGroup.dataset.group);
+            }
+            return;
+        }
+        
+        // Собираем все совпадения
+        const results = [];
+        
+        // NM2 модули
+        Object.entries(this.nm2Modules).forEach(([groupName, modules]) => {
+            modules.forEach(m => {
+                if (m.toLowerCase().includes(searchLower)) {
+                    results.push({ name: m, group: groupName, level: 'nm2' });
+                }
+            });
+        });
+        
+        // User модули
+        Object.entries(this.userModules).forEach(([groupName, modules]) => {
+            modules.forEach(m => {
+                if (m.toLowerCase().includes(searchLower)) {
+                    results.push({ name: m, group: groupName, level: 'user' });
+                }
+            });
+        });
+        
+        // Пусто — ничего не найдено
+        if (results.length === 0) {
+            const emptyMsg = document.createElement('div');
+            emptyMsg.textContent = `No modules found matching "${searchTerm}"`;
+            emptyMsg.style.cssText = `
+                padding: 20px;
+                text-align: center;
+                color: #666;
+                font-size: 11px;
+                font-style: italic;
+            `;
+            modulesContainer.appendChild(emptyMsg);
+            return;
+        }
+        
+        // Заголовок результата
+        const resultHeader = document.createElement('div');
+        resultHeader.style.cssText = `
+            padding: 6px 12px;
+            font-size: 10px;
+            color: #666;
+            border-bottom: 1px solid #333;
+            margin-bottom: 4px;
+        `;
+        resultHeader.textContent = `Found ${results.length} module(s)`;
+        modulesContainer.appendChild(resultHeader);
+        
+        // Выводим совпадения
+        results.forEach(({ name, group, level }) => {
+            const moduleItem = document.createElement('div');
+            moduleItem.className = 'module-item';
+            moduleItem.style.cssText = `
+                padding: 4px 12px;
+                font-size: 11px;
+                color: #ccc;
+                cursor: pointer;
+                user-select: none;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                min-height: 24px;
+            `;
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = (level === 'user' ? '★ ' : '') + name;
+            if (level === 'user') {
+                nameSpan.style.color = '#0af';
+            }
+            
+            const groupSpan = document.createElement('span');
+            groupSpan.textContent = group;
+            groupSpan.style.cssText = `
+                font-size: 9px;
+                color: #555;
+                font-style: italic;
+            `;
+            
+            moduleItem.appendChild(nameSpan);
+            moduleItem.appendChild(groupSpan);
+            
+            moduleItem.onmouseenter = () => {
+                moduleItem.style.background = '#2a2a2a';
+            };
+            moduleItem.onmouseleave = () => {
+                moduleItem.style.background = 'transparent';
+            };
+            moduleItem.onclick = () => {
+                this.handleModuleSelect(name);
+            };
+            
+            modulesContainer.appendChild(moduleItem);
+        });
+    }
+
     createMenuElement() {
         this.menuElement = document.createElement('div');
         this.menuElement.id = 'context-menu';
         this.menuElement.style.cssText = `
             position: fixed;
-            width: 550px;
+            width: 600px;
             height: 400px;
             background: #1a1a1a;
             border: 1px solid #333;
@@ -409,7 +520,7 @@ export class ContextMenu {
                 min-height: 24px;
             `;
             
-            moduleItem.textContent = moduleName;
+            moduleItem.textContent = isUser ? '★ ' + moduleName : moduleName;
             
             moduleItem.onmouseenter = () => {
                 moduleItem.style.background = '#2a2a2a';
@@ -960,17 +1071,22 @@ export class ContextMenu {
         if (this.searchInput) {
             // Поиск при вводе (новая логика)
             this.searchInput.addEventListener('input', () => {
-                // Получаем активную группу
-                const activeGroup = this.menuElement.querySelector('.group-item[style*="border-left-color"]');
-                if (activeGroup) {
-                    const groupName = activeGroup.dataset.group;
-                    this.showModulesForGroup(groupName);
-                } else {
-                    // Если нет активной группы, показываем первую
-                    const firstGroup = Object.keys(this.moduleGroups)[0];
-                    if (firstGroup) {
-                        this.showModulesForGroup(firstGroup);
+                const searchTerm = this.searchInput.value;
+                
+                if (searchTerm.trim() === '') {
+                    // Пусто — вернуть активную группу
+                    const activeGroup = this.menuElement.querySelector('.group-item[style*="border-left-color"]');
+                    if (activeGroup) {
+                        this.showModulesForGroup(activeGroup.dataset.group);
+                    } else {
+                        const firstGroup = Object.keys(this.moduleGroups)[0];
+                        if (firstGroup) {
+                            this.showModulesForGroup(firstGroup);
+                        }
                     }
+                } else {
+                    // ⭐ Ищем по всем модулям
+                    this.searchAllModules(searchTerm);
                 }
             });
             
@@ -1217,7 +1333,7 @@ export class ContextMenu {
 
     async loadUserModules() {
         try {
-            console.log('📂 Loading user modules...');
+            //console.log('📂 Loading user modules...');
             
             const response = await fetch('/api/list-user-modules');
             if (!response.ok) {

@@ -1,0 +1,27 @@
+{
+  "filename": "color(1).json",
+  "modules": [
+    {
+      "name": "zcolor",
+      "id": 1,
+      "type": 0,
+      "parameters": "[0,0,0,\"hsl(135, 80%, 45%)\"]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 1,
+      "vpos": 13
+    },
+    {
+      "name": "Zgen",
+      "id": 2,
+      "type": 0,
+      "parameters": "[0,0,0,0,\"hsl(315, 80%, 30%)\"]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 2,
+      "vpos": 13
+    }
+  ],
+  "cables": [],
+  "textpad": ""
+}

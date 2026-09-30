@@ -197,7 +197,7 @@ export class ModuleFactory {
             if (response.ok) {
                 const data = await response.json();
                 this._userModuleNames = data.modules || [];
-                console.log(`📂 Loaded ${this._userModuleNames.length} user module names:`, this._userModuleNames);
+                //console.log(`📂 Loaded ${this._userModuleNames.length} user module names:`, this._userModuleNames);
             } else {
                 this._userModuleNames = [];
             }
@@ -229,14 +229,18 @@ export class ModuleFactory {
         }
         // Генерируем уникальный ID
         const moduleId = `${type}_${this.nextModuleId++}`;
-        
-        // Создаем панель с grid координатами
+                
         const panel = new Panel(gridX, gridY, gridWidth, gridHeight, definition.displayName || type);
-        
+
         // Устанавливаем свойства
         panel.moduleId = moduleId;
         panel.layer = layer;
         panel.parentSystem = this.parentSystem;
+
+        // ⭐ Читаем цвет из definition
+        if (definition.customColor) {
+            panel.customColor = definition.customColor;
+        }
         
         // Создаем компоненты 
         this._addComponentsToPanel(panel, definition.components);

@@ -193,7 +193,7 @@ i3 0 [60*60*24*7]
                 if (response.ok) {
                     const content = await response.text();
                     udoContents.push(content);
-                    console.log(`✅ Loaded UDO: ${filename}`);
+                    //console.log(`✅ Loaded UDO: ${filename}`);
                 } else {
                     console.warn(`⚠️ UDO file not found: ${filename}`);
                     udoContents.push(`; UDO ${filename} not found\nopcode ${filename.replace('.txt', '')}, 0, 0\n; empty\nendop`);
@@ -461,7 +461,7 @@ i3 0 [60*60*24*7]
         this._audioBusCount = 2 + audioCount;
         this._controlBusCount = 2 + controlCount;
         
-        console.log(`🎛️ zakinit: audio=${this._audioBusCount} (2 + ${audioCount}), control=${this._controlBusCount} (2 + ${controlCount})`);
+        //console.log(`🎛️ zakinit: audio=${this._audioBusCount} (2 + ${audioCount}), control=${this._controlBusCount} (2 + ${controlCount})`);
     }
     
     /**
@@ -469,7 +469,7 @@ i3 0 [60*60*24*7]
      */
     _getCableType(cable) {
         const color = cable.getDisplayColor ? cable.getDisplayColor() : cable.color;
-        console.log(`🔍 Getting cable type for color: ${color}`);
+        //console.log(`🔍 Getting cable type for color: ${color}`);
         
         // Audio цвета
         const audioColors = ['#ef4444', '#ff0000', '#ff4444', '#ff6b6b', '#ff8800', '#ffa500', '#ff8c00'];
@@ -485,14 +485,14 @@ i3 0 [60*60*24*7]
         
         for (const audioColor of audioColors) {
             if (colorLower === audioColor.toLowerCase()) {
-                console.log(`  ✅ Color ${color} is AUDIO`);
+                //console.log(`  ✅ Color ${color} is AUDIO`);
                 return 'audio';
             }
         }
         
         for (const controlColor of controlColors) {
             if (colorLower === controlColor.toLowerCase()) {
-                console.log(`  ✅ Color ${color} is CONTROL`);
+                //console.log(`  ✅ Color ${color} is CONTROL`);
                 return 'control';
             }
         }
@@ -538,7 +538,7 @@ i3 0 [60*60*24*7]
 
 
     addModule(moduleData) {
-        console.log('🎯 addModule called with:', moduleData);
+        //console.log('🎯 addModule called with:', moduleData);
         
         const { 
             typeId,           // ← это может быть строка ("Noise") или число (31)
@@ -561,7 +561,7 @@ i3 0 [60*60*24*7]
         // Если есть определение, берём typeID из него
         if (moduleDef && moduleDef.typeID !== undefined) {
             numericTypeId = moduleDef.typeID;
-            console.log(`  🔢 Found typeID in definition: ${numericTypeId}`);
+            //console.log(`  🔢 Found typeID in definition: ${numericTypeId}`);
         } else {
             // Пробуем найти typeID в модулях по имени
             const registry = this.system?.moduleFactory?.moduleRegistry;
@@ -569,7 +569,7 @@ i3 0 [60*60*24*7]
                 for (const [key, def] of Object.entries(registry)) {
                     if (key === typeId && def.typeID !== undefined) {
                         numericTypeId = def.typeID;
-                        console.log(`  🔢 Found typeID by key match: ${numericTypeId}`);
+                        //console.log(`  🔢 Found typeID by key match: ${numericTypeId}`);
                         break;
                     }
                 }
@@ -588,7 +588,7 @@ i3 0 [60*60*24*7]
 
         if (!this.includes.has(filename)) {
             this.includes.add(filename);
-            this.log(`📄 Added include: ${filename}`);
+            //this.log(`📄 Added include: ${filename}`);
         }
         // Сохраняем модуль с правильным typeId
         const moduleKey = `${instanceName}_${instanceId}`;
@@ -608,9 +608,8 @@ i3 0 [60*60*24*7]
             udoPath: filename,
         });
         
-        console.log('  ✅ Module saved with numericTypeId:', numericTypeId);
-        this.log(`✅ Added module: ${moduleKey} (${layer})`);
-        //this.showFullCsd();
+        //console.log('  ✅ Module saved with numericTypeId:', numericTypeId);
+        //this.log(`✅ Added module: ${moduleKey} (${layer})`);
     }
     
     removeModule(instanceId, instanceName, typeId, layer) {
@@ -647,7 +646,7 @@ i3 0 [60*60*24*7]
         const orc = await this.generateOrc();
         return `<CsoundSynthesizer>
     <CsOptions>
-    -odac ;-d
+    -odac -d -m16
     </CsOptions>
     <CsInstruments>
     ${orc}
@@ -661,7 +660,7 @@ i3 0 [60*60*24*7]
     }
     
     formatModuleLine(module) {
-        console.log('🎯 formatModuleLine called with:', module);
+        //console.log('🎯 formatModuleLine called with:', module);
         
         const {
             instanceName,
@@ -685,23 +684,23 @@ i3 0 [60*60*24*7]
             moduleName = moduleDef.type;
         }
         
-        console.log(`  📛 Module name: ${moduleName} (typeID: ${numericTypeId})`);
+        //console.log(`  📛 Module name: ${moduleName} (typeID: ${numericTypeId})`);
         
         // ⭐ ID входов/выходов из определения модуля
         const inputIds = moduleDef?.inputs || [];
         const outputIds = moduleDef?.outputs || [];
         
-        console.log(`  📊 Input IDs:`, inputIds);
-        console.log(`  📊 Output IDs:`, outputIds);
+        //console.log(`  📊 Input IDs:`, inputIds);
+        //console.log(`  📊 Output IDs:`, outputIds);
         
         // ⭐ Для каждого ID входа — ищем кабель
         const inletBuses = inputIds.map(id => {
             const cable = this._findCableForPort(instanceId, id, 'input');
             if (cable && this._cableBusMap[cable.id] !== undefined) {
-                console.log(`  🔗 Input id=${id} → bus ${this._cableBusMap[cable.id]}`);
+                //console.log(`  🔗 Input id=${id} → bus ${this._cableBusMap[cable.id]}`);
                 return this._cableBusMap[cable.id];
             }
-            console.log(`  🔗 Input id=${id} → 1 (empty)`);
+            //console.log(`  🔗 Input id=${id} → 1 (empty)`);
             return 1;
         });
         
@@ -711,16 +710,16 @@ i3 0 [60*60*24*7]
             if (cables.length > 0) {
                 const busNumber = this._cableBusMap[cables[0].id];
                 if (busNumber !== undefined) {
-                    console.log(`  🔗 Output id=${id} → bus ${busNumber} (${cables.length} cables)`);
+                    //console.log(`  🔗 Output id=${id} → bus ${busNumber} (${cables.length} cables)`);
                     return busNumber;
                 }
             }
-            console.log(`  🔗 Output id=${id} → 0 (ground)`);
+            //console.log(`  🔗 Output id=${id} → 0 (ground)`);
             return 0;
         });
         
-        console.log(`  📊 Inlet buses:`, inletBuses);
-        console.log(`  📊 Outlet buses:`, outletBuses);
+        //console.log(`  📊 Inlet buses:`, inletBuses);
+        //console.log(`  📊 Outlet buses:`, outletBuses);
         
         // ⭐ Параметры из moduleDef.params (в порядке opcode)
         const paramIds = moduleDef?.params || [];
@@ -814,7 +813,7 @@ i3 0 [60*60*24*7]
                 
                 if (!bus || bus === 0) {
                     // ⭐ bus 0 = ground, LED просто не горит
-                    console.log(`  🔗 LED id=${led.id}: bus=0 (ground), skipping`);
+                    //console.log(`  🔗 LED id=${led.id}: bus=0 (ground), skipping`);
                     return;
                 }
                 
@@ -822,7 +821,7 @@ i3 0 [60*60*24*7]
                 const channelName = `led_${instanceName}_${instanceId}_${led.id}`;
                 const ledType = led.ledType || 'rms';
                 
-                console.log(`  💡 LED id=${led.id} → ${ledType}(${bus}, "${channelName}")`);
+               // console.log(`  💡 LED id=${led.id} → ${ledType}(${bus}, "${channelName}")`);
                 
                 // ⭐ Строка вызова LED-UDO
                 ledLines.push(`led_${ledType} ${bus}, "${channelName}"`);
@@ -835,7 +834,7 @@ i3 0 [60*60*24*7]
             ...ledLines,
         ].join('\n');
 
-        console.log('  ✅ result:', result);
+        //console.log('  ✅ result:', result);
         return result;
     }
 
@@ -896,7 +895,7 @@ i3 0 [60*60*24*7]
             add: 'color: #8bc34a; font-weight: bold',
             remove: 'color: #ff6b6b; font-weight: bold'
         };
-        console.log(`%c[CsoundGenerator] ${message}`, styles[style] || styles.normal);
+        //console.log(`%c[CsoundGenerator] ${message}`, styles[style] || styles.normal);
     }
     
     reset() {
@@ -915,7 +914,7 @@ i3 0 [60*60*24*7]
     // ⭐ РЕГИСТРАЦИЯ ПОЛЬЗОВАТЕЛЬСКОГО МОДУЛЯ
     registerUserModule(name, data) {
         this.userModules[name] = data;
-        console.log(`📝 CsoundGenerator: registered user module "${name}"`);
+        //console.log(`📝 CsoundGenerator: registered user module "${name}"`);
     }
 
     // ⭐ ЗАГРУЗКА ПОЛЬЗОВАТЕЛЬСКИХ МОДУЛЕЙ

@@ -362,13 +362,13 @@ export class PatchManager {
 
   endCableDrag(endJack) {
       if (!this.startJack) {
-          console.log('❌ No start jack');
+          //console.log('❌ No start jack');
           this.cancelCableDrag();
           return null;
       }
       
       if (!endJack) {
-          console.log('❌ No end jack found');
+          //console.log('❌ No end jack found');
           this.cancelCableDrag();
           return null;
       }
@@ -381,7 +381,7 @@ export class PatchManager {
       if (fromJack.direction === 'input' && toJack.direction === 'output') {
           fromJack = endJack;
           toJack = this.startJack;
-          console.log('🔄 Swapped: input → output corrected');
+          //console.log('🔄 Swapped: input → output corrected');
       }
       
       // Проверяем, что from — выход, to — вход

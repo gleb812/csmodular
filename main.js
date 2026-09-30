@@ -715,19 +715,19 @@ class ModularSystem {
     );
 
     return panels.map((module) => {
-      // Получаем параметры модуля
-      const parameters = this.collectModuleParameters(module);
-
-      return {
-        name: module.jsonName || module.type || 'Unknown',
-        id: module.jsonId || this.generateJsonId(module),
-        type: module.typeID || 0,
-        parameters: JSON.stringify(parameters),
-        modes: [],
-        area: (module.layer || 'voice').toUpperCase(),
-        hpos: module.gridX || 0,
-        vpos: module.gridY || 0,
-      };
+        const parameters = this.collectModuleParameters(module);
+        
+        return {
+            name: module.jsonName || module.type || 'Unknown',
+            id: module.jsonId || this.generateJsonId(module),
+            type: module.typeID || 0,
+            parameters: JSON.stringify(parameters),
+            modes: [],
+            area: (module.layer || 'voice').toUpperCase(),
+            hpos: module.gridX || 0,
+            vpos: module.gridY || 0,
+            customColor: module.customColor || null,
+        };
     });
   }
 
@@ -756,11 +756,6 @@ class ModularSystem {
         params[index] = value;
       }
     });
-
-    // 🎨 Сохраняем customColor в параметрах (например, последний индекс)
-    if (module.customColor) {
-      params[params.length] = module.customColor;
-    }
 
     // Заполняем пропуски нулями
     for (let i = 0; i < params.length; i++) {
@@ -1348,54 +1343,62 @@ class ModularSystem {
     }
   }
 
-  async loadAvailableModules(selectElement) {
+async loadAvailableModules(selectElement) {
+    let builtinCount = 0;
+    let userCount = 0;
+    
+    // ⭐ 1. Штатные модули из ./modules/
     try {
-      // Запрашиваем список файлов из папки modules
-      const response = await fetch('./modules/');
-      const text = await response.text();
-
-      // Парсим HTML страницу директории
-      const parser = new DOMParser();
-      const htmlDoc = parser.parseFromString(text, 'text/html');
-      const links = htmlDoc.querySelectorAll('a');
-
-      let moduleCount = 0;
-
-      for (const link of links) {
-        const filename = link.getAttribute('href');
-        // Ищем .js файлы (но не .module.js которые уже загружены)
-        if (
-          filename &&
-          filename.endsWith('.js') &&
-          !filename.includes('.module.js')
-        ) {
-          const moduleName = filename.replace('.js', '');
-
-          // Пробуем загрузить модуль, чтобы получить его displayName
-          try {
-            const modulePath = `./modules/${filename}`;
-            const module = await import(/* @vite-ignore */ modulePath);
-
-            // Находим экспорт (обычно первый ключ)
-            const moduleKey = Object.keys(module)[0];
-            if (moduleKey && module[moduleKey]) {
-              const displayName = module[moduleKey].displayName || moduleName;
-              this.addModuleToSelect(selectElement, moduleName, displayName);
-              moduleCount++;
+        const response = await fetch('./modules/');
+        const text = await response.text();
+        
+        const parser = new DOMParser();
+        const htmlDoc = parser.parseFromString(text, 'text/html');
+        const links = htmlDoc.querySelectorAll('a');
+        
+        for (const link of links) {
+            const filename = link.getAttribute('href');
+            if (filename && filename.endsWith('.js') && !filename.includes('.module.js')) {
+                const moduleName = filename.replace('.js', '');
+                
+                try {
+                    const modulePath = `./modules/${filename}`;
+                    const module = await import(/* @vite-ignore */ modulePath);
+                    const moduleKey = Object.keys(module)[0];
+                    if (moduleKey && module[moduleKey]) {
+                        const displayName = module[moduleKey].displayName || moduleName;
+                        this.addModuleToSelect(selectElement, moduleName, displayName);
+                        builtinCount++;
+                    }
+                } catch (e) {
+                    this.addModuleToSelect(selectElement, moduleName, moduleName);
+                    builtinCount++;
+                }
             }
-          } catch (e) {
-            // Если не удалось загрузить, добавляем просто по имени
-            this.addModuleToSelect(selectElement, moduleName, moduleName);
-            moduleCount++;
-          }
         }
-      }
-
-      console.log(`Загружено модулей в список: ${moduleCount}`);
     } catch (error) {
-      console.warn('Не удалось получить список модулей:', error);
+        console.warn('Не удалось получить список штатных модулей:', error);
     }
-  }
+    
+    // ⭐ 2. Пользовательские модули из /api/list-user-modules
+    try {
+        const response = await fetch('/api/list-user-modules');
+        if (response.ok) {
+            const data = await response.json();
+            const userModules = data.modules || [];
+            
+            for (const moduleName of userModules) {
+                // ⭐ Помечаем пользовательские звёздочкой
+                this.addModuleToSelect(selectElement, moduleName, `★ ${moduleName}`);
+                userCount++;
+            }
+        }
+    } catch (error) {
+        console.warn('Не удалось получить список пользовательских модулей:', error);
+    }
+    
+    //console.log(`Загружено в список: ${builtinCount} штатных, ${userCount} пользовательских`);
+}
 
   addModuleToSelect(selectElement, value, text) {
     const option = document.createElement('option');
@@ -1539,12 +1542,8 @@ class ModularSystem {
 
       if (typeof this.endMeasure === 'function') this.endMeasure('total');
 
-      if (this.profiler && this.profiler.frameCount % 60 === 0) {
-          if (typeof this.logPerformance === 'function') {
-              this.logPerformance();
-          } else {
-              this.updateFPS(now);
-          }
+      if (this.frameCount % 60 === 0) {
+          this.updateFPS(now);
       }
 
       if (this.frameCount % 60 === 0) {
@@ -1565,17 +1564,6 @@ class ModularSystem {
 
     const times = this.profiler.times || {};
     const frameCount = this.profiler.frameCount || 0;
-
-    // console.log('📊 PERFORMANCE:');
-    // console.log(`   FPS: ${Math.round(this.currentFPS || 0)}`);
-    // console.log(`   Frame: ${Math.round(times.total || 0)}ms`);
-    // console.log(`   ├ Clear: ${Math.round(times.clear || 0)}ms`);
-    // console.log(`   ├ Voice: ${Math.round(times.drawVoice || 0)}ms`);
-    // console.log(`   ├ FX: ${Math.round(times.drawFx || 0)}ms`);
-    // console.log(`   ├ Divider: ${Math.round(times.drawDivider || 0)}ms`);
-    // console.log(`   └ Cables: ${Math.round(times.drawCables || 0)}ms`);
-    // console.log(`   Modules: ${this.components?.filter?.(c => c instanceof Panel)?.length || 0}`);
-    // console.log(`   Cables: ${this.patchManager?.cables?.length || 0}`);
 
     // Сбрасываем счетчики
     this.profiler.times = {
@@ -1618,9 +1606,9 @@ class ModularSystem {
   })();
 
   async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
-      console.log(
-        `=== ADD NEW MODULE AT POSITION: ${moduleType} to ${layerName} at (${gridX}, ${gridY}) ===`,
-      );
+      //console.log(
+      //  `=== ADD NEW MODULE AT POSITION: ${moduleType} to ${layerName} at (${gridX}, ${gridY}) ===`,
+      //);
 
       try {
         // Проверяем слой
@@ -1632,13 +1620,13 @@ class ModularSystem {
         // main.js - исправленная часть addNewModuleAtPosition()
 
         if (!this.moduleFactory.moduleRegistry[moduleType]) {
-            console.log(`📂 Module ${moduleType} not in registry, trying to load...`);
+            //console.log(`📂 Module ${moduleType} not in registry, trying to load...`);
             
             let loaded = false;
             
             // ⭐ Проверяем, является ли модуль пользовательским
             const isUser = await this.moduleFactory.isUserModule(moduleType);
-            console.log(`  isUser: ${isUser}, moduleType: ${moduleType}`);
+            //console.log(`  isUser: ${isUser}, moduleType: ${moduleType}`);
             
             if (isUser) {
                 // ⭐ ПОЛЬЗОВАТЕЛЬСКИЙ → загружаем через API

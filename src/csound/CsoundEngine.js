@@ -48,7 +48,7 @@ export class CsoundEngine {
     _setState(state, info = null) {
         if (this.state === state) return;
         this.state = state;
-        console.log(`[CsoundEngine] state → ${state}`, info || '');
+        //console.log(`[CsoundEngine] state → ${state}`, info || '');
         this._stateListeners.forEach(cb => {
             try { cb(state, info); } catch (e) { console.error(e); }
         });
@@ -60,7 +60,7 @@ export class CsoundEngine {
         
         if (level === 'error') console.error('[Csound]', msg);
         else if (level === 'warn') console.warn('[Csound]', msg);
-        else console.log('[Csound]', msg);
+        //else console.log('[Csound]', msg);
         
         this._messageListeners.forEach(cb => {
             try { cb(msg, level); } catch (e) { console.error(e); }
@@ -88,12 +88,12 @@ export class CsoundEngine {
             await this._destroyInstance();
             
             // Импорт и создание
-            console.log(`[CsoundEngine] Loading Csound ${CSOUND_VERSION} from CDN...`);
+            //console.log(`[CsoundEngine] Loading Csound ${CSOUND_VERSION} from CDN...`);
             const { Csound } = await import(/* @vite-ignore */ CSOUND_CDN);
             
-            console.log('[CsoundEngine] Creating instance...');
+            //console.log('[CsoundEngine] Creating instance...');
             this.instance = await Csound();
-            console.log('[CsoundEngine] Instance:', this.instance.name || '(unnamed)');
+            //console.log('[CsoundEngine] Instance:', this.instance.name || '(unnamed)');
             // ⭐ Для обратной совместимости со старым кодом (Knob, Slider)
             window.csound = this.instance;
             
@@ -101,32 +101,34 @@ export class CsoundEngine {
             this._attachCsoundListeners();
             
             // Настройка
-            console.log('[CsoundEngine] Setting options...');
+            //console.log('[CsoundEngine] Setting options...');
             await this.instance.setOption('-odac');
+            await this.instance.setOption('-d');
+            await this.instance.setOption('-m16');
             
             // Генерация ORC
-            console.log('[CsoundEngine] Generating ORC...');
+            //console.log('[CsoundEngine] Generating ORC...');
             const orc = await this.system.csoundGen.generateOrc();
-            console.log(`[CsoundEngine] ORC length: ${orc.length} chars`);
+            //console.log(`[CsoundEngine] ORC length: ${orc.length} chars`);
             
             // Компиляция
-            console.log('[CsoundEngine] Compiling ORC...');
+            //console.log('[CsoundEngine] Compiling ORC...');
             const result = await this.instance.compileOrc(orc);
-            console.log('[CsoundEngine] compileOrc result:', result);
+            //console.log('[CsoundEngine] compileOrc result:', result);
             
             if (result !== 0) {
                 throw new Error(`ORC compilation failed (code ${result}). Check console for Csound messages.`);
             }
             
             // ⭐ Читаем score, чтобы запустить инструменты i1, i2, i3
-            console.log('[CsoundEngine] Reading score...');
+            //console.log('[CsoundEngine] Reading score...');
             const sco = 'i1 0 [60*60*24*7]\ni2 0 [60*60*24*7]\ni3 0 [60*60*24*7]';
             await this.instance.readScore(sco);
             
             // Запуск
-            console.log('[CsoundEngine] Starting audio...');
+            //console.log('[CsoundEngine] Starting audio...');
             await this.instance.start();
-            console.log('[CsoundEngine] ✓ Started');
+            //console.log('[CsoundEngine] ✓ Started');
             
             this._setState('running');
 
@@ -153,11 +155,11 @@ export class CsoundEngine {
 
     async stop() {
         if (this.state === 'idle') {
-            console.log('[CsoundEngine] Already stopped');
+            //console.log('[CsoundEngine] Already stopped');
             return;
         }
         
-        console.log('[CsoundEngine] Stopping...');
+        //console.log('[CsoundEngine] Stopping...');
         await this._destroyInstance();
         this._setState('idle');
     }
@@ -191,11 +193,11 @@ export class CsoundEngine {
      */
     async recompile() {
         if (this.state !== 'running' || !this.instance) {
-            console.log('[CsoundEngine] Not running, calling init()');
+            //console.log('[CsoundEngine] Not running, calling init()');
             return this.init();
         }
         
-        console.log('[CsoundEngine] Recompiling (full restart)...');
+        //console.log('[CsoundEngine] Recompiling (full restart)...');
         
         // Полный перезапуск — надёжнее, чем compileOrc на существующем инстансе.
         // Причина: compileOrc не заменяет определения UDO, а конфликтует с уже 
@@ -218,7 +220,7 @@ export class CsoundEngine {
      */
     async sendNote(note, duration = -1, velocity = 0.7) {
         if (!this.isReady()) {
-            console.warn('[CsoundEngine] Not ready, cannot send note');
+            //console.warn('[CsoundEngine] Not ready, cannot send note');
             return false;
         }
         const midiNote = typeof note === 'string'
@@ -255,7 +257,7 @@ export class CsoundEngine {
     async setChannel(name, value) {
         if (!this.isReady()) return false;
         if (typeof this.instance.setControlChannel !== 'function') {
-            console.warn('[CsoundEngine] setControlChannel not available');
+            //console.warn('[CsoundEngine] setControlChannel not available');
             return false;
         }
         await this.instance.setControlChannel(name, value);
@@ -347,7 +349,7 @@ export class CsoundEngine {
         if (typeof c.on === 'function') {
             try {
                 c.on('message', (msg) => this._emitMessage(msg, 'info'));
-                console.log('[CsoundEngine] Attached message listener via .on()');
+                //console.log('[CsoundEngine] Attached message listener via .on()');
                 return;
             } catch (e) {
                 console.warn('[CsoundEngine] .on() failed:', e);
