@@ -180,10 +180,10 @@ i3 0 [60*60*24*7]
         return udoContents;
     }
 
-// src/csound/CsoundGenerator.js - полный generateOrc()
-
     async generateOrc() {
-        // ⭐ 1. Загружаем все UDO содержимое для встроенных модулей
+        // ⭐ 0. Собираем mapping ftgen (перед остальным)
+        const mappingFtgens = await this._collectMappingFtgens();
+        
         const udoContents = [];
         const includesList = Array.from(this.includes).sort();
         
@@ -272,7 +272,9 @@ i3 0 [60*60*24*7]
     giSq400 ftgen 21, 0, 16384, 7,1,41,1,0,0,16343,0
     giSq96 ftgen 22, 0, 16384, 7,1,1366,1,0,0,15018,0
     giSq16 ftgen 23, 0, 16384, 7,1,910,1,0,0,15474,0
-
+    ;---------------------------------
+    ; MAPPING TABLES (auto from value_maps.json)
+    ${mappingFtgens}
     ;---------------------------------
     ; UDO section (inlined from /csound/modules/*.txt)
     ${udoString}
@@ -329,8 +331,81 @@ i3 0 [60*60*24*7]
     }
 
 
+    /**
+     * Извлечь имена mapping-таблиц из DSP-кода модуля.
+     * Ищем строки вида:
+     *   ;@ map FLTphs LFOlow
+     */
+    _extractMappingTablesFromUdo(udoText) {
+        const names = [];
+        if (!udoText) return names;
+        
+        // Ищем все вхождения ;@ map
+        const regex = /^;\s*@\s*map\s+(.+)$/gm;
+        let match;
+        while ((match = regex.exec(udoText)) !== null) {
+            const parts = match[1].trim().split(/\s+/);
+            parts.forEach(p => {
+                if (p) names.push(p);
+            });
+        }
+        return names;
+    }
 
-    // ⭐⭐⭐ НОВЫЕ МЕТОДЫ ДЛЯ РАБОТЫ С КАБЕЛЯМИ ⭐⭐⭐
+
+    async _collectMappingFtgens() {
+        const usedNames = new Set();
+        
+        // 1. Для каждого модуля в патче — читаем его UDO-файл
+        for (const moduleData of this.modules.values()) {
+            const udoPath = moduleData.udoPath;  // "user/zmapp.txt" или "9.txt"
+            if (!udoPath) continue;
+            
+            try {
+                const response = await fetch(`/csound/modules/${udoPath}`);
+                if (!response.ok) continue;
+                const udoText = await response.text();
+                
+                const names = this._extractMappingTablesFromUdo(udoText);
+                names.forEach(n => usedNames.add(n));
+            } catch (e) {
+                console.warn(`⚠️ Could not read UDO ${udoPath}:`, e);
+            }
+        }
+        
+        console.log('🔍 usedNames from UDO files:', [...usedNames]);
+        
+        if (usedNames.size === 0) {
+            return '; no mapping tables in use';
+        }
+        
+        // 2. Достаём сами таблицы
+        const mappingTables = this.system?.mappingTables;
+        if (!mappingTables || mappingTables.getCount() === 0) {
+            console.warn('⚠️ MappingTables not loaded');
+            return '; mapping tables not loaded';
+        }
+        
+        // 3. Генерируем ftgen
+        const lines = [];
+        let tableNumber = 1000;
+        const sortedNames = [...usedNames].sort();
+        
+        for (const name of sortedNames) {
+            const values = mappingTables.get(name);
+            if (!values || !Array.isArray(values) || values.length === 0) {
+                console.warn(`⚠️ Mapping table "${name}" empty or missing`);
+                continue;
+            }
+            
+            const valuesStr = values.join(', ');
+            lines.push(`gi_map_${name} ftgen ${tableNumber}, 0, ${values.length}, -2, 0, ${valuesStr}`);
+            console.log(`📊 ftgen ${tableNumber} ← "${name}" (${values.length} values)`);
+            tableNumber++;
+        }
+        
+        return lines.length > 0 ? lines.join('\n') : '; no mapping tables generated';
+    }
     
     /**
      * Добавить кабель

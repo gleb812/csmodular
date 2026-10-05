@@ -11,6 +11,8 @@ export class Slider extends BaseComponent {
         this.min = min;
         this.max = max;
         this.value = value;
+
+        this.mappingTable = null;   // имя таблицы из value_maps.json, например 'Level_dB'
         
         // Просто прямоугольник для начала
         this.trackColor = '#475569';
@@ -82,6 +84,19 @@ export class Slider extends BaseComponent {
         ctx.fillStyle = '#fff';
         ctx.fillText(valueText, tooltipX, tooltipY + tooltipHeight / 2);
     }
+
+    static getPropertySchema() {
+        return [
+            {
+                key: 'mappingTable',
+                label: 'Mapping Table',
+                type: 'mapping-select',
+                optionsFrom: 'mappingTables',
+                help: 'Value mapping table (0..127 → real value). Optional.',
+            },
+        ];
+    }
+
     
     // === ПРОСТАЯ ПРОВЕРКА HOVER ===
     handleMouseMove(x, y) {

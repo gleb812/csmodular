@@ -35,7 +35,7 @@ export class Knob extends BaseComponent {
         this.value = value;
         this.showZeroIndicator = showZeroIndicator;
         this.infoFunc = infoFunc;
-        
+        this.mappingTable = null;   // имя таблицы из value_maps.json, например 'Level_dB'
         // Улучшенное состояние перетаскивания
         this.isDragging = false;
         this.startAngle = 0;
@@ -297,6 +297,18 @@ export class Knob extends BaseComponent {
                     .then(() => {}, () => {});
             }
         }
+    }
+
+    static getPropertySchema() {
+        return [
+            {
+                key: 'mappingTable',
+                label: 'Mapping Table',
+                type: 'mapping-select',
+                optionsFrom: 'mappingTables',
+                help: 'Value mapping table (0..127 → real value). Optional.',
+            },
+        ];
     }
 
     // Метод для быстрой установки значения (например, для загрузки из JSON)

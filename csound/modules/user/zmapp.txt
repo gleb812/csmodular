@@ -1,0 +1,7 @@
+;@ map FLTphs LFOlow
+opcode zmapp, 0, kk
+kKnob1, kKnob2 xin
+
+; --- module body ---
+; Add your DSP code here
+endop

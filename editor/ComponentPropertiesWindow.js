@@ -237,6 +237,11 @@ export class ComponentPropertiesWindow {
             inputEl.onchange = () => {
                 comp[propDef.key] = inputEl.value;
                 console.log(`🔧 ${propDef.key} = ${inputEl.value}`);
+                
+                // ⭐ Обновляем код в CodeViewerWindow
+                if (this.app.codeViewerWindow) {
+                    this.app.codeViewerWindow.updateCode();
+                }
             };
             
         } else if (propDef.type === 'number') {
@@ -293,7 +298,64 @@ export class ComponentPropertiesWindow {
                 comp[propDef.key] = inputEl.value;
                 console.log(`🔧 ${propDef.key} = "${inputEl.value}"`);
             };
+
+        } else if (propDef.type === 'mapping-select') {
+            // ⭐ Кастомный select для mapping-таблиц с браузером
+            inputEl = document.createElement('div');
+            inputEl.style.cssText = `
+                display: flex;
+                gap: 4px;
+                width: 100%;
+            `;
             
+            // Текущее значение — показываем как текст
+            const currentValue = comp[propDef.key] || '';
+            const valueDisplay = document.createElement('div');
+            valueDisplay.style.cssText = `
+                flex: 1;
+                padding: 4px 8px;
+                background: #1a1a1a;
+                border: 1px solid #444;
+                border-radius: 3px;
+                color: ${currentValue ? '#0af' : '#666'};
+                font-size: 12px;
+                box-sizing: border-box;
+                cursor: pointer;
+                font-family: monospace;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            `;
+            valueDisplay.textContent = currentValue || '— None —';
+            
+            // Кнопка для открытия браузера
+            const browseBtn = document.createElement('button');
+            browseBtn.textContent = '🔍';
+            browseBtn.title = 'Browse tables';
+            browseBtn.style.cssText = `
+                padding: 4px 8px;
+                background: #2a2a2a;
+                border: 1px solid #0af;
+                color: #0af;
+                border-radius: 3px;
+                cursor: pointer;
+                font-size: 12px;
+            `;
+            
+            // Клик на значение или кнопку — открываем браузер
+            const openBrowser = () => {
+                this._showMappingBrowser(comp, propDef, valueDisplay);
+            };
+            
+            valueDisplay.onclick = openBrowser;
+            browseBtn.onclick = openBrowser;
+            
+            inputEl.appendChild(valueDisplay);
+            inputEl.appendChild(browseBtn);
+            
+            // Заглушка для общего механизма
+            inputEl._valueDisplay = valueDisplay;
+
         } else if (propDef.type === 'checkbox') {
             // ⭐ Чекбокс
             inputEl = document.createElement('input');
@@ -334,6 +396,229 @@ export class ComponentPropertiesWindow {
         return wrapper;
     }
 
+
+    _showMappingBrowser(comp, propDef, valueDisplay) {
+        // Ищем mappingTables
+        const tables = this.app.mappingTables 
+                    || this.app.system?.mappingTables 
+                    || window.modularSystem?.mappingTables;
+        
+        if (!tables || tables.getCount() === 0) {
+            this._showNotification('⚠️ No mapping tables loaded');
+            return;
+        }
+        
+        const allNames = tables.getAllNames();
+        let filteredNames = allNames;
+        
+        // ⭐ Создаём модальное окно
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 99999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        `;
+        
+        const dialog = document.createElement('div');
+        dialog.style.cssText = `
+            background: #1a1a1a;
+            border: 1px solid #0af;
+            border-radius: 8px;
+            padding: 16px;
+            width: 400px;
+            max-height: 500px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.8);
+        `;
+        
+        // Заголовок
+        const header = document.createElement('div');
+        header.style.cssText = `
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #333;
+        `;
+        header.innerHTML = `
+            <span style="color: #0af; font-weight: bold; font-size: 13px;">
+                🔍 Browse Mapping Tables
+            </span>
+            <button id="close-browser-btn" style="
+                background: transparent;
+                border: none;
+                color: #666;
+                cursor: pointer;
+                font-size: 16px;
+                padding: 0 4px;
+            ">✕</button>
+        `;
+        
+        // Поле поиска
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.placeholder = 'Type to search (min 2 chars)...';
+        searchInput.style.cssText = `
+            width: 100%;
+            padding: 8px 10px;
+            background: #0a0a0a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+            margin-bottom: 12px;
+            outline: none;
+            box-sizing: border-box;
+        `;
+        
+        // Список результатов
+        const list = document.createElement('div');
+        list.style.cssText = `
+            flex: 1;
+            overflow-y: auto;
+            min-height: 200px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 4px;
+        `;
+        
+        // Функция отрисовки списка
+        const renderList = (names) => {
+            list.innerHTML = '';
+            
+            // ⭐ Кнопка "None"
+            const noneItem = document.createElement('div');
+            noneItem.textContent = '— None —';
+            noneItem.style.cssText = `
+                padding: 6px 12px;
+                cursor: pointer;
+                font-size: 11px;
+                color: #666;
+                border-bottom: 1px solid #222;
+                font-style: italic;
+            `;
+            noneItem.onmouseenter = () => noneItem.style.background = '#1a1a1a';
+            noneItem.onmouseleave = () => noneItem.style.background = 'transparent';
+            noneItem.onclick = () => {
+                comp[propDef.key] = null;
+                valueDisplay.textContent = '— None —';
+                valueDisplay.style.color = '#666';
+                
+                // ⭐ Обновляем код
+                if (this.app.codeViewerWindow) {
+                    this.app.codeViewerWindow.updateCode();
+                }
+                
+                overlay.remove();
+            };
+            list.appendChild(noneItem);
+            
+            if (names.length === 0) {
+                const empty = document.createElement('div');
+                empty.textContent = searchInput.value.length < 2 
+                    ? 'Start typing to search...'
+                    : 'No tables match';
+                empty.style.cssText = `
+                    padding: 20px;
+                    text-align: center;
+                    color: #555;
+                    font-size: 11px;
+                    font-style: italic;
+                `;
+                list.appendChild(empty);
+                return;
+            }
+            
+            names.forEach(name => {
+                const item = document.createElement('div');
+                item.textContent = name;
+                item.style.cssText = `
+                    padding: 6px 12px;
+                    cursor: pointer;
+                    font-size: 11px;
+                    color: #ccc;
+                    font-family: monospace;
+                    border-bottom: 1px solid #1a1a1a;
+                `;
+                item.onmouseenter = () => item.style.background = '#1a1a1a';
+                item.onmouseleave = () => item.style.background = 'transparent';
+                item.onclick = () => {
+                    comp[propDef.key] = name;
+                    valueDisplay.textContent = name;
+                    valueDisplay.style.color = '#0af';
+                    
+                    // ⭐ Обновляем код
+                    if (this.app.codeViewerWindow) {
+                        this.app.codeViewerWindow.updateCode();
+                    }
+                    
+                    overlay.remove();
+                };
+                list.appendChild(item);
+            });
+        };
+        
+        // Изначально показываем все
+        renderList(allNames);
+        
+        // ⭐ Поиск: с 2 символов
+        searchInput.oninput = () => {
+            const term = searchInput.value.trim();
+            
+            if (term.length === 0) {
+                filteredNames = allNames;
+                renderList(allNames);
+                return;
+            }
+            
+            if (term.length < 2) {
+                // Не ищем, показываем подсказку
+                renderList([]);
+                return;
+            }
+            
+            const lower = term.toLowerCase();
+            filteredNames = allNames.filter(n => 
+                n.toLowerCase().includes(lower)
+            );
+            renderList(filteredNames);
+        };
+        
+        // Собираем
+        dialog.appendChild(header);
+        dialog.appendChild(searchInput);
+        dialog.appendChild(list);
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+        
+        // Фокус на поиск
+        setTimeout(() => searchInput.focus(), 50);
+        
+        // Обработчики закрытия
+        header.querySelector('#close-browser-btn').onclick = () => overlay.remove();
+        overlay.onclick = (e) => {
+            if (e.target === overlay) overlay.remove();
+        };
+        
+        // Escape
+        const onKeydown = (e) => {
+            if (e.key === 'Escape') {
+                overlay.remove();
+                document.removeEventListener('keydown', onKeydown);
+            }
+        };
+        document.addEventListener('keydown', onKeydown);
+    }
+
+
+
     // ⭐ Получить список опций для select
     _getOptionsFor(propDef) {
         if (propDef.optionsFrom === 'ioComponents') {
@@ -368,7 +653,35 @@ export class ComponentPropertiesWindow {
         if (propDef.options) {
             return propDef.options;
         }
-        
+
+        if (propDef.optionsFrom === 'mappingTables') {
+            // ⭐ Ищем mappingTables в порядке приоритета:
+            // 1. app.mappingTables (редактор)
+            // 2. app.system.mappingTables
+            // 3. window.modularSystem.mappingTables
+            const tables = this.app.mappingTables 
+                        || this.app.system?.mappingTables 
+                        || window.modularSystem?.mappingTables;
+            
+            if (!tables) {
+                console.warn('⚠️ MappingTables not found in ComponentPropertiesWindow');
+                return [{ value: '', label: '— No mapping tables loaded —' }];
+            }
+            
+            if (tables.getCount() === 0) {
+                // Таблицы ещё загружаются
+                return [{ value: '', label: '— Loading... —' }];
+            }
+            
+            const names = tables.getAllNames();
+            console.log(`📋 Mapping tables dropdown: ${names.length} options`);
+            
+            return [
+                { value: '', label: '— None —' },
+                ...names.map(n => ({ value: n, label: n })),
+            ];
+        }
+
         return [];
     }
     

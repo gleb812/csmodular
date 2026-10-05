@@ -25,6 +25,8 @@ import { Line } from '../src/components/Line.js';
 import { Graph } from '../src/components/Graph.js';
 import { MiniVU } from '../src/components/MiniVU.js';
 
+import { MappingTables } from '../src/csound/MappingTables.js';
+
 const GRID_UNITS = {
     X: 260,
     Y: 15
@@ -103,6 +105,9 @@ export class EditorApp {
         this.propertiesWindow = new ModulePropertiesWindow(this);
         this.codeViewerWindow = new CodeViewerWindow(this);
         this.componentPropertiesWindow = new ComponentPropertiesWindow(this);
+        // ⭐ Mapping tables (для редактора)
+        this.mappingTables = new MappingTables();
+        this.mappingTables.load();
         this.createDefaultModule();
         this.animate();
         this.setupEvents();

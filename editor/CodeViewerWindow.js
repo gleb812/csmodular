@@ -266,8 +266,31 @@ export class CodeViewerWindow {
         const paramStr = 'k'.repeat(allParams.length);
         const xinStr = allParams.join(', ');
         
-        let code = `opcode ${moduleName}, 0, ${paramStr}\n`;
-        
+        // ⭐ Собираем mapping-таблицы из интерактивных компонентов
+        const mappingNames = [];
+        const paramComponents = this.app.components
+            .filter(c => !c._isNewDragging)
+            .filter(c => this._isParametricComponent(c.constructor.name))
+            .sort((a, b) => parseInt(a.id) - parseInt(b.id));
+
+        paramComponents.forEach(comp => {
+            if (comp.mappingTable) {
+                mappingNames.push(comp.mappingTable);
+            }
+        });
+
+        // Дедупликация
+        const uniqueMappings = [...new Set(mappingNames)];
+
+        let code = '';
+
+        // ⭐ Строка ;@ map
+        if (uniqueMappings.length > 0) {
+            code += `;@ map ${uniqueMappings.join(' ')}\n`;
+        }
+
+        code += `opcode ${moduleName}, 0, ${paramStr}\n`;
+
         if (allParams.length > 0) {
             code += `${xinStr} xin\n`;
         }
@@ -302,6 +325,13 @@ export class CodeViewerWindow {
         code += `endop\n`;
         
         return code;
+    }
+
+    _isParametricComponent(type) {
+        return [
+            'Knob', 'Slider',
+            'ButtonFlat', 'ButtonText', 'ButtonRadio', 'ButtonIncDec'
+        ].includes(type);
     }
 
     // ⭐ Синхронизация с модулем (кнопка ⟳)

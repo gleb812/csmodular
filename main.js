@@ -13,6 +13,7 @@ import { ModuleContextMenu } from './src/ui/ModuleContextMenu.js';
 import { CSoundWindow } from './src/ui/CSoundWindow.js'; 
 import { CsoundGenerator } from './src/csound/CsoundGenerator.js';
 import { CsoundEngine } from './src/csound/CsoundEngine.js';
+import { MappingTables } from './src/csound/MappingTables.js';
 import { debounce } from './src/utils/debounce.js';
 
 // Глобальный обработчик ошибок
@@ -153,7 +154,12 @@ class ModularSystem {
     this.endMeasure = this.endMeasure.bind(this);
     this.logPerformance = this.logPerformance.bind(this);
 
-     // Csound Generator (генерирует ORC)
+    // ⭐ Mapping tables
+    // в конструкторе:
+    this.mappingTables = new MappingTables();
+    this.mappingTables.load();
+
+    // Csound Generator (генерирует ORC)
     this.csoundGen = new CsoundGenerator();
     this.csoundGen.system = this; 
     this.csoundGen.loadUserModules();
