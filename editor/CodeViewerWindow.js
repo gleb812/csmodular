@@ -175,7 +175,6 @@ export class CodeViewerWindow {
     }
 
 
-    // ⭐ Генерация кода Csound (обновлённая версия)
     generateCsoundCode() {
         const module = this.app.module;
         if (!module) return '';
@@ -194,119 +193,112 @@ export class CodeViewerWindow {
         const audioOutputs = [];
         const controlOutputs = [];
         
-        let knobCount = 0;
-        let sliderCount = 0;
-        let buttonCount = 0;
-        let levelCount = 0;
-        
         let inputIndex = 0;
         let outputIndex = 0;
+        
+        // ⭐ Единый проход: собираем параметры и их имена синхронно
+        const paramComponents = [];   // [{ comp, paramName }]
+        const typeCounters = { Knob: 0, Slider: 0, Button: 0, Level: 0 };
         
         for (const comp of components) {
             const type = comp.constructor.name;
             
             if (type === 'Knob') {
-                knobCount++;
+                typeCounters.Knob++;
+                paramComponents.push({ comp, paramName: `kKnob${typeCounters.Knob}` });
             } else if (type === 'Slider') {
-                sliderCount++;
-            } else if (type === 'ButtonFlat' || type === 'ButtonText' || type === 'ButtonIncDec') {
-                buttonCount++;
-            } else if (type === 'ButtonRadio') {
-                buttonCount++;
+                typeCounters.Slider++;
+                paramComponents.push({ comp, paramName: `kSlider${typeCounters.Slider}` });
+            } else if (type === 'ButtonFlat' || type === 'ButtonText'
+                       || type === 'ButtonIncDec' || type === 'ButtonRadio') {
+                typeCounters.Button++;
+                paramComponents.push({ comp, paramName: `kButton${typeCounters.Button}` });
             } else if (type === 'LevelShift') {
-                levelCount++;
+                typeCounters.Level++;
+                paramComponents.push({ comp, paramName: `kLevel${typeCounters.Level}` });
             } else if (type === 'Input') {
                 inputIndex++;
                 const jackType = comp._jackType || comp.type || 'audio';
                 if (jackType === 'audio') {
-                    audioInputs.push({ 
-                        param: `kIn${inputIndex}`,
-                        varName: `in${inputIndex}`
-                    });
+                    audioInputs.push({ param: `kIn${inputIndex}`, varName: `in${inputIndex}` });
                 } else {
-                    controlInputs.push({ 
-                        param: `kIn${inputIndex}`,
-                        varName: `in${inputIndex}`
-                    });
+                    controlInputs.push({ param: `kIn${inputIndex}`, varName: `in${inputIndex}` });
                 }
             } else if (type === 'Output') {
                 outputIndex++;
                 const jackType = comp._jackType || comp.type || 'audio';
                 if (jackType === 'audio') {
-                    audioOutputs.push({ 
-                        param: `kOut${outputIndex}`,
-                        varName: `out${outputIndex}`
-                    });
+                    audioOutputs.push({ param: `kOut${outputIndex}`, varName: `out${outputIndex}` });
                 } else {
-                    controlOutputs.push({ 
-                        param: `kOut${outputIndex}`,
-                        varName: `out${outputIndex}`
-                    });
+                    controlOutputs.push({ param: `kOut${outputIndex}`, varName: `out${outputIndex}` });
                 }
             }
         }
         
+        // ⭐ allParams: параметры + входы + выходы
         const allParams = [];
-        
-        for (let i = 1; i <= knobCount; i++) allParams.push(`kKnob${i}`);
-        for (let i = 1; i <= sliderCount; i++) allParams.push(`kSlider${i}`);
-        for (let i = 1; i <= buttonCount; i++) allParams.push(`kButton${i}`);
-        for (let i = 1; i <= levelCount; i++) allParams.push(`kLevel${i}`);
+        paramComponents.forEach(({ paramName }) => allParams.push(paramName));
         
         const totalInputs = audioInputs.length + controlInputs.length;
-        for (let i = 1; i <= totalInputs; i++) {
-            allParams.push(`kIn${i}`);
-        }
+        for (let i = 1; i <= totalInputs; i++) allParams.push(`kIn${i}`);
         
         const totalOutputs = audioOutputs.length + controlOutputs.length;
-        for (let i = 1; i <= totalOutputs; i++) {
-            allParams.push(`kOut${i}`);
-        }
+        for (let i = 1; i <= totalOutputs; i++) allParams.push(`kOut${i}`);
         
         const paramStr = 'k'.repeat(allParams.length);
         const xinStr = allParams.join(', ');
         
-        // ⭐ Собираем mapping-таблицы из интерактивных компонентов
-        const mappingNames = [];
-        const paramComponents = this.app.components
-            .filter(c => !c._isNewDragging)
-            .filter(c => this._isParametricComponent(c.constructor.name))
-            .sort((a, b) => parseInt(a.id) - parseInt(b.id));
-
-        paramComponents.forEach(comp => {
-            if (comp.mappingTable) {
-                mappingNames.push(comp.mappingTable);
+        // ⭐ Mapping-таблицы (по порядку компонентов)
+        const uniqueMappings = [];
+        const seenMappings = new Set();
+        
+        paramComponents.forEach(({ comp }) => {
+            if (comp.mappingTable && !seenMappings.has(comp.mappingTable)) {
+                seenMappings.add(comp.mappingTable);
+                uniqueMappings.push(comp.mappingTable);
             }
         });
-
-        // Дедупликация
-        const uniqueMappings = [...new Set(mappingNames)];
-
+        
         let code = '';
-
+        
         // ⭐ Строка ;@ map
         if (uniqueMappings.length > 0) {
             code += `;@ map ${uniqueMappings.join(' ')}\n`;
         }
-
+        
         code += `opcode ${moduleName}, 0, ${paramStr}\n`;
-
+        
         if (allParams.length > 0) {
             code += `${xinStr} xin\n`;
         }
         
+        // ⭐ Автоматическое применение mapping-таблиц
+        // Идём по paramComponents — индекс совпадает с позицией в allParams
+        const mappingLines = [];
+        
+        paramComponents.forEach(({ comp, paramName }) => {
+            if (!comp.mappingTable) return;
+            mappingLines.push(`    ${paramName} table ${paramName}, gi${comp.mappingTable}`);
+        });
+        
+        if (mappingLines.length > 0) {
+            code += `\n    ; --- mapping tables ---\n`;
+            code += mappingLines.join('\n') + '\n';
+            code += `    ; ----------------------\n\n`;
+        }
+        
+        // Входы
         for (const inp of audioInputs) {
             code += `a${inp.varName} zar ${inp.param}\n`;
         }
-        
         for (const inp of controlInputs) {
             code += `k${inp.varName} zkr ${inp.param}\n`;
         }
         
+        // Выходы
         for (const out of audioOutputs) {
             code += `a${out.varName} init 0\n`;
         }
-        
         for (const out of controlOutputs) {
             code += `k${out.varName} init 0\n`;
         }
@@ -317,7 +309,6 @@ export class CodeViewerWindow {
         for (const out of audioOutputs) {
             code += `zaw a${out.varName}, ${out.param}\n`;
         }
-        
         for (const out of controlOutputs) {
             code += `zkw k${out.varName}, ${out.param}\n`;
         }
