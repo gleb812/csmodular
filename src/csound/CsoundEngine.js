@@ -132,6 +132,9 @@ export class CsoundEngine {
             
             this._setState('running');
 
+            // ⭐ Resync control-каналов при первом запуске
+            await this._resyncAllControls();
+            
             // ⭐ Перезапускаем поллинг LED после recompile
             if (this._ledChannels.size > 0) {
                 if (this._ledPollInterval) {
@@ -187,24 +190,126 @@ export class CsoundEngine {
     // ГОРЯЧАЯ ЗАМЕНА ORC
     // ============================================
 
-    /**
-     * Пересобрать ORC и перезапустить score.
-     * Если инстанс не запущен — вызывает init().
-     */
     async recompile() {
         if (this.state !== 'running' || !this.instance) {
-            //console.log('[CsoundEngine] Not running, calling init()');
             return this.init();
         }
         
-        //console.log('[CsoundEngine] Recompiling (full restart)...');
+        console.log('[CsoundEngine] Recompiling via reset + compileOrc...');
+        const t0 = performance.now();
         
-        // Полный перезапуск — надёжнее, чем compileOrc на существующем инстансе.
-        // Причина: compileOrc не заменяет определения UDO, а конфликтует с уже 
-        // загруженными (ошибки "cannot redefine xout" и т.п.).
-        await this.stop();
-        return this.init();
+        try {
+            // 1. Сбросить состояние (инстанс остаётся живой)
+            await this.instance.reset();
+            
+            // 2. Заново выставить опции (после reset они сброшены)
+            await this.instance.setOption('-odac');
+            await this.instance.setOption('-d');
+            await this.instance.setOption('-m16');
+            
+            // 3. Сгенерировать ORC
+            const orc = await this.system.csoundGen.generateOrc();
+            
+            // 4. Компилировать
+            const rc = await this.instance.compileOrc(orc);
+            if (rc !== 0) throw new Error(`compileOrc failed: ${rc}`);
+            
+            // 5. Score
+            const sco = 'i1 0 [60*60*24*7]\ni2 0 [60*60*24*7]\ni3 0 [60*60*24*7]';
+            const rs = await this.instance.readScore(sco);
+            if (rs !== 0) throw new Error(`readScore failed: ${rs}`);
+            
+            // 6. Start
+            const st = await this.instance.start();
+            if (st !== 0) throw new Error(`start failed: ${st}`);
+            
+            // 7. ⭐ Resync control-каналов
+            await this._resyncAllControls();
+            
+            // 8. Перезапуск поллинга LED
+            if (this._ledChannels.size > 0) {
+                if (this._ledPollInterval) {
+                    clearInterval(this._ledPollInterval);
+                    this._ledPollInterval = null;
+                }
+                this._ensureLedPolling();
+            }
+            
+            const dt = Math.round(performance.now() - t0);
+            console.log(`[CsoundEngine] ✓ Recompiled in ${dt}ms`);
+            return true;
+            
+        } catch (e) {
+            console.error('[CsoundEngine] recompile via reset failed:', e);
+            console.log('[CsoundEngine] Falling back to full restart...');
+            await this.stop();
+            return this.init();
+        }
     }
+
+    /**
+     * Переслать текущие значения всех control-каналов в Csound.
+     * Нужно после recompile, потому что новый ORC видит каналы как 0.
+     */
+    async _resyncAllControls() {
+        if (!this.isReady()) return;
+        const system = this.system;
+        if (!system?.components) return;
+        
+        const tasks = [];
+        let count = 0;
+        
+        for (const panel of system.components) {
+            if (panel.constructor.name !== 'Panel') continue;
+            if (!panel.components) continue;
+            
+            for (const comp of panel.components) {
+                if (!comp.csoundChannel) continue;
+                
+                const value = this._getControlValue(comp);
+                tasks.push(
+                    this.setChannel(comp.csoundChannel, value)
+                        .then(() => { count++; })
+                        .catch(e => console.warn(`[CsoundEngine] resync failed ${comp.csoundChannel}:`, e))
+                );
+            }
+        }
+        
+        await Promise.all(tasks);
+        console.log(`[CsoundEngine] 🔄 Resynced ${count} control(s)`);
+    }
+
+    /**
+     * Достать текущее значение компонента в виде, который понимает Csound.
+     */
+    _getControlValue(comp) {
+        const type = comp.constructor.name;
+        
+        // Если у компонента есть свой getValue — используем его
+        if (typeof comp.getValue === 'function') {
+            return comp.getValue();
+        }
+        
+        // По типу компонента
+        switch (type) {
+            case 'ButtonText':
+                return comp.isActive ? 1 : 0;
+            case 'ButtonRadio':
+            case 'ButtonFlat':
+            case 'ButtonIncDec':
+            case 'PartSelector':
+                return comp.selectedIndex ?? comp.currentIndex ?? comp.value ?? 0;
+            case 'Knob':
+            case 'Slider':
+            case 'LevelShift':
+                return comp.value ?? comp.currentValue ?? 0;
+        }
+        
+        // Fallback
+        return comp.value ?? comp.currentValue ?? comp.selectedIndex ?? 0;
+    }
+
+
 
     // ============================================
     // API ДЛЯ UI / КОМПОНЕНТОВ
