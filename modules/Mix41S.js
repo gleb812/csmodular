@@ -10,6 +10,7 @@
         gridHeight: 4,
         originalName: 'Mix4-1S',
         tooltip: 'Mixer 4-1 Stereo',
+    params: [0, 5, 11, 22, 33],
         inputs: [1, 2, 6, 8, 15, 16, 19, 23, 25, 30],
         outputs: [13, 28],
         components: [

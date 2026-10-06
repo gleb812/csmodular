@@ -11,6 +11,7 @@
         gridHeight: 2,
         originalName: 'Gate',
         tooltip: 'Gate',
+    params: [],
         inputs: [5, 6, 12, 13],
         outputs: [1, 8],
         components: [

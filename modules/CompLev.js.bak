@@ -5,6 +5,7 @@
     export const CompLevModule = {
         type: 'CompLev',
             typeID: 59,
+    defaultParams: [64],
         displayName: 'CompLev',
         gridHeight: 2,
         originalName: 'CompLev',

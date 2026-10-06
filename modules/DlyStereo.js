@@ -11,6 +11,7 @@
         gridHeight: 5,
         originalName: 'DlyStereo',
         tooltip: 'Delay Stereo',
+    params: [1, 3, 5, 7, 9, 11, 15, 18, 19, 21, 16],
         inputs: [20],
         outputs: [12, 13],
         components: [

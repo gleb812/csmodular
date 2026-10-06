@@ -10,6 +10,7 @@
         gridHeight: 4,
         originalName: 'ClkGen',
         tooltip: 'Clock Generator',
+    params: [3, 5, 18, 4, 21],
         inputs: [14],
         outputs: [6, 7, 8, 16],
         components: [

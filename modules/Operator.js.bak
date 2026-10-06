@@ -5,6 +5,7 @@
     export const OperatorModule = {
         type: 'Operator',
             typeID: 180,
+    defaultParams: [1, 0, 0, 1, 0, 7, 0, 0, 90, 99, 80, 99, 70, 99, 70, 0, 0, 50, 0, 0, 0, 0, 99, 1, 1],
         displayName: 'Operator',
         gridHeight: 12,
         originalName: 'Operator',

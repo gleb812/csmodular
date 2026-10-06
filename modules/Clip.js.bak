@@ -5,6 +5,7 @@
     export const ClipModule = {
         type: 'Clip',
             typeID: 61,
+    defaultParams: [0, 0, 0, 1],
         displayName: 'Clip',
         gridHeight: 2,
         originalName: 'Clip',

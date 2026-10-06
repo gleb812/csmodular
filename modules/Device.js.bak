@@ -5,6 +5,7 @@
     export const DeviceModule = {
         type: 'Device',
             typeID: 30,
+    defaultParams: [],
         displayName: 'Device',
         gridHeight: 3,
         originalName: 'Device',

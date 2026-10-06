@@ -10,6 +10,7 @@
         gridHeight: 3,
         originalName: 'EnvADR',
         tooltip: 'Envelope AD/R',
+    params: [17, 18, 7, 8, 23, 20, 22],
         inputs: [0, 6, 10],
         outputs: [1, 4, 13],
         components: [

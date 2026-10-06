@@ -5,6 +5,7 @@
     export const MixStereoModule = {
         type: 'MixStereo',
             typeID: 48,
+    defaultParams: [100, 100, 100, 100, 100, 100, 64, 64, 64, 64, 64, 64, 100],
         displayName: 'MixStereo',
         gridHeight: 5,
         originalName: 'MixStereo',

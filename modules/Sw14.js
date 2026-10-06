@@ -9,6 +9,7 @@
         gridHeight: 3,
         originalName: 'Sw1-4',
         tooltip: 'Switch 1-4',
+    params: [],
         inputs: [6],
         outputs: [0, 1, 8, 11, 12],
         components: [

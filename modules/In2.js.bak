@@ -5,6 +5,7 @@
     export const In2Module = {
         type: 'In2',
             typeID: 170,
+    defaultParams: [0, 1, 1],
         displayName: '2-In',
         gridHeight: 2,
         originalName: '2-In',

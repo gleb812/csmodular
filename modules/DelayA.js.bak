@@ -5,6 +5,8 @@
     export const DelayAModule = {
         type: 'DelayA',
             typeID: 176,
+    mode: [0],
+    defaultParams: [64, 64, 64, 64, 1, 0],
         displayName: 'DelayA',
         gridHeight: 3,
         originalName: 'DelayA',

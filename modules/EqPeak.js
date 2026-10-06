@@ -10,6 +10,7 @@
         gridHeight: 4,
         originalName: 'EqPeak',
         tooltip: 'Eq Peak',
+    params: [1, 2, 3, 12, 14],
         inputs: [11],
         outputs: [10],
         components: [

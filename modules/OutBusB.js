@@ -9,6 +9,7 @@
         gridHeight: 2,
         originalName: 'OutBusB',
         tooltip: '2 outputs bus',
+    params: [4, 5],
         inputs: [0, 1],
         outputs: [],
         components: [

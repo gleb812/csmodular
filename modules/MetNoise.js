@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'MetNoise',
         tooltip: 'Metallic noise oscillator',
+    params: [0, 5, 1, 7, 10],
         inputs: [2, 9],
         outputs: [4],
         components: [

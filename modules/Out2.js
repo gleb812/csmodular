@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: '2-Out',
         tooltip: '2 Outputs',
+    params: [0, 8, 12],
         inputs: [1, 2],
         outputs: [],
         components: [

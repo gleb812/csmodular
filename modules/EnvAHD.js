@@ -10,6 +10,7 @@
         gridHeight: 4,
         originalName: 'EnvAHD',
         tooltip: 'Envelope AHD',
+    params: [17, 18, 24, 4, 5, 20],
         inputs: [2, 7, 9],
         outputs: [10, 13],
         components: [

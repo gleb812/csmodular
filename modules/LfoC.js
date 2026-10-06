@@ -11,6 +11,7 @@
         gridHeight: 2,
         originalName: 'LfoC',
         tooltip: 'LFO C',
+    params: [3, 8, 4, 10],
         inputs: [9],
         outputs: [7],
         components: [

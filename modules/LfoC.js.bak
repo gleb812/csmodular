@@ -5,6 +5,8 @@
     export const LfoCModule = {
         type: 'LfoC',
             typeID: 24,
+    mode: [0],
+    defaultParams: [64, 0, 4, 1, 1],
         displayName: 'LfoC',
         gridHeight: 2,
         originalName: 'LfoC',

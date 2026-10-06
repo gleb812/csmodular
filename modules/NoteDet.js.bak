@@ -5,6 +5,7 @@
     export const NoteDetModule = {
         type: 'NoteDet',
             typeID: 156,
+    defaultParams: [64],
         displayName: 'NoteDet',
         gridHeight: 2,
         originalName: 'NoteDet',

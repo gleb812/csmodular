@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'X-Fade',
         tooltip: 'Cross Fader',
+    params: [4, 0, 13],
         inputs: [1, 2, 3],
         outputs: [6],
         components: [

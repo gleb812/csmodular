@@ -10,6 +10,7 @@
         gridHeight: 3,
         originalName: 'Flanger',
         tooltip: 'Flanger',
+    params: [1, 0, 4, 10],
         inputs: [6],
         outputs: [5],
         components: [

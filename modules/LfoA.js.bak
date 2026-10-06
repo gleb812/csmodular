@@ -5,6 +5,7 @@
     export const LfoAModule = {
         type: 'LfoA',
             typeID: 26,
+    defaultParams: [64, 0, 0, 0, 0, 1, 4, 1],
         displayName: 'LfoA',
         gridHeight: 3,
         originalName: 'LfoA',

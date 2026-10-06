@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'LevAmp',
         tooltip: 'Level Amplifier',
+    params: [0, 7],
         inputs: [1],
         outputs: [3],
         components: [

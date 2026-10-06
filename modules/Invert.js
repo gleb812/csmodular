@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'Invert',
         tooltip: 'Logic Inverter',
+    params: [],
         inputs: [6, 9],
         outputs: [1, 4],
         components: [

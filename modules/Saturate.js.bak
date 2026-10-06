@@ -26,7 +26,9 @@
                 "x": 108,
                 "y": 14,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Mod",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Knob",
@@ -50,7 +52,9 @@
                 "x": 210,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -58,7 +62,9 @@
                 "x": 240,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Graph",

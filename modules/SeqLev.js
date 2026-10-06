@@ -9,6 +9,7 @@
         gridHeight: 8,
         originalName: 'SeqLev',
         tooltip: 'Sequencer Level',
+    params: [26, 29, 28, 31, 30, 33, 32, 35, 34, 37, 36, 39, 38, 41, 40, 43, 81, 26, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 43, 200, 12, 19, 13, 18],
         inputs: [0, 1, 3, 5, 82, 115],
         outputs: [8, 58, 114],
         components: [

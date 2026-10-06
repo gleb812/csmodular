@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'LevAdd',
         tooltip: 'Level Add',
+    params: [0, 9],
         inputs: [1],
         outputs: [3],
         components: [

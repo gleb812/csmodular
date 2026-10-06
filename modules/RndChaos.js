@@ -9,6 +9,7 @@
         gridHeight: 4,
         originalName: 'RndChaos',
         tooltip: 'Rnd Chaos',
+    params: [2, 5, 10, 13, 9],
         inputs: [1, 4, 7],
         outputs: [0],
         components: [

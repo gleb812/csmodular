@@ -18,7 +18,9 @@
                 "x": 4,
                 "y": 25,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Clk",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -26,7 +28,9 @@
                 "x": 4,
                 "y": 47,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Rst",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -34,7 +38,9 @@
                 "x": 4,
                 "y": 69,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Loop",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "TextLabel",
@@ -60,7 +66,9 @@
                 "x": 204,
                 "y": 4,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Park",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "LED",
@@ -83,7 +91,9 @@
                 "x": 240,
                 "y": 26,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Link",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -324,7 +334,9 @@
                 "x": 240,
                 "y": 105,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Trig",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Line",
@@ -522,7 +534,9 @@
                 "x": 4,
                 "y": 105,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Trig",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "Line",
@@ -906,7 +920,9 @@
                 "x": 240,
                 "y": 84,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Val",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -914,7 +930,9 @@
                 "x": 4,
                 "y": 84,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Val",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Line",

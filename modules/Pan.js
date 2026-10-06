@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'Pan',
         tooltip: 'Pan',
+    params: [1, 3, 13],
         inputs: [0, 4],
         outputs: [5, 7],
         components: [

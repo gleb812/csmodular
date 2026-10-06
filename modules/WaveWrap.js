@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'WaveWrap',
         tooltip: 'Wave Wrapper',
+    params: [1, 3, 6],
         inputs: [0, 4],
         outputs: [7],
         components: [

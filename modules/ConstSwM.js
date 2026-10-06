@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'ConstSwM',
         tooltip: 'Constant Switch Momentary',
+    params: [5, 3],
         inputs: [],
         outputs: [0],
         components: [

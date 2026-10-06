@@ -10,6 +10,7 @@
         gridHeight: 5,
         originalName: 'FltPhase',
         tooltip: 'Filter Phase',
+    params: [3, 5, 7, 12, 14, 26, 28, 30, 19, 21, 18],
         inputs: [2, 6, 10, 13, 22],
         outputs: [0],
         components: [

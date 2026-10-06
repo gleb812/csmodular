@@ -5,6 +5,7 @@
     export const DlyClockModule = {
         type: 'DlyClock',
             typeID: 178,
+    defaultParams: [0],
         displayName: 'DlyClock',
         gridHeight: 2,
         originalName: 'DlyClock',

@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'CtrlRcv',
         tooltip: 'MIDI Control Receive',
+    params: [5, 7],
         inputs: [],
         outputs: [2, 8],
         components: [

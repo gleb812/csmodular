@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'T&H',
         tooltip: 'Track & Hold',
+    params: [],
         inputs: [0, 4],
         outputs: [1],
         components: [

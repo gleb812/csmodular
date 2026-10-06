@@ -5,6 +5,8 @@
     export const DlySingleAModule = {
         type: 'DlySingleA',
             typeID: 172,
+    mode: [0],
+    defaultParams: [64],
         displayName: 'DlySingleA',
         gridHeight: 2,
         originalName: 'DlySingleA',

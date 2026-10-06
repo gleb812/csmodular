@@ -5,6 +5,7 @@
     export const ModADSRModule = {
         type: 'ModADSR',
             typeID: 23,
+    defaultParams: [0, 54, 100, 14, 0, 0, 0, 0, 0, 1],
         displayName: 'ModADSR',
         gridHeight: 5,
         originalName: 'ModADSR',

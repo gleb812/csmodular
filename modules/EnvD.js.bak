@@ -5,6 +5,7 @@
     export const EnvDModule = {
         type: 'EnvD',
             typeID: 55,
+    defaultParams: [54, 0],
         displayName: 'EnvD',
         gridHeight: 2,
         originalName: 'EnvD',

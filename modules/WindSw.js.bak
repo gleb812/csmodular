@@ -5,6 +5,7 @@
     export const WindSwModule = {
         type: 'WindSw',
             typeID: 85,
+    defaultParams: [40, 80],
         displayName: 'WindSw',
         gridHeight: 2,
         originalName: 'WindSw',

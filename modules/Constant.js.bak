@@ -5,6 +5,7 @@
     export const ConstantModule = {
         type: 'Constant',
             typeID: 43,
+    defaultParams: [64, 0],
         displayName: 'Constant',
         gridHeight: 2,
         originalName: 'Constant',

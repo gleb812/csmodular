@@ -5,6 +5,7 @@
     export const ADConvModule = {
         type: 'ADConv',
             typeID: 131,
+    defaultParams: [],
         displayName: 'ADConv',
         gridHeight: 2,
         originalName: 'ADConv',

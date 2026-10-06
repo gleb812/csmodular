@@ -18,7 +18,9 @@
                 "x": 4,
                 "y": 24,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Ctrl",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",
@@ -250,7 +252,9 @@
                 "x": 240,
                 "y": 105,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Trig",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Line",
@@ -266,7 +270,9 @@
                 "x": 240,
                 "y": 86,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Val",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -274,7 +280,9 @@
                 "x": 4,
                 "y": 105,
                 "jackType": "logic",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Trig",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Input",
@@ -282,7 +290,9 @@
                 "x": 4,
                 "y": 87,
                 "jackType": "control",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Val",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -586,7 +596,9 @@
                 "x": 23,
                 "y": 85,
                 "length": 21,
-                "orientation": "Horizontal"
+                "orientation": "Horizontal",
+                "ConnectorName": "Trig",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Line",

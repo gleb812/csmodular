@@ -5,6 +5,7 @@
     export const LevScalerModule = {
         type: 'LevScaler',
             typeID: 115,
+    defaultParams: [64, 64, 64, 1],
         displayName: 'LevScaler',
         gridHeight: 3,
         originalName: 'LevScaler',
@@ -151,7 +152,8 @@
                 "width": 11,
                 "height": 24,
                 "color": "#ffffff"
-        },
+        ,
+        "svgSrc": "/svg/levscaler_ADSR.svg"},
         {
                 "componentType": "ButtonFlat",
                 "id": "17",

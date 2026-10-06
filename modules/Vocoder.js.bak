@@ -5,6 +5,7 @@
     export const VocoderModule = {
         type: 'Vocoder',
             typeID: 108,
+    defaultParams: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 0],
         displayName: 'Vocoder',
         gridHeight: 8,
         originalName: 'Vocoder',

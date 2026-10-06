@@ -10,6 +10,7 @@
         gridHeight: 5,
         originalName: 'OscShpA',
         tooltip: 'Osc Shape A',
+    params: [3, 12, 16, 18, 21, 5, 6, 8, 14, 27, 28],
         inputs: [0, 1, 2, 7, 13],
         outputs: [17],
         components: [

@@ -5,6 +5,7 @@
     export const MixFaderModule = {
         type: 'MixFader',
             typeID: 161,
+    defaultParams: [100, 100, 100, 100, 100, 100, 100, 100, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
         displayName: 'MixFader',
         gridHeight: 9,
         originalName: 'MixFader',

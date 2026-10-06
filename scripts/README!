@@ -25,9 +25,28 @@ python patch_jack_name_id.py ../modules --inputs inputs_connectors_simple.json -
 25.02.26 - в конфигурационный файл patchModules добавлены параметры модулей. Все дефолтные параметры взяты из файла all_proc.txt . Он в свою очередь получен применением скрипта extract_param_from_pch.py к результатам операции pch2csd -p all_modules1.pch2 > a111.txt и pch2csd -p all_modules2.pch2 > all2.txt
 ЕСЛИ В ОПИСАНИИ МОДУЛЯ JS ОТСУТСТВУЕТ СТРОКА defaulParams, то причины надо искать вот здесь.
 
-УДОБНЫЕ КОНСОЛЬНЫЕ КОМАНДЫ:
 
-await modularSystem.csoundEngine.showCurrentOrc();
+06.10.2026 обнаружилась ошибка одного из патчеров(?) в модуле OscC
+вот правильный вариант:
+        {
+                "componentType": "ButtonFlat",
+                "id": "9",
+                "x": 181,
+                "y": 5,
+                "width": 36,
+                "height": 12,
+                "labels": [
+                        "FM Lin",
+                        "FM Trk"
+                ],
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 0
+        },
+
+
+
+
+УДОБНЫЕ КОНСОЛЬНЫЕ КОМАНДЫ:
 
 / ORC (то, что идёт в compileOrc)
 const orc = await modularSystem.csoundGen.generateOrc();

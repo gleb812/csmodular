@@ -5,6 +5,7 @@
     export const EnvADSRModule = {
         type: 'EnvADSR',
             typeID: 20,
+    defaultParams: [0, 0, 54, 100, 14, 0, 1, 0],
         displayName: 'EnvADSR',
         gridHeight: 4,
         originalName: 'EnvADSR',
@@ -216,7 +217,8 @@
                 "width": 11,
                 "height": 21,
                 "color": "#ffffff"
-        },
+        ,
+        "svgSrc": "/svg/levscaler_ADSR.svg"},
         {
                 "componentType": "TextLabel",
                 "id": "25",

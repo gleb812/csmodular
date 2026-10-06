@@ -5,6 +5,7 @@
     export const ModAmtModule = {
         type: 'ModAmt',
             typeID: 195,
+    defaultParams: [100, 1, 0, 0],
         displayName: 'ModAmt',
         gridHeight: 2,
         originalName: 'ModAmt',

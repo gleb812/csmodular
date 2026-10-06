@@ -5,6 +5,7 @@
     export const Mux81Module = {
         type: 'Mux81',
             typeID: 124,
+    defaultParams: [],
         displayName: 'Mux8-1',
         gridHeight: 2,
         originalName: 'Mux8-1',

@@ -9,6 +9,7 @@
         gridHeight: 3,
         originalName: 'StChorus',
         tooltip: 'Stereo Chorus',
+    params: [0, 1, 4],
         inputs: [3],
         outputs: [2, 8],
         components: [

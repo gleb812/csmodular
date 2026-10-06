@@ -5,6 +5,7 @@
     export const XFadeModule = {
         type: 'XFade',
             typeID: 18,
+    defaultParams: [0, 64, 0],
         displayName: 'X-Fade',
         gridHeight: 2,
         originalName: 'X-Fade',

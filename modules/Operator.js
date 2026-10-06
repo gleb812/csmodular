@@ -10,6 +10,7 @@
         gridHeight: 12,
         originalName: 'Operator',
         tooltip: 'FM Operator',
+    params: [0, 1, 2, 3, 4, 5, 6, 7, 31, 33, 34, 35, 39, 44, 46, 56, 58, 64, 66, 68, 70, 72, 79, 54, 50],
         inputs: [26, 27, 40, 51, 74, 75, 77],
         outputs: [61],
         components: [

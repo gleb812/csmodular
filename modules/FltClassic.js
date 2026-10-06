@@ -10,6 +10,7 @@
         gridHeight: 4,
         originalName: 'FltClassic',
         tooltip: 'Filter Classic',
+    params: [0, 6, 7, 10, 13, 17],
         inputs: [1, 2, 16],
         outputs: [15],
         components: [

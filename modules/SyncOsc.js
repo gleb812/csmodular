@@ -9,6 +9,7 @@
         gridHeight: 6,
         originalName: 'SyncOsc',
         tooltip: 'Sync oscillator',
+    params: [3, 6, 7, 8, 10, 11, 13, 18, 20, 23, 27],
         inputs: [0, 1, 12, 19],
         outputs: [26],
         components: [

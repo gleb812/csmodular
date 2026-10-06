@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'WindSw',
         tooltip: 'Window Switch',
+    params: [2, 5],
         inputs: [0, 8],
         outputs: [9, 12],
         components: [

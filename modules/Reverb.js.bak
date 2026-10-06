@@ -5,6 +5,8 @@
     export const ReverbModule = {
         type: 'Reverb',
             typeID: 12,
+    mode: [0],
+    defaultParams: [64, 64, 64, 1],
         displayName: 'Reverb',
         gridHeight: 3,
         originalName: 'Reverb',

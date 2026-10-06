@@ -5,6 +5,7 @@
     export const NoteQuantModule = {
         type: 'NoteQuant',
             typeID: 75,
+    defaultParams: [127, 0],
         displayName: 'NoteQuant',
         gridHeight: 2,
         originalName: 'NoteQuant',

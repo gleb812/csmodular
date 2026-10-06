@@ -5,6 +5,7 @@
     export const GlideModule = {
         type: 'Glide',
             typeID: 158,
+    defaultParams: [64, 1, 0],
         displayName: 'Glide',
         gridHeight: 2,
         originalName: 'Glide',

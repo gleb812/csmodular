@@ -11,6 +11,7 @@
         gridHeight: 2,
         originalName: 'FltHP',
         tooltip: 'Filter Highpass',
+    params: [1, 5, 10, 6],
         inputs: [0, 4],
         outputs: [11],
         components: [

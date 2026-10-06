@@ -5,6 +5,7 @@
     export const EnvHModule = {
         type: 'EnvH',
             typeID: 41,
+    defaultParams: [32, 0],
         displayName: 'EnvH',
         gridHeight: 2,
         originalName: 'EnvH',
@@ -138,7 +139,8 @@
                 "width": 21,
                 "height": 11,
                 "color": "#ffffff"
-        },
+        ,
+        "svgSrc": "/svg/EnvH.svg"},
         {
                 "componentType": "TextLabel",
                 "id": "14",

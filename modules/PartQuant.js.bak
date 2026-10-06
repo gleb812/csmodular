@@ -5,6 +5,7 @@
     export const PartQuantModule = {
         type: 'PartQuant',
             typeID: 22,
+    defaultParams: [127],
         displayName: 'PartQuant',
         gridHeight: 2,
         originalName: 'PartQuant',

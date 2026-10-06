@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'RandomA',
         tooltip: 'Random A',
+    params: [3, 8, 4, 10, 11, 12, 14],
         inputs: [9],
         outputs: [7],
         components: [

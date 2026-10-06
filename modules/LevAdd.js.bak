@@ -5,6 +5,7 @@
     export const LevAddModule = {
         type: 'LevAdd',
             typeID: 112,
+    defaultParams: [64, 1],
         displayName: 'LevAdd',
         gridHeight: 2,
         originalName: 'LevAdd',
@@ -72,7 +73,8 @@
                 "width": 19,
                 "height": 17,
                 "color": "#ffffff"
-        },
+        ,
+        "svgSrc": "/svg/Levadd.svg"},
         {
                 "componentType": "Line",
                 "id": "8",

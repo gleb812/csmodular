@@ -9,6 +9,7 @@
         gridHeight: 2,
         originalName: 'BusIn',
         tooltip: 'Global bus',
+    params: [],
         inputs: [],
         outputs: [0, 3, 6, 10],
         components: [

@@ -5,6 +5,7 @@
     export const LfoShpAModule = {
         type: 'LfoShpA',
             typeID: 24,
+    defaultParams: [64, 1, 0, 0, 1, 64, 0, 0, 0, 0, 4, 0],
         displayName: 'LfoShpA',
         gridHeight: 5,
         originalName: 'LfoShpA',

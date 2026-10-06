@@ -9,6 +9,7 @@
         gridHeight: 4,
         originalName: 'ShelvEQ',
         tooltip: 'Shelving equalizer',
+    params: [1, 2, 13, 15, 0],
         inputs: [10],
         outputs: [11],
         components: [

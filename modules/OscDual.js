@@ -10,6 +10,7 @@
         gridHeight: 5,
         originalName: 'OscDual',
         tooltip: 'Osc Dual',
+    params: [3, 12, 18, 21, 5, 6, 8, 10, 16, 26, 29, 32, 38, 39],
         inputs: [0, 1, 2, 7, 15],
         outputs: [17],
         components: [

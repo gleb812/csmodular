@@ -10,6 +10,7 @@
         gridHeight: 3,
         originalName: 'Mux8-1X',
         tooltip: 'Multiplexer 8-1 with variable X-Fade',
+    params: [27],
         inputs: [0, 1, 4, 6, 8, 10, 12, 14, 24],
         outputs: [17],
         components: [

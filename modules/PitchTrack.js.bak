@@ -5,6 +5,7 @@
     export const PitchTrackModule = {
         type: 'PitchTrack',
             typeID: 198,
+    defaultParams: [20],
         displayName: 'PitchTrack',
         gridHeight: 2,
         originalName: 'PitchTrack',

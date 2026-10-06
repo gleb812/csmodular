@@ -5,6 +5,7 @@
     export const CompSigModule = {
         type: 'CompSig',
             typeID: 159,
+    defaultParams: [],
         displayName: 'CompSig',
         gridHeight: 2,
         originalName: 'CompSig',

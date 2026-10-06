@@ -1,6 +1,9 @@
-opcode zout, 0, k
-kIn1 xin
+opcode zout, 0, kk
+kButton1, kIn1 xin
 ain1 zar kIn1
 
-out ain1,ain1
+outs ain1*kButton1,ain1*kButton1
+
+; --- module body ---
+; Add your DSP code here
 endop

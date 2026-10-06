@@ -5,6 +5,8 @@
     export const FltHPModule = {
         type: 'FltHP',
             typeID: 134,
+    mode: [0],
+    defaultParams: [60, 0, 0, 1],
         displayName: 'FltHP',
         gridHeight: 2,
         originalName: 'FltHP',

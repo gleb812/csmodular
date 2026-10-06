@@ -5,6 +5,7 @@
     export const BinCounterModule = {
         type: 'BinCounter',
             typeID: 130,
+    defaultParams: [],
         displayName: 'BinCounter',
         gridHeight: 2,
         originalName: 'BinCounter',

@@ -5,6 +5,7 @@
     export const EnvFollowModule = {
         type: 'EnvFollow',
             typeID: 71,
+    defaultParams: [0, 20],
         displayName: 'EnvFollow',
         gridHeight: 2,
         originalName: 'EnvFollow',

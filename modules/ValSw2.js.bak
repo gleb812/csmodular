@@ -5,6 +5,7 @@
     export const ValSw2Module = {
         type: 'ValSw2',
             typeID: 105,
+    defaultParams: [0],
         displayName: 'ValSw2-1',
         gridHeight: 2,
         originalName: 'ValSw2-1',

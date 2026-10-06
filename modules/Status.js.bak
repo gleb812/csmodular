@@ -18,7 +18,9 @@
                 "x": 166,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "VarActive",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",
@@ -44,7 +46,9 @@
                 "x": 107,
                 "y": 13,
                 "jackType": "logic",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "PatchActive",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -61,7 +65,9 @@
                 "x": 225,
                 "y": 13,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "VoiceNo",
+                "ConnectorIndex": 2
         }
 ]
     };

@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'PitchTrack',
         tooltip: 'Pitch tracker',
+    params: [12],
         inputs: [2],
         outputs: [3, 6, 8],
         components: [

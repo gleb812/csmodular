@@ -11,6 +11,7 @@
         gridHeight: 3,
         originalName: 'DelayA',
         tooltip: 'Delay A',
+    params: [2, 3, 4, 5, 8, 15],
         inputs: [6],
         outputs: [7],
         components: [

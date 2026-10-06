@@ -1,0 +1,8 @@
+opcode zOO, 0, kkk
+kKnob1, kButton1, kOut1 xin
+aout1 oscil .5*kButton1,kKnob1
+
+; --- module body ---
+; Add your DSP code here
+zaw aout1, kOut1
+endop

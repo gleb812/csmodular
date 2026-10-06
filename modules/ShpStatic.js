@@ -9,6 +9,7 @@
         gridHeight: 2,
         originalName: 'ShpStatic',
         tooltip: 'Shape Static',
+    params: [3, 5],
         inputs: [1],
         outputs: [0],
         components: [

@@ -5,6 +5,7 @@
     export const DXRouterModule = {
         type: 'DXRouter',
             typeID: 165,
+    defaultParams: [0, 0],
         displayName: 'DXRouter',
         gridHeight: 6,
         originalName: 'DXRouter',

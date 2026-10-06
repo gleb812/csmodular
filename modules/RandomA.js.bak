@@ -5,6 +5,7 @@
     export const RandomAModule = {
         type: 'RandomA',
             typeID: 200,
+    defaultParams: [64, 0, 0, 1, 1, 4, 3],
         displayName: 'RandomA',
         gridHeight: 2,
         originalName: 'RandomA',

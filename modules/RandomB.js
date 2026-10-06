@@ -10,6 +10,7 @@
         gridHeight: 3,
         originalName: 'RandomB',
         tooltip: 'Random B',
+    params: [1, 4, 9, 6, 16, 13, 5, 15, 21],
         inputs: [0, 3],
         outputs: [8],
         components: [

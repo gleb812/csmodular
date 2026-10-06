@@ -5,6 +5,8 @@
     export const DelayModule = {
         type: 'Delay',
             typeID: 0,
+    mode: [0],
+    defaultParams: [64, 0, 1],
         displayName: 'Delay',
         gridHeight: 3,
         originalName: 'Delay',

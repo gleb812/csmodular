@@ -5,6 +5,7 @@
     export const FltMultiModule = {
         type: 'FltMulti',
             typeID: 49,
+    defaultParams: [75, 0, 0, 1, 0, 1, 1],
         displayName: 'FltMulti',
         gridHeight: 4,
         originalName: 'FltMulti',

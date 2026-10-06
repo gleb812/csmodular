@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: '8Counter',
         tooltip: '8 Counter',
+    params: [],
         inputs: [40, 44],
         outputs: [16, 33, 34, 35, 36, 37, 38, 39],
         components: [

@@ -5,6 +5,7 @@
     export const EqPeakModule = {
         type: 'EqPeak',
             typeID: 103,
+    defaultParams: [60, 64, 64, 1, 127],
         displayName: 'EqPeak',
         gridHeight: 4,
         originalName: 'EqPeak',

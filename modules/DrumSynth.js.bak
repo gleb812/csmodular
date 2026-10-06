@@ -5,6 +5,7 @@
     export const DrumSynthModule = {
         type: 'DrumSynth',
             typeID: 58,
+    defaultParams: [42, 15, 46, 50, 120, 102, 57, 32, 39, 49, 1, 68, 61, 79, 115, 1],
         displayName: 'DrumSynth',
         gridHeight: 8,
         originalName: 'DrumSynth',

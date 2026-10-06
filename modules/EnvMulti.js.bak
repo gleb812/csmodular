@@ -5,6 +5,7 @@
     export const EnvMultiModule = {
         type: 'EnvMulti',
             typeID: 52,
+    defaultParams: [127, 45, 64, 0, 0, 30, 30, 14, 0, 2, 0, 1, 0],
         displayName: 'EnvMulti',
         gridHeight: 6,
         originalName: 'EnvMulti',

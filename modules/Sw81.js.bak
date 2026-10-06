@@ -36,7 +36,9 @@
                 "x": 4,
                 "y": 45,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Control",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextField",
@@ -88,7 +90,9 @@
                 "x": 240,
                 "y": 45,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -141,7 +145,9 @@
                 "x": 82,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -149,7 +155,9 @@
                 "x": 124,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -157,7 +165,9 @@
                 "x": 166,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Input",
@@ -165,7 +175,9 @@
                 "x": 208,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In4",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Input",
@@ -173,7 +185,9 @@
                 "x": 99,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In5",
+                "ConnectorIndex": 4
         },
         {
                 "componentType": "Input",
@@ -181,7 +195,9 @@
                 "x": 141,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In6",
+                "ConnectorIndex": 5
         },
         {
                 "componentType": "Input",
@@ -189,7 +205,9 @@
                 "x": 183,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In7",
+                "ConnectorIndex": 6
         },
         {
                 "componentType": "Input",
@@ -197,7 +215,9 @@
                 "x": 225,
                 "y": 15,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In8",
+                "ConnectorIndex": 7
         },
         {
                 "componentType": "Stub",

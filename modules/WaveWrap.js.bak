@@ -5,6 +5,7 @@
     export const WaveWrapModule = {
         type: 'WaveWrap',
             typeID: 74,
+    defaultParams: [0, 0, 1],
         displayName: 'WaveWrap',
         gridHeight: 2,
         originalName: 'WaveWrap',

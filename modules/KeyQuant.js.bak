@@ -5,6 +5,7 @@
     export const KeyQuantModule = {
         type: 'KeyQuant',
             typeID: 152,
+    defaultParams: [127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         displayName: 'KeyQuant',
         gridHeight: 2,
         originalName: 'KeyQuant',

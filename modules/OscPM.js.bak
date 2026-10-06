@@ -5,6 +5,8 @@
     export const OscPMModule = {
         type: 'OscPM',
             typeID: 183,
+    mode: [0],
+    defaultParams: [64, 64, 1, 0, 0, 1, 0],
         displayName: 'OscPM',
         gridHeight: 3,
         originalName: 'OscPM',

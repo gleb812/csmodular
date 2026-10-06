@@ -5,6 +5,7 @@
     export const NoteSendModule = {
         type: 'NoteSend',
             typeID: 143,
+    defaultParams: [100, 64, 0],
         displayName: 'NoteSend',
         gridHeight: 2,
         originalName: 'NoteSend',

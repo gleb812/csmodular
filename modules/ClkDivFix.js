@@ -9,6 +9,7 @@
         gridHeight: 2,
         originalName: 'ClkDivFix',
         tooltip: 'Clock Divider Fixed',
+    params: [],
         inputs: [1, 2],
         outputs: [6, 7, 8],
         components: [

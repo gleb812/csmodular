@@ -5,6 +5,8 @@
     export const FlipFlopModule = {
         type: 'FlipFlop',
             typeID: 91,
+    mode: [0],
+    defaultParams: [],
         displayName: 'FlipFlop',
         gridHeight: 2,
         originalName: 'FlipFlop',

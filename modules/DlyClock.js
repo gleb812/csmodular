@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'DlyClock',
         tooltip: 'Delay Clocked',
+    params: [5],
         inputs: [0, 6],
         outputs: [7],
         components: [

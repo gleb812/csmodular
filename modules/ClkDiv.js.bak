@@ -5,6 +5,8 @@
     export const ClkDivModule = {
         type: 'ClkDiv',
             typeID: 69,
+    mode: [0],
+    defaultParams: [0],
         displayName: 'ClkDiv',
         gridHeight: 2,
         originalName: 'ClkDiv',

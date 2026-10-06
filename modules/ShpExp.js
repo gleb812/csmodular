@@ -9,6 +9,7 @@
         gridHeight: 2,
         originalName: 'ShpExp',
         tooltip: 'Shape Exp',
+    params: [0, 2, 9, 6],
         inputs: [1, 4],
         outputs: [5],
         components: [

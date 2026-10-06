@@ -5,6 +5,7 @@
     export const NoiseGateModule = {
         type: 'NoiseGate',
             typeID: 189,
+    defaultParams: [20, 0, 64, 1],
         displayName: 'NoiseGate',
         gridHeight: 3,
         originalName: 'NoiseGate',

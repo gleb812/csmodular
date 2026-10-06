@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'MinMax',
         tooltip: 'Min/Max Compare',
+    params: [],
         inputs: [0, 1],
         outputs: [2, 3],
         components: [

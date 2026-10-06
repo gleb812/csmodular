@@ -40,7 +40,8 @@
                 "width": 23,
                 "height": 16,
                 "color": "#ffffff"
-        },
+        ,
+        "svgSrc": "/svg/SW_onoffM_T.svg"},
         {
                 "componentType": "Line",
                 "id": "3",
@@ -84,7 +85,8 @@
                 "width": 11,
                 "height": 12,
                 "color": "#ffffff"
-        },
+        ,
+        "svgSrc": "/svg/TH_SH.svg"},
         {
                 "componentType": "Line",
                 "id": "10",

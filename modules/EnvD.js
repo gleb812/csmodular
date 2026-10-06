@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'EnvD',
         tooltip: 'Envelope Decay',
+    params: [6],
         inputs: [0, 5, 8],
         outputs: [11, 12],
         components: [

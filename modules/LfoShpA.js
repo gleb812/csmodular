@@ -10,6 +10,7 @@
         gridHeight: 5,
         originalName: 'LfoShpA',
         tooltip: 'LFO Shape A',
+    params: [1, 6, 10, 11, 12, 17, 24, 26, 29, 31, 14],
         inputs: [3, 4, 5, 13, 16, 28],
         outputs: [0, 32],
         components: [

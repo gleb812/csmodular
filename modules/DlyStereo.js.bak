@@ -5,6 +5,8 @@
     export const DlyStereoModule = {
         type: 'DlyStereo',
             typeID: 182,
+    mode: [0],
+    defaultParams: [64, 64, 64, 64, 0, 0, 0, 127, 64, 1, 0],
         displayName: 'DlyStereo',
         gridHeight: 5,
         originalName: 'DlyStereo',

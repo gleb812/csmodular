@@ -5,6 +5,8 @@
     export const OscCModule = {
         type: 'OscC',
             typeID: 96,
+    mode: [0],
+    defaultParams: [64, 64, 1, 0, 0, 1, 0, 0],
         displayName: 'OscC',
         gridHeight: 3,
         originalName: 'OscC',
@@ -190,12 +192,12 @@
                 "y": 5,
                 "width": 36,
                 "height": 12,
-                "labels": [,
-                "ConnectorName": "Pitch",
-                "ConnectorIndex": 0
+                "labels": [
                         "FM Lin",
                         "FM Trk"
-                ]
+                ],
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonFlat",

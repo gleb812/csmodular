@@ -5,6 +5,7 @@
     export const DlyShiftRegModule = {
         type: 'DlyShiftReg',
             typeID: 179,
+    defaultParams: [],
         displayName: 'DlyShiftReg',
         gridHeight: 2,
         originalName: 'DlyShiftReg',

@@ -5,6 +5,7 @@
     export const OscNoiseModule = {
         type: 'OscNoise',
             typeID: 106,
+    defaultParams: [64, 64, 1, 0, 0, 0, 0, 1],
         displayName: 'OscNoise',
         gridHeight: 3,
         originalName: 'OscNoise',

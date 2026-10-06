@@ -5,6 +5,7 @@
     export const OscMasterModule = {
         type: 'OscMaster',
             typeID: 27,
+    defaultParams: [64, 64, 1, 0, 0],
         displayName: 'OscMaster',
         gridHeight: 3,
         originalName: 'OscMaster',

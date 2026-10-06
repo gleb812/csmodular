@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'MonoKey',
         tooltip: 'Monophonic Keyboard',
+    params: [6],
         inputs: [],
         outputs: [1, 2, 3],
         components: [

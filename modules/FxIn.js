@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'Fx-In',
         tooltip: 'Fx Input',
+    params: [5, 7, 10],
         inputs: [],
         outputs: [0, 3],
         components: [

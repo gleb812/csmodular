@@ -9,6 +9,7 @@
         gridHeight: 9,
         originalName: 'SeqNote',
         tooltip: 'Sequencer Note',
+    params: [26, 29, 28, 31, 30, 33, 32, 35, 34, 37, 36, 39, 38, 41, 40, 43, 81, 17, 27, 60, 61, 84, 85, 86, 88, 89, 90, 91, 92, 93, 94, 95, 96, 200, 201, 12, 10],
         inputs: [0, 1, 3, 5, 22, 23, 82, 115],
         outputs: [8, 58, 114],
         components: [

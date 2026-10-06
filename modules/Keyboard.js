@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'Keyboard',
         tooltip: 'Keyboard',
+    params: [],
         inputs: [],
         outputs: [0, 1, 2, 3, 7, 10],
         components: [

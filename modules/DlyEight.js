@@ -11,6 +11,7 @@
         gridHeight: 3,
         originalName: 'DlyEight',
         tooltip: 'Delay 8 Tap',
+    params: [10],
         inputs: [0],
         outputs: [1, 2, 3, 4, 5, 6, 7, 8],
         components: [

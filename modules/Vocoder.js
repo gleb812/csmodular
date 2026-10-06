@@ -10,6 +10,7 @@
         gridHeight: 8,
         originalName: 'Vocoder',
         tooltip: 'Vocoder',
+    params: [19, 27, 28, 29, 30, 31, 32, 33, 34, 36, 37, 38, 39, 40, 41, 42, 43, 65],
         inputs: [1, 24],
         outputs: [25],
         components: [

@@ -11,6 +11,7 @@
         gridHeight: 3,
         originalName: 'Delay',
         tooltip: 'Audio delay',
+    params: [1, 3, 5, 8],
         inputs: [0, 9],
         outputs: [10],
         components: [

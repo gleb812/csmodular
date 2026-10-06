@@ -10,6 +10,7 @@
         gridHeight: 3,
         originalName: 'NoiseGate',
         tooltip: 'Noise Gate',
+    params: [17, 18, 3, 7],
         inputs: [0],
         outputs: [1, 8],
         components: [

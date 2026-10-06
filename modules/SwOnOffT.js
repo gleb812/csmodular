@@ -9,6 +9,7 @@
         gridHeight: 2,
         originalName: 'SwOnOffT',
         tooltip: 'Switch On/Off Toggling',
+    params: [],
         inputs: [0],
         outputs: [1, 3],
         components: [

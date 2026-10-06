@@ -5,6 +5,7 @@
     export const LevAmpModule = {
         type: 'LevAmp',
             typeID: 81,
+    defaultParams: [64, 0],
         displayName: 'LevAmp',
         gridHeight: 2,
         originalName: 'LevAmp',

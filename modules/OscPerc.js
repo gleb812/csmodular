@@ -10,6 +10,7 @@
         gridHeight: 3,
         originalName: 'OscPerc',
         tooltip: 'Osc Percussion',
+    params: [10, 11, 12, 13, 14, 17, 2, 22, 15],
         inputs: [0, 1, 5],
         outputs: [16],
         components: [

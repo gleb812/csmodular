@@ -10,6 +10,7 @@
         gridHeight: 3,
         originalName: 'FltStatic',
         tooltip: 'Filter Static',
+    params: [10, 14, 16, 17, 24],
         inputs: [23],
         outputs: [22],
         components: [

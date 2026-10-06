@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'Constant',
         tooltip: 'Constant Value',
+    params: [2, 5],
         inputs: [],
         outputs: [1],
         components: [

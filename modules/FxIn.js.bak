@@ -5,6 +5,7 @@
     export const FxInModule = {
         type: 'FxIn',
             typeID: 127,
+    defaultParams: [0, 1, 1],
         displayName: 'Fx-In',
         gridHeight: 2,
         originalName: 'Fx-In',

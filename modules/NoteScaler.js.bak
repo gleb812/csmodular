@@ -5,6 +5,7 @@
     export const NoteScalerModule = {
         type: 'NoteScaler',
             typeID: 72,
+    defaultParams: [0],
         displayName: 'NoteScaler',
         gridHeight: 2,
         originalName: 'NoteScaler',

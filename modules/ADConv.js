@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'ADConv',
         tooltip: 'A/D Converter',
+    params: [],
         inputs: [40],
         outputs: [17, 32, 34, 35, 36, 37, 38, 39],
         components: [

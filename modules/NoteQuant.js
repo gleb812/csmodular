@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'NoteQuant',
         tooltip: 'Note Quantizer',
+    params: [0, 4],
         inputs: [6],
         outputs: [7],
         components: [

@@ -10,6 +10,7 @@
         gridHeight: 5,
         originalName: 'FltNord',
         tooltip: 'Filter Nord',
+    params: [1, 6, 10, 11, 14, 16, 17, 20, 24, 27],
         inputs: [0, 3, 4, 23, 26],
         outputs: [22],
         components: [

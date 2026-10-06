@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'LevConv',
         tooltip: 'Level Converter',
+    params: [0],
         inputs: [4],
         outputs: [6],
         components: [

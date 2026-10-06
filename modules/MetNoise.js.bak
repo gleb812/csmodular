@@ -5,6 +5,7 @@
     export const MetNoiseModule = {
         type: 'MetNoise',
             typeID: 29,
+    defaultParams: [64, 64, 1, 0, 0],
         displayName: 'MetNoise',
         gridHeight: 2,
         originalName: 'MetNoise',

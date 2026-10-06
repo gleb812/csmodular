@@ -5,6 +5,7 @@
     export const ZeroCntModule = {
         type: 'ZeroCnt',
             typeID: 198,
+    defaultParams: [],
         displayName: 'ZeroCnt',
         gridHeight: 2,
         originalName: 'ZeroCnt',

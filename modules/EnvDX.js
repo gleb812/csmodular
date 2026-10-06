@@ -9,6 +9,7 @@
         gridHeight: 7,
         originalName: 'EnvDX',
         tooltip: 'DX style envelope',
+    params: [0, 1, 2, 3, 4, 5, 6, 7, 37],
         inputs: [24, 25, 26, 33],
         outputs: [34, 36],
         components: [

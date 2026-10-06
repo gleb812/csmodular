@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'LevMult',
         tooltip: 'Level Multiplier',
+    params: [],
         inputs: [1, 6],
         outputs: [0],
         components: [

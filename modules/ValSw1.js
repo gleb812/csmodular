@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'ValSw1-2',
         tooltip: 'Value Switch 1-2',
+    params: [12],
         inputs: [1, 9],
         outputs: [0, 5],
         components: [

@@ -5,6 +5,8 @@
     export const RndPatternModule = {
         type: 'RndPattern',
             typeID: 208,
+    mode: [0],
+    defaultParams: [64, 64, 127, 15, 0, 0, 1],
         displayName: 'RndPattern',
         gridHeight: 3,
         originalName: 'RndPattern',

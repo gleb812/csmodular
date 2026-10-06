@@ -5,6 +5,7 @@
     export const Fade2Module = {
         type: 'Fade2',
             typeID: 114,
+    defaultParams: [64, 0],
         displayName: 'Fade2-1',
         gridHeight: 2,
         originalName: 'Fade2-1',

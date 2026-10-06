@@ -9,6 +9,7 @@
         gridHeight: 2,
         originalName: 'Mix1-1A',
         tooltip: 'Mixer 1-1 A',
+    params: [0, 2],
         inputs: [1, 30],
         outputs: [13],
         components: [

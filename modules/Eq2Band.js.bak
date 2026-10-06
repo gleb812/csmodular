@@ -5,6 +5,7 @@
     export const Eq2BandModule = {
         type: 'Eq2Band',
             typeID: 32,
+    defaultParams: [64, 64, 127, 1, 0, 2],
         displayName: 'Eq2Band',
         gridHeight: 3,
         originalName: 'Eq2Band',

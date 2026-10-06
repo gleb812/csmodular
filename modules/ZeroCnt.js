@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'ZeroCnt',
         tooltip: 'Zero Crossing Counter',
+    params: [],
         inputs: [0],
         outputs: [1],
         components: [

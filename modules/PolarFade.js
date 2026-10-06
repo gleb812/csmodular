@@ -9,6 +9,7 @@
         gridHeight: 3,
         originalName: 'PolarFade',
         tooltip: 'Quardraphonic fader',
+    params: [1, 3, 4, 6],
         inputs: [0, 5, 8, 9, 10, 13],
         outputs: [11],
         components: [

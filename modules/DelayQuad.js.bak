@@ -5,6 +5,8 @@
     export const DelayQuadModule = {
         type: 'DelayQuad',
             typeID: 175,
+    mode: [0],
+    defaultParams: [64, 64, 64, 64, 64, 64, 64, 64, 0],
         displayName: 'DelayQuad',
         gridHeight: 5,
         originalName: 'DelayQuad',

@@ -10,6 +10,7 @@
         gridHeight: 5,
         originalName: 'MixStereo',
         tooltip: 'Mixer Stereo',
+    params: [0, 1, 5, 6, 10, 11, 15, 16, 20, 21, 25, 26, 34],
         inputs: [3, 8, 13, 18, 23, 28],
         outputs: [35, 36],
         components: [

@@ -5,6 +5,7 @@
     export const Out4Module = {
         type: 'Out4',
             typeID: 3,
+    defaultParams: [0, 1, 0],
         displayName: '4-Out',
         gridHeight: 2,
         originalName: '4-Out',

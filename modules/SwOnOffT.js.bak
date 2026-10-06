@@ -67,7 +67,8 @@
                 "width": 23,
                 "height": 16,
                 "color": "#ffffff"
-        },
+        ,
+        "svgSrc": "/svg/SW_onoffM_T.svg"},
         {
                 "componentType": "Line",
                 "id": "7",

@@ -9,6 +9,7 @@
         gridHeight: 2,
         originalName: 'PeakFollow',
         tooltip: 'Peak follower',
+    params: [0, 1],
         inputs: [3],
         outputs: [4],
         components: [

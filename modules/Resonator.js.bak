@@ -18,7 +18,9 @@
                 "x": 5,
                 "y": 54,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -26,7 +28,9 @@
                 "x": 21,
                 "y": 54,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Knob",
@@ -140,7 +144,9 @@
                 "x": 215,
                 "y": 5,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -148,7 +154,9 @@
                 "x": 239,
                 "y": 5,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Line",
@@ -252,7 +260,9 @@
                 "x": 239,
                 "y": 57,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out2",
+                "ConnectorIndex": 1
         }
 ]
     };

@@ -5,6 +5,7 @@
     export const RndClkAModule = {
         type: 'RndClkA',
             typeID: 204,
+    defaultParams: [127, 0, 0, 0, 1],
         displayName: 'RndClkA',
         gridHeight: 2,
         originalName: 'RndClkA',

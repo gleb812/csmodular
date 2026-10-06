@@ -5,6 +5,7 @@
     export const THModule = {
         type: 'TH',
             typeID: 139,
+    defaultParams: [],
         displayName: 'T&H',
         gridHeight: 2,
         originalName: 'T&H',

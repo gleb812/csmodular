@@ -9,6 +9,7 @@
         gridHeight: 6,
         originalName: 'PulseOsc',
         tooltip: 'Pulse oscillator',
+    params: [3, 7, 8, 9, 13, 15, 20, 25, 27, 30, 31, 32],
         inputs: [0, 1, 2, 14, 26],
         outputs: [19],
         components: [

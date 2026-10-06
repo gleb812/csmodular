@@ -1045,7 +1045,7 @@ class ModularSystem {
       // Удаляем из csound генератора
       this.csoundGen.removeModule(
           module.jsonId,
-          module.title,
+          module.jsonName || module.type,
           module.typeID,
           module.layer,
       );
@@ -1713,7 +1713,7 @@ async loadAvailableModules(selectElement) {
           this.csoundGen.addModule({
             typeId: moduleType,
             instanceId: newModule.jsonId,
-            instanceName: newModule.title,
+            instanceName: moduleType,
             layer: layerName,
             parameters: [],
             mode: [],
@@ -1741,7 +1741,7 @@ async loadAvailableModules(selectElement) {
               leds.forEach(led => {
                   if (led.sourceComponentId === null || led.sourceComponentId === undefined) return;
                   
-                  const channelName = `led_${newModule.title}_${newModule.jsonId}_${led.id}`;
+                  const channelName = `led_${moduleType}_${newModule.jsonId}_${led.id}`;
                   led.sourceChannel = channelName;
                   this.csoundEngine.registerLedChannel(channelName);
                   console.log(`💡 Registered LED channel: ${channelName}`);

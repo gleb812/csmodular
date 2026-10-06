@@ -101,7 +101,9 @@
                 "x": 240,
                 "y": 45,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -109,7 +111,9 @@
                 "x": 240,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonText",

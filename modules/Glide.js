@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'Glide',
         tooltip: 'Glide',
+    params: [5, 11, 1],
         inputs: [3, 7],
         outputs: [8],
         components: [

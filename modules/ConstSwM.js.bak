@@ -5,6 +5,7 @@
     export const ConstSwMModule = {
         type: 'ConstSwM',
             typeID: 188,
+    defaultParams: [64, 0, 0],
         displayName: 'ConstSwM',
         gridHeight: 2,
         originalName: 'ConstSwM',
@@ -54,7 +55,8 @@
                 "width": 23,
                 "height": 10,
                 "color": "#ffffff"
-        },
+        ,
+        "svgSrc": "/svg/ConstSWM_ConstSWT.svg"},
         {
                 "componentType": "TextEdit",
                 "id": "2",

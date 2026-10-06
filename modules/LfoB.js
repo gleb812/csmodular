@@ -10,6 +10,7 @@
         gridHeight: 4,
         originalName: 'LfoB',
         tooltip: 'LFO B',
+    params: [0, 5, 4, 7, 13, 15, 23, 25, 27],
         inputs: [1, 2, 17, 21],
         outputs: [6, 18],
         components: [

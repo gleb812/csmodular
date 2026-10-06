@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'EnvFollow',
         tooltip: 'Envelope Follower',
+    params: [4, 6],
         inputs: [0],
         outputs: [1],
         components: [

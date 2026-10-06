@@ -5,6 +5,7 @@
     export const DAConvModule = {
         type: 'DAConv',
             typeID: 132,
+    defaultParams: [],
         displayName: 'DAConv',
         gridHeight: 2,
         originalName: 'DAConv',

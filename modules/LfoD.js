@@ -9,6 +9,7 @@
         gridHeight: 6,
         originalName: 'LfoD',
         tooltip: 'LFO D',
+    params: [0, 3, 2, 4, 9, 11, 18, 19, 22, 25, 27, 29],
         inputs: [5, 6, 10, 21, 28, 35],
         outputs: [14, 15],
         components: [

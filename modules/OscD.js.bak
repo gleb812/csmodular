@@ -5,6 +5,8 @@
     export const OscDModule = {
         type: 'OscD',
             typeID: 96,
+    mode: [0],
+    defaultParams: [64, 64, 1, 0, 1],
         displayName: 'OscD',
         gridHeight: 2,
         originalName: 'OscD',

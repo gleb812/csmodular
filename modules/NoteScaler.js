@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'NoteScaler',
         tooltip: 'Note Scaler',
+    params: [1],
         inputs: [3],
         outputs: [2],
         components: [

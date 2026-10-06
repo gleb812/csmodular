@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'ModAmt',
         tooltip: 'Modulation Amount',
+    params: [4, 13, 7],
         inputs: [2, 5],
         outputs: [1],
         components: [

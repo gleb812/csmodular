@@ -11,6 +11,7 @@
         gridHeight: 5,
         originalName: 'DelayQuad',
         tooltip: 'Delay Quad',
+    params: [4, 7, 1, 8, 12, 14, 18, 20, 24],
         inputs: [0, 3, 11, 17, 23],
         outputs: [6, 10, 16, 22, 26],
         components: [

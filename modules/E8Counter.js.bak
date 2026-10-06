@@ -5,6 +5,7 @@
     export const E8CounterModule = {
         type: 'E8Counter',
             typeID: 86,
+    defaultParams: [],
         displayName: '8Counter',
         gridHeight: 2,
         originalName: '8Counter',

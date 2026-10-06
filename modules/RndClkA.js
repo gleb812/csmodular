@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'RndClkA',
         tooltip: 'Random Clock A',
+    params: [2, 5, 6, 7],
         inputs: [1, 10, 14],
         outputs: [3],
         components: [

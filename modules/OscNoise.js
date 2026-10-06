@@ -10,6 +10,7 @@
         gridHeight: 3,
         originalName: 'OscNoise',
         tooltip: 'Noise oscillator',
+    params: [0, 14, 1, 5, 8, 9, 16, 17],
         inputs: [4, 7, 13],
         outputs: [2],
         components: [

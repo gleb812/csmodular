@@ -18,7 +18,9 @@
                 "x": 4,
                 "y": 30,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Ctrl",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextField",
@@ -70,7 +72,9 @@
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "Out",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -87,7 +91,9 @@
                 "x": 82,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -95,7 +101,9 @@
                 "x": 126,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In2",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "Input",
@@ -103,7 +111,9 @@
                 "x": 169,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In3",
+                "ConnectorIndex": 2
         },
         {
                 "componentType": "Input",
@@ -111,7 +121,9 @@
                 "x": 212,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "dynamic"
+                "bandwidth": "dynamic",
+                "ConnectorName": "In4",
+                "ConnectorIndex": 3
         },
         {
                 "componentType": "Stub",

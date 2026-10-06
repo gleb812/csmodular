@@ -9,6 +9,7 @@
         gridHeight: 3,
         originalName: 'testtest',
         tooltip: 'testtest',
+    params: [4],
         inputs: 1,
         outputs: 0,
         components: [

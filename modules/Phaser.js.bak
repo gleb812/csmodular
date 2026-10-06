@@ -5,6 +5,7 @@
     export const PhaserModule = {
         type: 'Phaser',
             typeID: 192,
+    defaultParams: [0, 64, 0, 1],
         displayName: 'Phaser',
         gridHeight: 2,
         originalName: 'Phaser',

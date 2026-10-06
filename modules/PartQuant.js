@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'PartQuant',
         tooltip: 'Partial Quantizer',
+    params: [0],
         inputs: [2],
         outputs: [3],
         components: [

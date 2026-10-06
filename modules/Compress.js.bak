@@ -5,6 +5,7 @@
     export const CompressModule = {
         type: 'Compress',
             typeID: 150,
+    defaultParams: [18, 20, 1, 20, 30, 0, 1],
         displayName: 'Compress',
         gridHeight: 5,
         originalName: 'Compress',

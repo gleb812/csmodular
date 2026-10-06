@@ -5,6 +5,7 @@
     export const Mix41AModule = {
         type: 'Mix41A',
             typeID: 193,
+    defaultParams: [],
         displayName: 'Mix4-1A',
         gridHeight: 2,
         originalName: 'Mix4-1A',

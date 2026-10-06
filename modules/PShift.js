@@ -10,6 +10,7 @@
         gridHeight: 3,
         originalName: 'PShift',
         tooltip: 'Pitch Shifter',
+    params: [0, 5, 7, 13, 14],
         inputs: [1, 6],
         outputs: [2],
         components: [

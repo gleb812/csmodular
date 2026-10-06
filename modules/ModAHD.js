@@ -10,6 +10,7 @@
         gridHeight: 5,
         originalName: 'ModAHD',
         tooltip: 'Envelope Modulation AHD',
+    params: [17, 18, 24, 5, 20, 28, 31],
         inputs: [2, 4, 7, 9, 19, 27],
         outputs: [10, 13],
         components: [

@@ -9,6 +9,7 @@
         gridHeight: 2,
         originalName: 'S&H',
         tooltip: 'Sample & Hold',
+    params: [],
         inputs: [1, 5],
         outputs: [0],
         components: [

@@ -10,6 +10,7 @@
         gridHeight: 3,
         originalName: 'FreqShift',
         tooltip: 'Frequency Shifter',
+    params: [4, 8, 9, 2],
         inputs: [3, 21],
         outputs: [0, 1],
         components: [

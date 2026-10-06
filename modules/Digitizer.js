@@ -10,6 +10,7 @@
         gridHeight: 3,
         originalName: 'Digitizer',
         tooltip: 'Digitizer',
+    params: [0, 7, 12, 14],
         inputs: [2, 11],
         outputs: [1],
         components: [

@@ -9,6 +9,7 @@
         gridHeight: 3,
         originalName: 'Scratch',
         tooltip: 'Scratch',
+    params: [0, 7, 5, 9],
         inputs: [1, 6],
         outputs: [2],
         components: [

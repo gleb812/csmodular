@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'CtrlSend',
         tooltip: 'MIDI Control Send',
+    params: [4, 6, 8],
         inputs: [1, 13],
         outputs: [11],
         components: [

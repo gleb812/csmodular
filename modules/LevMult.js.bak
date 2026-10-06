@@ -5,6 +5,7 @@
     export const LevMultModule = {
         type: 'LevMult',
             typeID: 44,
+    defaultParams: [],
         displayName: 'LevMult',
         gridHeight: 2,
         originalName: 'LevMult',

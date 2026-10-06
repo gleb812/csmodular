@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: '4-In',
         tooltip: '4 Inputs',
+    params: [8, 13, 15],
         inputs: [],
         outputs: [0, 1, 4, 6],
         components: [

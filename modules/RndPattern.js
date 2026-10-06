@@ -11,6 +11,7 @@
         gridHeight: 3,
         originalName: 'RndPattern',
         tooltip: 'Random Pattern',
+    params: [7, 11, 19, 20, 23, 24, 28],
         inputs: [0, 1, 9, 16, 27],
         outputs: [3],
         components: [

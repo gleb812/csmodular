@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'Automate',
         tooltip: 'MIDI Control Automate',
+    params: [4, 6, 8, 13],
         inputs: [1],
         outputs: [11],
         components: [

@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'DAConv',
         tooltip: 'D/A Converter',
+    params: [],
         inputs: [0, 1, 5, 7, 9, 11, 13, 15],
         outputs: [16],
         components: [

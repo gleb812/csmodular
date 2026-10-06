@@ -5,6 +5,7 @@
     export const OverdriveModule = {
         type: 'Overdrive',
             typeID: 62,
+    defaultParams: [0, 0, 1, 0, 1],
         displayName: 'Overdrive',
         gridHeight: 2,
         originalName: 'Overdrive',

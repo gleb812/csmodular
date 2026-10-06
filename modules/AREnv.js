@@ -9,6 +9,7 @@
         gridHeight: 3,
         originalName: 'AR-Env',
         tooltip: 'AR Envelope',
+    params: [16, 19, 13],
         inputs: [1, 7, 9],
         outputs: [0, 5],
         components: [

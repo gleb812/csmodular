@@ -9,6 +9,7 @@
         gridHeight: 2,
         originalName: 'OutBusA',
         tooltip: '4 outputs  + CVA bus',
+    params: [],
         inputs: [0, 1, 5, 7],
         outputs: [],
         components: [

@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'DlyShiftReg',
         tooltip: 'Shift Register',
+    params: [],
         inputs: [0, 1],
         outputs: [3, 4, 5, 6, 7, 8, 9, 10],
         components: [

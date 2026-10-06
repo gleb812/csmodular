@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'BinCounter',
         tooltip: 'Binary Counter',
+    params: [],
         inputs: [41, 42],
         outputs: [17, 32, 34, 35, 36, 37, 38, 39],
         components: [

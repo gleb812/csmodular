@@ -5,6 +5,7 @@
     export const LfoBModule = {
         type: 'LfoB',
             typeID: 190,
+    defaultParams: [64, 0, 1, 0, 0, 0, 0, 1, 4, 0],
         displayName: 'LfoB',
         gridHeight: 4,
         originalName: 'LfoB',

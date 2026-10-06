@@ -9,6 +9,7 @@
         gridHeight: 2,
         originalName: 'AudioIn',
         tooltip: 'Audio input',
+    params: [],
         inputs: [],
         outputs: [1, 2, 7, 8],
         components: [

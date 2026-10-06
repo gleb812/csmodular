@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'NoteSend',
         tooltip: 'MIDI Note Send',
+    params: [3, 5, 6],
         inputs: [9, 12, 13],
         outputs: [],
         components: [

@@ -5,6 +5,7 @@
     export const CtrlRcvModule = {
         type: 'CtrlRcv',
             typeID: 147,
+    defaultParams: [7, 0],
         displayName: 'CtrlRcv',
         gridHeight: 2,
         originalName: 'CtrlRcv',

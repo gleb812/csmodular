@@ -5,6 +5,7 @@
     export const PShiftModule = {
         type: 'PShift',
             typeID: 167,
+    defaultParams: [64, 64, 0, 2, 1],
         displayName: 'PShift',
         gridHeight: 3,
         originalName: 'PShift',

@@ -10,6 +10,7 @@
         gridHeight: 3,
         originalName: 'OscMaster',
         tooltip: 'Osc Master',
+    params: [0, 5, 4, 11, 12],
         inputs: [1, 2],
         outputs: [6],
         components: [

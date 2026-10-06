@@ -5,6 +5,7 @@
     export const LevConvModule = {
         type: 'LevConv',
             typeID: 157,
+    defaultParams: [4, 0],
         displayName: 'LevConv',
         gridHeight: 2,
         originalName: 'LevConv',

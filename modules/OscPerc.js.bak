@@ -5,6 +5,7 @@
     export const OscPercModule = {
         type: 'OscPerc',
             typeID: 196,
+    defaultParams: [64, 64, 0, 0, 0, 64, 64, 0, 1],
         displayName: 'OscPerc',
         gridHeight: 3,
         originalName: 'OscPerc',

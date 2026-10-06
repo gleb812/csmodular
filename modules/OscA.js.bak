@@ -5,6 +5,7 @@
     export const OscAModule = {
         type: 'OscA',
             typeID: 97,
+    defaultParams: [64, 64, 1, 0, 2, 1, 0],
         displayName: 'OscA',
         gridHeight: 3,
         originalName: 'OscA',

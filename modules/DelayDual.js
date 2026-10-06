@@ -11,6 +11,7 @@
         gridHeight: 3,
         originalName: 'DelayDual',
         tooltip: 'Delay Dual',
+    params: [3, 4, 16, 19],
         inputs: [5, 9, 18],
         outputs: [10, 11],
         components: [

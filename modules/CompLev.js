@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'CompLev',
         tooltip: 'Compare to Level',
+    params: [1],
         inputs: [2],
         outputs: [3],
         components: [

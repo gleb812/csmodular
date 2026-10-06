@@ -11,6 +11,7 @@
         gridHeight: 3,
         originalName: 'OscC',
         tooltip: 'Osc C',
+    params: [2, 3, 11, 14, 7, 19, 9, 21],
         inputs: [0, 4, 6, 18],
         outputs: [12],
         components: [
@@ -192,12 +193,12 @@
                 "y": 5,
                 "width": 36,
                 "height": 12,
-                "labels": [,
-                "ConnectorName": "Pitch",
-                "ConnectorIndex": 0
+                "labels": [
                         "FM Lin",
                         "FM Trk"
-                ]
+                ],
+                "ConnectorName": "Pitch",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "ButtonFlat",

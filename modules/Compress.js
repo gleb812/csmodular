@@ -10,6 +10,7 @@
         gridHeight: 5,
         originalName: 'Compress',
         tooltip: 'Compressor',
+    params: [4, 5, 6, 7, 8, 14, 16],
         inputs: [0, 1, 15],
         outputs: [2, 3],
         components: [

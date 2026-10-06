@@ -5,6 +5,7 @@
     export const FlangerModule = {
         type: 'Flanger',
             typeID: 89,
+    defaultParams: [64, 64, 64, 1],
         displayName: 'Flanger',
         gridHeight: 3,
         originalName: 'Flanger',

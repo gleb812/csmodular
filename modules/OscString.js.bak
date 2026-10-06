@@ -5,6 +5,7 @@
     export const OscStringModule = {
         type: 'OscString',
             typeID: 13,
+    defaultParams: [64, 64, 1, 0, 0, 80, 0, 1],
         displayName: 'OscString',
         gridHeight: 3,
         originalName: 'OscString',

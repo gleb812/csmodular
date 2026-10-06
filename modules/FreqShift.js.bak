@@ -5,6 +5,7 @@
     export const FreqShiftModule = {
         type: 'FreqShift',
             typeID: 98,
+    defaultParams: [0, 0, 2, 1],
         displayName: 'FreqShift',
         gridHeight: 3,
         originalName: 'FreqShift',

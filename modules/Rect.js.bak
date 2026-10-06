@@ -5,6 +5,7 @@
     export const RectModule = {
         type: 'Rect',
             typeID: 82,
+    defaultParams: [0, 1],
         displayName: 'Rect',
         gridHeight: 2,
         originalName: 'Rect',

@@ -11,6 +11,7 @@
         gridHeight: 4,
         originalName: 'DelayB',
         tooltip: 'Delay B',
+    params: [6, 7, 8, 9, 16, 19, 21, 29, 5],
         inputs: [10, 15, 20],
         outputs: [11],
         components: [

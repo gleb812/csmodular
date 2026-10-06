@@ -9,6 +9,7 @@
         gridHeight: 2,
         originalName: 'RndDistr',
         tooltip: 'Rnd Distribution',
+    params: [1, 3, 8],
         inputs: [0, 4],
         outputs: [5],
         components: [

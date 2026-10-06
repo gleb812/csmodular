@@ -9,6 +9,7 @@
         gridHeight: 2,
         originalName: 'Sw1-2M',
         tooltip: 'Switch 1-2 Momentary',
+    params: [],
         inputs: [4],
         outputs: [0, 1, 3],
         components: [

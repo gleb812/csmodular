@@ -9,6 +9,7 @@
         gridHeight: 2,
         originalName: 'RndStep',
         tooltip: 'Rnd Step',
+    params: [0, 2, 5, 9, 12, 11],
         inputs: [3],
         outputs: [1],
         components: [

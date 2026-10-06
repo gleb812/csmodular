@@ -5,6 +5,7 @@
     export const PanModule = {
         type: 'Pan',
             typeID: 47,
+    defaultParams: [0, 64, 0],
         displayName: 'Pan',
         gridHeight: 2,
         originalName: 'Pan',
@@ -132,7 +133,8 @@
                 "width": 62,
                 "height": 9,
                 "color": "#ffffff"
-        }
+        ,
+        "svgSrc": "/svg/pan.svg"}
 ]
     };
     

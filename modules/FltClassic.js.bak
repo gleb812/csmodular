@@ -5,6 +5,7 @@
     export const FltClassicModule = {
         type: 'FltClassic',
             typeID: 92,
+    defaultParams: [75, 0, 0, 0, 2, 1],
         displayName: 'FltClassic',
         gridHeight: 4,
         originalName: 'FltClassic',

@@ -5,6 +5,8 @@
     export const RndClkBModule = {
         type: 'RndClkB',
             typeID: 206,
+    mode: [0],
+    defaultParams: [127, 0, 1, 0, 0],
         displayName: 'RndClkB',
         gridHeight: 3,
         originalName: 'RndClkB',

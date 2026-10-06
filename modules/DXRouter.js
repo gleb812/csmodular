@@ -10,6 +10,7 @@
         gridHeight: 6,
         originalName: 'DXRouter',
         tooltip: 'DX style router',
+    params: [21, 14],
         inputs: [0, 1, 2, 3, 4, 10],
         outputs: [5, 6, 7, 8, 9, 11, 12],
         components: [

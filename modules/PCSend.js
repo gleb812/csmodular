@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'PCSend',
         tooltip: 'MIDI Program Change Send',
+    params: [5, 7],
         inputs: [0, 11],
         outputs: [10],
         components: [

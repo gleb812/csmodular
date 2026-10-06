@@ -9,6 +9,7 @@
         gridHeight: 8,
         originalName: 'SeqVal',
         tooltip: 'Sequencer Values',
+    params: [26, 29, 28, 31, 30, 33, 32, 35, 34, 37, 36, 39, 38, 41, 40, 43, 81, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27, 61, 63, 122, 123, 124, 10, 120],
         inputs: [0, 1, 3, 5, 82, 115],
         outputs: [8, 58, 114],
         components: [

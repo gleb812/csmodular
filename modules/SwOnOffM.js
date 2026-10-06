@@ -9,6 +9,7 @@
         gridHeight: 2,
         originalName: 'SwOnOffM',
         tooltip: 'Switch On/Off Momentary',
+    params: [],
         inputs: [1],
         outputs: [0, 2],
         components: [

@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'CompSig',
         tooltip: 'Compare to Signal',
+    params: [],
         inputs: [0, 1],
         outputs: [2],
         components: [

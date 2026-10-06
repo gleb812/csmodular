@@ -5,6 +5,7 @@
     export const MonoKeyModule = {
         type: 'MonoKey',
             typeID: 199,
+    defaultParams: [0],
         displayName: 'MonoKey',
         gridHeight: 2,
         originalName: 'MonoKey',

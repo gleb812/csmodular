@@ -11,6 +11,7 @@
         gridHeight: 2,
         originalName: 'OscD',
         tooltip: 'Osc D',
+    params: [3, 5, 8, 4, 11],
         inputs: [9],
         outputs: [7],
         components: [

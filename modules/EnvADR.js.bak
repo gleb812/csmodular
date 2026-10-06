@@ -5,6 +5,7 @@
     export const EnvADRModule = {
         type: 'EnvADR',
             typeID: 84,
+    defaultParams: [0, 0, 0, 54, 1, 0, 1, 0],
         displayName: 'EnvADR',
         gridHeight: 3,
         originalName: 'EnvADR',

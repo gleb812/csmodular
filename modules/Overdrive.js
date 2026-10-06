@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'Overdrive',
         tooltip: 'Overdrive',
+    params: [2, 7, 11, 1, 9],
         inputs: [0, 5],
         outputs: [6],
         components: [

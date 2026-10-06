@@ -5,6 +5,7 @@
     export const EnvAHDModule = {
         type: 'EnvAHD',
             typeID: 46,
+    defaultParams: [0, 0, 32, 0, 14, 0, 1],
         displayName: 'EnvAHD',
         gridHeight: 4,
         originalName: 'EnvAHD',

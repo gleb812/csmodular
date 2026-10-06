@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'Fade1-2',
         tooltip: 'Fader 1-2',
+    params: [0, 9],
         inputs: [1, 8],
         outputs: [2, 6],
         components: [

@@ -5,6 +5,7 @@
     export const FltStaticModule = {
         type: 'FltStatic',
             typeID: 54,
+    defaultParams: [75, 0, 0, 1, 0],
         displayName: 'FltStatic',
         gridHeight: 3,
         originalName: 'FltStatic',

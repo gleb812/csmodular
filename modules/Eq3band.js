@@ -9,6 +9,7 @@
         gridHeight: 4,
         originalName: 'Eq3band',
         tooltip: 'Eq 3 Band',
+    params: [1, 2, 3, 12, 14, 19, 24, 25],
         inputs: [11],
         outputs: [10],
         components: [

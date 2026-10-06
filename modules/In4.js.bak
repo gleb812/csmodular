@@ -5,6 +5,7 @@
     export const In4Module = {
         type: 'In4',
             typeID: 171,
+    defaultParams: [0, 1, 1],
         displayName: '4-In',
         gridHeight: 2,
         originalName: '4-In',

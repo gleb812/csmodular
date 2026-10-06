@@ -103,8 +103,8 @@ export class CsoundEngine {
             // Настройка
             //console.log('[CsoundEngine] Setting options...');
             await this.instance.setOption('-odac');
-            await this.instance.setOption('-d');
-            await this.instance.setOption('-m16');
+            //await this.instance.setOption('-d');
+            //await this.instance.setOption('-m16');
             
             // Генерация ORC
             //console.log('[CsoundEngine] Generating ORC...');

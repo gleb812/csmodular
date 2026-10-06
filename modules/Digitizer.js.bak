@@ -5,6 +5,7 @@
     export const DigitizerModule = {
         type: 'Digitizer',
             typeID: 118,
+    defaultParams: [11, 64, 0, 1],
         displayName: 'Digitizer',
         gridHeight: 3,
         originalName: 'Digitizer',

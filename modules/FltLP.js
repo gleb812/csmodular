@@ -11,6 +11,7 @@
         gridHeight: 2,
         originalName: 'FltLP',
         tooltip: 'Filter Lowpass',
+    params: [0, 4, 11, 6],
         inputs: [1, 5],
         outputs: [10],
         components: [

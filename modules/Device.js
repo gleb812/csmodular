@@ -10,6 +10,7 @@
         gridHeight: 3,
         originalName: 'Device',
         tooltip: 'Device',
+    params: [],
         inputs: [],
         outputs: [0, 3, 6, 9, 11, 12, 14],
         components: [

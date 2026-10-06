@@ -5,6 +5,7 @@
     export const OscDualModule = {
         type: 'OscDual',
             typeID: 164,
+    defaultParams: [64, 64, 1, 0, 0, 127, 0, 0, 0, 0, 1, 0, 0, 0],
         displayName: 'OscDual',
         gridHeight: 5,
         originalName: 'OscDual',
@@ -298,7 +299,8 @@
                 "width": 14,
                 "height": 11,
                 "color": "#ffffff"
-        },
+        ,
+        "svgSrc": "/svg/OscDual.svg"},
         {
                 "componentType": "SVG",
                 "id": "34",

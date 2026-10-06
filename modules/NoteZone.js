@@ -10,6 +10,7 @@
         gridHeight: 3,
         originalName: 'NoteZone',
         tooltip: 'MIDI Note Zone',
+    params: [3, 5, 8, 13, 17, 19],
         inputs: [],
         outputs: [],
         components: [

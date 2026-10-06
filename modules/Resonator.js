@@ -9,6 +9,7 @@
         gridHeight: 5,
         originalName: 'Resonator',
         tooltip: 'Resonator',
+    params: [2, 7, 6, 9, 10, 16, 27, 12, 14, 18],
         inputs: [0, 1, 24],
         outputs: [22, 23],
         components: [

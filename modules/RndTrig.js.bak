@@ -5,6 +5,7 @@
     export const RndTrigModule = {
         type: 'RndTrig',
             typeID: 206,
+    defaultParams: [64, 0, 1, 0],
         displayName: 'RndTrig',
         gridHeight: 2,
         originalName: 'RndTrig',

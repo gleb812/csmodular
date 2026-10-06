@@ -10,6 +10,7 @@
         gridHeight: 3,
         originalName: 'OscString',
         tooltip: 'Osc String',
+    params: [2, 7, 6, 9, 10, 16, 27, 12],
         inputs: [0, 1, 24],
         outputs: [23],
         components: [

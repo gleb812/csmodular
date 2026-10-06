@@ -10,6 +10,7 @@
         gridHeight: 4,
         originalName: 'FltVoice',
         tooltip: 'Filter Voice',
+    params: [2, 5, 7, 9, 10, 11, 13, 17, 20, 22],
         inputs: [1, 12, 19],
         outputs: [0],
         components: [

@@ -5,6 +5,8 @@
     export const DlyEightModule = {
         type: 'DlyEight',
             typeID: 181,
+    mode: [0],
+    defaultParams: [0],
         displayName: 'DlyEight',
         gridHeight: 3,
         originalName: 'DlyEight',

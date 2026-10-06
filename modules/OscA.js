@@ -10,6 +10,7 @@
         gridHeight: 3,
         originalName: 'OscA',
         tooltip: 'Osc A',
+    params: [1, 4, 5, 7, 9, 14, 12],
         inputs: [0, 3],
         outputs: [8],
         components: [

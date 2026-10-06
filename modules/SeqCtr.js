@@ -9,6 +9,7 @@
         gridHeight: 8,
         originalName: 'SeqCtr',
         tooltip: 'Sequencer Controlled',
+    params: [26, 29, 28, 31, 30, 33, 32, 35, 34, 37, 36, 39, 38, 41, 40, 43, 26, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 43, 4, 6, 7, 8, 9],
         inputs: [1, 82, 115],
         outputs: [58, 114],
         components: [

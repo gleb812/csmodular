@@ -5,6 +5,7 @@
     export const NoteRcvModule = {
         type: 'NoteRcv',
             typeID: 148,
+    defaultParams: [64, 0],
         displayName: 'NoteRcv',
         gridHeight: 2,
         originalName: 'NoteRcv',

@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'NoteRcv',
         tooltip: 'MIDI Note Receive',
+    params: [1, 9],
         inputs: [],
         outputs: [3, 5, 11],
         components: [

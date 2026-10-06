@@ -10,6 +10,7 @@
         gridHeight: 3,
         originalName: 'LfoA',
         tooltip: 'LFO A',
+    params: [1, 4, 7, 9, 6, 16, 13],
         inputs: [0, 3],
         outputs: [8],
         components: [

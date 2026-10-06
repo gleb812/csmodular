@@ -5,6 +5,7 @@
     export const KeyboardModule = {
         type: 'Keyboard',
             typeID: 1,
+    defaultParams: [],
         displayName: 'Keyboard',
         gridHeight: 2,
         originalName: 'Keyboard',

@@ -5,6 +5,7 @@
     export const OscBModule = {
         type: 'OscB',
             typeID: 7,
+    defaultParams: [64, 64, 1, 0, 0, 0, 0, 0, 2, 1, 0],
         displayName: 'OscB',
         gridHeight: 5,
         originalName: 'OscB',

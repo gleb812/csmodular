@@ -10,6 +10,7 @@
         gridHeight: 3,
         originalName: 'LevMod',
         tooltip: 'Level Modulator',
+    params: [7, 9],
         inputs: [0, 2, 6],
         outputs: [1],
         components: [

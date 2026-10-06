@@ -10,6 +10,7 @@
         gridHeight: 6,
         originalName: 'EnvMulti',
         tooltip: 'Envelope Multi',
+    params: [12, 15, 18, 21, 24, 27, 30, 33, 4, 40, 38, 45],
         inputs: [1, 6, 10],
         outputs: [2, 5],
         components: [

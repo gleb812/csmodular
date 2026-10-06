@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'Clip',
         tooltip: 'Clip',
+    params: [1, 5, 10, 12],
         inputs: [0, 4],
         outputs: [9],
         components: [

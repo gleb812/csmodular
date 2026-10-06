@@ -11,6 +11,7 @@
         gridHeight: 4,
         originalName: 'OscShpB',
         tooltip: 'Osc Shape B',
+    params: [19, 2, 6, 8, 9, 10, 13, 16, 11, 28],
         inputs: [0, 1, 3, 12, 15],
         outputs: [18],
         components: [

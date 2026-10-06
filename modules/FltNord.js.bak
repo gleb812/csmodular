@@ -5,6 +5,7 @@
     export const FltNordModule = {
         type: 'FltNord',
             typeID: 51,
+    defaultParams: [75, 0, 0, 1, 0, 1, 1, 0, 0, 0],
         displayName: 'FltNord',
         gridHeight: 5,
         originalName: 'FltNord',

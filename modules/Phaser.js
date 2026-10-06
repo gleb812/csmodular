@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'Phaser',
         tooltip: 'Phaser',
+    params: [0, 1, 3, 8],
         inputs: [5],
         outputs: [6],
         components: [

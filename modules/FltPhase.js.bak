@@ -5,6 +5,7 @@
     export const FltPhaseModule = {
         type: 'FltPhase',
             typeID: 102,
+    defaultParams: [0, 64, 0, 64, 2, 64, 1, 127, 0, 0, 0],
         displayName: 'FltPhase',
         gridHeight: 5,
         originalName: 'FltPhase',

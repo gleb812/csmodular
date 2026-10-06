@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'EnvH',
         tooltip: 'Envelope Hold',
+    params: [7],
         inputs: [1, 4, 9],
         outputs: [10, 13],
         components: [

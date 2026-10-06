@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'Rect',
         tooltip: 'Rectifier',
+    params: [2, 4],
         inputs: [0],
         outputs: [1],
         components: [

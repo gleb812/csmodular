@@ -5,6 +5,8 @@
     export const PulseModule = {
         type: 'Pulse',
             typeID: 38,
+    mode: [0],
+    defaultParams: [1, 0, 0],
         displayName: 'Pulse',
         gridHeight: 2,
         originalName: 'Pulse',

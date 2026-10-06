@@ -9,6 +9,7 @@
         gridHeight: 3,
         originalName: 'PolarPan',
         tooltip: 'Quadraphonic panner',
+    params: [0, 2, 5, 7],
         inputs: [1, 4, 12],
         outputs: [8, 9, 10, 11],
         components: [

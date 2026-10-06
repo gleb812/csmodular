@@ -18,7 +18,9 @@
                 "x": 210,
                 "y": 11,
                 "jackType": "control",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -26,7 +28,9 @@
                 "x": 240,
                 "y": 11,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "Out1",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Line",

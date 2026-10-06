@@ -5,6 +5,7 @@
     export const FltCombModule = {
         type: 'FltComb',
             typeID: 162,
+    defaultParams: [64, 0, 0, 64, 0, 0, 127, 1],
         displayName: 'FltComb',
         gridHeight: 4,
         originalName: 'FltComb',

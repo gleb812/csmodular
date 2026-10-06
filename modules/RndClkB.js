@@ -11,6 +11,7 @@
         gridHeight: 3,
         originalName: 'RndClkB',
         tooltip: 'Random Clock B',
+    params: [3, 5, 19, 24, 26],
         inputs: [0, 6, 13, 23],
         outputs: [1],
         components: [

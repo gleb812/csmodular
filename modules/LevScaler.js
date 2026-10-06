@@ -10,6 +10,7 @@
         gridHeight: 3,
         originalName: 'LevScaler',
         tooltip: 'Level Scaler',
+    params: [2, 3, 4, 17],
         inputs: [8, 12],
         outputs: [7, 9],
         components: [

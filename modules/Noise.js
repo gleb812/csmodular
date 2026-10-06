@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'Noise',
         tooltip: 'Noise',
+    params: [0, 5],
         inputs: [],
         outputs: [1],
         components: [

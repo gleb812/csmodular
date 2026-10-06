@@ -11,6 +11,7 @@
         gridHeight: 3,
         originalName: 'OscPM',
         tooltip: 'Osc Phase Mod',
+    params: [2, 3, 11, 14, 7, 19, 22],
         inputs: [0, 4, 6, 18],
         outputs: [12],
         components: [

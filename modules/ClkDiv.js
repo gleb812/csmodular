@@ -11,6 +11,7 @@
         gridHeight: 2,
         originalName: 'ClkDiv',
         tooltip: 'Clock Divider',
+    params: [7],
         inputs: [0, 3],
         outputs: [9],
         components: [

@@ -11,6 +11,7 @@
         gridHeight: 2,
         originalName: 'DlySingleB',
         tooltip: 'Delay Single',
+    params: [2, 5],
         inputs: [4, 8],
         outputs: [11],
         components: [

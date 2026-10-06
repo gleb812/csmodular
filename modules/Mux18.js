@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'Mux1-8',
         tooltip: 'Multiplexer 1-8',
+    params: [],
         inputs: [33, 44],
         outputs: [0, 1, 4, 10, 14, 26, 29, 31],
         components: [

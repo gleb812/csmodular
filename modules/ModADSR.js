@@ -10,6 +10,7 @@
         gridHeight: 5,
         originalName: 'ModADSR',
         tooltip: 'Envelope Modulation ADSR',
+    params: [2, 3, 7, 10, 27, 30, 33, 36, 38],
         inputs: [13, 18, 21, 26, 29, 32, 35],
         outputs: [14, 17],
         components: [

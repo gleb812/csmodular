@@ -399,7 +399,7 @@ i3 0 [60*60*24*7]
             }
             
             const valuesStr = values.join(', ');
-            lines.push(`gi_map_${name} ftgen ${tableNumber}, 0, ${values.length}, -2, 0, ${valuesStr}`);
+            lines.push(`gi${name} ftgen ${tableNumber}, 0, ${values.length}, -2, 0, ${valuesStr}`);
             console.log(`📊 ftgen ${tableNumber} ← "${name}" (${values.length} values)`);
             tableNumber++;
         }

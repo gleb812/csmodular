@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'RndTrig',
         tooltip: 'Random Trig',
+    params: [3, 5, 19, 16],
         inputs: [0, 4, 6, 13],
         outputs: [1],
         components: [

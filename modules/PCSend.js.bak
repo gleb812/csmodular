@@ -5,6 +5,7 @@
     export const PCSendModule = {
         type: 'PCSend',
             typeID: 142,
+    defaultParams: [0, 0],
         displayName: 'PCSend',
         gridHeight: 2,
         originalName: 'PCSend',
@@ -122,7 +123,8 @@
                 "width": 20,
                 "height": 12,
                 "color": "#ffffff"
-        }
+        ,
+        "svgSrc": "/svg/ctrsend_pcsend_automate.svg"}
 ]
     };
     

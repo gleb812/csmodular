@@ -5,6 +5,7 @@
     export const AutomateModule = {
         type: 'Automate',
             typeID: 57,
+    defaultParams: [7, 64, 0, 0],
         displayName: 'Automate',
         gridHeight: 2,
         originalName: 'Automate',
@@ -136,7 +137,8 @@
                 "width": 20,
                 "height": 12,
                 "color": "#ffffff"
-        },
+        ,
+        "svgSrc": "/svg/ctrsend_pcsend_automate.svg"},
         {
                 "componentType": "ButtonFlat",
                 "id": "13",

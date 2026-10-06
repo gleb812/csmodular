@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'WahWah',
         tooltip: 'Wah-Wah',
+    params: [0, 4, 8],
         inputs: [1, 2],
         outputs: [3],
         components: [

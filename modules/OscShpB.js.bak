@@ -5,6 +5,8 @@
     export const OscShpBModule = {
         type: 'OscShpB',
             typeID: 9,
+    mode: [0],
+    defaultParams: [64, 64, 1, 0, 0, 0, 0, 0, 1, 0],
         displayName: 'OscShpB',
         gridHeight: 4,
         originalName: 'OscShpB',

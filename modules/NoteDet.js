@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'NoteDet',
         tooltip: 'Note Detector',
+    params: [0],
         inputs: [],
         outputs: [4, 6, 8],
         components: [

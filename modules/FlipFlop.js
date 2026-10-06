@@ -11,6 +11,7 @@
         gridHeight: 2,
         originalName: 'FlipFlop',
         tooltip: 'Flip Flop',
+    params: [],
         inputs: [3, 4, 5],
         outputs: [7, 10],
         components: [

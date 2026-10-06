@@ -10,6 +10,7 @@
         gridHeight: 4,
         originalName: 'FltComb',
         tooltip: 'Filter Comb',
+    params: [3, 4, 6, 11, 13, 17, 21, 23],
         inputs: [1, 7, 15, 20],
         outputs: [0],
         components: [

@@ -5,6 +5,8 @@
     export const GateModule = {
         type: 'Gate',
             typeID: 64,
+    mode: [0, 0],
+    defaultParams: [],
         displayName: 'Gate',
         gridHeight: 2,
         originalName: 'Gate',

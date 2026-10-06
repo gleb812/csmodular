@@ -42,7 +42,9 @@
                 "x": 216,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "OutL",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Input",
@@ -50,7 +52,9 @@
                 "x": 228,
                 "y": 4,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "In",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Line",
@@ -74,7 +78,9 @@
                 "x": 240,
                 "y": 30,
                 "jackType": "audio",
-                "bandwidth": "static"
+                "bandwidth": "static",
+                "ConnectorName": "OutR",
+                "ConnectorIndex": 1
         },
         {
                 "componentType": "TextLabel",

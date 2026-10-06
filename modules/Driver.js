@@ -9,6 +9,7 @@
         gridHeight: 3,
         originalName: 'Driver',
         tooltip: 'Driver',
+    params: [0, 2],
         inputs: [4, 8],
         outputs: [5],
         components: [

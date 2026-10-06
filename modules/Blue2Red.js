@@ -9,6 +9,7 @@
         gridHeight: 2,
         originalName: 'Blue2Red',
         tooltip: 'Blue 2 Red',
+    params: [],
         inputs: [0],
         outputs: [1],
         components: [

@@ -11,6 +11,7 @@
         gridHeight: 3,
         originalName: 'Reverb',
         tooltip: 'Reverb',
+    params: [0, 9, 12, 17],
         inputs: [3, 16],
         outputs: [15, 19],
         components: [

@@ -11,6 +11,7 @@
         gridHeight: 2,
         originalName: 'Pulse',
         tooltip: 'Pulse',
+    params: [0, 2, 4],
         inputs: [1, 7],
         outputs: [8],
         components: [

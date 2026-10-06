@@ -9,6 +9,7 @@
         gridHeight: 8,
         originalName: 'SeqA',
         tooltip: 'Control and step sequencer',
+    params: [3, 4, 5, 9, 10, 11, 12, 37, 38, 39, 40, 41, 42, 43, 44, 45, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 73, 74, 78, 83],
         inputs: [0, 7],
         outputs: [79, 80],
         components: [

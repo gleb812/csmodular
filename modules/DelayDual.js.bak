@@ -5,6 +5,8 @@
     export const DelayDualModule = {
         type: 'DelayDual',
             typeID: 174,
+    mode: [0],
+    defaultParams: [64, 64, 64, 64],
         displayName: 'DelayDual',
         gridHeight: 3,
         originalName: 'DelayDual',

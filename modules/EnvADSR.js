@@ -10,6 +10,7 @@
         gridHeight: 4,
         originalName: 'EnvADSR',
         tooltip: 'Envelope ADSR',
+    params: [8, 9, 15, 21, 23, 24, 28],
         inputs: [0, 10, 18],
         outputs: [1, 4],
         components: [

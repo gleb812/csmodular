@@ -10,6 +10,7 @@
         gridHeight: 4,
         originalName: 'FltMulti',
         tooltip: 'Filter Multi-mode',
+    params: [0, 5, 8, 10, 11, 13, 22],
         inputs: [1, 2, 15],
         outputs: [16, 17, 18],
         components: [
