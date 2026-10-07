@@ -28,6 +28,7 @@ PARAM_TYPES = [
     'ButtonText',
     'ButtonRadio',
     'ButtonIncDec',
+    'TextEdit',
 ]
 
 MODE_TYPES = [

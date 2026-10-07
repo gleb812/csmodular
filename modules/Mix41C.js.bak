@@ -10,6 +10,7 @@
         gridHeight: 4,
         originalName: 'Mix4-1C',
         tooltip: 'Mixer 4-1 C',
+    params: [1, 3, 6, 9, 21, 22],
         inputs: [0, 4, 7, 10, 14],
         outputs: [12],
         components: [

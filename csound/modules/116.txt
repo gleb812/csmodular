@@ -1,4 +1,4 @@
-;@ map d BUT003
+;@ map BUT003
 
 ;@ ins k k k k k k k k
 ;@ outs k

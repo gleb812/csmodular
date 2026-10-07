@@ -10,7 +10,7 @@
         gridHeight: 2,
         originalName: 'ConstSwT',
         tooltip: 'Constant Switch Toggling',
-    params: [5, 3],
+    params: [5, 2, 3],
         inputs: [],
         outputs: [0],
         components: [

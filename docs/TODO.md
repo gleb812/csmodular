@@ -3,6 +3,8 @@
 ## Current tasks
 
 - [ ] проблема с реинициализацией модуля, содержащего контроллеры, при его добавлении
+- [ ] Mix1-1A exp/lin selector change leads to error
+- [ ] some DSP code still contain 'd' parameter in @map line - should be eliminated
 
 
 

@@ -14,8 +14,10 @@ export class CsoundGenerator {
         
         // Активные кабели (для отслеживания)
         this._activeCables = [];
+
+        this._converterBuses = {};   // key: `${cableId}_${inputId}` -> { type, sourceBus, bus }
         
-        // НОВОЕ: маппинг кабель -> номер шины
+        // маппинг кабель -> номер шины
         this._cableBusMap = {};      // cableId -> busNumber
         this._audioBusCounter = 2;   // следующий свободный номер для audio
         this._controlBusCounter = 2; // следующий свободный номер для control
@@ -57,6 +59,18 @@ opcode A2O, a, a  ; THIS IS TEMPORARY!
     kin = k(ain)
     kout = (kin > 0 ? 1 : 0)
     xout a(kout)
+endop
+
+opcode K2A, 0, kk
+    kzkIn, kzaOut xin
+    kIn zkr kzkIn
+    zaw a(kIn), kzaOut
+endop
+
+opcode A2K, 0, kk
+    kzaIn, kzkOut xin
+    aIn zar kzaIn
+    zkw k(aIn), kzkOut
 endop
 
 ;---------------------------------
@@ -181,6 +195,7 @@ i3 0 [60*60*24*7]
     }
 
     async generateOrc() {
+        this._prepareConverters();
         // ⭐ 0. Собираем mapping ftgen (перед остальным)
         const mappingFtgens = await this._collectMappingFtgens();
         
@@ -251,6 +266,19 @@ i3 0 [60*60*24*7]
         kin = k(ain)
         kout = (kin > 0 ? 1 : 0)
         xout a(kout)
+    endop
+
+    ; -------- converters (strict inputs) --------
+    opcode K2A, 0, kk
+        kzkIn, kzaOut xin
+        kIn zkr kzkIn
+        zaw a(kIn), kzaOut
+    endop
+
+    opcode A2K, 0, kk
+        kzaIn, kzkOut xin
+        aIn zar kzaIn
+        zkw k(aIn), kzkOut
     endop
 
     gkNote init 64
@@ -417,6 +445,77 @@ i3 0 [60*60*24*7]
         this._updateZakInit();
         this.log(`🔌 Added cable, zakinit updated`);
     }
+
+    _prepareConverters() {
+        this._converterBuses = {};
+        
+        // Защита: счётчики не должны отставать от count
+        this._audioBusCounter = Math.max(this._audioBusCounter, this._audioBusCount);
+        this._controlBusCounter = Math.max(this._controlBusCounter, this._controlBusCount);
+        
+        let found = 0;
+        
+        for (const moduleData of this.modules.values()) {
+            const panel = this.getPanelById(moduleData.instanceId);
+            if (!panel) continue;
+            
+            const moduleDef = this.system?.moduleFactory?.moduleRegistry?.[moduleData.typeId];
+            if (!moduleDef) continue;
+            
+            const inputIds = moduleDef.inputs || [];
+            
+            for (const inputId of inputIds) {
+                const cable = this._findCableForPort(moduleData.instanceId, inputId, 'input');
+                if (!cable) continue;
+                
+                const sourceType = cable.fromJack?.type || 'audio';
+                
+                const inputComp = panel.components.find(
+                    c => String(c.id) === String(inputId)
+                );
+                const inputType = inputComp?.type || 'audio';
+                
+                if (sourceType === inputType) continue;
+                
+                let convType;
+                if (sourceType === 'control' && inputType === 'audio') {
+                    convType = 'K2A';
+                } else if (sourceType === 'audio' && inputType === 'control') {
+                    convType = 'A2K';
+                } else {
+                    console.warn(`[CsoundGenerator] Unsupported conversion: ${sourceType} → ${inputType}`);
+                    continue;
+                }
+                
+                const sourceBus = this._cableBusMap[cable.id];
+                if (sourceBus === undefined) {
+                    console.warn(`[CsoundGenerator] Cable ${cable.id.substr(0, 8)} has no bus`);
+                    continue;
+                }
+                
+                let newBus;
+                if (inputType === 'audio') {
+                    newBus = this._audioBusCounter++;
+                    this._audioBusCount = this._audioBusCounter;
+                } else {
+                    newBus = this._controlBusCounter++;
+                    this._controlBusCount = this._controlBusCounter;
+                }
+                
+                const key = `${cable.id}_${inputId}`;
+                this._converterBuses[key] = {
+                    type: convType,
+                    sourceBus,
+                    bus: newBus,
+                };
+                
+                found++;
+                console.log(`[CsoundGenerator] Converter: ${convType} (src: ${sourceType}-bus ${sourceBus} → dst: ${inputType}-bus ${newBus}) (module ${moduleData.instanceName}/${inputId})`);
+            }
+        }
+        
+        console.log(`[CsoundGenerator] _prepareConverters: found ${found} converter(s)`);
+    }
     
     /**
      * Назначить номер шины кабелю
@@ -539,40 +638,39 @@ i3 0 [60*60*24*7]
         //console.log(`🎛️ zakinit: audio=${this._audioBusCount} (2 + ${audioCount}), control=${this._controlBusCount} (2 + ${controlCount})`);
     }
     
-    /**
-     * Определяем тип кабеля по цвету
-     */
     _getCableType(cable) {
-        const color = cable.getDisplayColor ? cable.getDisplayColor() : cable.color;
-        //console.log(`🔍 Getting cable type for color: ${color}`);
+        // ⭐ 1. ПРИОРИТЕТ: тип источника (Output-джека). Это истина.
+        const sourceType = cable.fromJack?.type;
+        if (sourceType === 'audio' || sourceType === 'control') {
+            return sourceType;
+        }
         
-        // Audio цвета
+        // ⭐ 2. Fallback: тип приёмника
+        const destType = cable.toJack?.type;
+        if (destType === 'audio' || destType === 'control') {
+            return destType;
+        }
+        
+        // ⭐ 3. Совсем fallback: по цвету (старое поведение)
+        const color = cable.getDisplayColor ? cable.getDisplayColor() : cable.color;
+        
         const audioColors = ['#ef4444', '#ff0000', '#ff4444', '#ff6b6b', '#ff8800', '#ffa500', '#ff8c00'];
-        // Control цвета
         const controlColors = ['#3b82f6', '#0000ff', '#4488ff', '#fde047', '#ffff00', '#ffd93d', '#ffdd57'];
         
         if (!color) {
-            console.log('  No color, defaulting to audio');
             return 'audio';
         }
         
         const colorLower = color.toLowerCase();
         
         for (const audioColor of audioColors) {
-            if (colorLower === audioColor.toLowerCase()) {
-                //console.log(`  ✅ Color ${color} is AUDIO`);
-                return 'audio';
-            }
+            if (colorLower === audioColor.toLowerCase()) return 'audio';
         }
         
         for (const controlColor of controlColors) {
-            if (colorLower === controlColor.toLowerCase()) {
-                //console.log(`  ✅ Color ${color} is CONTROL`);
-                return 'control';
-            }
+            if (colorLower === controlColor.toLowerCase()) return 'control';
         }
         
-        console.log(`  ⚠️ Color ${color} not recognized, defaulting to audio`);
         return 'audio';
     }
     
@@ -768,15 +866,21 @@ i3 0 [60*60*24*7]
         //console.log(`  📊 Input IDs:`, inputIds);
         //console.log(`  📊 Output IDs:`, outputIds);
         
-        // ⭐ Для каждого ID входа — ищем кабель
         const inletBuses = inputIds.map(id => {
             const cable = this._findCableForPort(instanceId, id, 'input');
-            if (cable && this._cableBusMap[cable.id] !== undefined) {
-                //console.log(`  🔗 Input id=${id} → bus ${this._cableBusMap[cable.id]}`);
-                return this._cableBusMap[cable.id];
+            if (!cable) return 1;
+            
+            const sourceBus = this._cableBusMap[cable.id];
+            if (sourceBus === undefined) return 1;
+            
+            // ⭐ Если есть конвертер — используем его выходной bus
+            const convKey = `${cable.id}_${id}`;
+            const conv = this._converterBuses[convKey];
+            if (conv) {
+                return conv.bus;
             }
-            //console.log(`  🔗 Input id=${id} → 1 (empty)`);
-            return 1;
+            
+            return sourceBus;
         });
         
         // ⭐ Для каждого ID выхода — ищем кабели
@@ -903,8 +1007,22 @@ i3 0 [60*60*24*7]
             });
         }
 
+        // ⭐ Собираем строки конвертеров для ЭТОГО модуля (перед вызовом)
+        const converterLines = [];
+        for (const id of inputIds) {
+            const cable = this._findCableForPort(instanceId, id, 'input');
+            if (!cable) continue;
+            
+            const convKey = `${cable.id}_${id}`;
+            const conv = this._converterBuses[convKey];
+            if (!conv) continue;
+            
+            converterLines.push(`${conv.type} ${conv.sourceBus}, ${conv.bus}`);
+        }
+
         const result = [
             ...chngetLines,
+            ...converterLines,
             callLine,
             ...ledLines,
         ].join('\n');

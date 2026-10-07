@@ -10,7 +10,7 @@
         gridHeight: 9,
         originalName: 'MixFader',
         tooltip: 'Mixer 8-1 Fader',
-    params: [0, 18, 19, 20, 21, 22, 23, 24, 35, 48],
+    params: [0, 1, 18, 19, 20, 21, 22, 23, 24, 26, 27, 28, 29, 30, 31, 32, 35, 48],
         inputs: [2, 4, 6, 8, 10, 12, 14, 16, 47],
         outputs: [25],
         components: [

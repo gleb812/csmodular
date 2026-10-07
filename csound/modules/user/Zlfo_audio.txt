@@ -1,0 +1,7 @@
+opcode Zlfo_audio, 0, k
+kOut1 xin
+
+
+kout1 oscil .5,444
+zkw kout1, kOut1
+endop
