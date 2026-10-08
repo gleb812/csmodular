@@ -12,11 +12,18 @@ dist
 dist-ssr
 *.local
 
+# Rust / Tauri
+src-tauri/target/
+src-tauri/gen/
+
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
+*.bak
 *.suo
 *.ntvs*
 *.njsproj
