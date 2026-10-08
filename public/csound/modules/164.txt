@@ -1,0 +1,57 @@
+;@ map OSCsem OSCprt
+;@ map OSCcnt
+
+;@ ins k k a a a
+;@ outs a
+opcode OscDual, 0, kkkkkkkkkkkkkkkkkkkk
+; TODO: No PhM for SAW, PWM signals aren't -64..+64, No Soft function
+; kModLev - 0...1
+; kMod - blue - -64..+64
+kCoarse,kFine,kKBT,kPchMod,kTuneMode,kSqLev,kPWMod,kSawLev,kSwPh,kSubLev,kON,kPW,kSPhM,kSoft,kPitchIn,kModIn,kSync,kPWIn,kPhIn,kOut xin
+  async zar kSync
+  kMod zkr kModIn
+  kPWMo zkr kPWMod
+
+  if kKBT != 1 goto NoKBT
+    kNote = gkNote
+    goto KBT
+  NoKBT:
+    kNote = 64
+  KBT:
+  kPitch init 64
+  if kPitchIn == 0 goto Run
+    kPitch zkr kPitchIn
+  Run:
+  if kTuneMode!=3 then
+    kCoarse table kcoarse, giOSCsem
+    kFine table kFine, giOSCcnt
+    kM_ = kPitch+kModLev*kMod+kNote+kFine*0.01
+    kFreq = cpsmidinn(kM_+kCoarse)
+  else
+      if kcoarse <= 32 then
+        kFreq table kcoarse, giOSCprt
+        kFine table kFine, giOSCcnt
+        kFreq *= cent(kFine)
+      else
+        kPart table kcoarse, giOSCprt
+        kFine table kFine, giOSCcnt
+        kM_ = kPitch+kModLev*kMod+kNote+kFine*0.01
+        kFreq = cpsmidinn(kM_)*kPart
+      endif
+  endif
+  Out:
+
+  ; Sq with PWM
+  kPMod = kPW + kPWMo*kPWIn
+  aphase, asyncout syncphasor kFreq, async
+  aphase limit aphase+kPMod,0,1  ; check signal levels for PW
+  a1 table aphase, 4, 1
+
+  ; Saw. PhM is not yet implemented
+  aout2 oscilikts 0.5, kFreq, 3, async, 0 ; always Saw
+
+  ; SubOct. Soft is not implemented yet
+  aoutS oscilikts 0.5, .5*kFreq, 4, async, 0
+  aMix = (a1+kPMod)*kSqLev + aoutS*kSubLev + aout2*kSawLev  ; +kPMod - cos we have DC for non-Sq50 pulses
+  zaw aMix*kON, kOut
+endop

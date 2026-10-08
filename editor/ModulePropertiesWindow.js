@@ -1,6 +1,6 @@
 // editor/ModulePropertiesWindow.js
 import { ColorPicker } from '../src/ui/ColorPicker.js';
-
+import { moduleStore } from '../src/api/index.js';
 export class ModulePropertiesWindow {
     constructor(app) {
         this.app = app;
@@ -264,37 +264,21 @@ export class ModulePropertiesWindow {
     }
 
     async saveModuleToServer(jsCode, dspCode, name) {
-        console.log('📤 Sending to server:', { name, jsLength: jsCode.length, dspLength: dspCode ? dspCode.length : 0 });
+        console.log('📤 Saving module:', { name, jsLength: jsCode.length, dspLength: dspCode ? dspCode.length : 0 });
         
         try {
-            const response = await fetch('/api/save-module', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: name,
-                    code: jsCode,
-                    dsp_code: dspCode  // ⭐ Добавляем DSP код
-                })
-            });
+            const ok = await moduleStore.save(name, jsCode, dspCode);
             
-            console.log('📥 Response status:', response.status);
-            
-            if (response.ok) {
-                const result = await response.json();
-                console.log('✅ Server response:', result);
-                this.app.uiManager.showNotification(`✅ Module "${name}" saved to modules/user/ and csound/modules/user/`);
+            if (ok) {
+                this.app.uiManager.showNotification(`✅ Module "${name}" saved`);
                 return true;
             } else {
-                const error = await response.json();
-                console.error('❌ Server error:', error);
-                this.app.uiManager.showNotification(`❌ Error: ${error.error || 'Unknown error'}`);
+                this.app.uiManager.showNotification(`❌ Could not save module "${name}"`);
                 return false;
             }
         } catch (error) {
             console.error('💥 Save error:', error);
-            this.app.uiManager.showNotification(`❌ Server error: ${error.message}`);
+            this.app.uiManager.showNotification(`❌ Error: ${error.message}`);
             return false;
         }
     }

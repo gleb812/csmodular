@@ -1,0 +1,10 @@
+;@ outs a a
+opcode In2, 0, kkkkk
+  kInSw, kOnOffSw, kPad, kzL, kzR xin
+  kPad += 1
+  aL, aR ins
+  zaw aL * kPad * kOnOffSw, kzL
+  zaw aR * kPad * kOnOffSw, kzR
+endop
+
+; TODO bus?

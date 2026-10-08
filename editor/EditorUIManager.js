@@ -1,5 +1,5 @@
 // editor/EditorUIManager.js
-
+import { moduleStore } from '../src/api/index.js';
 export class EditorUIManager {
     constructor(app) {
         this.app = app;
@@ -240,17 +240,9 @@ export class EditorUIManager {
     }
 
 
-
-    // ⭐ НОВЫЙ МЕТОД - диалог загрузки модуля
     async showLoadDialog() {
         try {
-            const response = await fetch('/api/list-user-modules');
-            if (!response.ok) {
-                throw new Error('Failed to fetch modules');
-            }
-            
-            const data = await response.json();
-            const modules = data.modules || [];
+            const modules = await moduleStore.list();
             
             if (modules.length === 0) {
                 this.showNotification('📭 No user modules found');
@@ -340,12 +332,11 @@ export class EditorUIManager {
 
     async loadModule(name) {
         try {
-            const response = await fetch(`/api/load-module/${name}`);
-            if (!response.ok) {
-                throw new Error(`Failed to load module (${response.status})`);
+            const data = await moduleStore.load(name);
+            if (!data) {
+                throw new Error(`Module "${name}" not found`);
             }
             
-            const data = await response.json();
             const code = data.code;
             const dspCode = data.dsp_code;
             

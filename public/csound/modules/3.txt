@@ -1,0 +1,31 @@
+;@ ins a a a a
+opcode Out4, 0, kkkkkkk
+ks, kMute, kPad, k1, k2, k3, k4 xin
+kM1[] fillarray 1,0,0
+kM2[] fillarray 0,1,0
+kM3[] fillarray 0,0,1
+kpad = kPad + 1
+a1 zar k1
+a2 zar k2
+a3 zar k3
+a4 zar k4
+
+a1 limit a1, -4, 4  ; built-in limiter
+a2 limit a2, -4, 4
+a3 limit a3, -4, 4
+a4 limit a4, -4, 4
+a1 *= 0.125
+a2 *= 0.125
+a3 *= 0.125
+a4 *= 0.125
+
+aO1 = a1*kMute*kpad
+aO2 = a2*kMute*kpad
+aO3 = a3*kMute*kpad
+aO4 = a4*kMute*kpad
+outq kM1[ks]*aO1,kM1[ks]*aO2,kM1[ks]*aO3,kM1[ks]*aO4
+gaFX1 += kM2[ks] * aO1
+gaFX2 += kM2[ks] * aO2
+gaFX3 += kM2[ks] * aO3
+gaFX4 += kM2[ks] * aO4
+endop

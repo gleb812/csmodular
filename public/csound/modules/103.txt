@@ -1,0 +1,28 @@
+;@ map d FLTfrQ
+;@ map d FLTgai
+;@ map d FLTbwi
+;@ map d BUT002
+;@ map d FLTeqq
+
+;@ ins a
+;@ outs a
+opcode EqPeak, 0, kkkkkkk
+  kFreq, kGain, kBW, kON, kLev, kIn, kOut xin
+  ain zar kIn
+
+ i12sq2 = 1.059463094; 2^(-1/12)
+ kf1 = kFreq * i12sq2 ^ (12 * kBW)
+ kf2 = kFreq / i12sq2 ^ (12 * kBW)
+ kq = kFreq / (kf1 - kf2)
+ kGU = 10^(kGain/20) ; dB -> units
+
+ if kGain >= 0 goto Norm
+    aout pareq ain, kFreq, kGU, kq/5 ; empirical coeff
+    goto Out
+ Norm:
+ aout pareq ain, kFreq, kGU, kq
+ Out:
+ zaw aout*kLev*kON, kOut
+endop
+
+; TODO check if works

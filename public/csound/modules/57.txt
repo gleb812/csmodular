@@ -1,0 +1,26 @@
+;@ ins k
+;@ outs k
+opcode Automate, 0, kkkkkk
+  kCtrl, kVal, kCh, kEcho, kIn, kout xin
+
+  ksend zkr kIn
+  kOut init 0
+  kSend trigger ksend, 0, 0
+
+  if (kEcho == 1 && gkstatus == 176 && gkchan == kCh && gkdata1 == kCtrl) goto Rx
+    kData = 0
+    goto Over
+Rx:
+    kData = gkdata2
+    kSend = 1
+Over:
+
+  kValue limit kData + kVal, 0, 127
+  kTrig changed kValue, kSend
+if kTrig == 0 goto Halt
+  midiout 176, kCh, kCtrl, kValue ; GENERIC CC MESSAGE
+  kOut = 1
+Halt:
+  zkw kOut, kout
+  kOut = 0 ; reset after send
+endop

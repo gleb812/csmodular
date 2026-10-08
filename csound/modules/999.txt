@@ -1,7 +1,0 @@
-;@ ins a
-;@ outs k
-opcode A2K, 0, ii
-    izaIn, izkOut xin
-    aIn zar izaIn
-    zkw k(aIn), izkOut
-endop
