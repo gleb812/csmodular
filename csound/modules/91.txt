@@ -1,6 +1,8 @@
+;@ variant k default
+;@ strict 0 0 0
 ;@ ins k k k
 ;@ outs k k
-opcode FlipFlop, 0, kkkkkk
+opcode FlipFlop_k, 0, kkkkkk
   kType,kclk,kin,krst,knotq,kq xin  ; kin and krst permutated
   kClk zkr kclk
   kIn  zkr kin
@@ -37,9 +39,10 @@ endop
 
 ; TODO Time of flip & flop needs checking!
 
+;@ variant a
 ;@ ins a a a
 ;@ outs a a
-opcode FlipFlop, 0, kkkkkk
+opcode FlipFlop_a, 0, kkkkkk
 setksmps 1
   kType,kclk,kin,krst,knotq,kq xin ; kin and krst permutated
   aClk zar kclk

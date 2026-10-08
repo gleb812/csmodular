@@ -1,0 +1,32 @@
+;@ variant k
+;@ strict 0 0
+;@ ins k k
+;@ outs k k
+opcode MinMax_k, 0, kkkk
+  ka,kb,kmin,kmax xin
+  kA zkr ka
+  kB zkr kb
+
+  kMin min kA, kB
+  kMax max kA, kB
+
+  zkw kMin, kmin
+  zkw kMax, kmax
+endop
+
+;@ variant a
+;@ ins a a
+;@ outs a a
+opcode MinMax_a, 0, kkkk
+  ka,kb,kmin,kmax xin
+  aA zar ka
+  aB zar kb
+
+  aMin min aA, aB
+  aMax max aA, aB
+
+  zaw aMin, kmin
+  zaw aMax, kmax
+endop
+
+; UP 10.04.20

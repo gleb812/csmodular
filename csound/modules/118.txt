@@ -1,9 +1,11 @@
 ;@ map EFXraS
 
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k
 
-opcode Digitizer, 0, kkkkkkk
+opcode Digitizer_k, 0, kkkkkkk
   setksmps 1   ; because fold opcode is a-rate only
   kbits,krate,kratem,kon,  kin,kmod,kout xin
   ; TODO sample rate change is slightly different
@@ -23,10 +25,11 @@ Over:
   zkw k(aOut)*kon, kout
 endop
 
+;@ variant a
 ;@ ins a a
 ;@ outs a
 
-opcode Digitizer, 0, kkkkkkk
+opcode Digitizer_a, 0, kkkkkkk
   kbits,krate,kratem,kon,  kin,kmod,kout xin
 
   aModIn 	zar kmod

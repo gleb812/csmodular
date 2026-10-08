@@ -1,6 +1,8 @@
+;@ variant k default
+;@ strict 0 0 0 0
 ;@ ins k k k k
 ;@ outs k k
-opcode Gate, 0, kkkkkkkk
+opcode Gate_k, 0, kkkkkkkk
 kType1,kType2,kin1,kin2,kin3,kin4,ko1,ko2 xin
   ky1 zkr kin1
   ky2 zkr kin2
@@ -50,9 +52,10 @@ kType1,kType2,kin1,kin2,kin3,kin4,ko1,ko2 xin
   zkw kOut2, ko2
 endop
 
+;@ variant a
 ;@ ins a a a a
 ;@ outs k k
-opcode Gate, 0, kkkkkkkk
+opcode Gate_a, 0, kkkkkkkk
 setksmps 1
 kType1,kType2,kin1,kin2,kin3,kin4,ko1,ko2 xin
   ay1 zkr kin1

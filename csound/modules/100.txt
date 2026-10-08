@@ -1,6 +1,8 @@
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k k
-opcode sw21, 0, kkkk
+opcode sw21_k, 0, kkkk
   kSw, kin1,kin2, kout, kctrl xin
   k1 init 1
   k2 init 0
@@ -20,9 +22,10 @@ Next:
   zkw k2/16,  kctrl
 endop
 
+;@ variant a
 ;@ ins a a
 ;@ outs a k
-opcode sw21, 0, kkkk
+opcode sw21_a, 0, kkkk
   kSw, kin1,kin2, kout, kctrl xin
   k1 init 1
   k2 init 0

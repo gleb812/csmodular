@@ -1,7 +1,9 @@
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k
 ; TODO
-opcode saturate, 0, kkkkkkk
+opcode saturate_k, 0, kkkkkkk
   klev, kmodlev, kOn, kCurve, kin, kmod, kout xin
   k1 zkr kin
   kM zkr kmod
@@ -22,10 +24,11 @@ opcode saturate, 0, kkkkkkk
   zkw kOn*(klev*kshp + (1 - klev)*k1), kout
 endop
 
+;@ variant a
 ;@ ins a a
 ;@ outs a
 
-opcode saturate, 0, kkkkkkk
+opcode saturate_a, 0, kkkkkkk
   klev, kmodlev, kOn, kCurve, kin, kmod, kout xin
   a1 zar kin
   aM zar kmod

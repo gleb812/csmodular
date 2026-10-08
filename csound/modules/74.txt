@@ -1,7 +1,9 @@
 ;@ SHPamp SHPwrp
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k
-opcode WaveWrap, 0, kkkkkk
+opcode WaveWrap_k, 0, kkkkkk
   kMod,klev,kOn, kin, kmodin, kout xin
 
   kIn zkr kin
@@ -14,9 +16,10 @@ opcode WaveWrap, 0, kkkkkk
   zkw kOut * kamp * kOn,  kout
 endop
 
+;@ variant a
 ;@ ins a a
 ;@ outs a
-opcode WaveWrap, 0, kkkkkk
+opcode WaveWrap_a, 0, kkkkkk
   kMod,klev,kOn, kin, kmodin, kout xin
 
   aIn zar kin

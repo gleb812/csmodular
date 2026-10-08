@@ -57,6 +57,11 @@ export class PatchManager {
           this.system._recompileDebounced();
       }
 
+      // ⭐ Пересчёт вариантов + UI-перекраска
+      if (this.system?.recomputeVariantUI) {
+          this.system.recomputeVariantUI();   // асинхронный, не ждём
+      }
+
       return cable;
   }
 
@@ -253,6 +258,11 @@ export class PatchManager {
           
           if (this.system?.csoundEngine?.state === 'running') {
               this.system._recompileDebounced();
+          }
+
+          // ⭐ Пересчёт вариантов + UI-перекраска
+          if (this.system?.recomputeVariantUI) {
+              this.system.recomputeVariantUI();   // асинхронный, не ждём
           }
       }
   }

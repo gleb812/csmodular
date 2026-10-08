@@ -1,9 +1,11 @@
 ;@ map DLY_5m DLY25m DLY100 DLY500 DLY_1s DLY_2s DLY2p7 FLTfrq
 ;@ map CLA001
 
+;@ variant k default
+;@ strict 1 0 0
 ;@ ins a k k
 ;@ outs a
-opcode DelayB, 0, kkkkkkkkkkk
+opcode DelayB_k, 0, kkkkkkkkkkk
   kTime,kFB,kLP,kDW,kRange,kFBmodL,kDWmodL,kHP, kin,kfbmod,kdwmod,kout xin
 
   ain    zar kin
@@ -35,9 +37,10 @@ opcode DelayB, 0, kkkkkkkkkkk
   zaw aout*kDW_+ain*(1-kDW_), kout
 endop
 
+;@ variant a
 ;@ ins a a a
 ;@ outs a
-opcode DelayB, 0, kkkkkkkkkkk
+opcode DelayB_a, 0, kkkkkkkkkkk
   kTime,kFB,kLP,kDW,kRange,kFBmodL,kDWmodL,kHP, kin,kfbmod,kdwmod,kout xin
 
   ain    zar kin

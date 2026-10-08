@@ -1,6 +1,8 @@
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k k
-opcode Invert, 0, kkkk
+opcode Invert_k, 0, kkkk
   kI1,kI2,kO1,kO2 xin
   ki1 zkr kI1
   ki2 zkr kI2
@@ -14,9 +16,10 @@ opcode Invert, 0, kkkk
   zkw kni2, kO2
 endop
 
+;@ variant a
 ;@ ins a a
 ;@ outs a a
-opcode Invert, 0, kkkk
+opcode Invert_a, 0, kkkk
   kI1,kI2,kO1,kO2 xin
   setksmps 1
   ai1 zar kI1

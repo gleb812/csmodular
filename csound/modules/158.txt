@@ -1,8 +1,10 @@
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k 
 ;@ outs k
 ;@ map NTEtim
 
-opcode Glide, 0, kkkkkk
+opcode Glide_k, 0, kkkkkk
 kTime,kGlide,kShape,kIn,kOn,kOut xin
 kin zkr kIn
 kon zkr kOn
@@ -49,9 +51,10 @@ Bypass:
 zkw kout,kOut
 endop
 
+;@ variant a
 ;@ ins a a 
 ;@ outs a
-opcode Glide, 0, kkkkkk
+opcode Glide_a, 0, kkkkkk
 kTime,kGlide,kShape,kIn,kOn,kOut xin
 setksmps 1
 ain zar kIn

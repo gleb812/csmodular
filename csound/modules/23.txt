@@ -1,10 +1,12 @@
 ;@ map ENVtim ENVlev
+;@ variant k default
+;@ strict 1 1 1 1 1 0 1
 ;@ ins k k k k k k k
 ;@ outs k k
 
 ; TODO test if mod works
 
-opcode ModADSR, 0, kkkkkkkkkkkkk
+opcode ModADSR_k, 0, kkkkkkkkkkkkk
 	kA_,kD_,kS_,kR_,kAm,kDm,kSm,kRm,  kType,kKB,  kGatei,kamod,kdmod,ksmod,krmod,kin,kAMi,kEnvO,kout xin
 
 	k1[] fillarray 1,-1, 1,-1, 2,-2
@@ -102,9 +104,10 @@ EnvOut:
 	zkw kEnv1*kIn, kout
 endop
 
+;@ variant a
 ;@ ins k k k k k a k
 ;@ outs k a
-opcode ModADSR, 0, kkkkkkkkkkkkk
+opcode ModADSR_a, 0, kkkkkkkkkkkkk
 	kA_,kD_,kS_,kR_,kAm,kDm,kSm,kRm,  kType,kKB,  kGatei,kamod,kdmod,ksmod,krmod,kin,kAMi,kEnvO,kout xin
 
 	k1[] fillarray 1,-1, 1,-1, 2,-2

@@ -1,8 +1,10 @@
 ;@ map LVLatt LVLrel
 
+;@ variant k default
+;@ strict 0
 ;@ ins k
 ;@ outs k
-opcode EnvFollow, 0, kkkk
+opcode EnvFollow_k, 0, kkkk
   katt, krel, kin,kout  xin
   kAtt table katt, giLVLatt
   kRel table krel, giLVLrel
@@ -13,9 +15,10 @@ opcode EnvFollow, 0, kkkk
   zkw k(ares), kout
 endop
 
+;@ variant a
 ;@ ins a
 ;@ outs k
-opcode EnvFollow, 0, kkkk
+opcode EnvFollow_a, 0, kkkk
   katt, krel, kin,kout  xin
   kAtt table katt, giLVLatt
   kRel table krel, giLVLrel

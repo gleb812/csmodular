@@ -1,9 +1,11 @@
 
 ;@ map ENVtim ENVlev
+;@ variant k default
+;@ strict 1 0 1
 ;@ ins k k k
 ;@ outs k k k
 ; TODO Trig/Gate not yet implemented
-opcode EnvADR, 0, kkkkkkkkkkkk
+opcode EnvADR_k, 0, kkkkkkkkkkkk
 	kShape,kt1,kReset,kt2,
 	kTG,kType,kKB,kSus,
 	kGatei,kin,kAMi,kEnvO,kout,kendo xin   
@@ -124,10 +126,11 @@ endop
 
 
 ;@ map ENVtim ENVlev
+;@ variant a
 ;@ ins k a k
 ;@ outs k a k
 
-opcode EnvADR, 0, kkkkkkkkkkkk
+opcode EnvADR_a, 0, kkkkkkkkkkkk
 	kShape,kt1,kReset,kt2,
 	kTG,kType,kKB,kSus,
 	kGatei,kin,kAMi,kEnvO,kout,kendo xin   

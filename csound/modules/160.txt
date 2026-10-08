@@ -1,9 +1,11 @@
+;@ variant k default
+;@ strict 0
 ;@ ins k
 ;@ outs k
 
 ; TODO check, esp. red type
 
-opcode ZeroCnt, 0, kk
+opcode ZeroCnt_k, 0, kk
   kin,kout xin
   kIn zkr kin
 
@@ -25,10 +27,11 @@ opcode ZeroCnt, 0, kk
   zkw (kind-64)/64, kout
 endop
 
+;@ variant a
 ;@ ins a
 ;@ outs k
 
-opcode ZeroCnt, 0, kk
+opcode ZeroCnt_a, 0, kk
   setksmps 1
   kin,kout xin
   aIn zar kin

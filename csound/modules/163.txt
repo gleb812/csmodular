@@ -1,8 +1,10 @@
 ;@ map OSCsem OSCprt OSCcnt
 
+;@ variant k default
+;@ strict 0 0 1 1 1
 ;@ ins k k a a a
 ;@ outs a
-opcode OscShpA, 0, kkkkkkkkkkkkkkkkk
+opcode OscShpA_k, 0, kkkkkkkkkkkkkkkkk
 ;setksmps 1
 ; kModLev - 0...1
 ; kMod - blue - -64..+64
@@ -91,9 +93,10 @@ endif
 zaw aout*kON, kOut
 endop
 
+;@ variant a
 ;@ ins a a a a a
 ;@ outs a
-opcode OscShpA, 0, kkkkkkkkkkkkkkkkk
+opcode OscShpA_a, 0, kkkkkkkkkkkkkkkkk
 ;setksmps 1
 ; kModLev - 0...1
 ; kMod - blue - -64..+64

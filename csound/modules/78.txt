@@ -1,6 +1,8 @@
+;@ variant k default
+;@ strict 0
 ;@ ins k
 ;@ outs k k k k k k k k k
-opcode sw18, 0, kkkkkkkkkkk
+opcode sw18_k, 0, kkkkkkkkkkk
   kSw, kin,ko1,ko2,ko3,ko4,ko5,ko6,ko7,ko8, kctrl xin
   kSw[][] init 8,8
   kSw fillarray 1,0,0,0,0,0,0,0, 0,1,0,0,0,0,0,0, 0,0,1,0,0,0,0,0, 0,0,0,1,0,0,0,0,  0,0,0,0,1,0,0,0, 0,0,0,0,0,1,0,0, 0,0,0,0,0,0,1,0  0,0,0,0,0,0,0,1
@@ -17,9 +19,10 @@ opcode sw18, 0, kkkkkkkkkkk
   zkw kSel/4,  kctrl
 endop
 
+;@ variant a
 ;@ ins a
 ;@ outs a a a a a a a a k
-opcode sw18, 0, kkkkkkkkkkk
+opcode sw18_a, 0, kkkkkkkkkkk
   kSw, kin,ko1,ko2,ko3,ko4,ko5,ko6,ko7,ko8, kctrl xin
   kSw[][] init 8,8
   kSw fillarray 1,0,0,0,0,0,0,0, 0,1,0,0,0,0,0,0, 0,0,1,0,0,0,0,0, 0,0,0,1,0,0,0,0,  0,0,0,0,1,0,0,0, 0,0,0,0,0,1,0,0, 0,0,0,0,0,0,1,0  0,0,0,0,0,0,0,1

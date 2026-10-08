@@ -1,10 +1,12 @@
 ;@ map AMPEXP
 ;@ map PANLOG
 
+;@ variant k default
+;@ strict 0 0 0 0 0 0
 ;@ ins k k k k k k
 ;@ outs k k
 
-opcode MixStereo, 0, kkkkkkkkkkkkkkkkkkkkk
+opcode MixStereo_k, 0, kkkkkkkkkkkkkkkkkkkkk
   kL1,kL2,kL3,kL4,kL5,kL6,kP1,kP2,kP3,kP4,kP5,kP6,kM,ki1,ki2,ki3,ki4,ki5,ki6,koL,koR xin
 
   k1 zkr ki1
@@ -46,10 +48,11 @@ opcode MixStereo, 0, kkkkkkkkkkkkkkkkkkkkk
   zkw koutR*kM, koR
 endop
 
+;@ variant a
 ;@ ins a a a a a a
 ;@ outs a a
 
-opcode MixStereo, 0, kkkkkkkkkkkkkkkkkkkkk
+opcode MixStereo_a, 0, kkkkkkkkkkkkkkkkkkkkk
   kL1,kL2,kL3,kL4,kL5,kL6,kP1,kP2,kP3,kP4,kP5,kP6,kM,ki1,ki2,ki3,ki4,ki5,ki6,koL,koR xin
 
   a1 zar ki1

@@ -1,6 +1,8 @@
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k
-opcode ClkDiv, 0, kkkkk
+opcode ClkDiv_k, 0, kkkkk
   kDiv, kType, kclk,kres,kout xin
   kClk zkr kclk
   kRes zkr kres
@@ -42,9 +44,10 @@ GateMode:
   zkw kOut, kout
 endop
 
+;@ variant a
 ;@ ins a a
 ;@ outs a
-opcode ClkDiv, 0, kkkkk
+opcode ClkDiv_a, 0, kkkkk
   kDiv, kType, kclk,kres,kout xin
   setksmps 1
   aClk zar kclk

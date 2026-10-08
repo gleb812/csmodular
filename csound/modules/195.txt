@@ -1,8 +1,10 @@
 ;@ map CLA001 AMPEXP
 
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k
-opcode ModAmt, 0, kkkkkkk
+opcode ModAmt_k, 0, kkkkkkk
   kdpt,kOn,kexplin,kinvm, kin,kmod,kout xin
 
   kModIn 	zkr kmod
@@ -25,9 +27,10 @@ Out:
     zkw kOut, kout
 endop
 
+;@ variant a
 ;@ ins a a
 ;@ outs a
-opcode ModAmt, 0, kkkkkkk
+opcode ModAmt_a, 0, kkkkkkk
   kdpt,kOn,kexplin,kinvm, kin,kmod,kout xin
 
   aModIn 	zar kmod

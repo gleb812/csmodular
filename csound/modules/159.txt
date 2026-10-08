@@ -1,6 +1,8 @@
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k
-opcode CompSig, 0, kkk
+opcode CompSig_k, 0, kkk
   kin1,kin2,kout xin
   kIn1 zkr kin1
   kIn2 zkr kin2
@@ -15,9 +17,10 @@ run:
   zkw kres, kout
 endop
 
+;@ variant a
 ;@ ins a a
 ;@ outs a
-opcode CompSig, 0, kkk
+opcode CompSig_a, 0, kkk
   kin1,kin2,kout xin
   setksmps 1
   aIn1 zar kin1

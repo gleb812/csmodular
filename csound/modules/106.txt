@@ -1,9 +1,11 @@
 ;@ map OSCsem OSCprt
 ;@ map OSCcnt
 
+;@ variant k default
+;@ strict 0 0 0
 ;@ ins k k k
 ;@ outs a
-opcode OscNoise, 0, kkkkkkkkkkkk
+opcode OscNoise_k, 0, kkkkkkkkkkkk
 ; TODO No Width Modulation
 ; kModLev - 0...1
 ; kMod - blue - -64..+64
@@ -60,9 +62,10 @@ a5 butterbp a4, kFr, kW
 zaw a5*kON, kOut
 endop
 
+;@ variant a
 ;@ ins a a a
 ;@ outs a
-opcode OscNoise, 0, kkkkkkkkkkkk
+opcode OscNoise_a, 0, kkkkkkkkkkkk
 ; kModLev - 0...1
 ; kMod - blue - -64..+64
 kCoarse,kFine,kKBT,kModLev,kTuneMode,kWid,kWMod,kON,kPitchIn,kModIn,kWidIn,kOut xin

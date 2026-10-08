@@ -1,8 +1,10 @@
 ;@ map PANLOG PANLIN
 
+;@ variant k default
+;@ strict 0 0 0
 ;@ ins k k k
 ;@ outs k
-opcode XFade, 0, kkkkkkk
+opcode XFade_k, 0, kkkkkkk
   kmod,kMix,kLogLin, kin1,kin2,kmodin,kout xin
   kIn1 zkr kin1
   kIn2 zkr kin2
@@ -24,9 +26,10 @@ opcode XFade, 0, kkkkkkk
   zkw kO, kout
 endop
 
+;@ variant a
 ;@ ins a a a
 ;@ outs a
-opcode XFade, 0, kkkkkkk
+opcode XFade_a, 0, kkkkkkk
   kmod,kMix,kLogLin, kin1,kin2,kmodin,kout xin
   aIn1 zar kin1
   aIn2 zar kin2

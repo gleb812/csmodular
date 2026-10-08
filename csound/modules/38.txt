@@ -1,7 +1,9 @@
 ;@ map LOGsub LOGlow LOGhii
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k
-opcode Pulse, 0, kkkkkkk
+opcode Pulse_k, 0, kkkkkkk
   kTime,kMod,kRange,kMode,kin,kmodi,kout xin
   kIn zkr kin
   kModIn zkr kmodi
@@ -35,9 +37,10 @@ Over:
   zkw kOut, kout
 endop
 
+;@ variant a
 ;@ ins a a
 ;@ outs a
-opcode Pulse, 0, kkkkkkk
+opcode Pulse_a, 0, kkkkkkk
   kTime,kMod,kRange,kMode,kin,kmodi,kout xin
   setksmps 1
   aIn zar kin

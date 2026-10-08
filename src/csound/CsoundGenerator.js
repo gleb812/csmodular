@@ -195,6 +195,8 @@ i3 0 [60*60*24*7]
     }
 
     async generateOrc() {
+        await this._loadVariantsForModules(); 
+        this._prepareVariants();  
         this._prepareConverters();
         // ⭐ 0. Собираем mapping ftgen (перед остальным)
         const mappingFtgens = await this._collectMappingFtgens();
@@ -681,6 +683,161 @@ i3 0 [60*60*24*7]
         return `zakinit ${this._audioBusCount}, ${this._controlBusCount}`;
     }
 
+
+    /**
+     * Для каждого модуля в патче — читает его UDO, парсит variants,
+     * сохраняет в moduleDef (moduleFactory.moduleRegistry[typeId]).
+     * Кэширует по udoPath.
+     */
+    async _loadVariantsForModules() {
+        if (!this._variantsCache) this._variantsCache = {};
+        
+        for (const moduleData of this.modules.values()) {
+            const { typeId, udoPath } = moduleData;
+            if (!udoPath || !typeId) continue;
+            
+            // Кэш — не перечитываем один и тот же файл
+            let variants = this._variantsCache[udoPath];
+            if (variants === undefined) {
+                try {
+                    const response = await fetch(`/csound/modules/${udoPath}`);
+                    if (!response.ok) {
+                        this._variantsCache[udoPath] = null;
+                        continue;
+                    }
+                    const udoText = await response.text();
+                    variants = this._parseVariants(udoText);
+                    this._variantsCache[udoPath] = variants;
+                } catch (e) {
+                    console.warn(`[CsoundGenerator] variants load failed: ${udoPath}`, e);
+                    this._variantsCache[udoPath] = null;
+                    continue;
+                }
+            }
+            
+            // Сохраняем в moduleDef
+            const moduleDef = this.system?.moduleFactory?.moduleRegistry?.[typeId];
+            if (moduleDef && variants) {
+                moduleDef.variants = variants.variants;
+                moduleDef.defaultSuffix = variants.defaultSuffix;
+                moduleDef.strict = variants.strict;
+            }
+        }
+    }
+
+
+    _prepareVariants() {
+        // 1. Сброс — все модули в дефолт
+        for (const moduleData of this.modules.values()) {
+            const moduleDef = this.system?.moduleFactory?.moduleRegistry?.[moduleData.typeId];
+            if (!moduleDef?.variants || moduleDef.variants.length < 2) {
+                moduleData._activeVariant = null;
+                continue;
+            }
+            moduleData._activeVariant = moduleDef.defaultSuffix || 'k';
+        }
+        
+        // 2. Итерация до стабилизации
+        const MAX_ITER = 20;
+        let iter = 0;
+        let changed = true;
+        
+        while (changed && iter < MAX_ITER) {
+            changed = false;
+            iter++;
+            
+            for (const moduleData of this.modules.values()) {
+                const moduleDef = this.system?.moduleFactory?.moduleRegistry?.[moduleData.typeId];
+                if (!moduleDef?.variants || moduleDef.variants.length < 2) continue;
+                
+                const inputIds = moduleDef.inputs || [];
+                const strict = moduleDef.strict || [];
+                const defaultSuffix = moduleDef.defaultSuffix || 'k';
+                
+                // Ищем audio-кабель на триггерном входе
+                let forceAudio = false;
+                
+                for (let i = 0; i < inputIds.length; i++) {
+                    if (strict[i] === 1) continue;
+                    
+                    const inputId = inputIds[i];
+                    const cable = this._findCableForPort(moduleData.instanceId, inputId, 'input');
+                    if (!cable) continue;
+                    
+                    // ⭐ Тип источника с учётом активного варианта модуля-источника
+                    const sourceType = this._resolveSourceType(cable);
+                    
+                    if (sourceType === 'audio') {
+                        forceAudio = true;
+                        break;
+                    }
+                }
+                
+                // Желаемый режим
+                let desiredSuffix = defaultSuffix;
+                if (forceAudio) {
+                    const targetVariant = moduleDef.variants.find(v => v.suffix === 'a');
+                    if (targetVariant) desiredSuffix = 'a';
+                }
+                
+                // Если изменилось — фиксируем
+                if (moduleData._activeVariant !== desiredSuffix) {
+                    moduleData._activeVariant = desiredSuffix;
+                    changed = true;
+                }
+            }
+        }
+        
+        if (iter > 1) {
+            console.log(`[CsoundGenerator] _prepareVariants: стабилизировано за ${iter} итераций`);
+        }
+        
+        // Лог переключённых
+        let switched = 0;
+        for (const moduleData of this.modules.values()) {
+            const moduleDef = this.system?.moduleFactory?.moduleRegistry?.[moduleData.typeId];
+            if (!moduleDef?.variants || moduleDef.variants.length < 2) continue;
+            const def = moduleDef.defaultSuffix || 'k';
+            if (moduleData._activeVariant && moduleData._activeVariant !== def) {
+                switched++;
+            }
+        }
+        if (switched > 0) {
+            console.log(`[CsoundGenerator] _prepareVariants: ${switched} module(s) switched from default`);
+        }
+    }
+
+    /**
+     * Определить тип источника кабеля с учётом активного варианта модуля-источника.
+     * 
+     * Если модуль-источник — с вариантами и активный = 'a' → возвращаем 'audio'.
+     * Если активный = 'k' → возвращаем 'control'.
+     * Иначе — реальный fromJack.type.
+     */
+    _resolveSourceType(cable) {
+        const fromJack = cable.fromJack;
+        if (!fromJack) return 'audio';
+        
+        const sourcePanel = fromJack.parentModule;
+        if (!sourcePanel) return fromJack.type || 'audio';
+        
+        // Ищем moduleData источника
+        const sourceModuleData = [...this.modules.values()]
+            .find(m => m.instanceId === sourcePanel.jsonId);
+        
+        if (sourceModuleData) {
+            const sourceDef = this.system?.moduleFactory?.moduleRegistry?.[sourceModuleData.typeId];
+            if (sourceDef?.variants && sourceDef.variants.length > 1) {
+                const active = sourceModuleData._activeVariant || sourceDef.defaultSuffix || 'k';
+                return active === 'a' ? 'audio' : 'control';
+            }
+        }
+        
+        // Обычный модуль — реальный тип джека
+        return fromJack.type || 'audio';
+    }
+
+
 /**
  * Найти кабель, подключенный к порту (входу)
  */
@@ -856,6 +1013,11 @@ i3 0 [60*60*24*7]
         if (moduleDef && moduleDef.type) {
             moduleName = moduleDef.type;
         }
+
+        if (moduleDef?.variants?.length > 1) {
+            const suffix = module._activeVariant || moduleDef.defaultSuffix || 'k';
+            moduleName = `${moduleDef.type}_${suffix}`;
+        }
         
         //console.log(`  📛 Module name: ${moduleName} (typeID: ${numericTypeId})`);
         
@@ -1030,6 +1192,104 @@ i3 0 [60*60*24*7]
         //console.log('  ✅ result:', result);
         return result;
     }
+
+
+    _parseVariants(udoText) {
+        if (!udoText) return null;
+        
+        const lines = udoText.split('\n');
+        const variants = [];
+        let defaultSuffix = null;
+        let strictMask = null;
+        let pending = null;
+        
+        // ⭐ «Предварительные» теги — до ;@ ins
+        let preSuffix = null;
+        let preIsDefault = false;
+        
+        for (const line of lines) {
+            const stripped = line.trim();
+            
+            // ;@ ins k k a k
+            const mIns = stripped.match(/^;\s*@\s*ins\s+(.+)$/);
+            if (mIns) {
+                pending = {
+                    ins: mIns[1].trim().split(/\s+/),
+                    outs: null,
+                    suffix: preSuffix,         // ⭐ подхватываем
+                    opcodeName: null,
+                    isDefault: preIsDefault,   // ⭐ подхватываем
+                };
+                if (preIsDefault && preSuffix) {
+                    defaultSuffix = preSuffix;
+                }
+                // Сброс pre
+                preSuffix = null;
+                preIsDefault = false;
+                continue;
+            }
+            
+            // ;@ outs k
+            const mOuts = stripped.match(/^;\s*@\s*outs\s+(.+)$/);
+            if (mOuts && pending) {
+                pending.outs = mOuts[1].trim().split(/\s+/);
+                continue;
+            }
+            
+            // ;@ variant k [default]
+            const mVar = stripped.match(/^;\s*@\s*variant\s+(\S+)(?:\s+(default))?\s*$/);
+            if (mVar) {
+                const suffix = mVar[1];
+                const isDefault = !!mVar[2];
+                if (pending) {
+                    pending.suffix = suffix;
+                    pending.isDefault = isDefault;
+                    if (isDefault) defaultSuffix = suffix;
+                } else {
+                    // ⭐ запоминаем до ;@ ins
+                    preSuffix = suffix;
+                    preIsDefault = isDefault;
+                }
+                continue;
+            }
+            
+            // ;@ strict 0 0 1 0
+            const mStrict = stripped.match(/^;\s*@\s*strict\s+(.+)$/);
+            if (mStrict) {
+                strictMask = mStrict[1].trim().split(/\s+/).map(x => parseInt(x) || 0);
+                continue;
+            }
+            
+            // opcode Foo_k, 0, kkkk
+            const mOp = stripped.match(/^opcode\s+(\w+)\s*,/);
+            if (mOp && pending) {
+                pending.opcodeName = mOp[1];
+                variants.push(pending);
+                pending = null;
+                continue;
+            }
+        }
+        
+        if (variants.length === 0) {
+            return null;
+        }
+        
+        if (!defaultSuffix && variants.length > 0) {
+            defaultSuffix = variants[0].suffix || 'k';
+        }
+        
+        if (!strictMask) {
+            const n = variants[0]?.ins?.length || 0;
+            strictMask = new Array(n).fill(0);
+        }
+        
+        return {
+            defaultSuffix,
+            strict: strictMask,
+            variants,
+        };
+    }
+
 
     _findCablesForOutput(moduleId, componentId) {
         const targetId = parseInt(componentId);

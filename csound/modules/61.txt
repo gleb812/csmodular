@@ -1,8 +1,10 @@
 ;@ map CLA001
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k
 ; TODO check modulation
-opcode Clip, 0, kkkkkkk
+opcode Clip_k, 0, kkkkkkk
   kMod, klev, kShape, kOn, kin, kmod, kout xin
   k1 zkr kin
   kM zkr kmod
@@ -21,10 +23,11 @@ Out:
     zkw ko, kout
 endop
 
+;@ variant a
 ;@ ins a a
 ;@ outs a
 
-opcode Clip, 0, kkkkkkk
+opcode Clip_a, 0, kkkkkkk
   kMod, klev, kShape, kOn, kin, kmod, kout xin
   a1 zar kin
   aM zar kmod

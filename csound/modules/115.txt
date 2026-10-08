@@ -1,8 +1,10 @@
 ;@ map NTElev
 
+;@ variant k default
+;@ strict 1 0
 ;@ ins k k
 ;@ outs k k
-opcode LevScaler, 0, kkkkkkkk
+opcode LevScaler_k, 0, kkkkkkkk
   kL,kBP,kR,kKBT,kNote,kIn,kLevel,kOut xin
 
   if kKBT != 1 goto NoKBT
@@ -34,9 +36,10 @@ opcode LevScaler, 0, kkkkkkkk
   zkw kLev, kLevel
 endop
 
+;@ variant a
 ;@ ins k a
 ;@ outs k a
-opcode LevScaler, 0, kkkkkkkk
+opcode LevScaler_a, 0, kkkkkkkk
   kL,kBP,kR,kKBT,kNote,kIn,kLevel,kOut xin
 
   if kKBT != 1 goto NoKBT

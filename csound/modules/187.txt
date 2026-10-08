@@ -1,6 +1,8 @@
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k k
-opcode sw21M, 0, kkkkk
+opcode sw21M_k, 0, kkkkk
   kSw, kInOff, kInOn, kOut, kCtrl xin
 
   kinoff zkr kInOff
@@ -21,9 +23,10 @@ zkw kinoff*k1 + kinon*k2,kOut
 zkw k2/16, kCtrl
 endop
 
+;@ variant a
 ;@ ins a a
 ;@ outs a k
-opcode sw21M, 0, kkkkk
+opcode sw21M_a, 0, kkkkk
   kSw, kInOff, kInOn, kOut, kCtrl xin
 
   ainoff zar aInOff

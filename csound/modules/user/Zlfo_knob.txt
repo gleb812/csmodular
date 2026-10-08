@@ -1,0 +1,14 @@
+;@ map LFOlow
+opcode Zlfo_knob, 0, kk
+kKnob1, kOut1 xin
+
+    ; --- mapping tables ---
+    kKnob1 table kKnob1, giLFOlow
+    ; ----------------------
+
+aout1 oscil 1, kKnob1
+
+; --- module body ---
+; Add your DSP code here
+zaw aout1, kOut1
+endop

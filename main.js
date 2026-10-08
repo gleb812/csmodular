@@ -328,8 +328,6 @@ class ModularSystem {
   }
 
 
-
-
   // Добавь этот метод в класс ModularSystem
   forceRedraw() {
       this._forceRedraw = true;
@@ -337,6 +335,121 @@ class ModularSystem {
       this._fxDirty = true;
       this._cablesDirty = true;
   }  
+
+
+  /**
+   * Пересчитать активные варианты для всех модулей патча
+   * и применить к UI: обновить типы джеков, перекрасить выходные кабели.
+   * 
+   * Вызывается после addCable / removeCable.
+   */
+  async recomputeVariantUI() {
+      if (!this.csoundGen) return;
+      
+      // 1. Убедиться, что variants загружены и активный вариант посчитан
+      await this.csoundGen._loadVariantsForModules();
+      this.csoundGen._prepareVariants();
+      
+      // 2. Пройти по всем панелям и применить _activeVariant
+      const panels = this.components.filter(c => c.constructor.name === 'Panel');
+      
+      for (const panel of panels) {
+          // Найти соответствующий moduleData в CsoundGenerator
+          const moduleData = [...this.csoundGen.modules.values()]
+              .find(m => m.instanceId === panel.jsonId);
+          if (!moduleData) continue;
+          
+          const moduleDef = this.moduleFactory?.moduleRegistry?.[moduleData.typeId];
+          if (!moduleDef?.variants || moduleDef.variants.length < 2) continue;
+          
+          const activeSuffix = moduleData._activeVariant;
+          if (!activeSuffix) continue;
+          
+          // Сравниваем с тем, что уже применено
+          if (panel._lastAppliedVariant === activeSuffix) continue;
+          
+          // Найти активный вариант
+          const activeVariant = moduleDef.variants.find(v => v.suffix === activeSuffix);
+          if (!activeVariant) continue;
+          
+          // Применяем к компонентам панели
+          this._applyVariantToPanel(panel, activeVariant);
+          
+          panel._lastAppliedVariant = activeSuffix;
+      }
+      
+      // 3. Force redraw
+      this._voiceDirty = true;
+      this._fxDirty = true;
+      this._cablesDirty = true;
+      this.forceRedraw?.();
+  }
+
+  /**
+   * Применить вариант к панели: обновить типы джеков и перекрасить выходные кабели.
+   */
+  _applyVariantToPanel(panel, variant) {
+      const moduleDef = this.moduleFactory?.moduleRegistry?.[panel.jsonName];
+      if (!moduleDef) return;
+      
+      const inputIds = moduleDef.inputs || [];
+      const outputIds = moduleDef.outputs || [];
+      
+      // ⭐ Обновляем типы Input
+      for (let i = 0; i < inputIds.length; i++) {
+          const id = inputIds[i];
+          const newType = this._typeFromSuffix(variant.ins[i]);
+          const comp = panel.components.find(c => String(c.id) === String(id));
+          if (comp && comp.type !== newType) {
+              comp.type = newType;
+          }
+      }
+      
+      // ⭐ Обновляем типы Output
+      for (let i = 0; i < outputIds.length; i++) {
+          const id = outputIds[i];
+          const newType = this._typeFromSuffix(variant.outs[i]);
+          const comp = panel.components.find(c => String(c.id) === String(id));
+          if (comp && comp.type !== newType) {
+              comp.type = newType;
+          }
+      }
+      
+      // ⭐ Перекрашиваем ВЫХОДНЫЕ кабели (от этой панели)
+      for (const cable of this.patchManager.cables) {
+          const fromPanel = cable.fromJack?.parentModule;
+          if (fromPanel !== panel) continue;
+          
+          // Обновляем цвет кабеля по типу источника
+          const sourceType = cable.fromJack.type;
+          const newColor = this.patchManager.CABLE_COLORS[sourceType] 
+                        || this.patchManager.CABLE_COLORS.other;
+          cable.typeColor = newColor;
+          
+          // Обновляем цвет центра приёмного джека
+          if (cable.toJack) {
+              cable.toJack.updateCenterColor(cable.getDisplayColor());
+          }
+      }
+      
+      // ⭐ Перерисовка джека-источника
+      panel.components.forEach(comp => {
+          if (comp.constructor.name === 'Input' || comp.constructor.name === 'Output') {
+              comp.connected = comp.cables.length > 0;
+          }
+      });
+  }
+
+  /**
+   * Преобразовать суффикс варианта в тип джека.
+   * 'k' → 'control', 'a' → 'audio', всё прочее — как есть.
+   */
+  _typeFromSuffix(suffix) {
+      if (suffix === 'a') return 'audio';
+      if (suffix === 'k') return 'control';
+      return suffix || 'control';
+  }
+
 
   toggleProfiler(enabled) {
     if (!this.profiler) return;

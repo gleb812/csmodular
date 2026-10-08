@@ -1,6 +1,8 @@
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k k k k k k k k
-opcode DlyShiftReg, 0, kkkkkkkkkk
+opcode DlyShiftReg_k, 0, kkkkkkkkkk
   kin,kclk,ko1,ko2,ko3,ko4,ko5,ko6,ko7,ko8 xin
   kIn zkr kin
   kClk zkr kclk
@@ -38,9 +40,10 @@ endif
 endop
 
 
+;@ variant a
 ;@ ins a a
 ;@ outs a a a a a a a a
-opcode DlyShiftReg, 0, kkkkkkkkkk
+opcode DlyShiftReg_a, 0, kkkkkkkkkk
   kin,kclk,ko1,ko2,ko3,ko4,ko5,ko6,ko7,ko8 xin
   setksmps 1
   aIn zar kin

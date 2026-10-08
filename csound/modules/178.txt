@@ -1,7 +1,9 @@
 
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k
-opcode DlyClock, 0, kkkk
+opcode DlyClock_k, 0, kkkk
   kDel, kin,kclk,kout xin
   kIn zkr kin
   kClk zkr kclk
@@ -21,9 +23,10 @@ zkw kReg[kDel1], kout
 endop
 
 
+;@ variant a
 ;@ ins a a
 ;@ outs a
-opcode DlyClock, 0, kkkk
+opcode DlyClock_a, 0, kkkk
   kDel, kin,kclk,kout xin
   setksmps 1
   aIn zar kin

@@ -1,9 +1,11 @@
 
 ;@ map ENVtim ENVlev
+;@ variant k default
+;@ strict 1 1 0
 ;@ ins k k k
 ;@ outs k k
 
-opcode EnvADDSR, 0, kkkkkkkkkkkkkkkk
+opcode EnvADDSR_k, 0, kkkkkkkkkkkkkkkk
 	kKB,kShape,kt1,kt2,kl2,kt3,kl3,kt4,
 	kSusPlac,kType,kReset,
 	kGatei,kAMi,kin,kEnvO,kout xin   
@@ -196,10 +198,11 @@ endop
 
 
 ;@ map ENVtim ENVlev
+;@ variant a
 ;@ ins k k a
 ;@ outs k a
 
-opcode EnvADDSR, 0, kkkkkkkkkkkkkkkk
+opcode EnvADDSR_a, 0, kkkkkkkkkkkkkkkk
 	kKB,kShape,kt1,kt2,kl2,kt3,kl3,kt4,
 	kSusPlac,kType,kReset,
 	kGatei,kAMi,kin,kEnvO,kout xin   

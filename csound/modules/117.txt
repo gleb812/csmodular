@@ -1,9 +1,11 @@
 ;@ map CLA001
 
+;@ variant k default
+;@ strict 0 0 0
 ;@ ins k k k
 ;@ outs k
 
-opcode LevMod, 0, kkkkkk
+opcode LevMod_k, 0, kkkkkk
   kdpt, kbal,  kin,kmod,kdp,kout xin
 
   kModD 	zkr kdp
@@ -17,10 +19,11 @@ opcode LevMod, 0, kkkkkk
   zkw kOut, kout
 endop
 
+;@ variant a
 ;@ ins a a a
 ;@ outs a
 
-opcode LevMod, 0, kkkkkk
+opcode LevMod_a, 0, kkkkkk
   kdpt, kbal,  kin,kmod,kdp,kout xin
 
   aModD 	zar kdp

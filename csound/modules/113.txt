@@ -1,8 +1,10 @@
 ;@ map MIXPAN
 
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k k
-opcode Fade1, 0, kkkkkk
+opcode Fade1_k, 0, kkkkkk
   kPan,kmod,kin,kmodin,koutL,koutR xin
   kIn zkr kin
   kMod zkr kmodin
@@ -19,9 +21,10 @@ opcode Fade1, 0, kkkkkk
   zkw kR, koutR
 endop
 
+;@ variant a
 ;@ ins a a
 ;@ outs a a
-opcode Fade1, 0, kkkkkk
+opcode Fade1_a, 0, kkkkkk
   kPan,kmod,kin,kmodin,koutL,koutR xin
   aIn zar kin
   aMod zar kmodin

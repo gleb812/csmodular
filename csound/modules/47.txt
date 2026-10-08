@@ -1,8 +1,10 @@
 ;@ map PANLOG PANLIN
 
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k k
-opcode Pan, 0, kkkkkkk
+opcode Pan_k, 0, kkkkkkk
   kmod,kPan,kLogLin, kin,kmodin,koutL,koutR xin
   kIn zkr kin
   kMod zkr kmodin
@@ -25,9 +27,10 @@ opcode Pan, 0, kkkkkkk
   zkw kR, koutR
 endop
 
+;@ variant a
 ;@ ins a a
 ;@ outs a a
-opcode Pan, 0, kkkkkkk
+opcode Pan_a, 0, kkkkkkk
   kmod,kPan,kLogLin, kin,kmodin,koutL,koutR xin
   aIn zar kin
   aMod zar kmodin

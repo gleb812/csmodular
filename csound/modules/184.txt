@@ -2,9 +2,11 @@
 ;@ map BUT002
 ;@ map BUT003
 
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k
-opcode Mix11A, 0, kkkkkk
+opcode Mix11A_k, 0, kkkkkk
   kLev, kOn, kExpLin, kin, kchain, kout  xin
   kIn zkr kin
   kChain zkr kchain
@@ -20,9 +22,10 @@ opcode Mix11A, 0, kkkkkk
   zkw kOut, kout
 endop
 
+;@ variant a
 ;@ ins a a
 ;@ outs a
-opcode Mix11A, 0, kkkkkk
+opcode Mix11A_a, 0, kkkkkk
   kLev, kOn, kExpLin, kin, kchain, kout  xin
   aIn zar kin
   aChain zar kchain

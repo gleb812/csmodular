@@ -2,9 +2,11 @@
 ;@ map OSCcnt
 ;@ map CLA000
 
+;@ variant k default
+;@ strict 0 0 1 1 1
 ;@ ins k k a a a
 ;@ outs a
-opcode OscC, 0, kkkkkkkkkkkkkk
+opcode OscC_k, 0, kkkkkkkkkkkkkk
 ; kModLev - 0...1
 ; kMod - blue - -64..+64
 ; FREQ SEMI FAC - ALL THE SAME!
@@ -66,9 +68,10 @@ aout oscilikts 1, kFreq + aFM*kIndx*cpsmidinn(kFMNote), kWave+1, async, 0
 zaw aout*kON, kOut
 endop
 
+;@ variant a
 ;@ ins a a a a a
 ;@ outs a
-opcode OscC, 0, kkkkkkkkkkkkkk
+opcode OscC_a, 0, kkkkkkkkkkkkkk
 ; kModLev - 0...1
 ; kMod - blue - -64..+64
 ; FREQ SEMI FAC - ALL THE SAME!

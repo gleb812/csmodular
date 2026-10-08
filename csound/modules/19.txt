@@ -1,9 +1,11 @@
 ;@ map AMPEXP CLA001
 ;@ map BUT003
 
+;@ variant k default
+;@ strict 0 0 0 0 0
 ;@ ins k k k k k
 ;@ outs k
-opcode Mix41B, 0, kkkkkkkkkkk
+opcode Mix41B_k, 0, kkkkkkkkkkk
 kLev1,kLev2,kLev3,kLev4,kExpLin,kI1,kI2,kI3,kI4,kCh,kOut  xin
 	k1 zkr kI1
 	k2 zkr kI2
@@ -28,9 +30,10 @@ kLev1,kLev2,kLev3,kLev4,kExpLin,kI1,kI2,kI3,kI4,kCh,kOut  xin
 	zkw kout, kOut
 endop
 
+;@ variant a
 ;@ ins a a a a a
 ;@ outs a
-opcode Mix41B, 0, kkkkkkkkkkk
+opcode Mix41B_a, 0, kkkkkkkkkkk
 kLev1,kLev2,kLev3,kLev4,kExpLin,kI1,kI2,kI3,kI4,kCh,kOut  xin
 	a1 zar kI1
 	a2 zar kI2

@@ -1,9 +1,11 @@
 
 ;@ map ENVtim ENVlev
+;@ variant k default
+;@ strict 1 0 1
 ;@ ins k k k
 ;@ outs k k
 
-opcode EnvMulti, 0, kkkkkkkkkkkkkkkkkk
+opcode EnvMulti_k, 0, kkkkkkkkkkkkkkkkkk
 	kl1,kl2,kl3,kl4,kt1,kt2,kt3,kt4,
 	kReset,kSusPlac,kType,kKB,kShape,
 	kGatei,kin,kAMi,kEnvO,kout xin   
@@ -200,10 +202,11 @@ endop
 
 
 ;@ map ENVtim ENVlev
+;@ variant a
 ;@ ins k a k
 ;@ outs k a
 
-opcode EnvMulti, 0, kkkkkkkkkkkkkkkkkk
+opcode EnvMulti_a, 0, kkkkkkkkkkkkkkkkkk
 	kl1,kl2,kl3,kl4,kt1,kt2,kt3,kt4,
 	kReset,kSusPlac,kType,kKB,kShape,
 	kGatei,kin,kAMi,kEnvO,kout xin   

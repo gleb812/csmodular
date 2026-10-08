@@ -1,6 +1,8 @@
+;@ variant k default
+;@ strict 1 0 0 0 0 0 0 0 0
 ;@ ins k k k k k k k k k
 ;@ outs k
-opcode Mux81X, 0, kkkkkkkkkkk
+opcode Mux81X_k, 0, kkkkkkkkkkk
   kx,k1,k2,k3,k4,k5,k6,k7,k8,kc,ko xin
   kCtrl zkr kc
   ki1 zkr k1
@@ -128,9 +130,10 @@ Over:
 zkw kOut, ko
 endop
 
+;@ variant a
 ;@ ins k a a a a a a a a
 ;@ outs a
-opcode Mux81X, 0, kkkkkkkkkkk
+opcode Mux81X_a, 0, kkkkkkkkkkk
   kx,k1,k2,k3,k4,k5,k6,k7,k8,kc,ko xin
   kCtrl zkr kc
   ai1 zar k1

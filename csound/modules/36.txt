@@ -1,6 +1,8 @@
+;@ variant k default
+;@ strict 0
 ;@ ins k
 ;@ outs k k
-opcode swOnOffM, 0, kkkk
+opcode swOnOffM_k, 0, kkkk
   kSw, kin, kout, kctrl xin
 
   kSw K2Y kSw
@@ -10,9 +12,10 @@ opcode swOnOffM, 0, kkkk
   zkw kSw/16,  kctrl
 endop
 
+;@ variant a
 ;@ ins a
 ;@ outs a k
-opcode swOnOffM, 0, kkkk
+opcode swOnOffM_a, 0, kkkk
 kSw, kin, kout, kctrl xin
 
 aIn zar kin

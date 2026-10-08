@@ -2,9 +2,11 @@
 ;@ map BUT002
 ;@ map BUT003
 
+;@ variant k default
+;@ strict 0 0 0 0 0
 ;@ ins k k k k k
 ;@ outs k
-opcode Mix41C, 0, kkkkkkkkkkkkkkkk
+opcode Mix41C_k, 0, kkkkkkkkkkkkkkkk
 kL1,kL2,kL3,kL4,kO1,kO2,kO3,kO4,kPad,kExpLin,kI1,kI2,kI3,kI4,kCh,kOut  xin
 	k1 zkr kI1
 	k2 zkr kI2
@@ -31,9 +33,10 @@ kL1,kL2,kL3,kL4,kO1,kO2,kO3,kO4,kPad,kExpLin,kI1,kI2,kI3,kI4,kCh,kOut  xin
 	zkw kout, kOut
 endop
 
+;@ variant a
 ;@ ins a a a a a
 ;@ outs a
-opcode Mix41C, 0, kkkkkkkkkkkkkkkk
+opcode Mix41C_a, 0, kkkkkkkkkkkkkkkk
 kL1,kL2,kL3,kL4,kO1,kO2,kO3,kO4,kPad,kExpLin,kI1,kI2,kI3,kI4,kCh,kOut  xin
 	a1 zar kI1
 	a2 zar kI2

@@ -1,9 +1,11 @@
 ;@ map OSCsem OSCprt
 ;@ map OSCcnt
 
+;@ variant k default
+;@ strict 0 0 0 0
 ;@ ins k k k k
 ;@ outs a
-opcode OscPM, 0, kkkkkkkkkkkkk
+opcode OscPM_k, 0, kkkkkkkkkkkkk
 ; kModLev - 0...1
 ; kMod - blue - -64..+64
 kCoarse,kFine,kKBT,kTuneMode,kPM,kON,kPitchM,kWave, kModIn,kSyncIn,kPMIn,kPitchIn,kOut xin
@@ -53,9 +55,10 @@ aout oscilikts 1, kFreq + aPM*kIndx*cpsmidinn(kNote), kWave+1, async, 0
 zaw aout*kON, kOut
 endop
 
+;@ variant a
 ;@ ins a a a a
 ;@ outs a
-opcode OscPM, 0, kkkkkkkkkkkkk
+opcode OscPM_a, 0, kkkkkkkkkkkkk
 ; kModLev - 0...1
 ; kMod - blue - -64..+64
 kCoarse,kFine,kKBT,kTuneMode,kPM,kON,kPitchM,kWave, kModIn,kSyncIn,kPMIn,kPitchIn,kOut xin

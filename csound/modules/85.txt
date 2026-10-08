@@ -1,6 +1,8 @@
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k k
-opcode WindSw, 0, kkkkkk
+opcode WindSw_k, 0, kkkkkk
   kFrom, kTo, kin,kctrl,kout,kgate xin
   kCtrl zkr kctrl
   kCtrl *= 64
@@ -17,9 +19,10 @@ run:
   zkw kIn*kGate,kout
 endop
 
+;@ variant a
 ;@ ins a a
 ;@ outs a a
-opcode WindSw, 0, kkkkkk
+opcode WindSw_a, 0, kkkkkk
   kFrom, kTo, kin,kctrl,kout,kgate xin
   setkmps 1
   aCtrl zar kctrl

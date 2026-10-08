@@ -1,9 +1,11 @@
 ;@ map OSCsem OSCprt
 ;@ map OSCcnt
 
+;@ variant k default
+;@ strict 0 0 1
 ;@ ins k k a
 ;@ outs a
-opcode OscPerc, 0, kkkkkkkkkkkkk
+opcode OscPerc_k, 0, kkkkkkkkkkkkk
 ; kModLev - 0...1
 ; kMod - blue - -64..+64
 ; OSCPERC = OSCA + ENVD
@@ -84,9 +86,10 @@ aout oscilikts 0.5, kFreq*kEnvP, 1, async, kClick
 
 endop
 
+;@ variant a
 ;@ ins a a a
 ;@ outs a
-opcode OscPerc, 0, kkkkkkkkkkkkk
+opcode OscPerc_a, 0, kkkkkkkkkkkkk
 ; kModLev - 0...1
 ; kMod - blue - -64..+64
 ; OSCPERC = OSCA + ENVD

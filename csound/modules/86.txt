@@ -1,6 +1,8 @@
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k k k k k k k k
-opcode E8Counter, 0, kkkkkkkkkk
+opcode E8Counter_k, 0, kkkkkkkkkk
   kclk,krst,ko1,ko2,ko3,ko4,ko5,ko6,ko7,ko8 xin
   kCount init 0
 
@@ -40,9 +42,10 @@ opcode E8Counter, 0, kkkkkkkkkk
     zkw k8[kCount], ko8
 endop
 
+;@ variant a
 ;@ ins a a
 ;@ outs a a a a a a a a
-opcode E8Counter, 0, kkkkkkkkkk
+opcode E8Counter_a, 0, kkkkkkkkkk
 setksmps 1
   kclk,krst,ko1,ko2,ko3,ko4,ko5,ko6,ko7,ko8 xin
   kCount init 0

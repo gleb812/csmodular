@@ -1,8 +1,10 @@
 ; nothing to map
 
+;@ variant k default
+;@ strict 0 0 0 0
 ;@ ins k k k k
 ;@ outs k
-opcode Mix41A, 0, kkkkk
+opcode Mix41A_k, 0, kkkkk
 	k1,k2,k3,k4,k5 xin
 	ks1 zkr k1
 	ks2 zkr k2
@@ -14,9 +16,10 @@ opcode Mix41A, 0, kkkkk
 	zkw kOut,k5
 endop
 
+;@ variant a
 ;@ ins a a a a
 ;@ outs a
-opcode Mix41A, 0, kkkkk
+opcode Mix41A_a, 0, kkkkk
 	k1,k2,k3,k4,k5 xin
 	as1 zar k1
 	as2 zar k2

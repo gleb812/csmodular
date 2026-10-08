@@ -1,6 +1,8 @@
+;@ variant k default
+;@ strict 0 0 0 0
 ;@ ins k k k k
 ;@ outs k k
-opcode sw41, 0, kkkkkk
+opcode sw41_k, 0, kkkkkk
   kSel, kin1,kin2,kin3,kin4, kout, kctrl xin
   kSw[][] init 4,4
   kSw fillarray 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1
@@ -14,9 +16,10 @@ opcode sw41, 0, kkkkkk
   zkw kSel/4,  kctrl
 endop
 
+;@ variant a
 ;@ ins a a a a
 ;@ outs a k
-opcode sw41, 0, kkkkkk
+opcode sw41_a, 0, kkkkkk
   kSel, kin1,kin2,kin3,kin4, kout, kctrl xin
   kSw[][] init 4,4
   kSw fillarray 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1

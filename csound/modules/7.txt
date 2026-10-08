@@ -1,9 +1,11 @@
 ;@ map OSCsem OSCprt
 ;@ map OSCcnt OSCshp
 
+;@ variant k default
+;@ strict 0 0 1 1 1
 ;@ ins k k a a a
 ;@ outs a
-opcode OscB, 0, kkkkkkkkkkkkkkkkk
+opcode OscB_k, 0, kkkkkkkkkkkkkkkkk
 ; kModLev - 0...1
 ; kMod - blue - -64..+64
 ; FREQ SEMI FAC - ALL THE SAME!
@@ -83,9 +85,10 @@ WOut:
 zaw aout*kON, kOut
 endop
 
+;@ variant a
 ;@ ins a a a a a
 ;@ outs a
-opcode OscB, 0, kkkkkkkkkkkkkkkkk
+opcode OscB_a, 0, kkkkkkkkkkkkkkkkk
 ; kModLev - 0...1
 ; kMod - blue - -64..+64
 ; FREQ SEMI FAC - ALL THE SAME!

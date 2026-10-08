@@ -1,9 +1,11 @@
 ;@ map LVLatG LVLreG LVLthr
 
+;@ variant k default
+;@ strict 0
 ;@ ins k
 ;@ outs k k
 
-opcode NoiseGate, 0, kkkkkkk
+opcode NoiseGate_k, 0, kkkkkkk
 kthr,katt,krel,kOn, kin,kout,kenv xin
 
 kIn zkr kin
@@ -73,10 +75,11 @@ zkw kEnv,kenv
 zkw kIn * kEnv,kout
 endop
 
+;@ variant a
 ;@ ins a
 ;@ outs a k
 
-opcode NoiseGate, 0, kkkkkkk
+opcode NoiseGate_a, 0, kkkkkkk
 kthr,katt,krel,kOn, kin,kout,kenv xin
 
 aIn zar kin

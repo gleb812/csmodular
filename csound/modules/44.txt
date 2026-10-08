@@ -1,15 +1,18 @@
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k
-opcode LevMult, 0, kkk
+opcode LevMult_k, 0, kkk
   kin,kmod,kout xin
   kI zkr kin
   kM zkr kmod
   zkw kI * kM, kout
 endop
 
+;@ variant a
 ;@ ins a a
 ;@ outs a
-opcode LevMult, 0, kkk
+opcode LevMult_a, 0, kkk
   kin,kmod,kout xin
   aI zar kin
   aM zar kmod

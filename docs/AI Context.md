@@ -1,43 +1,44 @@
-markdown
 
+```markdown
 # AI Context — CsModular
 
-Этот документ — краткое описание системы для ИИ-ассистента.
-Цель: сократить время на ознакомление с проектом до 5 минут.
+This document is a short description of the system for the AI assistant.
+Goal: reduce onboarding time to 5 minutes.
 
-## Что это
+## What it is
 
-**CsModular** — модульная среда синтеза звука в браузере на базе Csound.
-Пользователь собирает патч из модулей, соединяет их кабелями, слышит результат.
+**CsModular** — modular sound synthesis environment in the browser, built on Csound.
+The user assembles a patch from modules, connects them with cables, hears the result.
 
-## Стек
+## Stack
 
 - **Frontend**: vanilla JS (ES modules), Vite
-- **Аудио**: `@csound/browser` 6.18.7 (через CDN unpkg)
-- **Backend**: Flask (`backend/server.py`) — сохраняет user-модули, конвертирует .pch2 через `pch2csd`
-- **CSound-код**: UDO-файлы в `csound/modules/*.txt`
+- **Audio**: `@csound/browser` 6.18.7 (via unpkg CDN)
+- **Backend**: Flask (`backend/server.py`) — saves user-modules, converts .pch2 via `pch2csd`
+- **Csound code**: UDO files in `csound/modules/*.txt`
+- **Scripts**: Python patchers in `scripts/` (params, mapping tables, NM2 cleanup)
 
-## Ключевые сущности
+## Key entities
 
-### Патч
-Набор модулей + кабелей. Сохраняется в JSON. Загружается в `PatchLoader`.
+### Patch
+Set of modules + cables. Saved to JSON. Loaded via `PatchLoader`.
 
-### Модуль (в UI)
-Визуальный блок с компонентами. Состоит из:
-- **JS-описание** (в `modules/` или `modules/user/`)
-- **UDO-файл** (в `csound/modules/` или `csound/modules/user/`)
-- Экземпляр `Panel` с `components`
+### Module (in UI)
+Visual block with components. Consists of:
+- **JS description** (in `modules/` or `modules/user/`)
+- **UDO file** (in `csound/modules/` or `csound/modules/user/`)
+- An instance of `Panel` with `components`
 
-### Модуль (JS-описание)
+### Module (JS description)
 ```js
 {
-    type: 'Zgen',                    // имя opcode
-    typeID: 999,                     // для поиска UDO-файла (999.txt для user)
-    displayName: 'Zgen',
+    type: 'Zgen',                    // opcode name (Csound identifier)
+    typeID: 999,                     // for UDO file lookup (999.txt for user)
+    displayName: 'Zgen',             // UI name — can contain spaces, dashes, etc.
     gridHeight: 3,
-    params: [1, 2],                  // ID компонентов, идущих в opcode (в порядке xin)
-    inputs: [3],                     // ID Input-компонентов
-    outputs: [4, 5],                 // ID Output-компонентов
+    params: [1, 2],                  // component IDs passed to opcode (in xin order)
+    inputs: [3],                     // component IDs of Input-jacks
+    outputs: [4, 5],                 // component IDs of Output-jacks
     components: [
         { componentType: 'Knob', id: '1', ... },
         { componentType: 'Output', id: '4', ... },
@@ -45,327 +46,170 @@ markdown
         // ...
     ]
 }
+```
 
-UDO-файл (Csound)
-csound
+**Important**: `type` is the Csound-valid identifier. `displayName` is only for UI. **Never use `displayName` or `title` in Csound variable names, chnget channels, or opcode calls** — only `type` / `jsonName`.
 
+### UDO file (Csound)
+```csound
 opcode Zgen, 0, kkk
-kParam1, kParam2, kOut1 xin     ; порядок = порядок в params+inputs+outputs
+kParam1, kParam2, kOut1 xin     ; order = order in params+inputs+outputs
   ; ... DSP ...
   zaw aResult, kOut1
 endop
+```
 
-Правило: params + inputs + outputs в этом порядке дают порядок аргументов xin.
-Кабель
+Rule: `params + inputs + outputs` in this order gives the order of `xin` arguments.
 
-Связь Output → Input. Хранит bus-номер в CsoundGenerator._cableBusMap.
-Zak-пространство
+**Multiple variants**: some NM2 modules have more than one opcode in the file (e.g. `k`-variant and `a`-variant). Currently Csound takes the **last** opcode with a given name. A variant mechanism (parsing `;@ ins` / `;@ outs` headers) is planned but not yet implemented.
 
-Csound-механизм связи между модулями. Каждый выход пишет в свой zak-bus, каждый вход читает из zak-bus.
-Основные классы
-Класс   Файл    Роль
-ModularSystem   main.js Главный координатор (Canvas, слои, анимация)
-ModuleFactory   src/ModuleFactory.js    Создание модулей из JS-описаний
-PatchManager    src/PatchManager.js Управление кабелями
-PatchLoader src/PatchLoader.js  Загрузка/сохранение патчей
-LayerManager    src/managers/LayerManager.js    Слои voice/fx, сетка, divider
-EventManager    src/managers/EventManager.js    Все события мыши
-UIManager   src/managers/UIManager.js   Панель управления (справа)
-CsoundGenerator src/csound/CsoundGenerator.js   Сборка ORC из модулей и кабелей
-CsoundEngine    src/csound/CsoundEngine.js  Управление инстансом Csound
-Поток данных
-Создание модуля
+### Cable
+Connection Output → Input. Stores the bus number in `CsoundGenerator._cableBusMap`.
 
-    main.js → ModuleFactory.createModule(type, ...) → Panel
+### Zak space
+Csound mechanism for inter-module communication. Each output writes to its own zak-bus, each input reads from a zak-bus.
+**Note**: audio-bus and control-bus are **separate spaces** (numbers do not collide).
 
-    CsoundGenerator.addModule({...}) — регистрирует в includes/modules
+### Converters (strict inputs)
+When a cable's source type differs from the destination input type, a converter is inserted **before the receiving module's call** in `instr 1/2`:
 
-    При recompile — ORC пересобирается
+- `K2A <sourceControlBus>, <newAudioBus>` — control → audio
+- `A2K <sourceAudioBus>, <newControlBus>` — audio → control
 
-Добавление кабеля
+Both opcodes are **always in the ORC template** (defined once, waiting).
+Bus allocation is done in `CsoundGenerator._prepareConverters()`, which is called at the start of `generateOrc()`.
+Line insertion is done in `CsoundGenerator.formatModuleLine()`.
 
-    PatchManager.addCable(from, to) → Cable с bus-номером
+Rule: one mismatch → one converter → one extra hidden bus. The UI shows one cable, the ORC shows two segments.
 
-    CsoundGenerator.addCable(cable) → bus в _cableBusMap
+## Main classes
 
-    При recompile — ORC пересобирается
+| Class | File | Role |
+|-------|------|------|
+| `ModularSystem` | `main.js` | Main coordinator (Canvas, layers, animation) |
+| `ModuleFactory` | `src/ModuleFactory.js` | Creates modules from JS descriptions |
+| `PatchManager` | `src/PatchManager.js` | Cables management |
+| `PatchLoader` | `src/PatchLoader.js` | Load/save patches |
+| `LayerManager` | `src/managers/LayerManager.js` | voice/fx layers, grid, divider |
+| `EventManager` | `src/managers/EventManager.js` | All mouse events |
+| `UIManager` | `src/managers/UIManager.js` | Control panel (right side) |
+| `CsoundGenerator` | `src/csound/CsoundGenerator.js` | Assembles ORC from modules and cables |
+| `CsoundEngine` | `src/csound/CsoundEngine.js` | Manages the Csound instance |
+| `MappingTables` | `src/csound/MappingTables.js` | Loads `value_maps.json` for `;@ map` |
+| `Input`, `Output` | `src/components/*.js` | Jacks (have `.type` — `'audio'` / `'control'` / `'logic'`) |
+| `Cable` | `src/Cable.js` | `fromJack.type` is the source of truth for cable type |
 
-Генерация ORC
+## Data flow
 
-    CsoundGenerator.generateOrc() — собирает:
+### Creating a module
+1. `main.js` → `ModuleFactory.createModule(type, ...)` → `Panel`
+2. `CsoundGenerator.addModule({ typeId, instanceId, instanceName, ... })`
+   - **`instanceName` MUST be the module `type` (Csound-valid)**, not the UI title
+3. On recompile → ORC is regenerated
 
-        UDO-секцию (из includes)
+### Adding a cable
+1. `PatchManager.addCable(from, to)` → `Cable`
+2. `CsoundGenerator.addCable(cable)` → bus assigned in `_cableBusMap`
+3. On recompile → ORC is regenerated
 
-        instr 1 (voice) — вызовы модулей + led_rms
+### ORC generation
+`CsoundGenerator.generateOrc()` assembles:
+1. `_prepareConverters()` — finds type mismatches, allocates buses
+2. `_collectMappingFtgens()` — ftgen for `;@ map` tables used in UDOs
+3. UDO section (from `includes`)
+4. `instr 1` (voice) — module calls + converters + `led_rms`
+5. `instr 2` (fx) — same
+6. Standard `instr 3`, `instr 4` (MIDI, offline)
 
-        instr 2 (fx) — вызовы модулей
+Then `CsoundEngine.init()` → `compileOrc` + `readScore` + `start`.
 
-        Стандартные instr 3, instr 4 (MIDI, offline)
+### Recompile (hot reload)
+`CsoundEngine.recompile()` uses **`reset()` + `setOption('-odac')` + `compileOrc` + `readScore` + `start`** — the instance is **not destroyed**, only reset. This is ~5x faster than a full restart and keeps the AudioContext alive.
 
-    CsoundEngine.init() → compileOrc + readScore + start
+After recompile, `_resyncAllControls()` pushes all current UI-component values back to Csound (because after reset, control channels are back to 0).
 
-LED
+**Same resync is also called in `init()`** — so the very first Run picks up all knob/button values without needing to touch them.
 
-    LED привязан к Output/Input (sourceComponentId)
+### LED
+- LED is bound to an Output/Input (`sourceComponentId`)
+- `CsoundGenerator` generates `led_rms <bus>, "<channel>"`
+- `CsoundEngine.registerLedChannel("<channel>")` on module creation
+- `CsoundEngine` polls channels via `getControlChannel` every 50 ms
+- `LED.draw` reads value from `CsoundEngine.getLedValue(channel)`
 
-    CsoundGenerator генерирует led_rms <bus>, "<channel>"
+### Module commutation
+Via zak:
+- Each Output has its own bus (assigned when a cable is created)
+- Module writes `zaw aOut, kOut` in opcode
+- Cable connects bus of input and output
 
-    CsoundEngine.registerLedChannel("<channel>") — при создании модуля
+**Rule: cables only within one layer** (voice ↔ voice, fx ↔ fx). Cross-layer is forbidden.
 
-    CsoundEngine поллит каналы через getControlChannel каждые 50ms
+### Cable type detection
+`CsoundGenerator._getCableType(cable)`:
+1. **Priority**: `cable.fromJack.type` (`'audio'` / `'control'`)
+2. Fallback: `cable.toJack.type`
+3. Last resort: color-based (legacy NM2 palette)
 
-    LED.draw читает значение из CsoundEngine.getLedValue(channel)
+**Important**: color is **visual only**. Custom cable coloring is supported, so color must never be the primary type source.
 
-Коммутация модулей
+## Csound name sanitization
 
-Через zak:
+Any string that goes into a Csound identifier (variable name, chnget channel, opcode name) must be safe. Use `sanitizeCsoundName()` from `src/utils/csoundName.js`:
 
-    Каждый Output имеет свой bus (назначается при кабеле)
+- `[^a-zA-Z0-9_]` → `_`
+- Prefix `_` if starts with a digit
 
-    Модуль пишет zaw aOut, kOut в opcode
+**However**: the primary defense is to **always use `type` / `jsonName`** (never `displayName` / `title`) when building Csound names.
 
-    Кабель соединяет bus входа и выхода
+## NM2 legacy and params
 
-Правило: кабели только внутри одного слоя (voice ↔ voice, fx ↔ fx). Cross-layer — запрещено.
-Правила разработки
+Old NM2 modules have `type` and `displayName` that may differ (e.g. `type: 'Out2'`, `displayName: '2-Out'`). The `type` is always safe; the `displayName` is only for UI.
 
-    UDO не трогаем — никаких chnset/chnget внутри opcode модуля
+The `params` array in NM2 JS descriptions lists **interactive component IDs in the order they appear in the opcode's `xin`** — and this is **the order in which components appear top-down in the `components` array** (not sorted by id).
 
-    Параметры через chnget — в instr 1/2, вне opcode
+Patcher `scripts/patch_params.py` regenerates `params` for all NM2 modules:
+- `PARAM_TYPES = [Knob, Slider, ButtonFlat, ButtonText, ButtonRadio, ButtonIncDec, TextEdit]` — go to `params`
+- `MODE_TYPES = [PartSelector, LevelShift]` — go to `modes` (with a warning; manual check)
 
-    LED через внешний UDO — led_rms вызывается в instr 1/2 после модуля
+## Development rules
 
-    ConnectorIndex не используется — легаси от NM2-импорта
+1. **Do not modify UDO files** — no `chnset`/`chnget` inside a module's opcode
+2. Parameters via `chnget` — inside `instr 1/2`, outside opcode
+3. LED via external UDO — `led_rms` called in `instr 1/2` after the module
+4. `ConnectorIndex` — legacy from NM2 import, not used
+5. User-modules always in `user/` — `csound/modules/user/` and `modules/user/`
+6. Each user-UDO — one opcode per file
+7. `params`/`inputs`/`outputs` — fixed order, matches `xin` in UDO
+8. **Csound names are always built from `type` / `jsonName`, never from `displayName` / `title`**
 
-    User-модули всегда в user/ — csound/modules/user/ и modules/user/
+## Known issues (short)
 
-    Каждый user-UDO — один opcode в своём файле
+- Two opcodes with the same name in one UDO file — Csound silently takes the last. Variant switching not yet implemented.
+- `CsoundEngine._ledValues` not cleared on `stop()`.
+- `ComponentPropertiesWindow` opens only via button.
 
-    params/inputs/outputs — порядок фиксирован — совпадает с xin в UDO
+## TODO (short)
 
-Что НЕ работает (известные проблемы)
+- Variant switching: `k` ↔ `a` module opcode based on incoming cable types (NM2-style polymorphic inputs)
+- Jack recoloring on variant switch (Inputs/Outputs change color, cables stay as-is on input side)
+- `TextField` currently not counted as a parameter (only display)
+- Split rendering into 4 canvas layers (overlay, bg, modules, cables)
+- Replace `getControlChannel` with `channelPtr` in `CsoundEngine`
+- Undo/Redo
+- Tests
 
-    Артефакт с кабелем поверх LED (решено через overlayCanvas в фазе 2)
+## How to start working
 
-    CsoundEngine._ledValues не обнуляется при stop()
+Before any change:
+1. Ask the user about the goal of the change
+2. Clarify which files will be affected
+3. Check if there are related issues in TODO
+4. Propose the minimal patch
 
-    ComponentPropertiesWindow открывается только по кнопке
-
-Известные TODO (кратко)
-
-    Разнести отрисовку на 4 canvas-слоя (overlay, bg, modules, cables)
-
-    Заменить getControlChannel на channelPtr
-
-    Undo/Redo
-
-    Тесты
-
-С чего начинать работу
-
-Перед любым изменением:
-
-    Спросить пользователя о цели изменения
-
-    Уточнить, какие файлы будут затронуты
-
-    Проверить, нет ли связанных проблем в TODO
-
-    Предложить минимальный патч
-
-Стиль:
-
-    Русский язык
-
-    Без «давайте попробуем» — конкретные правки
-
-    Показывать diff или полные методы
-
-    Не менять то, о чём не спросили
-
-text
-
-
----
-
-# 3. `docs/HOW_TO_WORK_WITH_AI.md`
-
-```markdown
-# Как работать с ИИ-ассистентом над CsModular
-
-## Принципы
-
-1. **Один вопрос — один ответ — одна правка.** 
-   ИИ теряет контекст при больших сообщениях. Лучше 10 маленьких задач, чем одна большая.
-
-2. **Сначала анализ, потом код.** 
-   Попроси ИИ «посмотри код, скажи, что не так» — прежде чем просить правки.
-
-3. **Показывай целевую функцию целиком, если она меняется.** 
-   Не «замени строку X», а «вот новая версия метода `formatModuleLine`».
-
-4. **Проверяй после каждой правки.** 
-   Один патч — один тест. Не накапливай 5 правок без проверки.
-
-5. **Фиксируй победы в TODO.** 
-   После каждой правки — что сделано, что осталось.
-
-## Как формулировать задачу
-
-### Плохо
-> «Сделай, чтобы LED мигал»
-
-### Хорошо
-> «LED не мигает, когда я кручу ручку LFO. `CsoundEngine._ledValues` показывает 0.743. LED.draw вызывается, но brightness не обновляется. Правь `LED.js` — метод `draw`.»
-
-**Ключевое**: контекст + симптом + файл/метод.
-
-## Что скидывать ИИ
-
-**Обязательно**:
-- Файл(ы), которые **трогаем**
-- **Ошибки** из консоли (полный стек)
-- **Лог** из консоли (если есть)
-- **Скрин** (если визуальная проблема)
-
-**Опционально, но полезно**:
-- `docs/AI_CONTEXT.md` — если ИИ новый
-- `docs/TODO.md` — для понимания контекста
-- Последние 2-3 сообщения диалога — если продолжаем
-
-## Что НЕ скидывать
-
-- **Весь** `main.js` — если правим одну функцию
-- Скрин всего экрана, если проблема в углу
-- Стек из 1000 строк
-- «Оно не работает» без деталей
-
-## Шаблон сообщения ИИ
-
-Контекст
-
-[одна-две строки: что делаем]
-Проблема
-
-[симптом: что вижу, что ожидаю]
-Файлы
-
-[какие файлы нужны ИИ]
-Что уже сделал
-
-[если пробовал что-то — каков результат]
-Цель
-
-[что должно быть после правки]
-text
-
-
-## Как ИИ отвечает
-
-**Идеально**:
-1. **Анализ** — почему так происходит
-2. **Варианты** — 2-3 подхода с плюсами/минусами
-3. **Рекомендация** — что выбрать и почему
-4. **Код** — полная функция или diff
-5. **Проверка** — что проверить после правки
-
-**Если ИИ предлагает 5 вариантов** — попроси выбрать **один**. «Покажи только рекомендуемый».
-
-## Цикл работы
-
-    Определить задачу
-    ↓
-
-    Сформулировать по шаблону
-    ↓
-
-    Скинуть нужные файлы
-    ↓
-
-    Получить правку
-    ↓
-
-    Сделать правку
-    ↓
-
-    Hard reload + проверить
-    ↓
-
-    Если работает — закрыть задачу в TODO
-    ↓
-
-    Если нет — скинуть логи и продолжить
-
-text
-
-
-## Соглашения по коду
-
-- **Русский** язык в комментариях
-- **JSDoc** для публичных методов
-- **Имена**: `camelCase` для методов, `PascalCase` для классов
-- **Файлы**: один класс — один файл
-- **Импорты**: сверху, порядок — внешние → внутренние
-
-## Соглашения по диалогу
-
-- **Ты** — зая, **ИИ** — Кит (на выбор, не обязательно)
-- **Плавники** вверх = начинаем, **плавники** вниз = стоп
-- **Не гнать** — двигаться по шагам
-- **Фиксировать** каждое решение в TODO/notes
-- **Проверять** после каждой правки
-
-## Что делать, если ИИ запутался
-
-1. **Скажи**: «Стоп. Ты не прав. Вот реальная ситуация: ...»
-2. **Дай минимум**: только нужные файлы
-3. **Спроси**: «Какой план? Не код, только план».
-4. **Утверди** план
-5. **Дай** задачу **по шагам**
-
-ИИ теряется при больших контекстах. Возвращай его к **одной** задаче.
-
-## Что делать, если ты запутался
-
-1. **Стоп** — не делай правку.
-2. **Скажи** ИИ: «Я запутался. Что мы делаем сейчас? Сформулируй одной фразой».
-3. **Утверди** понимание.
-4. **Продолжай**.
-
-## Что сохранять из диалога
-
-- **Решения** — в `docs/NOTES.md`
-- **TODO** — в `docs/TODO.md`
-- **Схемы** — в `docs/ARCHITECTURE.md`
-- **Артефакты** — в `docs/KNOWN_ISSUES.md`
-
-## Что НЕ сохранять
-
-- Промежуточные рассуждения
-- Эксперименты, которые отменили
-- Дубликаты
-
-## Памятка для нового ИИ
-
-Если ИИ новый — скинь ему **три файла**:
-1. `docs/AI_CONTEXT.md`
-2. `docs/TODO.md`
-3. `docs/HOW_TO_WORK_WITH_AI.md`
-
-**И скажи**: «Прочитай, потом спроси, что делаем».
-
-ИИ после этого работает **на порядок** эффективнее.
-
-## Принцип «не тормозить»
-
-- **Не** проси ИИ показать 5 вариантов — проси **один**.
-- **Не** скидывай 10 файлов — скидывай **2**.
-- **Не** обсуждай архитектуру на 5 сообщений — **прими решение** и двигайся.
-- **Не** оптимизируй преждевременно — **сначала работает**, потом быстро.
-
-## Принцип «не спешить»
-
-- **Проверяй** после каждой правки.
-- **Останавливайся** перед сложным рефакторингом.
-- **Задавай вопрос** — если что-то непонятно.
-- **Не бойся** откатить.
+Style:
+- Russian for the user, **English for public docs**
+- No "let's try" — concrete edits
+- Show diff or full methods
+- Do not change things not asked about
+```

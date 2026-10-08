@@ -1,6 +1,8 @@
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k k
-opcode ValSw1, 0, kkkkk
+opcode ValSw1_k, 0, kkkkk
 kval, kin,kctrl,kout1,kout2 xin
   k1 zkr kin1
   kCtrl zkr kctrl
@@ -13,9 +15,10 @@ default:
 halt:
 endop
 
+;@ variant a
 ;@ ins a a
 ;@ outs a a
-opcode ValSw1, 0, kkkkk
+opcode ValSw1_a, 0, kkkkk
 kval, kin,kctrl,kout1,kout2 xin
   setksmps 1
   a1 zar kin1

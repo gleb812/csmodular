@@ -1,0 +1,32 @@
+;@ variant k default
+;@ strict 0 0
+;@ ins k k
+;@ outs k
+opcode SimpleMix2types_k, 0, kkk
+kIn1, kIn2, kOut1 xin
+kin1 zkr kIn1
+kin2 zkr kIn2
+
+kout1 = kin1 + kin2
+
+; --- module body ---
+; Add your DSP code here
+zkw kout1, kOut1
+endop
+
+
+;@ variant a
+;@ strict 0 0
+;@ ins a a
+;@ outs a
+opcode SimpleMix2types_a, 0, kkk
+kIn1, kIn2, kOut1 xin
+ain1 zar kIn1
+ain2 zar kIn2
+
+aout1 = ain1 + ain2
+
+; --- module body ---
+; Add your DSP code here
+zaw aout1, kOut1
+endop

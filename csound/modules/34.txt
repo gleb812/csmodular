@@ -1,7 +1,9 @@
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k
 
-opcode shpExp, 0, kkkkkkk
+opcode shpExp_k, 0, kkkkkkk
 klev,kMod,kOn,kShape, kin,kmod,ko xin
 k1 zkr kin
 kM zkr kmod   ;TODO modulation & table optimization
@@ -30,9 +32,10 @@ endif
     zkw kout*kOn,ko
 endop
 
+;@ variant a
 ;@ ins a a
 ;@ outs a
-opcode shpExp, 0, kkkkkkk
+opcode shpExp_a, 0, kkkkkkk
 klev,kMod,kOn,kShape, kin,kmod,ko xin
 a1 zar kin
 aM zar kmod

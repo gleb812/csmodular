@@ -1,8 +1,10 @@
 ;@ map ENVtim
+;@ variant k default
+;@ strict 1 1 0
 ;@ ins k k k
 ;@ outs k k
 
-opcode EnvAHD, 0, kkkkkkkkkkkk
+opcode EnvAHD_k, 0, kkkkkkkkkkkk
 	kShape,kA_,kH_,kReset,kD_,kType,kKB, kTrig_,kAMi,kin,kEnvO,kout xin
 
 	k1[] fillarray 1,-1, 1,-1, 2,-2
@@ -97,10 +99,11 @@ EnvOut:
 	zkw kEnv1*kIn, kout
 endop
 
+;@ variant a
 ;@ ins k k a
 ;@ outs k a
 
-opcode EnvAHD, 0, kkkkkkkkkkkk
+opcode EnvAHD_a, 0, kkkkkkkkkkkk
 	kShape,kA_,kH_,kReset,kD_,kType,kKB, kTrig_,kAMi,kin,kEnvO,kout xin
 
 	k1[] fillarray 1,-1, 1,-1, 2,-2

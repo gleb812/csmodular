@@ -1,7 +1,9 @@
+;@ variant k default
+;@ strict 0
 ;@ ins k
 ;@ outs k
 ;TODO Inv x2 and Inv x3 are wrong for Nord. Need research
-opcode shpStatic, 0, kkkk
+opcode shpStatic_k, 0, kkkk
   kmode, kOn, kin, kout xin
 
   ko zkr kin
@@ -20,10 +22,11 @@ opcode shpStatic, 0, kkkk
   zkw ko * kOn, kout
 endop
 
+;@ variant a
 ;@ ins a
 ;@ outs a
 
-opcode shpStatic, 0, kkkk
+opcode shpStatic_a, 0, kkkk
   kmode, kOn, kin, kout xin
   setksmps 1
 

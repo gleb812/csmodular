@@ -5,27 +5,20 @@
 - [ ] проблема с реинициализацией модуля, содержащего контроллеры, при его добавлении
 - [ ] Mix1-1A exp/lin selector change leads to error
 - [ ] some DSP code still contain 'd' parameter in @map line - should be eliminated
+- [ ] Csound code window in Editor mode behaves badly
+- [ ] at zoom 50% and lower the working area also resizes
 
-
-
-### P1 — Stability
-- [X] Провести ревизию `console.log` — оставить только важные
-- [ ] Проверить работу `CsoundEngine.recompile()` при быстрых изменениях (10+ модулей подряд)
 
 ### P2 — UX 
-- [ ] Заготовить 2-3 demo-патча (заранее загружены в `patches/`)
+- [ ] Make 2-3 demo patches
 
-## 🎯 Архитектура отрисовки
-
-### Bugs
-- [ ] При zoom 50% и ниже границы рабочей области тоже уменьшаются
 
 ### Фаза 2 — `overlayCanvas` (приоритет)
 - [ ] Добавить `<canvas id="overlayCanvas">` в `index.html`
 - [ ] Вынести `LED`, `VU`, `hover`, `selection`, `dragging ghost`, `dragging cable`, `grid-cell highlight` в `overlayCanvas`
 - [ ] Убрать `_renderLeds` и `_redrawCablesInRect` — они становятся не нужны
 - [ ] Проверить, что артефакт с кабелем над LED исчез
-- [ ] Проверить FPS при 20+ модулях
+- [ ] Check FPS at 20+ units
 
 ### Фаза 3 — `bgCanvas` (фон, сетка, divider)
 - [ ] Вынести фон слоёв, сетку и divider в `bgCanvas`
@@ -128,3 +121,7 @@
 - `formatModuleLine` строит: `<params>` + `<mode>` + `<inputs>` + `<outputs>`. Порядок фиксирован.
 - Все user-UDO — в `csound/modules/user/`. Встроенные — в `csound/modules/`.
 - Инклюды подгружаются **лениво** через `CsoundGenerator.includes` (Set путей)
+
+
+## NB
+FilterHP has only one type, but FilterLP has two types. 

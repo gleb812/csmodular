@@ -1,6 +1,8 @@
+;@ variant k default
+;@ strict 0 0
 ;@ ins k k
 ;@ outs k k
-opcode MinMax, 0, kkkk
+opcode MinMax_k, 0, kkkk
   ka,kb,kmin,kmax xin
   kA zkr ka
   kB zkr kb
@@ -12,9 +14,10 @@ opcode MinMax, 0, kkkk
   zkw kMax, kmax
 endop
 
+;@ variant a
 ;@ ins a a
 ;@ outs a a
-opcode MinMax, 0, kkkk
+opcode MinMax_a, 0, kkkk
   ka,kb,kmin,kmax xin
   aA zar ka
   aB zar kb
