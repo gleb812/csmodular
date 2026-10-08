@@ -1,4 +1,4 @@
-export function createFileInput(accept = '.json,.pch2') {
+export function createFileInput(accept = '.json') {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = accept;

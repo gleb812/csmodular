@@ -1,3 +1,4 @@
+import { moduleStore } from './api/index.js';
 import { Panel } from './components/Panel.js';
 import { GRID_UNITS } from '../constants.js';
 
@@ -100,18 +101,15 @@ export class ModuleFactory {
     async loadUserModule(moduleName) {
         try {
             //console.log(`📂 Loading user module: ${moduleName}`);
-            
-            const response = await fetch(`/api/load-module/${moduleName}`);
-            if (!response.ok) {
-                console.warn(`Failed to load user module: ${moduleName} (status: ${response.status})`);
+
+            const data = await moduleStore.load(moduleName);
+            if (!data) {
+                console.warn(`Failed to load user module: ${moduleName}`);
                 return false;
             }
-            
-            const data = await response.json();
-            
+
             // Парсим JS код
             const moduleDef = this._parseModuleDefinition(data.code);
-
             if (!moduleDef) {
                 console.warn(`Could not parse module definition for: ${moduleName}`);
                 return false;
@@ -122,15 +120,7 @@ export class ModuleFactory {
 
             // Регистрируем в фабрике
             this.registerModule(moduleName, moduleDef);
-            
-            if (!moduleDef) {
-                console.warn(`Could not parse module definition for: ${moduleName}`);
-                return false;
-            }
-            
-            // Регистрируем в фабрике
-            this.registerModule(moduleName, moduleDef);
-            
+
             // ⭐ Регистрируем в CsoundGenerator
             if (this.parentSystem?.csoundGen) {
                 this.parentSystem.csoundGen.registerUserModule(moduleName, {
@@ -142,10 +132,10 @@ export class ModuleFactory {
                     outputs: moduleDef.outputs || []
                 });
             }
-            
+
             console.log(`✅ Loaded user module: ${moduleName}`);
             return true;
-            
+
         } catch (error) {
             console.error(`Error loading user module ${moduleName}:`, error);
             return false;
@@ -193,14 +183,8 @@ export class ModuleFactory {
     // ⭐ КЕШ СПИСКА ПОЛЬЗОВАТЕЛЬСКИХ МОДУЛЕЙ
     async _loadUserModuleNames() {
         try {
-            const response = await fetch('/api/list-user-modules');
-            if (response.ok) {
-                const data = await response.json();
-                this._userModuleNames = data.modules || [];
-                //console.log(`📂 Loaded ${this._userModuleNames.length} user module names:`, this._userModuleNames);
-            } else {
-                this._userModuleNames = [];
-            }
+            this._userModuleNames = await moduleStore.list();
+            //console.log(`📂 Loaded ${this._userModuleNames.length} user module names:`, this._userModuleNames);
         } catch (error) {
             console.warn('Could not load user module names:', error);
             this._userModuleNames = [];

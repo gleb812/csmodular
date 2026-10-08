@@ -14,25 +14,8 @@ export class PatchLoader {
                 fx: []
             }
         };
-        this.flaskAvailable = false;
-
-        // Проверяем Flask при инициализации
-        this.checkFlaskServer();
     }
 
-    async checkFlaskServer() {
-        try {
-            const response = await fetch('http://localhost:5050/api/health', {
-                method: 'GET',
-                timeout: 2000 // 2 секунды таймаут
-            });
-            this.flaskAvailable = response.ok;
-            console.log(`Flask server: ${this.flaskAvailable ? '✅ available' : '❌ unavailable'}`);
-        } catch (error) {
-            this.flaskAvailable = false;
-            console.log('Flask server: ❌ not running');
-        }
-    }
 
     // === ЗАГРУЗКА ПАТЧЕЙ ===
     
@@ -690,85 +673,26 @@ export class PatchLoader {
         return colorMap[(colorName || 'red').toLowerCase()] || colorMap.red;
     }
     
-    // === ЗАГРУЗКА ФАЙЛОВ JSON / PCH2 (через FLASK) ===
+    // === ЗАГРУЗКА ФАЙЛОВ JSON ===
 
 
     async loadPatchFromFile() {
         return new Promise((resolve) => {
             const input = createFileInput();
-            
+
             triggerFileInput(input, async (file) => {
                 try {
-                    // Обработка файла...
-                    const isPch2 = file.name.toLowerCase().endsWith('.pch2');
-                    let patchData;
-                    
-                    if (isPch2) {
-                        patchData = await this.convertPch2File(file);
-                    } else {
-                        const text = await file.text();
-                        patchData = JSON.parse(text);
-                    }
-                    
+                    const text = await file.text();
+                    const patchData = JSON.parse(text);
+
                     await this.loadPatch(patchData);
                     resolve({ success: true, filename: file.name, data: patchData });
-                    
+
                 } catch (error) {
                     resolve({ success: false, error: error.message });
                 }
             });
         });
-    }
-
-    async convertPch2File(file) {
-        console.log(`Converting .pch2 file: ${file.name}`);
-        
-        // Проверяем доступность сервера
-        if (!this.flaskAvailable) {
-            throw new Error(
-                'Flask server не запущен. Запустите:\n' +
-                '1. Откройте терминал\n' +
-                '2. Перейдите в папку backend\n' +
-                '3. Выполните: python server.py\n\n' +
-                'Или используйте .json файлы напрямую'
-            );
-        }
-        
-        const formData = new FormData();
-        formData.append('file', file);
-        
-        const FLASK_API = 'http://localhost:5050/api';
-        
-        try {
-            const response = await fetch(`${FLASK_API}/convert-patch`, {
-                method: 'POST',
-                body: formData,
-                // Добавляем таймаут для больших файлов
-                signal: AbortSignal.timeout(45000) // 45 секунд
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            
-            const result = await response.json();
-            
-            if (!result.success) {
-                throw new Error(result.error || 'Conversion failed');
-            }
-            
-            console.log('✅ .pch2 successfully converted');
-            return result.data;
-            
-        } catch (error) {
-            if (error.name === 'TimeoutError') {
-                throw new Error('Конвертация заняла слишком много времени (>45 сек)');
-            } else if (error.name === 'AbortError') {
-                throw new Error('Запрос был отменен');
-            } else {
-                throw new Error(`Ошибка конвертации: ${error.message}`);
-            }
-        }
     }
 
 }

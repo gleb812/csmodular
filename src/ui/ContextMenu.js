@@ -1,4 +1,5 @@
 // src/ui/ContextMenu.js
+import { moduleStore } from '../api/index.js';
 import { GRID_UNITS } from '../constants.js'; 
 
 export class ContextMenu {
@@ -544,16 +545,15 @@ export class ContextMenu {
     // Вспомогательный метод для загрузки данных модуля
     async fetchModuleData(moduleName) {
         try {
-            const response = await fetch(`/api/load-module/${moduleName}`);
-            if (!response.ok) return null;
-            
-            const data = await response.json();
+            const data = await moduleStore.load(moduleName);
+            if (!data) return null;
+
             const code = data.code || '';
-            
+
             // Парсим displayName из кода
             const displayNameMatch = code.match(/displayName:\s*['"]([^'"]+)['"]/);
             const gridHeightMatch = code.match(/gridHeight:\s*(\d+)/);
-            
+
             return {
                 displayName: displayNameMatch ? displayNameMatch[1] : moduleName,
                 gridHeight: gridHeightMatch ? parseInt(gridHeightMatch[1]) : 2,
@@ -1334,54 +1334,40 @@ export class ContextMenu {
     async loadUserModules() {
         try {
             //console.log('📂 Loading user modules...');
-            
-            const response = await fetch('/api/list-user-modules');
-            if (!response.ok) {
-                console.warn('Failed to load user modules:', response.status);
-                return;
-            }
-            
-            const data = await response.json();
-            const modules = data.modules || [];
-            
+
+            const modules = await moduleStore.list();
             //console.log(`📦 Found ${modules.length} user modules:`, modules);
-            
+
             // Очищаем существующие пользовательские модули
             this.userModules = {
                 'My Modules': []
             };
-            
+
             if (modules.length === 0) {
                 this.userModules['My Modules'] = ['(No user modules)'];
-                // ⭐ ОБНОВЛЯЕМ UI
                 this.updateUserGroupsInLeftPanel();
                 return;
             }
-            
+
             // Добавляем каждый модуль
             for (const moduleName of modules) {
-                // Просто добавляем по имени (без fetchModuleData)
                 this.userModules['My Modules'].push(moduleName);
                 if (!this._userModuleMap) {
                     this._userModuleMap = {};
                 }
                 this._userModuleMap[moduleName] = moduleName;
-                //console.log(`✅ Added user module: ${moduleName}`);
             }
-            
+
             // Обновляем allModules
             Object.entries(this.userModules).forEach(([group, mods]) => {
                 mods.forEach(module => {
                     this.allModules[module] = group;
                 });
             });
-            
+
             this.updateUserGroupsInLeftPanel();
             this.updateMenuUI();
-            
-            //console.log('✅ User modules loaded:', this.userModules);
-            //console.log('✅ User module map:', this._userModuleMap);
-            
+
         } catch (error) {
             console.error('❌ Error loading user modules:', error);
             this.userModules = {

@@ -1,5 +1,5 @@
 // src/csound/CsoundGenerator.js
-
+import { moduleStore } from '../api/index.js';
 export class CsoundGenerator {
     constructor() {
         // Множество инклудов (typeId)
@@ -1373,17 +1373,12 @@ i3 0 [60*60*24*7]
     // ⭐ ЗАГРУЗКА ПОЛЬЗОВАТЕЛЬСКИХ МОДУЛЕЙ
     async loadUserModules() {
         try {
-            const response = await fetch('/api/list-user-modules');
-            if (!response.ok) return;
-            
-            const data = await response.json();
-            const modules = data.modules || [];
+            const modules = await moduleStore.list();
             
             for (const name of modules) {
-                const loadResponse = await fetch(`/api/load-module/${name}`);
-                if (!loadResponse.ok) continue;
+                const moduleData = await moduleStore.load(name);
+                if (!moduleData) continue;
                 
-                const moduleData = await loadResponse.json();
                 this.registerUserModule(name, {
                     jsCode: moduleData.code,
                     dspCode: moduleData.dsp_code,
