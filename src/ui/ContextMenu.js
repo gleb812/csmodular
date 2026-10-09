@@ -1380,6 +1380,10 @@ export class ContextMenu {
 
 
     show(mouseX = null, mouseY = null) {
+        // ⭐ Асинхронно обновляем список user-модулей
+        this.loadUserModules().then(() => {
+            this.updateUserGroupsInLeftPanel();
+        });
         if (this.isVisible) return;
 
         // Закрываем меню джека если открыто
@@ -1661,10 +1665,43 @@ export class ContextMenu {
         document.head.appendChild(style);
     }
 
-    // Новый метод
-    openModuleEditor() {
-        // Открываем редактор в новой вкладке
-        window.open('/editor/editor.html', '_blank');
+    async openModuleEditor() {
+        const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+
+        if (isTauri) {
+            try {
+                const { WebviewWindow } = await import('@tauri-apps/api/webviewWindow');
+
+                // Если окно редактора уже открыто — фокусируемся на нём
+                const existing = await WebviewWindow.getByLabel('editor');
+                if (existing) {
+                    await existing.setFocus();
+                    return;
+                }
+
+                const editorWindow = new WebviewWindow('editor', {
+                    url: '/editor/editor.html',
+                    title: 'CsModular — Module Editor',
+                    width: 1400,
+                    height: 900,
+                    resizable: true,
+                    center: true,
+                });
+
+                editorWindow.once('tauri://created', () => {
+                    console.log('✅ Editor window created');
+                });
+
+                editorWindow.once('tauri://error', (e) => {
+                    console.error('❌ Editor window error:', e);
+                });
+            } catch (error) {
+                console.error('Failed to open editor window:', error);
+            }
+        } else {
+            // В браузере — обычное новое окно
+            window.open('/editor/editor.html', '_blank');
+        }
     }
 
 

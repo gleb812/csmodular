@@ -1,123 +1,147 @@
-# Csound Modular Synthesizer
+```markdown
+# CsModular
 
-A web-based modular synthesizer built with Csound, Flask, and vanilla JavaScript + Canvas.
+A web-based modular synthesizer built with Csound and vanilla JavaScript + Canvas.
 
-This project is a next level of *pch2csd* project  https://github.com/gleb812/pch2csd
+This project is a next level of the *pch2csd* project: https://github.com/gleb812/pch2csd
 
 ## Features
 
 - Modular architecture with interchangeable audio modules
-- Real-time Csound synthesis engine
+- Real-time Csound synthesis engine (via `@csound/browser`)
 - Web-based UI with Canvas rendering
-- Flask API backend for communication
-- Easy to extend with custom modules
-- Web-based graphical editor for the user modules (localhost:3000/editor)
+- Runs as a **web app** (browser) or **desktop app** (Tauri: Windows / Linux / macOS)
+- Built-in graphical editor for user modules
+- User modules stored as plain files (in Tauri) — easy to back up, share, version
+
+## Architecture
+
+- **Frontend**: vanilla JS (ES modules), Vite
+- **Audio**: `@csound/browser` 6.18.7
+- **Desktop shell**: Tauri 2.x (Rust)
+- **Storage**:
+  - Web: IndexedDB / localStorage (planned)
+  - Desktop: filesystem via `@tauri-apps/plugin-fs`
+  - Abstraction: `src/api/moduleStore.js`
+- **Csound code**: UDO files in `public/csound/modules/*.txt`
+- **Scripts**: Python patchers in `scripts/` (params, mapping tables, NM2 cleanup)
 
 ## Requirements
 
-- Python 3.8+
-- Node.js 16+
-- Csound (installed system-wide)
-- macOS / Linux / Windows (with WSL)
+### For web development
+- Node.js 18+
+- Modern browser (Chrome / Firefox / Edge)
+
+### For desktop build (Tauri)
+- Rust (via https://rustup.rs)
+- Microsoft Visual Studio C++ Build Tools (Windows)
+- WebView2 Runtime (Windows 10; Windows 11 has it built-in)
 
 ## Installation
 
-### 1. Clone the repository
-
-```bash
+```
 git clone git@github.com:gleb812/csmodular.git
 cd csmodular
-```
-
-### 2. Set up Python virtual environment
-
-```bash
-python -m venv venv
-source venv/bin/activate      # macOS / Linux
-# or venv\Scripts\activate    # Windows
-```
-
-### 3. Install Python dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Install Node.js dependencies
-
-```bash
 npm install
 ```
 
-## Running the project
+## Running
 
-Start both backend and frontend:
+### Web (browser)
 
-```bash
-npm run dev:full
+```
+npm run dev
 ```
 
-Open your browser and navigate to: `http://localhost:3000`
+Open http://localhost:3000
 
-> **Note:** The Flask API runs on `http://localhost:5000` by default.
+### Desktop (Tauri)
+
+```
+npx tauri dev
+```
+
+Opens a native window with the same UI. User modules are stored in:
+
+- **Windows**: `C:\Users\<User>\Documents\CsModular\`
+- **macOS**: `~/Documents/CsModular/`
+- **Linux**: `~/Documents/CsModular/`
+
+### Build desktop executable
+
+```
+npx tauri build
+```
+
+Output:
+- `src-tauri/target/release/csmodular.exe` — standalone executable
+- `src-tauri/target/release/bundle/msi/*.msi` — MSI installer
+- `src-tauri/target/release/bundle/nsis/*.exe` — NSIS installer
 
 ## Project Structure
 
 ```
 .
-├── backend/           # Flask API + Csound integration
-├── src/              # Frontend JavaScript + Canvas UI
-├── csound/           # Csound orchestras and samples
-├── modules/          # Synthesizer modules
-├── user_modules/     # User modules 
-├── public/           # Static assets
-├── scripts/          # Utility scripts
-├── requirements.txt  # Python dependencies
-├── package.json      # Node.js dependencies
-└── README.md         # This file
+├── src/                 # Frontend JavaScript + Canvas UI
+│   ├── api/             # moduleStore — unified user-module interface
+│   ├── csound/          # CsoundEngine, CsoundGenerator, MappingTables
+│   ├── components/      # UI components (Knob, Slider, Input, Output, ...)
+│   ├── managers/        # EventManager, LayerManager, UIManager
+│   └── ui/              # ContextMenu, CSoundWindow, etc.
+├── editor/              # Module editor (separate HTML entry)
+├── public/              # Static assets (csound/, tables/)
+│   ├── csound/          # UDO files, mapping tables
+│   └── tables/          # Value maps
+├── src-tauri/           # Tauri (Rust) shell
+├── scripts/             # Python utility scripts
+├── _legacy_backend/     # Old Flask backend (kept for reference)
+└── README.md
 ```
 
 ## Adding custom modules
 
-1. Create a new module in the `modules/` directory
-2. Define its parameters and connections
-3. The UI will automatically detect and display it
+1. Create a new module via the built-in editor (`Space → Editor`)
+2. Or manually add JS description + UDO file:
+   - JS: `modules/user/<Name>.js`
+   - UDO: `csound/modules/user/<Name>.txt`
+3. The UI auto-detects and displays it
 
-See `TODO.txt` for current development priorities and module format specifications.
+See `TODO.md` for current development priorities and module format specifications.
+See `AI Context.md` for a quick system overview.
 
 ## Development
 
-### Running separately
+### Web only
 
-**Backend only:**
-```bash
-python backend/app.py
 ```
-
-**Frontend only:**
-```bash
 npm run dev
 ```
 
-### Environment variables
+Faster iteration, full DevTools. Use this for 90% of UI work.
 
-Create a `.env` file in the root directory (optional):
+### Desktop dev
 
 ```
-FLASK_DEBUG=true
-PORT=5000
+npx tauri dev
 ```
+
+Use to verify Tauri-specific functionality (fs, native windows).
+
+**Note:** Do not run `npm run dev` and `npx tauri dev` simultaneously — both use port 3000.
 
 ## Troubleshooting
 
-**Csound not found:**
-- Install Csound from: https://csound.com/download.html
-- On macOS: `brew install csound`
-- On Linux: `sudo apt-get install csound`
-- On Windows: Download installer from the official website
+**Csound WASM not loading:**
+- Check browser console for errors
+- Ensure `@csound/browser` is accessible (CDN or bundled)
 
-**Port already in use:**
-- Change the port in `vite.config.js` or `backend/app.py`
+**Tauri build fails:**
+- On Windows: install Microsoft C++ Build Tools
+- Install WebView2 Runtime (Windows 10)
+- Ensure `rustc --version` works
+
+**Port 3000 already in use:**
+- Kill the process, or change port in `vite.config.js`
 
 ## Contributing
 
@@ -131,7 +155,7 @@ Contributions are welcome! Feel free to:
 
 - Built with [Csound](https://csound.com/)
 - UI powered by Canvas API
-- Backend with [Flask](https://flask.palletsprojects.com/)
+- Desktop shell by [Tauri](https://tauri.app/)
 
 ## License
 
@@ -141,3 +165,5 @@ MIT License — see the [LICENSE](LICENSE) file for details.
 
 **Gleb Rogozinski** — [GitHub](https://github.com/gleb812)
 
+
+```
