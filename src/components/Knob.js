@@ -1,5 +1,6 @@
 // components/Knob.js
 import { BaseComponent } from './BaseComponent.js';
+import { getCurrentTheme } from '../theme/currentTheme.js';
 
 export class Knob extends BaseComponent {
     static SIZES = {
@@ -54,44 +55,76 @@ export class Knob extends BaseComponent {
     }
 
     draw(ctx) {
+        const theme = getCurrentTheme();
+        const lineColor = theme.getLineColor();
+        const isLcd = theme.isLcd;
+
         ctx.save();
         ctx.translate(this.x + this.width/2, this.y + this.height/2);
-        
-        // Фон ручки
+
+        // === ФОН РУЧКИ ===
         ctx.beginPath();
         ctx.arc(0, 0, this.width/2, 0, Math.PI * 2);
-        ctx.fillStyle = this.isDragging ? '#e0e0e0' : '#ffffff';
+
+        if (isLcd) {
+            // LCD: почти прозрачный фон
+            ctx.fillStyle = theme.getElementBgColor(this.isDragging ? 1.0 : 0.2);
+        } else {
+            // Classic: белый фон
+            ctx.fillStyle = this.isDragging ? '#e0e0e0' : '#ffffff';
+        }
         ctx.fill();
-        ctx.strokeStyle = this.isHovered ? '#0af' : '#666';
-        ctx.lineWidth = 2;
+
+        // === ОБВОДКА ===
+        if (isLcd) {
+            ctx.strokeStyle = lineColor;
+            ctx.lineWidth = this.isHovered ? 2.5 : 1.5;
+            theme.applyGlow(ctx);
+        } else {
+            ctx.strokeStyle = this.isHovered ? '#0af' : '#666';
+            ctx.lineWidth = 2;
+        }
         ctx.stroke();
-        
-        // Угол поворота на основе значения
-        const angle = -Math.PI * 0.75 + (this.value - this.min) / (this.max - this.min) * Math.PI * 1.5;
-        
-        // Метка ручки
+        theme.clearGlow(ctx);
+
+        // === УГОЛ ПОВОРОТА ===
+        const angle = -Math.PI * 0.75
+            + (this.value - this.min) / (this.max - this.min) * Math.PI * 1.5;
+
+        // === МЕТКА ===
         ctx.rotate(angle);
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.lineTo(0, -this.width/2);
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 2;
+
+        if (isLcd) {
+            ctx.strokeStyle = lineColor;
+            ctx.lineWidth = 2.5;
+            theme.applyGlow(ctx);
+        } else {
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+        }
         ctx.stroke();
-        
+        theme.clearGlow(ctx);
+
         ctx.restore();
-        
-        // Индикатор нуля
+
+        // === ИНДИКАТОР НУЛЯ ===
         if (this.showZeroIndicator) {
             this.drawZeroIndicator(ctx);
         }
-        
-        // Тултип с текущим значением
+
+        // === ТУЛТИП ===
         if (this.showTooltip || this.isDragging) {
             this.drawTooltip(ctx);
         }
     }
 
     drawZeroIndicator(ctx) {
+        const theme = getCurrentTheme();
+        const isLcd = theme.isLcd;
+
         ctx.save();
         const centerX = this.x + this.width/2;
         const centerY = this.y + this.height/2;
@@ -99,51 +132,72 @@ export class Knob extends BaseComponent {
         const triangleY = centerY - radius - 6;
         const triangleSize = 5;
         const isAtZero = Math.abs(this.value) < 1;
-        
-        ctx.fillStyle = isAtZero ? '#00FF00' : '#003000';
+
+        if (isLcd) {
+            ctx.fillStyle = isAtZero
+                ? theme.getActiveFillColor()
+                : theme.getAccentAlpha(0.15);
+            if (isAtZero) theme.applyGlow(ctx);
+        } else {
+            ctx.fillStyle = isAtZero ? '#00FF00' : '#003000';
+        }
+
         ctx.beginPath();
         ctx.moveTo(centerX, triangleY + triangleSize);
         ctx.lineTo(centerX - triangleSize, triangleY);
         ctx.lineTo(centerX + triangleSize, triangleY);
         ctx.closePath();
         ctx.fill();
+
+        theme.clearGlow(ctx);
         ctx.restore();
     }
 
     drawTooltip(ctx) {
-        const valueText = this.min >= 0 && this.max <= 1 ? 
-            this.value.toFixed(2) : Math.round(this.value).toString();
+        const theme = getCurrentTheme();
+        const isLcd = theme.isLcd;
+        const lineColor = theme.getLineColor();
+
+        const valueText = this.min >= 0 && this.max <= 1
+            ? this.value.toFixed(2)
+            : Math.round(this.value).toString();
         const padding = 10;
         const tooltipHeight = 25;
         const tooltipX = this.x + this.width / 2;
         const tooltipY = this.y - tooltipHeight - 10;
-        
+
         ctx.font = '14px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         const textWidth = ctx.measureText(valueText).width;
         const tooltipWidth = textWidth + padding * 2;
-        
-        ctx.fillStyle = 'rgba(30, 30, 30, 0.9)';
+
+        ctx.fillStyle = isLcd ? theme.getTooltipBgColor() : 'rgba(30, 30, 30, 0.9)';
+
         ctx.beginPath();
         if (ctx.roundRect) {
-            ctx.roundRect(
-                tooltipX - tooltipWidth / 2,
-                tooltipY,
-                tooltipWidth,
-                tooltipHeight,
-                5
-            );
+            ctx.roundRect(tooltipX - tooltipWidth / 2, tooltipY, tooltipWidth, tooltipHeight, 5);
         } else {
             ctx.rect(tooltipX - tooltipWidth / 2, tooltipY, tooltipWidth, tooltipHeight);
         }
         ctx.fill();
-        
-        ctx.strokeStyle = '#666';
+
+        // Обводка
+        if (isLcd) {
+            ctx.strokeStyle = lineColor;
+            ctx.lineWidth = 1;
+            theme.applyGlow(ctx);
+        } else {
+            ctx.strokeStyle = '#666';
+        }
         ctx.stroke();
-        
-        ctx.fillStyle = '#fff';
+        theme.clearGlow(ctx);
+
+        // Текст
+        ctx.fillStyle = isLcd ? theme.getTooltipTextColor() : '#fff';
+        if (isLcd) theme.applyGlow(ctx);
         ctx.fillText(valueText, tooltipX, tooltipY + tooltipHeight / 2);
+        theme.clearGlow(ctx);
     }
 
     // === УЛУЧШЕННАЯ ЛОГИКА ВРАЩЕНИЯ ===

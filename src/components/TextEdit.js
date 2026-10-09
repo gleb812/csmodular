@@ -1,5 +1,6 @@
 // components/TextEdit.js
 import { BaseComponent } from './BaseComponent.js';
+import { getCurrentTheme } from '../theme/currentTheme.js';
 
 export class TextEdit extends BaseComponent {
     constructor(x, y, width = 43, text = 'Ch 1', initialState = false) {
@@ -22,19 +23,28 @@ export class TextEdit extends BaseComponent {
     }
     
     draw(ctx) {
+        const theme = getCurrentTheme();
+        const isLcd = theme.isLcd;
+        const accent = theme.getAccentColor();
+
         // === ПРОСТОЙ ФОН ===
         const radius = 2;
-        
-        if (this.isActive) {
-            // Активный - синий
-            ctx.fillStyle = this.isPressed ? '#4f46e5' : 
-                           this.isHovered ? '#4338ca' : '#4f46e5';
+
+        if (isLcd) {
+            const intensity = this.isActive
+                ? (this.isPressed ? 0.35 : this.isHovered ? 0.28 : 0.2)
+                : (this.isPressed ? 0.15 : this.isHovered ? 0.1 : 0.03);
+            ctx.fillStyle = theme.getAccentAlpha(intensity);
         } else {
-            // Неактивный - серый
-            ctx.fillStyle = this.isPressed ? '#6b7280' : 
-                           this.isHovered ? '#4b5563' : '#374151';
+            if (this.isActive) {
+                ctx.fillStyle = this.isPressed ? '#4f46e5' :
+                               this.isHovered ? '#4338ca' : '#4f46e5';
+            } else {
+                ctx.fillStyle = this.isPressed ? '#6b7280' :
+                               this.isHovered ? '#4b5563' : '#374151';
+            }
         }
-        
+
         if (ctx.roundRect) {
             ctx.roundRect(this.x, this.y, this.width, 13, radius);
             ctx.fill();
@@ -42,13 +52,19 @@ export class TextEdit extends BaseComponent {
             this.drawRoundedRect(ctx, this.x, this.y, this.width, 13, radius);
             ctx.fill();
         }
-        
+
         // === РАМКА ===
-        ctx.strokeStyle = this.isActive ? 
-            (this.isHovered ? '#0af' : '#6366f1') : 
-            (this.isHovered ? '#9ca3af' : '#4b5563');
-        ctx.lineWidth = 1;
-        
+        if (isLcd) {
+            ctx.strokeStyle = accent;
+            ctx.lineWidth = theme.lineWidth(this.isActive ? 1.5 : 1);
+            theme.applyGlow(ctx);
+        } else {
+            ctx.strokeStyle = this.isActive ?
+                (this.isHovered ? '#0af' : '#6366f1') :
+                (this.isHovered ? '#9ca3af' : '#4b5563');
+            ctx.lineWidth = 1;
+        }
+
         if (ctx.roundRect) {
             ctx.roundRect(this.x, this.y, this.width, 13, radius);
             ctx.stroke();
@@ -56,53 +72,52 @@ export class TextEdit extends BaseComponent {
             this.drawRoundedRect(ctx, this.x, this.y, this.width, 13, radius);
             ctx.stroke();
         }
-        
+        theme.clearGlow(ctx);
+
         // === ТЕКСТ ===
-        ctx.fillStyle = this.isActive ? '#ffffff' : '#d1d5db';
         ctx.font = 'bold 11px Arial, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        
+
         // Обрезаем текст если не помещается
         let displayText = this.text;
-        const maxWidth = this.width - 10; // Отступы по 5px с каждой стороны
-        
-        // Простая проверка ширины текста
+        const maxWidth = this.width - 10;
         const textWidth = ctx.measureText(displayText).width;
         if (textWidth > maxWidth) {
-            // Если текст не помещается, добавляем "..."
             while (ctx.measureText(displayText + '...').width > maxWidth && displayText.length > 1) {
                 displayText = displayText.slice(0, -1);
             }
             displayText = displayText + '...';
         }
-        
-        ctx.fillText(
-            displayText,
-            this.x + this.width / 2,
-            this.y + 13 / 2
-        );
-        
-        // === ИНДИКАТОР РЕДАКТИРОВАНИЯ (мигающий курсор) ===
+
+        if (isLcd) {
+            ctx.fillStyle = accent;
+            theme.applyGlow(ctx);
+        } else {
+            ctx.fillStyle = this.isActive ? '#ffffff' : '#d1d5db';
+        }
+
+        ctx.fillText(displayText, this.x + this.width / 2, this.y + 13 / 2);
+        theme.clearGlow(ctx);
+
+        // === ИНДИКАТОР РЕДАКТИРОВАНИЯ ===
         if (this.isEditing) {
-            // Мигающий курсор (каждые 500мс)
             const shouldShowCursor = Math.floor(Date.now() / 500) % 2 === 0;
-            
+
             if (shouldShowCursor) {
-                // Вычисляем позицию конца текста для курсора
                 const textMetrics = ctx.measureText(displayText);
                 const cursorX = this.x + this.width / 2 + textMetrics.width / 2 + 1;
                 const cursorY1 = this.y + 4;
                 const cursorY2 = this.y + 13 - 4;
-                
-                ctx.strokeStyle = '#ffffff';
+
+                ctx.strokeStyle = isLcd ? accent : '#ffffff';
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(cursorX, cursorY1);
                 ctx.lineTo(cursorX, cursorY2);
                 ctx.stroke();
             }
-            
+
             // Подсветка фона в режиме редактирования
             ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
             if (ctx.roundRect) {
@@ -113,16 +128,17 @@ export class TextEdit extends BaseComponent {
                 ctx.fill();
             }
         }
-        
-        // === ИНДИКАТОР АКТИВНОСТИ (тонкая линия снизу) ===
+
+        // === ИНДИКАТОР АКТИВНОСТИ ===
         if (this.isActive) {
-            ctx.fillStyle = '#22c55e';
-            ctx.fillRect(
-                this.x + 3,
-                this.y + 13 - 2,
-                this.width - 6,
-                1
-            );
+            if (isLcd) {
+                ctx.fillStyle = accent;
+                theme.applyGlow(ctx);
+            } else {
+                ctx.fillStyle = '#22c55e';
+            }
+            ctx.fillRect(this.x + 3, this.y + 13 - 2, this.width - 6, 1);
+            theme.clearGlow(ctx);
         }
     }
     

@@ -1,5 +1,6 @@
 // main.js
 import { ModuleFactory } from './src/ModuleFactory.js';
+import { initCurrentTheme } from './src/theme/currentTheme.js';
 import { GRID_UNITS } from './constants.js';
 import { Panel } from './src/components/Panel.js';
 import { PatchManager } from './src/PatchManager.js';
@@ -13,6 +14,7 @@ import { ModuleContextMenu } from './src/ui/ModuleContextMenu.js';
 import { CSoundWindow } from './src/ui/CSoundWindow.js'; 
 import { CsoundGenerator } from './src/csound/CsoundGenerator.js';
 import { CsoundEngine } from './src/csound/CsoundEngine.js';
+import { DesignSettingsPanel } from './src/ui/DesignSettingsPanel.js';
 import { MappingTables } from './src/csound/MappingTables.js';
 import { debounce } from './src/utils/debounce.js';
 
@@ -96,6 +98,7 @@ class ModularSystem {
     this.jackContextMenu = new JackContextMenu(this);
     this.moduleContextMenu = new ModuleContextMenu(this);
     this.csoundWindow = new CSoundWindow(this);
+    this.designSettings = new DesignSettingsPanel(this);
 
     this.collisionHighlight = {
       show: false,
@@ -538,10 +541,20 @@ class ModularSystem {
         case 'Del':
           this.deleteSelectedModule();
           break;
-
         case 'Escape':
           this.deselectModule();
           break;
+        case 'd':
+        case 'D':
+        case 'в':
+        case 'В':  // русская раскладка
+            // Не открывать если в поле ввода
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                return;
+            }
+            e.preventDefault();
+            this.designSettings.toggle();
+            break;
       }
     });
   }
@@ -2271,10 +2284,13 @@ window.debugFactory = () => {
   });
 };
 
-// Добавьте в конце файла после создания modularSystem
-document.addEventListener('DOMContentLoaded', () => {
-  modularSystem = new ModularSystem();
-  window.modularSystem = modularSystem;
+document.addEventListener('DOMContentLoaded', async () => {
+    // ⭐ Инициализируем тему ДО создания системы
+    await initCurrentTheme();
+    console.log('✅ Theme initialized');
+
+    modularSystem = new ModularSystem();
+    window.modularSystem = modularSystem;
 
   // Добавляем команды для дебага в консоли
   window.debugSystem = () => {

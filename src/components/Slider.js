@@ -1,5 +1,6 @@
 // components/Slider.js
 import { BaseComponent } from './BaseComponent.js';
+import { getCurrentTheme } from '../theme/currentTheme.js';
 
 export class Slider extends BaseComponent {
     constructor(x, y, width = 12, height = 80, min = 0, max = 100, value = 50) {
@@ -33,56 +34,99 @@ export class Slider extends BaseComponent {
         this.tooltipTimeout = null;
     }
     
-    // === ПРОСТОЙ DRAW ===
     draw(ctx) {
-        // 1. Просто рисуем прямоугольник (трек)
-        ctx.fillStyle = this.isHovered ? '#5a6b7e' : this.trackColor;
+        const theme = getCurrentTheme();
+        const isLcd = theme.isLcd;
+        const lineColor = theme.getLineColor();
+
+        ctx.save();
+
+        // === ТРЕК ===
+        if (isLcd) {
+            ctx.fillStyle = theme.getElementBgColor(this.isHovered ? 1.0 : 0.2);
+        } else {
+            ctx.fillStyle = this.isHovered ? '#5a6b7e' : this.trackColor;
+        }
         ctx.fillRect(this.x, this.y, this.width, this.height);
-        
-        // 2. Обводка
-        ctx.strokeStyle = this.trackBorderColor;
-        ctx.lineWidth = 1;
+
+        // === ОБВОДКА ТРЕКА ===
+        if (isLcd) {
+            ctx.strokeStyle = lineColor;
+            ctx.lineWidth = 1 * theme.getLineWeight();
+            theme.applyGlow(ctx);
+        } else {
+            ctx.strokeStyle = this.trackBorderColor;
+            ctx.lineWidth = 1;
+        }
         ctx.strokeRect(this.x, this.y, this.width, this.height);
-        
-        // 3. Позиция ползунка (просто закрашенная часть)
+        theme.clearGlow(ctx);
+
+        // === ПОЛЗУНОК ===
         const normalizedValue = (this.value - this.min) / (this.max - this.min);
         const thumbY = this.y + (1 - normalizedValue) * (this.height - this.thumbHeight);
-        
-        // 4. Ползунок - просто темный прямоугольник
-        ctx.fillStyle = this.isDragging ? '#2d3748' : this.thumbColor;
+
+        if (isLcd) {
+            ctx.fillStyle = theme.getActiveFillColor();
+            theme.applyGlow(ctx);
+        } else {
+            ctx.fillStyle = this.isDragging ? '#2d3748' : this.thumbColor;
+        }
         ctx.fillRect(this.x + 1, thumbY, this.width - 2, this.thumbHeight);
-        
-        // 5. Тултип если нужно
+        theme.clearGlow(ctx);
+
+        // === ТУЛТИП ===
         if (this.showTooltip || this.isDragging) {
             this.drawSimpleTooltip(ctx, thumbY);
         }
+
+        ctx.restore();
     }
     
     drawSimpleTooltip(ctx, thumbY) {
+        const theme = getCurrentTheme();
+        const isLcd = theme.isLcd;
+        const lineColor = theme.getLineColor();
+
         const valueText = Math.round(this.value).toString();
-        
+
         ctx.font = '12px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         const textWidth = ctx.measureText(valueText).width;
-        
+
         const tooltipX = this.x + this.width / 2;
         const tooltipY = thumbY - 15;
         const tooltipWidth = textWidth + 10;
         const tooltipHeight = 20;
-        
+
         // Фон
-        ctx.fillStyle = 'rgba(30, 30, 30, 0.9)';
+        ctx.fillStyle = isLcd ? theme.getTooltipBgColor() : 'rgba(30, 30, 30, 0.9)';
         ctx.fillRect(
             tooltipX - tooltipWidth / 2,
             tooltipY,
             tooltipWidth,
             tooltipHeight
         );
-        
+
+        // Обводка (только LCD)
+        if (isLcd) {
+            ctx.strokeStyle = lineColor;
+            ctx.lineWidth = 1;
+            theme.applyGlow(ctx);
+            ctx.strokeRect(
+                tooltipX - tooltipWidth / 2,
+                tooltipY,
+                tooltipWidth,
+                tooltipHeight
+            );
+            theme.clearGlow(ctx);
+        }
+
         // Текст
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = isLcd ? lineColor : '#fff';
+        if (isLcd) theme.applyGlow(ctx);
         ctx.fillText(valueText, tooltipX, tooltipY + tooltipHeight / 2);
+        theme.clearGlow(ctx);
     }
 
     static getPropertySchema() {

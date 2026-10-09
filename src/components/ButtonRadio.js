@@ -1,5 +1,5 @@
 import { BaseComponent } from './BaseComponent.js';
-
+import { getCurrentTheme } from '../theme/currentTheme.js';
 export class ButtonRadio extends BaseComponent {
     constructor(x, y, buttonCount = 4, buttonWidth = 40, text = 'One,Two,Three,Four', orientation = 'horizontal') {
         const height = 14;
@@ -58,98 +58,105 @@ export class ButtonRadio extends BaseComponent {
     }
     
     draw(ctx) {
-        ctx.save(); // ← ВАЖНО: изолируем весь компонент
-        
-        // Рисуем общий фон
-        ctx.fillStyle = '#1a202c';
+        const theme = getCurrentTheme();
+        const isLcd = theme.isLcd;
+        const accent = theme.getAccentColor();
+
+        ctx.save();
+
+        // === ОБЩИЙ ФОН ===
+        if (isLcd) {
+            ctx.fillStyle = theme.getAccentAlpha(0.03);
+        } else {
+            ctx.fillStyle = '#1a202c';
+        }
         ctx.fillRect(this.x, this.y, this.width, this.height);
-        
-        // Рисуем каждую кнопку отдельно
+
+        // === КНОПКИ ===
         for (let i = 0; i < this.buttonCount; i++) {
-            ctx.save(); // ← ИЗОЛИРУЕМ КАЖДУЮ КНОПКУ!
-            
+            ctx.save();
+
             let buttonX, buttonY, buttonCenterX, buttonCenterY;
-            
-            // Вычисляем координаты в зависимости от ориентации
             if (this.orientation === 'horizontal') {
                 buttonX = this.x + i * this.buttonWidth;
                 buttonY = this.y;
-                buttonCenterX = buttonX + this.buttonWidth / 2;
-                buttonCenterY = buttonY + this.buttonHeight / 2;
             } else {
-                // Вертикальная ориентация
                 buttonX = this.x;
                 buttonY = this.y + i * this.buttonHeight;
-                buttonCenterX = buttonX + this.buttonWidth / 2;
-                buttonCenterY = buttonY + this.buttonHeight / 2;
             }
-            
-            // Анимация нажатия
-            let scale = 1;
-            let offsetY = 0;
+            buttonCenterX = buttonX + this.buttonWidth / 2;
+            buttonCenterY = buttonY + this.buttonHeight / 2;
+
+            // Анимация
+            let scale = 1, offsetY = 0;
             if (this.buttonPressedStates[i]) {
                 const progress = this.animationProgress[i] / this.animationDuration;
                 scale = 1 - 0.05 * Math.sin(progress * Math.PI);
                 offsetY = 0.5 * Math.sin(progress * Math.PI);
             }
-            
+
             const drawX = buttonCenterX - (this.buttonWidth * scale) / 2;
             const drawY = buttonCenterY - (this.buttonHeight * scale) / 2 + offsetY;
             const drawWidth = this.buttonWidth * scale;
             const drawHeight = this.buttonHeight * scale;
-            
-            // ПРОСТОЙ ФОН (без градиента!)
-            if (i === this.selectedIndex) {
-                // Выбранная кнопка
-                if (this.buttonPressedStates[i]) {
-                    ctx.fillStyle = '#3730a3'; // Нажатая
-                } else if (this.buttonHoveredStates[i]) {
-                    ctx.fillStyle = '#2d3748'; // Hover
+
+            // === ФОН КНОПКИ ===
+            if (isLcd) {
+                const isSelected = i === this.selectedIndex;
+                const isHover = this.buttonHoveredStates[i];
+                const isPressed = this.buttonPressedStates[i];
+
+                // Selected → ярче, unselected → очень слабо
+                let intensity;
+                if (isSelected) {
+                    intensity = isPressed ? 0.4 : isHover ? 0.3 : 0.2;
                 } else {
-                    ctx.fillStyle = '#4f46e5'; // Обычная выбраная
+                    intensity = isPressed ? 0.15 : isHover ? 0.1 : 0.03;
                 }
+                ctx.fillStyle = theme.getAccentAlpha(intensity);
             } else {
-                // Невыбранная кнопка
-                if (this.buttonPressedStates[i]) {
-                    ctx.fillStyle = '#2d3748'; // Нажатая
-                } else if (this.buttonHoveredStates[i]) {
-                    ctx.fillStyle = '#1a202c'; // Hover
+                // Classic (как было)
+                if (i === this.selectedIndex) {
+                    if (this.buttonPressedStates[i])        ctx.fillStyle = '#3730a3';
+                    else if (this.buttonHoveredStates[i])   ctx.fillStyle = '#2d3748';
+                    else                                    ctx.fillStyle = '#4f46e5';
                 } else {
-                    ctx.fillStyle = '#2d3748'; // Обычная
+                    if (this.buttonPressedStates[i])        ctx.fillStyle = '#2d3748';
+                    else if (this.buttonHoveredStates[i])   ctx.fillStyle = '#1a202c';
+                    else                                    ctx.fillStyle = '#2d3748';
                 }
             }
-            
-            // Обрабатываем скругления для первой и последней кнопки
+
+            // Скругления
             const radius = 2;
-            let topLeftRadius = 0, topRightRadius = 0, bottomRightRadius = 0, bottomLeftRadius = 0;
-            
+            let tl = 0, tr = 0, br = 0, bl = 0;
             if (this.orientation === 'horizontal') {
-                if (i === 0) topLeftRadius = bottomLeftRadius = radius; // Первая кнопка
-                if (i === this.buttonCount - 1) topRightRadius = bottomRightRadius = radius; // Последняя кнопка
+                if (i === 0) tl = bl = radius;
+                if (i === this.buttonCount - 1) tr = br = radius;
             } else {
-                if (i === 0) topLeftRadius = topRightRadius = radius; // Первая кнопка (верхняя)
-                if (i === this.buttonCount - 1) bottomLeftRadius = bottomRightRadius = radius; // Последняя кнопка (нижняя)
+                if (i === 0) tl = tr = radius;
+                if (i === this.buttonCount - 1) bl = br = radius;
             }
-            
-            // Рисуем фон кнопки
-            this.drawRoundedRect(
-                ctx, 
-                drawX, drawY, drawWidth, drawHeight, 
-                topLeftRadius, topRightRadius, bottomRightRadius, bottomLeftRadius
-            );
+
+            this.drawRoundedRect(ctx, drawX, drawY, drawWidth, drawHeight, tl, tr, br, bl);
             ctx.fill();
-            
-            // Рамка кнопки
-            ctx.strokeStyle = this.buttonHoveredStates[i] ? '#0af' : '#666';
-            ctx.lineWidth = 1;
-            this.drawRoundedRect(
-                ctx, 
-                drawX, drawY, drawWidth, drawHeight, 
-                topLeftRadius, topRightRadius, bottomRightRadius, bottomLeftRadius
-            );
+
+            // === РАМКА КНОПКИ ===
+            if (isLcd) {
+                ctx.strokeStyle = accent;
+                ctx.lineWidth = theme.lineWidth(
+                    i === this.selectedIndex ? 1.5 : 1
+                );
+                theme.applyGlow(ctx);
+            } else {
+                ctx.strokeStyle = this.buttonHoveredStates[i] ? '#0af' : '#666';
+                ctx.lineWidth = 1;
+            }
+            this.drawRoundedRect(ctx, drawX, drawY, drawWidth, drawHeight, tl, tr, br, bl);
             ctx.stroke();
-            
-            // Разделительная линия между кнопками
+            theme.clearGlow(ctx);
+
+            // === РАЗДЕЛИТЕЛЬ ===
             if (i < this.buttonCount - 1) {
                 ctx.beginPath();
                 if (this.orientation === 'horizontal') {
@@ -159,29 +166,30 @@ export class ButtonRadio extends BaseComponent {
                     ctx.moveTo(buttonX, buttonY + this.buttonHeight);
                     ctx.lineTo(buttonX + this.buttonWidth, buttonY + this.buttonHeight);
                 }
-                ctx.strokeStyle = '#666';
+                ctx.strokeStyle = isLcd ? theme.getAccentAlpha(0.4) : '#666';
                 ctx.stroke();
             }
-            
-            // Текст на кнопке
-            ctx.fillStyle = '#fff';
+
+            // === ТЕКСТ ===
+            if (isLcd) {
+                ctx.fillStyle = accent;
+                if (i === this.selectedIndex) theme.applyGlow(ctx);
+            } else {
+                ctx.fillStyle = '#fff';
+            }
             ctx.font = 'bold 8px Arial, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(
-                this.labels[i],
-                buttonCenterX,
-                buttonCenterY + offsetY
-            );
-            
-            ctx.restore(); // ← ВОССТАНАВЛИВАЕМ КОНТЕКСТ ДЛЯ СЛЕДУЮЩЕЙ КНОПКИ
+            ctx.fillText(this.labels[i], buttonCenterX, buttonCenterY + offsetY);
+            theme.clearGlow(ctx);
+
+            ctx.restore();
         }
-        
-        // Индикатор выбранной кнопки (полоска) - рисуем ПОСЛЕ всех кнопок
-        ctx.save(); // ← Изолируем индикатор
-        
+
+        // === ИНДИКАТОР ВЫБРАННОЙ КНОПКИ ===
+        ctx.save();
+
         let selectedX, selectedY, indicatorWidth, indicatorHeight;
-        
         if (this.orientation === 'horizontal') {
             selectedX = this.x + this.selectedIndex * this.buttonWidth;
             selectedY = this.y + this.buttonHeight - 2;
@@ -193,17 +201,18 @@ export class ButtonRadio extends BaseComponent {
             indicatorWidth = 2;
             indicatorHeight = this.buttonHeight;
         }
-        
-        ctx.fillStyle = '#0af';
-        ctx.fillRect(
-            selectedX,
-            selectedY,
-            indicatorWidth,
-            indicatorHeight
-        );
-        
-        ctx.restore(); // ← Восстанавливаем для индикатора
-        ctx.restore(); // ← Восстанавливаем для всего компонента
+
+        if (isLcd) {
+            ctx.fillStyle = accent;
+            theme.applyGlow(ctx);
+        } else {
+            ctx.fillStyle = '#0af';
+        }
+        ctx.fillRect(selectedX, selectedY, indicatorWidth, indicatorHeight);
+        theme.clearGlow(ctx);
+
+        ctx.restore();
+        ctx.restore();
     }
     drawRoundedRect(ctx, x, y, width, height, tl, tr, br, bl) {
         ctx.beginPath();

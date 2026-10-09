@@ -1,4 +1,5 @@
 import { BaseComponent } from './BaseComponent.js';
+import { getCurrentTheme } from '../theme/currentTheme.js';
 
 export class LevelShift extends BaseComponent {
     static SIZES = {
@@ -52,160 +53,159 @@ export class LevelShift extends BaseComponent {
     }
     
     draw(ctx) {
+        const theme = getCurrentTheme();
+        const isLcd = theme.isLcd;
+        const accent = theme.getAccentColor();
+
         ctx.save();
-        
+
         // Анимация нажатия
         let scale = 1;
         if (this.isPressed) {
             const progress = this.animationProgress / this.animationDuration;
             scale = 1 - 0.05 * Math.sin(progress * Math.PI);
         }
-        
+
         const centerX = this.x + this.width / 2;
         const centerY = this.y + this.height / 2;
         const drawX = centerX - (this.width * scale) / 2;
         const drawY = centerY - (this.height * scale) / 2;
         const drawWidth = this.width * scale;
         const drawHeight = this.height * scale;
-        
-        // Основной фон с градиентом
-        const bgGradient = ctx.createLinearGradient(
-            drawX, drawY,
-            drawX, drawY + drawHeight
-        );
-        
-        if (this.isPressed) {
-            bgGradient.addColorStop(0, '#777');
-            bgGradient.addColorStop(1, '#555');
-        } else if (this.isHovered) {
-            bgGradient.addColorStop(0, '#999');
-            bgGradient.addColorStop(1, '#777');
-        } else {
-            bgGradient.addColorStop(0, '#999');
-            bgGradient.addColorStop(1, '#666');
-        }
-        
-        // Фон с скруглёнными углами
-        ctx.fillStyle = bgGradient;
-        const radius = 3;
-        if (ctx.roundRect) {
-            ctx.roundRect(drawX, drawY, drawWidth, drawHeight, radius);
-            ctx.fill();
-        } else {
-            this.drawRoundedRect(ctx, drawX, drawY, drawWidth, drawHeight, radius);
-            ctx.fill();
-        }
-        
-        // Разделительная линия посередине
-        ctx.strokeStyle = '#444';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(drawX, drawY + drawHeight/2);
-        ctx.lineTo(drawX + drawWidth, drawY + drawHeight/2);
-        ctx.stroke();
-        
-        // Рисуем активную половину
-        this.drawActiveHalf(ctx, drawX, drawY, drawWidth, drawHeight);
-        
-        // Рисуем большой треугольник
-        this.drawTriangle(ctx, drawX, drawY, drawWidth, drawHeight);
-        
-        // Рамка
-        ctx.strokeStyle = this.isHovered ? '#0af' : '#666';
-        ctx.lineWidth = 1;
-        
-        if (ctx.roundRect) {
-            ctx.roundRect(drawX, drawY, drawWidth, drawHeight, radius);
-            ctx.stroke();
-        } else {
-            this.drawRoundedRect(ctx, drawX, drawY, drawWidth, drawHeight, radius);
-            ctx.stroke();
-        }
-        
-        // Индикатор положения (маленькая точка в углу)
-        // ctx.fillStyle = '#22c55e';
-        // ctx.beginPath();
-        // const dotX = drawX + (this.position < 2 ? 4 : drawWidth - 4);
-        // const dotY = drawY + (this.position % 2 === 0 ? 4 : drawHeight - 4);
-        // ctx.arc(dotX, dotY, 1.5, 0, Math.PI * 2);
-        // ctx.fill();
-        
-        ctx.restore();
-        
-        // // Тултип
-        // if (this.showTooltip) {
-        //     this.drawTooltip(ctx);
-        // }
-    }
-    
-    drawActiveHalf(ctx, x, y, width, height) {
-        // Яркий теплый зеленый цвет с градиентом
-        const activeGradient = ctx.createLinearGradient(
-            x, y,
-            x, y + height/2
-        );
-        
-        if (this.isPressed) {
-            activeGradient.addColorStop(0, '#16a34a');
-            activeGradient.addColorStop(1, '#15803d');
-        } else {
-            activeGradient.addColorStop(0, '#22c55e');
-            activeGradient.addColorStop(1, '#16a34a');
-        }
-        
-        if (this.position === 0 || this.position === 1) {
-            // Верхняя половина активна
-            ctx.fillStyle = activeGradient;
-            ctx.fillRect(x, y, width, height/2);
-        } else {
-            // Нижняя половина активна
-            const bottomGradient = ctx.createLinearGradient(
-                x, y + height/2,
-                x, y + height
-            );
-            
-            if (this.isPressed) {
-                bottomGradient.addColorStop(0, '#16a34a');
-                bottomGradient.addColorStop(1, '#15803d');
-            } else {
-                bottomGradient.addColorStop(0, '#22c55e');
-                bottomGradient.addColorStop(1, '#16a34a');
-            }
-            
-            ctx.fillStyle = bottomGradient;
-            ctx.fillRect(x, y + height/2, width, height/2);
-        }
-    }
-    
-    drawTriangle(ctx, x, y, width, height) {
 
-        // Черный цвет
-        ctx.fillStyle = '#000000';
+        const radius = 3;
+
+        // === ФОН ===
+        if (isLcd) {
+            // LCD: прозрачный фон акцентом
+            const intensity = this.isPressed ? 0.2 : this.isHovered ? 0.12 : 0.05;
+            ctx.fillStyle = theme.getAccentAlpha(intensity);
+        } else {
+            // Classic: серый градиент
+            const bgGradient = ctx.createLinearGradient(drawX, drawY, drawX, drawY + drawHeight);
+            if (this.isPressed) {
+                bgGradient.addColorStop(0, '#777');
+                bgGradient.addColorStop(1, '#555');
+            } else if (this.isHovered) {
+                bgGradient.addColorStop(0, '#999');
+                bgGradient.addColorStop(1, '#777');
+            } else {
+                bgGradient.addColorStop(0, '#999');
+                bgGradient.addColorStop(1, '#666');
+            }
+            ctx.fillStyle = bgGradient;
+        }
+
+        this.drawRoundedRect(ctx, drawX, drawY, drawWidth, drawHeight, radius);
+        ctx.fill();
+
+        // === РАЗДЕЛИТЕЛЬНАЯ ЛИНИЯ ===
+        ctx.strokeStyle = isLcd ? theme.getAccentAlpha(0.4) : '#444';
+        ctx.lineWidth = 1;
         ctx.beginPath();
-        
+        ctx.moveTo(drawX, drawY + drawHeight / 2);
+        ctx.lineTo(drawX + drawWidth, drawY + drawHeight / 2);
+        ctx.stroke();
+
+        // === АКТИВНАЯ ПОЛОВИНА ===
+        this.drawActiveHalf(ctx, drawX, drawY, drawWidth, drawHeight, theme);
+
+        // === ТРЕУГОЛЬНИК ===
+        this.drawTriangle(ctx, drawX, drawY, drawWidth, drawHeight, theme);
+
+        // === РАМКА ===
+        if (isLcd) {
+            ctx.strokeStyle = accent;
+            ctx.lineWidth = theme.lineWidth(this.isHovered ? 1.5 : 1);
+            theme.applyGlow(ctx);
+        } else {
+            ctx.strokeStyle = this.isHovered ? '#0af' : '#666';
+            ctx.lineWidth = 1;
+        }
+        this.drawRoundedRect(ctx, drawX, drawY, drawWidth, drawHeight, radius);
+        ctx.stroke();
+        theme.clearGlow(ctx);
+
+        ctx.restore();
+    }
+    
+    drawActiveHalf(ctx, x, y, width, height, theme) {
+        const isLcd = theme.isLcd;
+
+        if (isLcd) {
+            // LCD: более плотная заливка акцентом
+            const intensity = this.isPressed ? 0.35 : 0.25;
+            ctx.fillStyle = theme.getAccentAlpha(intensity);
+            theme.applyGlow(ctx);
+        } else {
+            // Classic: зелёный градиент
+            const activeGradient = ctx.createLinearGradient(x, y, x, y + height / 2);
+            if (this.isPressed) {
+                activeGradient.addColorStop(0, '#16a34a');
+                activeGradient.addColorStop(1, '#15803d');
+            } else {
+                activeGradient.addColorStop(0, '#22c55e');
+                activeGradient.addColorStop(1, '#16a34a');
+            }
+            ctx.fillStyle = activeGradient;
+        }
+
+        if (this.position === 0 || this.position === 1) {
+            ctx.fillRect(x, y, width, height / 2);
+        } else {
+            // Нижняя половина
+            if (isLcd) {
+                // Один цвет — просто заливаем
+                ctx.fillRect(x, y + height / 2, width, height / 2);
+            } else {
+                // Classic: нижний градиент
+                const bottomGradient = ctx.createLinearGradient(x, y + height / 2, x, y + height);
+                if (this.isPressed) {
+                    bottomGradient.addColorStop(0, '#16a34a');
+                    bottomGradient.addColorStop(1, '#15803d');
+                } else {
+                    bottomGradient.addColorStop(0, '#22c55e');
+                    bottomGradient.addColorStop(1, '#16a34a');
+                }
+                ctx.fillStyle = bottomGradient;
+                ctx.fillRect(x, y + height / 2, width, height / 2);
+            }
+        }
+
+        theme.clearGlow(ctx);
+    }
+    
+    drawTriangle(ctx, x, y, width, height, theme) {
+        const isLcd = theme.isLcd;
+
+        if (isLcd) {
+            ctx.fillStyle = theme.getAccentColor();
+            theme.applyGlow(ctx);
+        } else {
+            ctx.fillStyle = '#000000';
+        }
+
+        ctx.beginPath();
+
         const centerX = x + width / 2;
         const triWidth = width * 0.6;
         const triHeight = height * 0.3;
-        
-        // Определяем направление и позицию
         const isUp = (this.position === 0 || this.position === 2);
         const triY = y + (this.position < 2 ? height * 0.25 : height * 0.75);
-        
+
         if (isUp) {
-            // Вверх
             ctx.moveTo(centerX, triY - triHeight / 2);
             ctx.lineTo(centerX + triWidth / 2, triY + triHeight / 2);
             ctx.lineTo(centerX - triWidth / 2, triY + triHeight / 2);
         } else {
-            // Вниз
             ctx.moveTo(centerX, triY + triHeight / 2);
             ctx.lineTo(centerX + triWidth / 2, triY - triHeight / 2);
             ctx.lineTo(centerX - triWidth / 2, triY - triHeight / 2);
         }
-        
+
         ctx.closePath();
         ctx.fill();
-
+        theme.clearGlow(ctx);
     }
     
     drawRoundedRect(ctx, x, y, width, height, radius) {

@@ -1,5 +1,6 @@
 // components/ButtonFlat.js
 import { BaseComponent } from './BaseComponent.js';
+import { getCurrentTheme } from '../theme/currentTheme.js';
 
 export class ButtonFlat extends BaseComponent {
     constructor(x, y, width = 80, height = 30, positionsString = 'Off,On') {
@@ -20,44 +21,74 @@ export class ButtonFlat extends BaseComponent {
     }
     
     draw(ctx) {
-        // ПРОСТОЙ фон - без градиентов, без анимаций
-        if (this.isPressed) {
-            ctx.fillStyle = '#4f46e5'; // Нажатый - фиолетовый
-        } else if (this.isHovered) {
-            ctx.fillStyle = '#4a5568'; // Hover - серый
+        const theme = getCurrentTheme();
+        const isLcd = theme.isLcd;
+
+        // === ФОН ===
+        if (isLcd) {
+            if (this.isPressed) {
+                ctx.fillStyle = theme.getAccentAlpha(0.25);
+            } else if (this.isHovered) {
+                ctx.fillStyle = theme.getAccentAlpha(0.15);
+            } else {
+                ctx.fillStyle = theme.getAccentAlpha(0.05);
+            }
         } else {
-            ctx.fillStyle = '#2d3748'; // Обычный - темно-серый
+            if (this.isPressed) {
+                ctx.fillStyle = '#4f46e5';
+            } else if (this.isHovered) {
+                ctx.fillStyle = '#4a5568';
+            } else {
+                ctx.fillStyle = '#2d3748';
+            }
         }
-        
-        // ПРОСТОЙ прямоугольник
         ctx.fillRect(this.x, this.y, this.width, this.height);
-        
-        // ПРОСТАЯ рамка
-        ctx.strokeStyle = '#666';
-        ctx.lineWidth = 1;
+
+        // === РАМКА ===
+        if (isLcd) {
+            ctx.strokeStyle = theme.getAccentColor();
+            ctx.lineWidth = theme.lineWidth(1);
+            theme.applyGlow(ctx);
+        } else {
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 1;
+        }
         ctx.strokeRect(this.x, this.y, this.width, this.height);
-        
-        // ПРОСТОЙ текст
-        ctx.fillStyle = '#fff';
+        theme.clearGlow(ctx);
+
+        // === ТЕКСТ ===
+        if (isLcd) {
+            ctx.fillStyle = theme.getTextColor();
+            theme.applyGlow(ctx);
+        } else {
+            ctx.fillStyle = '#fff';
+        }
         ctx.font = 'bold 8px Arial, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(
-            this.currentLabel, 
-            this.x + this.width / 2, 
+            this.currentLabel,
+            this.x + this.width / 2,
             this.y + this.height / 2
         );
-        
-        // Индикатор позиции (только если есть выбор)
+        theme.clearGlow(ctx);
+
+        // === ИНДИКАТОР ПОЗИЦИИ ===
         if (this.positions.length > 1) {
             const segmentWidth = this.width / this.positions.length;
-            ctx.fillStyle = this.isHovered ? '#0af' : '#4f46e5';
+            if (isLcd) {
+                ctx.fillStyle = theme.getActiveFillColor();
+                theme.applyGlow(ctx);
+            } else {
+                ctx.fillStyle = this.isHovered ? '#0af' : '#4f46e5';
+            }
             ctx.fillRect(
                 this.x + this.currentIndex * segmentWidth,
                 this.y + this.height - 3,
                 segmentWidth,
                 2
             );
+            theme.clearGlow(ctx);
         }
     }
     

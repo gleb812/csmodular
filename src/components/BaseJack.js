@@ -20,7 +20,7 @@ export class BaseJack extends BaseComponent {
                   `${this.direction}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         this.connected = false;
         this.cables = [];
-        this.centerColor = '#000000';
+        this.centerColor = null;  // было '#000000'
         
         this._parentModule = null;
         this.typeColors = {
@@ -130,7 +130,7 @@ export class BaseJack extends BaseComponent {
         }
         this.connected = this.cables.length > 0;
         if (!this.connected) {
-            this.centerColor = '#000000'; // Возвращаем черный цвет
+            this.centerColor = null;  // было '#000000'
         }
     }
     
@@ -138,6 +138,6 @@ export class BaseJack extends BaseComponent {
     clearCables() {
         this.cables = [];
         this.connected = false;
-        this.centerColor = '#000000';
+        this.centerColor = null;  // было '#000000'
     }
 }

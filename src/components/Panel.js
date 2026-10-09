@@ -1,4 +1,5 @@
 // Panel.js
+import { getCurrentTheme } from '../theme/currentTheme.js';
 export const GRID_UNITS = {
   X: 260,
   Y: 15,
@@ -86,34 +87,58 @@ export class Panel {
     this.setDirty(true);
   }
 
-  // Panel.js - измени метод draw (компоненты уже отсортированы)
   draw(ctx) {
-    // ===== ДОБАВИТЬ =====
     if (!this.dirty) return;
     if (this.pixelX === null || this.pixelY === null) return;
+
+    const theme = getCurrentTheme();
+    const isLcd = theme.isLcd;
 
     ctx.save();
     ctx.globalAlpha = this.opacity;
 
-    const bgColor = this.customColor || this.defaultColor || '#606060';
-    //console.log(`🎨 Drawing panel ${this.title} with color: ${bgColor}`); // ← отладка!
-    ctx.fillStyle = bgColor;
+    // === ФОН ПАНЕЛИ ===
+    if (isLcd) {
+        ctx.fillStyle = theme.getSurfaceColor();
+    } else {
+      // Classic: плотный фон
+      const bgColor = this.customColor || this.defaultColor || '#606060';
+      ctx.fillStyle = bgColor;
+    }
     ctx.fillRect(this.pixelX, this.pixelY, this.width, this.height);
-    // рамка
-    ctx.strokeStyle = '#444';
-    ctx.lineWidth = 2;
+
+    // === РАМКА ===
+    if (isLcd) {
+      ctx.strokeStyle = theme.getLineColor();
+      ctx.lineWidth = theme.lineWidth(1.5);
+      theme.applyGlow(ctx);
+    } else {
+      ctx.strokeStyle = '#444';
+      ctx.lineWidth = 2;
+    }
     ctx.strokeRect(this.pixelX, this.pixelY, this.width, this.height);
+    theme.clearGlow(ctx);
 
-    // === ТОЛЬКО БЕЛЫЙ ТЕКСТ (без обводки) ===
-    ctx.fillStyle = '#fff';
-    ctx.font = '12px Arial, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText(this.title, this.pixelX + 4, this.pixelY + 12);
+    // === ТЕКСТ (название модуля) ===
+    if (isLcd) {
+      ctx.fillStyle = theme.getTextColor();
+      ctx.font = '12px Arial, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+      theme.applyGlow(ctx);
+      ctx.fillText(this.title, this.pixelX + 4, this.pixelY + 12);
+      theme.clearGlow(ctx);
+    } else {
+      ctx.fillStyle = '#fff';
+      ctx.font = '12px Arial, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText(this.title, this.pixelX + 4, this.pixelY + 12);
+    }
 
-    // === ТЕКСТ ПРОЗРАЧНОСТИ ===
+    // === ТЕКСТ ПРОЗРАЧНОСТИ (только при bgImage) ===
     if (this.bgImage) {
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.fillStyle = isLcd ? theme.getTextColor() : 'rgba(255, 255, 255, 0.8)';
       ctx.font = '10px Arial';
       ctx.textAlign = 'left';
       ctx.fillText(
@@ -127,7 +152,6 @@ export class Panel {
     this.components.forEach((comp) => comp.draw(ctx));
 
     ctx.restore();
-    // ===== ДОБАВИТЬ =====
     this.dirty = false;
   }
 

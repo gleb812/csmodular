@@ -1,5 +1,6 @@
 // components/ButtonIncDec.js
 import { BaseComponent } from './BaseComponent.js';
+import { getCurrentTheme } from '../theme/currentTheme.js';
 
 export class ButtonIncDec extends BaseComponent {
     constructor(x, y, width = 40, items = 'Item1,Item2,Item3,Item4', initialIndex = 0) {
@@ -29,70 +30,92 @@ export class ButtonIncDec extends BaseComponent {
     }
     
     draw(ctx) {
+        const theme = getCurrentTheme();
+        const isLcd = theme.isLcd;
+        const accent = theme.getAccentColor();
+
         ctx.save();
-        // === 1. ОСНОВНОЙ ПРЯМОУГОЛЬНИК ===
         const radius = 2;
-        
-        // Фон
-        if (this.isPressed) {
-            ctx.fillStyle = '#4f46e5';
-        } else if (this.isHovered) {
-            ctx.fillStyle = '#4a5568';
+
+        // === ФОН ===
+        if (isLcd) {
+            if (this.isPressed) {
+                ctx.fillStyle = theme.getAccentAlpha(0.25);
+            } else if (this.isHovered) {
+                ctx.fillStyle = theme.getAccentAlpha(0.15);
+            } else {
+                ctx.fillStyle = theme.getAccentAlpha(0.05);
+            }
         } else {
-            ctx.fillStyle = '#2d3748';
+            if (this.isPressed) {
+                ctx.fillStyle = '#4f46e5';
+            } else if (this.isHovered) {
+                ctx.fillStyle = '#4a5568';
+            } else {
+                ctx.fillStyle = '#2d3748';
+            }
         }
-        
-        // Всегда используем drawRoundedRect (без roundRect)
         this.drawRoundedRect(ctx, this.x, this.y, this.width, 13, radius);
         ctx.fill();
-        
-        // Рамка
-        ctx.strokeStyle = this.isHovered ? '#0af' : '#666';
-        ctx.lineWidth = 1;
+
+        // === РАМКА ===
+        if (isLcd) {
+            ctx.strokeStyle = accent;
+            ctx.lineWidth = theme.lineWidth(1);
+            theme.applyGlow(ctx);
+        } else {
+            ctx.strokeStyle = this.isHovered ? '#0af' : '#666';
+            ctx.lineWidth = 1;
+        }
         this.drawRoundedRect(ctx, this.x, this.y, this.width, 13, radius);
         ctx.stroke();
-        
-        // === 2. ТЕКСТ ТЕКУЩЕГО ЭЛЕМЕНТА ===
-        ctx.fillStyle = '#fff';
+        theme.clearGlow(ctx);
+
+        // === ТЕКСТ ===
+        ctx.fillStyle = isLcd ? theme.getTextColor() : '#fff';
         ctx.font = 'bold 11px Arial, sans-serif';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        
-        // Текст с отступом слева
-        const textX = this.x + 3;
-        const textY = this.y + 13 / 2;
-        ctx.fillText(this.currentItem, textX, textY);
-        
-        // === 3. СТРЕЛКИ ВВЕРХ/ВНИЗ (справа) ===
+        if (isLcd) theme.applyGlow(ctx);
+        ctx.fillText(this.currentItem, this.x + 3, this.y + 13 / 2);
+        theme.clearGlow(ctx);
+
+        // === СТРЕЛКИ ===
         const arrowsX = this.x + this.width - this.arrowWidth - 4;
         const upY = this.y + 1;
         const downY = this.y + 13 - this.arrowHeight - 1;
-        
-        // Стрелка вверх
-        this.drawArrow(ctx, arrowsX, upY, 'up', 
-            this.isArrowUpHovered ? '#0af' : '#888');
-        
-        // Стрелка вниз
-        this.drawArrow(ctx, arrowsX, downY, 'down', 
-            this.isArrowDownHovered ? '#0af' : '#888');
-        
-        // === 4. ИНДИКАТОР ПОЗИЦИИ (как в ButtonFlat) ===
+
+        const arrowColor = isLcd
+            ? accent
+            : (this.isArrowUpHovered ? '#0af' : '#888');
+        const arrowColorDown = isLcd
+            ? accent
+            : (this.isArrowDownHovered ? '#0af' : '#888');
+
+        if (isLcd) theme.applyGlow(ctx);
+        this.drawArrow(ctx, arrowsX, upY, 'up', arrowColor);
+        this.drawArrow(ctx, arrowsX, downY, 'down', arrowColorDown);
+        theme.clearGlow(ctx);
+
+        // === ИНДИКАТОР ПОЗИЦИИ ===
         if (this.items.length > 1) {
-            ctx.save(); // ← Изолируем индикатор
-            
             const indicatorWidth = this.width / this.items.length;
-            ctx.fillStyle = this.isHovered ? '#0af' : '#4f46e5';
+            if (isLcd) {
+                ctx.fillStyle = theme.getActiveFillColor();
+                theme.applyGlow(ctx);
+            } else {
+                ctx.fillStyle = this.isHovered ? '#0af' : '#4f46e5';
+            }
             ctx.fillRect(
                 this.x + this.currentIndex * indicatorWidth,
                 this.y + 13 - 2,
                 indicatorWidth,
                 2
             );
-            
-            ctx.restore(); // ← Восстанавливаем
+            theme.clearGlow(ctx);
         }
-        
-        ctx.restore(); // ← Восстанавливаем контекст
+
+        ctx.restore();
     }
     
     drawArrow(ctx, x, y, direction, color) {

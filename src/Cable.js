@@ -1,4 +1,5 @@
 // src/Cable.js
+import { getCurrentTheme } from './theme/currentTheme.js';
 export class Cable {
     constructor(fromJack, toJack, color = '#ffffff') {
         this.id = `cable_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -67,29 +68,46 @@ export class Cable {
 
     draw(ctx) {
         if (!this.isActive) return;
-        
+
+        const theme = getCurrentTheme();
+        const isLcd = theme.isLcd;
+        const cableType = this.fromJack?.type || 'audio';
+
         const from = this.getJackCenter(this.fromJack);
         const to = this.getJackCenter(this.toJack);
-
         const randomFactor = this.randomFactor;
 
-        ctx.strokeStyle = this.getDisplayColor();
-        ctx.lineWidth = 3;
+        // === ЦВЕТ ===
+        // Classic: typeColor или visualColor
+        // LCD: цвет из темы (audio — яркий, control — полупрозрачный)
+        let strokeColor;
+        if (isLcd && !this.visualColor) {
+            // В LCD, если пользователь не задал свой цвет — используем тему
+            strokeColor = theme.getCableColor(cableType);
+        } else {
+            strokeColor = this.getDisplayColor();
+        }
+        ctx.strokeStyle = strokeColor;
+
+        // === ТОЛЩИНА ===
+        ctx.lineWidth = theme.getCableWidth(cableType);
         ctx.lineCap = 'round';
-        
+
+        // === СВЕЧЕНИЕ (только LCD) ===
+        if (theme.shouldGlowCable()) {
+            theme.applyGlow(ctx);
+        }
+
+        // === КРИВАЯ ===
         ctx.beginPath();
         ctx.moveTo(from.x, from.y);
-        
+
         const midX = (from.x + to.x) / 2;
         const baseCurveHeight = Math.abs(to.y - from.y) * 0.4;
-        
-        // Добавляем случайность
-        const curveVariation = (randomFactor - 0.5) * 0.2; // ±10% вариации
+        const curveVariation = (randomFactor - 0.5) * 0.2;
         const curveHeight = baseCurveHeight * (1 + curveVariation);
-        
-        // Случайное смещение по X для контрольных точек
-        const xOffset = (randomFactor - 0.5) * 30; // ±15 пикселей
-        
+        const xOffset = (randomFactor - 0.5) * 30;
+
         if (from.y < to.y) {
             ctx.bezierCurveTo(
                 midX + xOffset, from.y - curveHeight,
@@ -103,8 +121,10 @@ export class Cable {
                 to.x, to.y
             );
         }
-        
         ctx.stroke();
+
+        // Сброс свечения
+        theme.clearGlow(ctx);
     }
 
 

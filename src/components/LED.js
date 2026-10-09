@@ -1,5 +1,6 @@
 // src/components/LED.js
 import { BaseComponent } from './BaseComponent.js';
+import { getCurrentTheme } from '../theme/currentTheme.js';
 
 export class LED extends BaseComponent {
     constructor(x, y, width = 16, height = 10) {
@@ -26,32 +27,49 @@ export class LED extends BaseComponent {
     }
 
     draw(ctx) {
-        // ⭐ Читаем значение из CsoundEngine (если в рабочей системе)
+        const theme = getCurrentTheme();
+        const isLcd = theme.isLcd;
+
+        // ⭐ Читаем значение из CsoundEngine
         if (this.sourceChannel && window.modularSystem?.csoundEngine) {
             const v = window.modularSystem.csoundEngine.getLedValue?.(this.sourceChannel) || 0;
             this.setBrightness(v * this.gain);
         }
-        
-        // ⭐ Бинарное состояние: выше порога — горит, ниже — нет
+
         const isOn = this.brightness > this.threshold;
-        
-        let fillColor;
-        if (isOn) {
-            fillColor = '#00ff00';   // ярко-зелёный
+
+        if (isLcd) {
+            const accent = theme.getAccentColor();
+
+            if (isOn) {
+                // Горит — залито цветом + свечение
+                ctx.fillStyle = accent;
+                theme.applyGlow(ctx);
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                theme.clearGlow(ctx);
+
+                // И рамка тем же цветом (чтобы край был чёткий)
+                ctx.strokeStyle = accent;
+                ctx.lineWidth = theme.lineWidth(1);
+                ctx.strokeRect(this.x, this.y, this.width, this.height);
+            } else {
+                // Не горит — ТОЛЬКО РАМКА, слабая версия цвета
+                ctx.strokeStyle = theme.getAccentAlpha(0.35);
+                ctx.lineWidth = theme.lineWidth(1);
+                ctx.strokeRect(this.x, this.y, this.width, this.height);
+            }
         } else {
-            fillColor = '#003300';   // тёмно-зелёный
+            // === Classic ===
+            const fillColor = isOn ? '#00ff00' : '#003300';
+            ctx.fillStyle = fillColor;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+
+            ctx.strokeStyle = '#002200';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(this.x, this.y, this.width, this.height);
         }
-        
-        // Тело LED
-        ctx.fillStyle = fillColor;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
-        
-        // Контур
-        ctx.strokeStyle = '#002200';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(this.x, this.y, this.width, this.height);
-        
-        // ⭐ В редакторе — метка, если LED не привязан
+
+        // ⭐ Метка непривязанного LED (в редакторе) — оставляем как было
         if (!this.sourceComponentId && this._isInEditor?.()) {
             ctx.strokeStyle = '#f80';
             ctx.lineWidth = 1;

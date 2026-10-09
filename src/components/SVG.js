@@ -1,5 +1,6 @@
 // components/SVG.js
 import { BaseComponent } from './BaseComponent.js';
+import { getCurrentTheme } from '../theme/currentTheme.js';
 
 export class SVG extends BaseComponent {
     constructor(x, y, width, height, svgSrc, color = null) {
@@ -79,30 +80,38 @@ export class SVG extends BaseComponent {
     }
     
     draw(ctx) {
+        const theme = getCurrentTheme();
+        const isLcd = theme.isLcd;
+
+        // ⭐ В LCD: если цвет не задан, тонируем в цвет темы
+        if (isLcd && !this.tintColor && this.isLoaded && this.originalImage) {
+            // Однократно применяем тинт при первом рендере в LCD
+            if (!this._lcdTinted) {
+                this.setTintColor(theme.getAccentColor());
+                this._lcdTinted = true;
+            }
+        }
+
+        // ⭐ Если вернулись в classic — убираем тинт
+        if (!isLcd && this._lcdTinted) {
+            this.clearTintColor();
+            this._lcdTinted = false;
+        }
+
         if (this.isLoaded && this.image) {
             ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-            
+
             if (window.DEBUG_SVG) {
-                ctx.strokeStyle = 'rgba(0, 255, 0, 0.3)';
+                ctx.strokeStyle = isLcd ? 'rgba(0, 255, 255, 0.3)' : 'rgba(0, 255, 0, 0.3)';
                 ctx.lineWidth = 1;
                 ctx.strokeRect(this.x, this.y, this.width, this.height);
-                
-                // Показываем цвет тонирования
-                if (this.tintColor) {
-                    ctx.fillStyle = this.tintColor;
-                    ctx.fillRect(this.x + this.width - 10, this.y, 10, 10);
-                }
             }
         } else {
-            // Заглушка
-            ctx.fillStyle = 'rgba(150, 150, 150, 0.2)';
+            // Заглушка — в LCD используем цвет темы
+            ctx.fillStyle = isLcd
+                ? theme.getAccentAlpha(0.15)
+                : 'rgba(150, 150, 150, 0.2)';
             ctx.fillRect(this.x, this.y, this.width, this.height);
-            
-            if (window.DEBUG_SVG) {
-                ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(this.x, this.y, this.width, this.height);
-            }
         }
     }
     

@@ -1,4 +1,5 @@
 import { BaseComponent } from './BaseComponent.js';
+import { getCurrentTheme } from '../theme/currentTheme.js';
 
 export class ButtonText extends BaseComponent {
     static FIXED_HEIGHT = 13; // 13
@@ -31,107 +32,14 @@ export class ButtonText extends BaseComponent {
         return ButtonText.FIXED_HEIGHT;
     }
     
-    // draw(ctx) {
-    //     ctx.save();
-    //     ctx.lineWidth = 1;
-        
-    //     // Анимация нажатия
-    //     let scale = 1;
-    //     let offsetY = 0;
-    //     if (this.isPressed) {
-    //         const progress = this.animationProgress / this.animationDuration;
-    //         scale = 1 - 0.1 * Math.sin(progress * Math.PI);
-    //         offsetY = 1 * Math.sin(progress * Math.PI);
-    //     }
-        
-    //     const centerX = this.x + this.width / 2;
-    //     const centerY = this.y + ButtonText.FIXED_HEIGHT / 2;
-    //     const drawX = centerX - (this.width * scale) / 2;
-    //     const drawY = centerY - (ButtonText.FIXED_HEIGHT * scale) / 2 + offsetY;
-    //     const drawWidth = this.width * scale;
-    //     const drawHeight = ButtonText.FIXED_HEIGHT * scale;
-        
-    //     // Градиентный фон в зависимости от состояния
-    //     const gradient = ctx.createLinearGradient(
-    //         drawX, drawY,
-    //         drawX, drawY + drawHeight
-    //     );
-        
-    //     if (this.isActive) {
-    //         // Активное состояние (горит синим)
-    //         if (this.isPressed) {
-    //             gradient.addColorStop(0, '#4f46e5');
-    //             gradient.addColorStop(1, '#3730a3');
-    //         } else if (this.isHovered) {
-    //             gradient.addColorStop(0, '#4338ca');
-    //             gradient.addColorStop(1, '#3730a3');
-    //         } else {
-    //             gradient.addColorStop(0, '#4f46e5');
-    //             gradient.addColorStop(1, '#3b82f6');
-    //         }
-    //     } else {
-    //         // Неактивное состояние
-    //         if (this.isPressed) {
-    //             gradient.addColorStop(0, '#6b7280');
-    //             gradient.addColorStop(1, '#4b5563');
-    //         } else if (this.isHovered) {
-    //             gradient.addColorStop(0, '#4b5563');
-    //             gradient.addColorStop(1, '#374151');
-    //         } else {
-    //             gradient.addColorStop(0, '#374151');
-    //             gradient.addColorStop(1, '#1f2937');
-    //         }
-    //     }
-        
-    //     // Рисуем фон с скруглёнными углами
-    //     ctx.fillStyle = gradient;
-    //     const radius = 2;
-        
-    //     if (ctx.roundRect) {
-    //         ctx.roundRect(drawX, drawY, drawWidth, drawHeight, radius);
-    //         ctx.fill();
-    //     } else {
-    //         this.drawRoundedRect(ctx, drawX, drawY, drawWidth, drawHeight, radius);
-    //         ctx.fill();
-    //     }
-        
-    //     // Рамка кнопки
-    //     ctx.strokeStyle = this.isActive ? 
-    //         (this.isHovered ? '#0af' : '#6366f1') : 
-    //         (this.isHovered ? '#9ca3af' : '#4b5563');
-    //     ctx.lineWidth = 1;
-        
-    //     if (ctx.roundRect) {
-    //         ctx.roundRect(drawX, drawY, drawWidth, drawHeight, radius);
-    //         ctx.stroke();
-    //     } else {
-    //         this.drawRoundedRect(ctx, drawX, drawY, drawWidth, drawHeight, radius);
-    //         ctx.stroke();
-    //     }
-        
-    //     // Текст (буква)
-    //     ctx.fillStyle = this.isActive ? '#ffffff' : '#d1d5db';
-    //     ctx.font = 'bold 10px Arial, sans-serif';
-    //     ctx.textAlign = 'center';
-    //     ctx.textBaseline = 'middle';
-    //     ctx.fillText(
-    //         this.text,
-    //         centerX,
-    //         centerY + offsetY
-    //     );
-        
-    //     // Тултип
-    //     if (this.showTooltip) {
-    //         this.drawTooltip(ctx);
-    //     }
-
-    //     ctx.restore();
-    // }
 
     draw(ctx) {
+        const theme = getCurrentTheme();
+        const isLcd = theme.isLcd;
+        const accent = theme.getAccentColor();
+
         ctx.save();
-        ctx.lineWidth = 1;
-        
+
         // Анимация нажатия
         let scale = 1;
         let offsetY = 0;
@@ -140,64 +48,65 @@ export class ButtonText extends BaseComponent {
             scale = 1 - 0.1 * Math.sin(progress * Math.PI);
             offsetY = 1 * Math.sin(progress * Math.PI);
         }
-        
+
         const centerX = this.x + this.width / 2;
         const centerY = this.y + ButtonText.FIXED_HEIGHT / 2;
         const drawX = centerX - (this.width * scale) / 2;
         const drawY = centerY - (ButtonText.FIXED_HEIGHT * scale) / 2 + offsetY;
         const drawWidth = this.width * scale;
         const drawHeight = ButtonText.FIXED_HEIGHT * scale;
-        
-        // ПРОСТОЙ ФОН (без градиента!)
-        if (this.isActive) {
-            // Активное состояние (горит синим)
-            if (this.isPressed) {
-                ctx.fillStyle = '#3730a3'; // Темный синий для pressed
-            } else if (this.isHovered) {
-                ctx.fillStyle = '#3730a3'; // Темный синий для hover
-            } else {
-                ctx.fillStyle = '#4f46e5'; // Основной синий
-            }
+
+        // === ФОН ===
+        if (isLcd) {
+            // LCD: ярче при active, слабее при inactive
+            const intensity = this.isActive
+                ? (this.isPressed ? 0.4 : this.isHovered ? 0.3 : 0.2)
+                : (this.isPressed ? 0.15 : this.isHovered ? 0.1 : 0.03);
+            ctx.fillStyle = theme.getAccentAlpha(intensity);
         } else {
-            // Неактивное состояние
-            if (this.isPressed) {
-                ctx.fillStyle = '#4b5563'; // Темный серый для pressed
-            } else if (this.isHovered) {
-                ctx.fillStyle = '#374151'; // Средний серый для hover
+            // Classic: как было
+            if (this.isActive) {
+                if (this.isPressed)        ctx.fillStyle = '#3730a3';
+                else if (this.isHovered)   ctx.fillStyle = '#3730a3';
+                else                       ctx.fillStyle = '#4f46e5';
             } else {
-                ctx.fillStyle = '#1f2937'; // Темный серый
+                if (this.isPressed)        ctx.fillStyle = '#4b5563';
+                else if (this.isHovered)   ctx.fillStyle = '#374151';
+                else                       ctx.fillStyle = '#1f2937';
             }
         }
-        
-        // Рисуем фон с скруглёнными углами (без roundRect)
+
         const radius = 2;
         this.drawRoundedRect(ctx, drawX, drawY, drawWidth, drawHeight, radius);
         ctx.fill();
-        
-        // Рамка кнопки
-        ctx.strokeStyle = this.isActive ? 
-            (this.isHovered ? '#0af' : '#6366f1') : 
-            (this.isHovered ? '#9ca3af' : '#4b5563');
-        ctx.lineWidth = 1;
-        
+
+        // === РАМКА ===
+        if (isLcd) {
+            ctx.strokeStyle = accent;
+            ctx.lineWidth = theme.lineWidth(this.isActive ? 1.5 : 1);
+            theme.applyGlow(ctx);
+        } else {
+            ctx.strokeStyle = this.isActive
+                ? (this.isHovered ? '#0af' : '#6366f1')
+                : (this.isHovered ? '#9ca3af' : '#4b5563');
+            ctx.lineWidth = 1;
+        }
         this.drawRoundedRect(ctx, drawX, drawY, drawWidth, drawHeight, radius);
         ctx.stroke();
-        
-        // Текст (буква)
-        ctx.fillStyle = this.isActive ? '#ffffff' : '#d1d5db';
+        theme.clearGlow(ctx);
+
+        // === ТЕКСТ ===
+        if (isLcd) {
+            ctx.fillStyle = accent;
+            theme.applyGlow(ctx);
+        } else {
+            ctx.fillStyle = this.isActive ? '#ffffff' : '#d1d5db';
+        }
         ctx.font = 'bold 10px Arial, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(
-            this.text,
-            centerX,
-            centerY + offsetY
-        );
-        
-        // Тултип (изолированный)
-        // if (this.showTooltip) {
-        //     this.drawTooltip(ctx);
-        // }
+        ctx.fillText(this.text, centerX, centerY + offsetY);
+        theme.clearGlow(ctx);
 
         ctx.restore();
     }

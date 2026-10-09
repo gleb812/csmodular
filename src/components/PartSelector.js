@@ -1,5 +1,6 @@
 // components/PartSelector.js
 import { BaseComponent } from './BaseComponent.js';
+import { getCurrentTheme } from '../theme/currentTheme.js';
 
 export class PartSelector extends BaseComponent {
     constructor(x, y, width = 100, height = 30, imageCount = 5, menuOffset = 0, menuItems = null) {
@@ -85,27 +86,32 @@ export class PartSelector extends BaseComponent {
         const drawWidth = this.width * scale;
         const drawHeight = this.height * scale;
         
-        // Фон с градиентом как у ButtonFlat
-        const gradient = ctx.createLinearGradient(
-            drawX, drawY,
-            drawX, drawY + drawHeight
-        );
-        
-        if (this.isPressed) {
-            gradient.addColorStop(0, '#4f46e5');
-            gradient.addColorStop(1, '#3730a3');
-        } else if (this.isHovered) {
-            gradient.addColorStop(0, '#4a5568');
-            gradient.addColorStop(1, '#2d3748');
+         const theme = getCurrentTheme();
+        const isLcd = theme.isLcd;
+        const accent = theme.getAccentColor();
+
+        // === ФОН ===
+        if (isLcd) {
+            const intensity = this.isPressed ? 0.3 : this.isHovered ? 0.2 : 0.05;
+            ctx.fillStyle = theme.getAccentAlpha(intensity);
         } else {
-            gradient.addColorStop(0, '#2d3748');
-            gradient.addColorStop(1, '#1a202c');
+            // Classic: градиент как было
+            const gradient = ctx.createLinearGradient(drawX, drawY, drawX, drawY + drawHeight);
+            if (this.isPressed) {
+                gradient.addColorStop(0, '#4f46e5');
+                gradient.addColorStop(1, '#3730a3');
+            } else if (this.isHovered) {
+                gradient.addColorStop(0, '#4a5568');
+                gradient.addColorStop(1, '#2d3748');
+            } else {
+                gradient.addColorStop(0, '#2d3748');
+                gradient.addColorStop(1, '#1a202c');
+            }
+            ctx.fillStyle = gradient;
         }
-        
-        // Рисуем фон с скруглёнными углами
-        ctx.fillStyle = gradient;
+
+        // Рисуем фон
         const radius = 4;
-        
         if (ctx.roundRect) {
             ctx.roundRect(drawX, drawY, drawWidth, drawHeight, radius);
             ctx.fill();
@@ -113,11 +119,16 @@ export class PartSelector extends BaseComponent {
             this.drawRoundedRect(ctx, drawX, drawY, drawWidth, drawHeight, radius);
             ctx.fill();
         }
-        
-        // Рамка
-        ctx.strokeStyle = this.isHovered ? '#0af' : '#666';
-        ctx.lineWidth = 1;
-        
+
+        // === РАМКА ===
+        if (isLcd) {
+            ctx.strokeStyle = accent;
+            ctx.lineWidth = theme.lineWidth(this.isHovered ? 1.5 : 1);
+            theme.applyGlow(ctx);
+        } else {
+            ctx.strokeStyle = this.isHovered ? '#0af' : '#666';
+            ctx.lineWidth = 1;
+        }
         if (ctx.roundRect) {
             ctx.roundRect(drawX, drawY, drawWidth, drawHeight, radius);
             ctx.stroke();
@@ -125,13 +136,15 @@ export class PartSelector extends BaseComponent {
             this.drawRoundedRect(ctx, drawX, drawY, drawWidth, drawHeight, radius);
             ctx.stroke();
         }
+        theme.clearGlow(ctx);
         
         // Текст выбранного элемента
         if (this.menuItems[this.selectedIndex]) {
             const item = this.menuItems[this.selectedIndex];
             const text = item.label || `Item ${this.selectedIndex + 1}`;
             
-            ctx.fillStyle = '#fff';
+            ctx.fillStyle = isLcd ? accent : '#fff';
+            if (isLcd) theme.applyGlow(ctx);
             ctx.font = 'bold 8px Arial, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -142,10 +155,12 @@ export class PartSelector extends BaseComponent {
                 text.substring(0, maxChars - 2) + '..' : text;
             
             ctx.fillText(displayText, centerX, centerY + offsetY);
+            if (isLcd) theme.clearGlow(ctx);
         }
         
         // Стрелка вниз/вверх
-        ctx.fillStyle = this.isHovered ? '#0af' : '#ccc';
+        ctx.fillStyle = isLcd ? accent : (this.isHovered ? '#0af' : '#ccc');
+        if (isLcd) theme.applyGlow(ctx);
         const arrowSize = 3;
         const arrowX = drawX + drawWidth - 10;
         const arrowY = centerY + offsetY;
@@ -164,7 +179,7 @@ export class PartSelector extends BaseComponent {
         }
         ctx.closePath();
         ctx.fill();
-        
+        if (isLcd) theme.clearGlow(ctx);
         ctx.restore();
         
         // Рисуем меню если раскрыто
@@ -174,35 +189,40 @@ export class PartSelector extends BaseComponent {
     }
     
     drawMenu(ctx) {
+        const theme = getCurrentTheme();
+        const isLcd = theme.isLcd;
+        const accent = theme.getAccentColor();
+
         ctx.save();
-        
-        // Рассчитываем позицию меню
+
         const menuHeight = Math.min(
             this.menuItems.length * this.itemHeight,
             this.menuMaxHeight
         );
-        
-        // Проверяем, где больше места - внизу или вверху
+
         const canvas = ctx.canvas;
         const spaceBelow = canvas.height - (this.y + this.height);
         const spaceAbove = this.y;
-        
+
         let menuX = this.x;
         let menuY;
-        
+
         if (spaceBelow >= menuHeight || spaceBelow >= spaceAbove) {
-            // Открываем вниз
             menuY = this.y + this.height + 2;
         } else {
-            // Открываем вверх
             menuY = this.y - menuHeight - 2;
         }
-        
-        // Фон меню с прозрачностью
-        ctx.fillStyle = 'rgba(26, 32, 44, 0.95)';
-        ctx.strokeStyle = '#4a5568';
-        ctx.lineWidth = 1;
-        
+
+        // === ФОН МЕНЮ ===
+        if (isLcd) {
+            // LCD: почти чёрный полупрозрачный фон
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+        } else {
+            ctx.fillStyle = 'rgba(26, 32, 44, 0.95)';
+        }
+        ctx.strokeStyle = isLcd ? accent : '#4a5568';
+        ctx.lineWidth = theme.lineWidth(1);
+
         if (ctx.roundRect) {
             ctx.roundRect(menuX, menuY, this.menuWidth, menuHeight, 4);
             ctx.fill();
@@ -212,69 +232,69 @@ export class PartSelector extends BaseComponent {
             ctx.fill();
             ctx.stroke();
         }
-        
-        // Тень/обводка для эффекта "поверх всего"
-        ctx.strokeStyle = 'rgba(0, 170, 255, 0.3)';
-        ctx.lineWidth = 2;
-        
-        if (ctx.roundRect) {
-            ctx.roundRect(menuX, menuY, this.menuWidth, menuHeight, 4);
-            ctx.stroke();
-        } else {
-            this.drawRoundedRect(ctx, menuX, menuY, this.menuWidth, menuHeight, 4);
-            ctx.stroke();
-        }
-        
-        // Пункты меню
+
+        // === ПУНКТЫ МЕНЮ ===
         const visibleItems = Math.min(
             this.menuItems.length,
             Math.floor(this.menuMaxHeight / this.itemHeight)
         );
-        
+
         for (let i = 0; i < visibleItems; i++) {
             const itemY = menuY + (i * this.itemHeight);
             const isHovered = this.hoveredItemIndex === i;
             const isSelected = this.selectedIndex === i;
-            
+
             // Фон при наведении
             if (isHovered) {
-                ctx.fillStyle = 'rgba(74, 85, 104, 0.7)';
+                ctx.fillStyle = isLcd
+                    ? theme.getAccentAlpha(0.15)
+                    : 'rgba(74, 85, 104, 0.7)';
                 ctx.fillRect(menuX, itemY, this.menuWidth, this.itemHeight);
             }
-            
-            // Индикатор выбранного пункта
+
+            // Индикатор выбранного
             if (isSelected) {
-                ctx.fillStyle = '#4f46e5';
+                if (isLcd) {
+                    ctx.fillStyle = accent;
+                    theme.applyGlow(ctx);
+                } else {
+                    ctx.fillStyle = '#4f46e5';
+                }
                 ctx.fillRect(menuX, itemY, 3, this.itemHeight);
+                theme.clearGlow(ctx);
             }
-            
+
             // Текст
             const item = this.menuItems[i];
             const text = item.label || `Item ${i + 1}`;
-            
-            ctx.fillStyle = isHovered ? '#fff' : '#ccc';
+
+            ctx.fillStyle = isLcd
+                ? (isHovered || isSelected ? accent : theme.getAccentAlpha(0.7))
+                : (isHovered ? '#fff' : '#ccc');
             ctx.font = '8px Arial, sans-serif';
             ctx.textAlign = 'left';
             ctx.textBaseline = 'middle';
-            
-            // Обрезаем текст если нужно
+
             const maxChars = Math.floor(this.menuWidth / 5);
-            const displayText = text.length > maxChars ? 
-                text.substring(0, maxChars - 2) + '..' : text;
-            
+            const displayText = text.length > maxChars 
+                ? text.substring(0, maxChars - 2) + '..' 
+                : text;
+
             ctx.fillText(displayText, menuX + 8, itemY + this.itemHeight / 2);
-            
-            // Разделитель между пунктами (кроме последнего)
+
+            // Разделитель
             if (i < visibleItems - 1) {
                 ctx.beginPath();
                 ctx.moveTo(menuX + 5, itemY + this.itemHeight);
                 ctx.lineTo(menuX + this.menuWidth - 5, itemY + this.itemHeight);
-                ctx.strokeStyle = '#4a5568';
+                ctx.strokeStyle = isLcd
+                    ? theme.getAccentAlpha(0.2)
+                    : '#4a5568';
                 ctx.lineWidth = 0.5;
                 ctx.stroke();
             }
         }
-        
+
         ctx.restore();
     }
     

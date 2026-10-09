@@ -1,5 +1,6 @@
 // components/TextLabel.js
 import { BaseComponent } from './BaseComponent.js';
+import { getCurrentTheme } from '../theme/currentTheme.js';
 
 export class TextLabel extends BaseComponent {
     static ALIGN = {
@@ -68,41 +69,53 @@ export class TextLabel extends BaseComponent {
     }
     
     draw(ctx) {
+        const theme = getCurrentTheme();
+        const isLcd = theme.isLcd;
+
         ctx.save();
-        
+
         // Устанавливаем стиль текста
         ctx.font = `${this.fontSize}px ${this.fontFamily}`;
-        ctx.fillStyle = this.color;
+
+        // ⭐ В LCD — используем цвет темы, если цвет не задан явно
+        if (isLcd && (!this.color || this.color === '#ffffff' || this.color === '#fff')) {
+            ctx.fillStyle = theme.getTextColor();
+            theme.applyGlow(ctx);
+        } else {
+            ctx.fillStyle = this.color;
+        }
+
         ctx.textAlign = this.align;
         ctx.textBaseline = this.baseline;
-        
+
         // Рисуем текст
         ctx.fillText(this.text, this.x, this.y);
-        
-        // Дебаг-режим: показываем bounding box
+
+        theme.clearGlow(ctx);
+
+        // Дебаг-режим (без изменений)
         if (window.DEBUG_TEXT_LABEL) {
             ctx.strokeStyle = 'rgba(255, 0, 0, 0.3)';
             ctx.lineWidth = 1;
-            
+
             let drawX = this.x;
             let drawY = this.y;
-            
-            // Корректируем для отрисовки bounding box
+
             if (this.align === 'center') {
                 drawX = this.x - this.width / 2;
             } else if (this.align === 'right') {
                 drawX = this.x - this.width;
             }
-            
+
             if (this.baseline === 'middle') {
                 drawY = this.y - this.height / 2;
             } else if (this.baseline === 'bottom') {
                 drawY = this.y - this.height;
             }
-            
+
             ctx.strokeRect(drawX, drawY, this.width, this.height);
         }
-        
+
         ctx.restore();
     }
     

@@ -98,14 +98,49 @@ export class UIManager {
       border-radius: 8px 8px 0 0;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
+      padding: 0 8px;
       color: #aaa;
       font-size: 11px;
       user-select: none;
       will-change: transform;
     `;
-    header.textContent = '≡ Control Panel';
-    header.title = 'grab to move';
+
+    // Название слева
+    const headerTitle = document.createElement('span');
+    headerTitle.textContent = '≡ Control Panel';
+    header.appendChild(headerTitle);
+
+    // Кнопка Design Settings справа
+    const designBtn = document.createElement('button');
+    designBtn.id = 'design-settings-btn';
+    designBtn.innerHTML = '🎨';
+    designBtn.title = 'Design Settings (D)';
+    designBtn.style.cssText = `
+      background: transparent;
+      border: none;
+      color: #0af;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 0 4px;
+      line-height: 1;
+      transition: transform 0.15s;
+    `;
+    designBtn.onmouseenter = () => {
+      designBtn.style.transform = 'scale(1.2)';
+    };
+    designBtn.onmouseleave = () => {
+      designBtn.style.transform = 'scale(1)';
+    };
+    designBtn.onmousedown = (e) => {
+      // Не даём начать drag панели при клике на кнопку
+      e.stopPropagation();
+    };
+    designBtn.onclick = (e) => {
+      e.stopPropagation();
+      this.system.designSettings?.toggle();
+    };
+    header.appendChild(designBtn);
 
     this.container.insertBefore(header, this.container.firstChild);
 

@@ -1,5 +1,6 @@
 // components/TextField.js - ВЕРСИЯ С ТАБЛИЦАМИ
 import { BaseComponent } from './BaseComponent.js';
+import { getCurrentTheme } from '../theme/currentTheme.js';
 
 export class TextField extends BaseComponent {
     static HEIGHT = 16;
@@ -40,26 +41,41 @@ export class TextField extends BaseComponent {
     }
     
     draw(ctx) {
-        // Фон
-        ctx.fillStyle = this.backgroundColor;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
-        
-        // Рамка
-        ctx.strokeStyle = this.borderColor;
-        ctx.lineWidth = 1;
-        ctx.strokeRect(this.x, this.y, this.width, this.height);
-        
-        // Текст
-        ctx.fillStyle = this.textColor;
-        ctx.font = '12px monospace';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
-        ctx.fillText(
-            this.displayValue,
-            this.x + this.width / 2,
-            this.y + this.height / 2
-        );
+        const theme = getCurrentTheme();
+        const isLcd = theme.isLcd;
+
+        if (isLcd) {
+            // LCD: прозрачный фон + рамка
+            ctx.fillStyle = theme.getAccentAlpha(0.05);
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+
+            ctx.strokeStyle = theme.getAccentAlpha(0.5);
+            ctx.lineWidth = theme.lineWidth(1);
+            ctx.strokeRect(this.x, this.y, this.width, this.height);
+
+            // Текст
+            ctx.fillStyle = theme.getAccentColor();
+            theme.applyGlow(ctx);
+            ctx.font = '12px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(this.displayValue, this.x + this.width / 2, this.y + this.height / 2);
+            theme.clearGlow(ctx);
+        } else {
+            // Classic
+            ctx.fillStyle = this.backgroundColor;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+
+            ctx.strokeStyle = this.borderColor;
+            ctx.lineWidth = 1;
+            ctx.strokeRect(this.x, this.y, this.width, this.height);
+
+            ctx.fillStyle = this.textColor;
+            ctx.font = '12px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(this.displayValue, this.x + this.width / 2, this.y + this.height / 2);
+        }
     }
     
     // Подключение к целевому компоненту
