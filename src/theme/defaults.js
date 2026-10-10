@@ -18,7 +18,26 @@ export const DEFAULT_THEME = {
         controlWidth: 1.5,
         glow: false,   // ← отдельный флаг для кабелей
     },
+
+    background: {
+        image: null,  // или null — если фон выключен
+        parallax: true,                      // parallax-эффект включён?
+        parallaxStrength: 20,                // сила смещения
+    },
 };
+
+// Пресеты фонов
+export const BACKGROUND_PRESETS = [
+    { name: 'None',      value: null },
+    // --- Solid colors ---
+    { name: 'Black',     value: '#000000' },
+    { name: 'Dark Gray', value: '#1a1a1a' },
+    { name: 'Gray',      value: '#333333' },
+    // --- Images ---
+    { name: 'Dark',      value: '/backgrounds/dark.jpg' },
+    { name: 'Abstract',  value: '/backgrounds/abstract.jpg' },
+    { name: 'Glass',     value: '/backgrounds/glass.jpg' },
+];
 
 // Пресеты ЖК-цветов (для UI выбора)
 export const LCD_COLOR_PRESETS = [
@@ -28,4 +47,7 @@ export const LCD_COLOR_PRESETS = [
     { name: 'Pure White',  value: '#e0e0e0' },
     { name: 'Cyan',        value: '#4ec9c9' },
     { name: 'Magenta',     value: '#d989c9' },
+    { name: 'Steel',       value: '#8a8a8a' },   // ← ⭐ тёмно-серый
+    { name: 'Charcoal',    value: '#4a4a4a' },   // ← ⭐ графит
+    { name: 'Black',       value: '#1a1a1a' },   // ← ⭐ почти чёрный
 ];

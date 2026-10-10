@@ -35,22 +35,8 @@ export class ModuleContextMenu {
   }
 
   show(module, x, y) {
-    // console.log(
-    //   '🎯 ModuleContextMenu.show called with module:',
-    //   module,
-    //   'at',
-    //   x,
-    //   y,
-    // );
     this.currentModule = module;
     this.updateMenuContent();
-
-    // Проверяем, есть ли элемент в DOM
-    // console.log(
-    //   'Menu element in DOM:',
-    //   document.body.contains(this.menuElement),
-    // );
-    // console.log('Menu element parent:', this.menuElement.parentNode);
 
     // Позиционируем
     this.menuElement.style.left = `${x}px`;
@@ -89,6 +75,100 @@ export class ModuleContextMenu {
     this.menuElement.appendChild(
       this.createMenuItem('📝 Open Csound Code', () => this.openCsoundCode()),
     );
+
+
+    // === LAYER SWITCHER ===
+    const layerSection = document.createElement('div');
+    layerSection.style.cssText = `
+            padding: 6px 12px;
+            border-bottom: 1px solid #333;
+        `;
+
+    const layerTitle = document.createElement('div');
+    layerTitle.style.cssText = `
+            color: #aaa;
+            font-size: 11px;
+            margin-bottom: 6px;
+        `;
+    layerTitle.textContent = 'Layer:';
+    layerSection.appendChild(layerTitle);
+
+    const layerButtons = document.createElement('div');
+    layerButtons.style.cssText = `
+            display: flex;
+            gap: 6px;
+        `;
+
+    const currentLayer = this.currentModule.layer || 'voice';
+
+    // Voice button
+    const voiceBtn = document.createElement('button');
+    voiceBtn.textContent = 'Voice';
+    const isVoice = currentLayer === 'voice';
+    voiceBtn.style.cssText = `
+            flex: 1;
+            padding: 6px 8px;
+            background: ${isVoice ? '#0a3a5a' : '#2a2a2a'};
+            border: 1px solid ${isVoice ? '#0af' : '#444'};
+            color: ${isVoice ? '#0af' : '#aaa'};
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-family: inherit;
+            transition: all 0.15s;
+        `;
+    if (!isVoice) {
+        voiceBtn.onmouseenter = () => {
+            voiceBtn.style.background = '#3a3a3a';
+            voiceBtn.style.borderColor = '#666';
+        };
+        voiceBtn.onmouseleave = () => {
+            voiceBtn.style.background = '#2a2a2a';
+            voiceBtn.style.borderColor = '#444';
+        };
+        voiceBtn.onclick = (e) => {
+            e.stopPropagation();
+            this.setLayer('voice');
+        };
+    }
+
+    // FX button
+    const fxBtn = document.createElement('button');
+    fxBtn.textContent = 'FX';
+    const isFx = currentLayer === 'fx';
+    fxBtn.style.cssText = `
+            flex: 1;
+            padding: 6px 8px;
+            background: ${isFx ? '#3a2a0a' : '#2a2a2a'};
+            border: 1px solid ${isFx ? '#f59e0b' : '#444'};
+            color: ${isFx ? '#f59e0b' : '#aaa'};
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-family: inherit;
+            transition: all 0.15s;
+        `;
+    if (!isFx) {
+        fxBtn.onmouseenter = () => {
+            fxBtn.style.background = '#3a3a3a';
+            fxBtn.style.borderColor = '#666';
+        };
+        fxBtn.onmouseleave = () => {
+            fxBtn.style.background = '#2a2a2a';
+            fxBtn.style.borderColor = '#444';
+        };
+        fxBtn.onclick = (e) => {
+            e.stopPropagation();
+            this.setLayer('fx');
+        };
+    }
+
+    layerButtons.appendChild(voiceBtn);
+    layerButtons.appendChild(fxBtn);
+    layerSection.appendChild(layerButtons);
+    this.menuElement.appendChild(layerSection);
+
+
 
     // 2. СЕКЦИЯ ЦВЕТОВ
     const colorSection = document.createElement('div');
@@ -196,8 +276,75 @@ export class ModuleContextMenu {
     return separator;
   }
 
-  // В ModuleContextMenu.js - добавь метод createHeader()
+  setLayer(newLayer) {
+    if (!this.currentModule) return;
+    
+    const currentLayer = this.currentModule.layer || 'voice';
+    if (currentLayer === newLayer) return;
 
+    // Проверяем кабели
+    const cables = this.system.patchManager.findCablesByModule(this.currentModule.moduleId);
+    if (cables.length > 0) {
+      const layerNames = { voice: 'Voice', fx: 'FX' };
+      const ok = confirm(
+        `У модуля "${this.currentModule.title}" есть ${cables.length} кабел${cables.length === 1 ? 'ь' : cables.length < 5 ? 'я' : 'ей'}.\n\n` +
+        `При смене слоя на ${layerNames[newLayer]} все кабели будут удалены.\n\n` +
+        `Продолжить?`
+      );
+      if (!ok) return;
+      
+      cables.forEach(cable => {
+        this.system.patchManager.removeCable(cable);
+      });
+    }
+
+    const module = this.currentModule;
+
+    // ⭐ Удаляем ИЗ ВСЕХ слоёв (надёжно)
+    this.system.layerManager.removeModuleFromLayer(module);
+    
+    // ⭐ Удаляем из CsoundGenerator
+    this.system.csoundGen.removeModule(
+      module.jsonId,
+      module.jsonName || module.type,
+      module.typeID,
+      currentLayer
+    );
+
+    // ⭐ Ставим новый слой
+    module.layer = newLayer;
+    
+    // ⭐ Добавляем в новый слой
+    this.system.layerManager.addModuleToLayer(module, newLayer);
+    
+    // ⭐ Добавляем в CsoundGenerator
+    this.system.csoundGen.addModule({
+      typeId: module.jsonName || module.type,
+      instanceId: module.jsonId,
+      instanceName: module.jsonName || module.type,
+      layer: newLayer,
+      parameters: [],
+      mode: [],
+      defaultParams: [],
+      defaultMode: [],
+      inlets: 1,
+      outlets: 1,
+      isUser: false,
+    });
+
+    // Перерисовка
+    this.system._voiceDirty = true;
+    this.system._fxDirty = true;
+    this.system._cablesDirty = true;
+
+    // Recompile
+    if (this.system.csoundEngine?.state === 'running') {
+      this.system._recompileDebounced();
+    }
+
+    this.system.showNotification(`✓ ${module.title} → ${newLayer.toUpperCase()}`);
+    this.hide();
+  }
   createHeader() {
     const header = document.createElement('div');
     header.style.cssText = `

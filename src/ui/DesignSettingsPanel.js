@@ -2,7 +2,7 @@
 import { getCurrentTheme, setCurrentTheme } from '../theme/currentTheme.js';
 import { themeStore } from '../theme/themeStore.js';
 import { Theme } from '../theme/Theme.js';
-import { DEFAULT_THEME, LCD_COLOR_PRESETS } from '../theme/defaults.js';
+import { DEFAULT_THEME, LCD_COLOR_PRESETS, BACKGROUND_PRESETS } from '../theme/defaults.js';
 
 export class DesignSettingsPanel {
     constructor(system) {
@@ -117,6 +117,14 @@ export class DesignSettingsPanel {
         content.appendChild(this.buildSection('Cables', [
             this.buildSlider('cables.audioWidth', 'Audio Width', settings.cables.audioWidth, 1, 8, 0.5),
             this.buildSlider('cables.controlWidth', 'Control Width', settings.cables.controlWidth, 0.5, 5, 0.25),
+        ]));
+
+
+        // === BACKGROUND ===
+        content.appendChild(this.buildSection('Background', [
+            this.buildBackgroundPresets(settings.background?.image),
+            this.buildSlider('background.parallaxStrength', 'Parallax', 
+                settings.background?.parallaxStrength ?? 20, 0, 100, 5),
         ]));
 
         // === RESET ===
@@ -278,6 +286,93 @@ export class DesignSettingsPanel {
         return wrapper;
     }
 
+    buildBackgroundPresets(currentImage) {
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = `
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+            margin-bottom: 8px;
+        `;
+
+        BACKGROUND_PRESETS.forEach(preset => {
+            const btn = document.createElement('button');
+            const isActive = (currentImage || null) === preset.value;
+
+            // Определяем, что показывать в кнопке
+            let bgStyle;
+            if (!preset.value) {
+                bgStyle = 'background: #1a1a1a;';
+            } else if (this._isColorValue(preset.value)) {
+                bgStyle = `background: ${preset.value};`;
+            } else {
+                bgStyle = `background: url('${preset.value}') center/cover;`;
+            }
+
+            btn.style.cssText = `
+                height: 40px;
+                ${bgStyle}
+                border: 2px solid ${isActive ? '#0af' : '#444'};
+                border-radius: 4px;
+                cursor: pointer;
+                position: relative;
+                overflow: hidden;
+                transition: all 0.15s;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+
+            // Подпись снизу
+            const label = document.createElement('span');
+            label.textContent = preset.name;
+            label.style.cssText = `
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(0,0,0,0.6);
+                color: #fff;
+                font-size: 9px;
+                padding: 2px 4px;
+                text-align: center;
+                font-family: inherit;
+            `;
+            btn.appendChild(label);
+
+            btn.onmouseenter = () => {
+                btn.style.transform = 'scale(1.05)';
+                btn.style.borderColor = '#0af';
+            };
+            btn.onmouseleave = () => {
+                btn.style.transform = 'scale(1)';
+                btn.style.borderColor = isActive ? '#0af' : '#444';
+            };
+            btn.onclick = () => {
+                this.setPath('background.image', preset.value);
+                this.system?.applyBackgroundFromTheme?.();
+            };
+
+            wrapper.appendChild(btn);
+        });
+
+        return wrapper;
+    }
+
+    /**
+     * Проверка: значение — CSS-цвет?
+     */
+    _isColorValue(value) {
+        if (typeof value !== 'string') return false;
+        const v = value.trim().toLowerCase();
+        return v.startsWith('#') ||
+               v.startsWith('rgb(') ||
+               v.startsWith('rgba(') ||
+               v.startsWith('hsl(') ||
+               v.startsWith('hsla(');
+    }
+
     // === Палитра цветов ===
     buildColorPresets(currentColor) {
         const wrapper = document.createElement('div');
@@ -393,20 +488,18 @@ export class DesignSettingsPanel {
      */
     applyAndSave() {
         const theme = getCurrentTheme();
-
-        // Обновляем класс Theme (на случай если структура изменилась)
         setCurrentTheme(new Theme(theme.settings));
-
-        // Сохраняем
         themeStore.save(theme.settings);
 
-        // Форсируем перерисовку
+        // ⭐ Обновляем фон
+        if (this.system?.applyBackgroundFromTheme) {
+            this.system.applyBackgroundFromTheme();
+        }
+
         if (this.system?.forceRedraw) {
             this.system.forceRedraw();
         }
 
-        // Перерисовываем содержимое панели (если изменилась структура, например preset)
-        // Но только если это НЕ слайдер — иначе панель будет "прыгать" при перетаскивании
         if (!this._isSliderUpdate) {
             this.renderContent();
         }

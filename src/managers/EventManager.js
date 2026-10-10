@@ -27,6 +27,21 @@ export class EventManager {
     this.canvas.addEventListener('contextmenu', (e) =>
       this.handleContextMenu(e),
     );
+        // Space+drag для pan (как в Figma)
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && !e.repeat && 
+          e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+        this._spacePressed = true;
+        this.canvas.style.cursor = 'grab';
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.code === 'Space') {
+        this._spacePressed = false;
+        this.canvas.style.cursor = 'default';
+      }
+    });
   }
 
   // === ОСНОВНЫЕ ОБРАБОТЧИКИ ===
@@ -35,23 +50,21 @@ export class EventManager {
     const rect = this.canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+
+    // ⭐ SPACE+DRAG → pan мира
+    if (this._spacePressed || e.button === 1) {
+      this.system.isPanning = true;
+      this.system.startPanX = x;
+      this.system.startPanY = y;
+      this.system.startOffsetX = this.system.offsetX;
+      this.system.startOffsetY = this.system.offsetY;
+      this.canvas.style.cursor = 'grabbing';
+      e.preventDefault();
+      return;
+    }
+    // ⭐ Вычисляем мировые координаты
     const worldX = (x - this.system.offsetX) / this.system.scale;
     const worldY = (y - this.system.offsetY) / this.system.scale;
-
-    // 1A. Если уже перетаскиваем кабель - завершаем его
-    if (this.system.patchManager.draggingCable) {
-      this.system.patchManager.endCableDrag(this.system.patchManager.hoverJack);
-      e.preventDefault();
-      return;
-    }
-
-    // 1B. Разделитель между зонами
-    const screenY = y;
-    if (this.system.layerManager.checkDividerClick(screenY)) {
-      this.system.layerManager.startDividerDrag(screenY);
-      e.preventDefault();
-      return;
-    }
 
     // 1C. Удаление кабелей (Shift+клик)
     if (e.shiftKey) {
@@ -172,14 +185,6 @@ export class EventManager {
       return;
     }
 
-    // === ПЕРЕТАСКИВАНИЕ РАЗДЕЛИТЕЛЯ ===
-    if (this.system.layerManager.divider.isDragging) {
-      const updated = this.system.layerManager.updateDividerDrag(y);
-      if (updated) this.canvas.style.cursor = 'row-resize';
-      e.preventDefault();
-      return;
-    }
-
     // === ПЕРЕТАСКИВАНИЕ КОМПОНЕНТА (ручки и т.д.) ===
     if (
       this.system.draggingComponent &&
@@ -247,8 +252,6 @@ export class EventManager {
       this.canvas.style.cursor = 'default';
     }
   }
-
-  // Добавить в класс:
 
   _getCursorInfo(worldX, worldY) {
     if (this._cursorCacheValid) {
@@ -363,19 +366,6 @@ export class EventManager {
       return;
     }
 
-    // Завершение перетаскивания разделителя
-    if (this.system.layerManager.divider.isDragging) {
-      this.system.layerManager.endDividerDrag();
-      this.canvas.style.cursor = 'default';
-
-      if (this.system.forceRedraw) {
-        this.system.forceRedraw();
-      }
-
-      e.preventDefault();
-      return;
-    }
-
     // Завершение панорамирования
     if (this.system.isPanning) {
       this.system.isPanning = false;
@@ -389,9 +379,37 @@ export class EventManager {
 
   handleMouseWheel(e) {
     e.preventDefault();
-    const rect = this.canvas.getBoundingClientRect();
-    const y = e.clientY - rect.top;
-    this.system.layerManager.handleWheel(e.deltaY, y);
+
+    const system = this.system;
+
+    // Ctrl+колесо → zoom
+    if (e.ctrlKey || e.metaKey) {
+      const delta = -e.deltaY * 0.001;
+      const oldScale = system.scale;
+      system.scale = Math.max(0.1, Math.min(5, system.scale + delta));
+
+      // Zoom вокруг курсора
+      const rect = this.canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      const scaleFactor = system.scale / oldScale;
+      system.offsetX = mouseX - (mouseX - system.offsetX) * scaleFactor;
+      system.offsetY = mouseY - (mouseY - system.offsetY) * scaleFactor;
+
+      system.forceRedraw();
+      return;
+    }
+
+    // Shift+колесо → горизонтальный скролл
+    // Обычное колесо → вертикальный скролл мира
+    if (e.shiftKey) {
+      system.offsetX -= e.deltaY;
+    } else {
+      system.offsetY -= e.deltaY;
+    }
+
+    system.forceRedraw();
   }
 
   handleContextMenu(e) {

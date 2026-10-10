@@ -99,13 +99,25 @@ export class Panel {
 
     // === ФОН ПАНЕЛИ ===
     if (isLcd) {
-        ctx.fillStyle = theme.getSurfaceColor();
+      ctx.fillStyle = theme.getSurfaceColor();
     } else {
-      // Classic: плотный фон
       const bgColor = this.customColor || this.defaultColor || '#606060';
       ctx.fillStyle = bgColor;
     }
     ctx.fillRect(this.pixelX, this.pixelY, this.width, this.height);
+
+    // === FX-ПОЛОСКА (слева, внутри панели) ===
+    if (this.layer === 'fx') {
+      const stripeWidth = 3;
+      if (isLcd) {
+        ctx.fillStyle = theme.getAccentColor();
+        theme.applyGlow(ctx);
+      } else {
+        ctx.fillStyle = '#f59e0b';   // amber для classic
+      }
+      ctx.fillRect(this.pixelX, this.pixelY, stripeWidth, this.height);
+      theme.clearGlow(ctx);
+    }
 
     // === РАМКА ===
     if (isLcd) {

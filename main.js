@@ -1,6 +1,5 @@
 // main.js
 import { ModuleFactory } from './src/ModuleFactory.js';
-import { initCurrentTheme } from './src/theme/currentTheme.js';
 import { GRID_UNITS } from './constants.js';
 import { Panel } from './src/components/Panel.js';
 import { PatchManager } from './src/PatchManager.js';
@@ -17,6 +16,7 @@ import { CsoundEngine } from './src/csound/CsoundEngine.js';
 import { DesignSettingsPanel } from './src/ui/DesignSettingsPanel.js';
 import { MappingTables } from './src/csound/MappingTables.js';
 import { debounce } from './src/utils/debounce.js';
+import { initCurrentTheme, getCurrentTheme } from './src/theme/currentTheme.js';
 
 // Глобальный обработчик ошибок
 window.addEventListener('error', (event) => {
@@ -184,6 +184,7 @@ class ModularSystem {
         300
     );
     this.setupParallax();
+    this.applyBackgroundFromTheme();   // ⭐ применяем фон из темы
   }
 
 
@@ -195,6 +196,48 @@ class ModularSystem {
           this.parallaxMouseX = (e.clientX / window.innerWidth - 0.5) * 2;
           this.parallaxMouseY = (e.clientY / window.innerHeight - 0.5) * 2;
       });
+  }
+
+
+  applyBackgroundFromTheme() {
+    const theme = getCurrentTheme();
+    const el = this.parallaxElement;
+    if (!el) return;
+
+    const image = theme.getBackgroundImage();
+
+    if (!image) {
+      // Фон отключён
+      el.style.backgroundImage = 'none';
+      el.style.backgroundColor = 'transparent';
+      el.style.display = 'none';
+    } else if (this._isColorValue(image)) {
+      // Solid-цвет
+      el.style.backgroundImage = 'none';
+      el.style.backgroundColor = image;
+      el.style.display = 'block';
+    } else {
+      // Картинка
+      el.style.backgroundImage = `url('${image}')`;
+      el.style.backgroundColor = 'transparent';
+      el.style.display = 'block';
+    }
+
+    this.parallaxStrength = theme.getParallaxStrength();
+  }
+
+  /**
+   * Проверить, является ли значение CSS-цветом (а не URL).
+   * Поддерживает: #rgb, #rrggbb, rgb(...), rgba(...), hsl(...), hsla(...).
+   */
+  _isColorValue(value) {
+    if (typeof value !== 'string') return false;
+    const v = value.trim().toLowerCase();
+    return v.startsWith('#') ||
+           v.startsWith('rgb(') ||
+           v.startsWith('rgba(') ||
+           v.startsWith('hsl(') ||
+           v.startsWith('hsla(');
   }
 
   updateParallax() {
@@ -1648,10 +1691,6 @@ async loadAvailableModules(selectElement) {
               this._fxDirty = false;
           }
 
-          if (typeof this.startMeasure === 'function') this.startMeasure('drawDivider');
-          this.layerManager.drawDivider(this.ctx);
-          if (typeof this.endMeasure === 'function') this.endMeasure('drawDivider');
-
           if (this.selectedModule) {
               this.drawModuleSelections();
           }
@@ -1737,10 +1776,7 @@ async loadAvailableModules(selectElement) {
     };
   })();
 
-  async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
-      //console.log(
-      //  `=== ADD NEW MODULE AT POSITION: ${moduleType} to ${layerName} at (${gridX}, ${gridY}) ===`,
-      //);
+async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
 
       try {
         // Проверяем слой
@@ -1749,24 +1785,16 @@ async loadAvailableModules(selectElement) {
           return;
         }
 
-        // main.js - исправленная часть addNewModuleAtPosition()
-
         if (!this.moduleFactory.moduleRegistry[moduleType]) {
-            //console.log(`📂 Module ${moduleType} not in registry, trying to load...`);
-            
             let loaded = false;
             
             // ⭐ Проверяем, является ли модуль пользовательским
             const isUser = await this.moduleFactory.isUserModule(moduleType);
-            //console.log(`  isUser: ${isUser}, moduleType: ${moduleType}`);
             
             if (isUser) {
-                // ⭐ ПОЛЬЗОВАТЕЛЬСКИЙ → загружаем через API
-                // console.log(`📂 Loading user module: ${moduleType}`);
                 loaded = await this.moduleFactory.loadUserModule(moduleType);
             } else {
                 // ⭐ ВСТРОЕННЫЙ → загружаем из ./modules/
-                // console.log(`📂 Loading built-in module: ${moduleType}`);
                 try {
                     const modulePath = `./modules/${moduleType}.js`;
                     const module = await import(/* @vite-ignore */ modulePath);
@@ -1774,7 +1802,6 @@ async loadAvailableModules(selectElement) {
                     if (moduleKey && module[moduleKey]) {
                         this.moduleFactory.registerModule(moduleType, module[moduleKey]);
                         loaded = true;
-                        // console.log(`✅ Built-in module registered: ${moduleType}`);
                     }
                 } catch (error) {
                     console.warn(`Failed to load built-in module ${moduleType}:`, error);
@@ -1794,16 +1821,22 @@ async loadAvailableModules(selectElement) {
           return;
         }
 
+        // ⭐ Auto-layout для FX: не даём модулю оказаться выше Voice-зоны
+        if (layerName === 'fx') {
+            const fxFloorY = this._getFxFloorY();
+            if (gridY < fxFloorY) {
+                console.log(`📐 FX auto-layout: Y=${gridY} → ${fxFloorY}`);
+                gridY = fxFloorY;
+            }
+        }
+
         // Проверяем, свободно ли место
         const gridWidth = 1;
         const gridHeight = moduleDef.gridHeight || 2;
 
-        if (
-          !this.isGridCellFree(layerName, gridX, gridY, gridWidth, gridHeight)
-        ) {
-          console.log(
-            `❌ Position (${gridX}, ${gridY}) is occupied, searching nearby...`,
-          );
+        if (!this.isGridCellFree(layerName, gridX, gridY, gridWidth, gridHeight)) {
+          console.log(`❌ Position (${gridX}, ${gridY}) is occupied, searching nearby...`);
+          
           const freeSpace = this.findFreeSpace(
             layerName,
             gridWidth,
@@ -1811,14 +1844,25 @@ async loadAvailableModules(selectElement) {
             gridX,
             gridY,
           );
+          
           if (!freeSpace) {
             this.showNotification(
               `❌ Нет места в слое ${layerName === 'voice' ? 'VA' : 'FX'}`,
             );
             return;
           }
+          
           gridX = freeSpace.gridX;
           gridY = freeSpace.gridY;
+          
+          // ⭐ Повторная проверка для FX: findFreeSpace мог вернуть место выше voice
+          if (layerName === 'fx') {
+              const fxFloorY = this._getFxFloorY();
+              if (gridY < fxFloorY) {
+                  gridY = fxFloorY;
+              }
+          }
+          
           console.log(`✅ Found alternative position: (${gridX}, ${gridY})`);
         }
 
@@ -1860,7 +1904,6 @@ async loadAvailableModules(selectElement) {
             this.patchLoader.moduleMap.byLayer[layerName].push(newModule);
           }
 
-
           // ⭐ Регистрируем LED-каналы
           if (this.csoundEngine && newModule.components) {
               const leds = newModule.components.filter(c => c.constructor.name === 'LED');
@@ -1882,17 +1925,34 @@ async loadAvailableModules(selectElement) {
           else this._fxDirty = true;
           this._cablesDirty = true;
 
-          // После добавления модуля:
           if (this.csoundEngine.state === 'running') {
               this._recompileDebounced();
           }
-          //console.log(`✅ МОДУЛЬ УСПЕШНО ДОБАВЛЕН В (${gridX}, ${gridY})!`);
         }
       } catch (error) {
         console.error(`Ошибка при создании модуля ${moduleType}:`, error);
         this.showNotification(`❌ Ошибка: ${error.message}`);
       }
   }
+
+
+  /**
+   * Найти "пол" для FX-модулей — ниже всех Voice.
+   * @returns {number} gridY, ниже которого должен быть FX-модуль
+   */
+  _getFxFloorY() {
+    const voiceLayer = this.layerManager?.layers?.voice;
+    if (!voiceLayer?.modules?.length) return 0;
+    
+    let maxVoiceY = 0;
+    for (const m of voiceLayer.modules) {
+      const bottom = m.gridY + m.gridHeight;
+      if (bottom > maxVoiceY) maxVoiceY = bottom;
+    }
+    
+    return maxVoiceY + 10;
+  }
+
 
   drawDraggingCableIfNeeded() {
     if (
@@ -2031,16 +2091,8 @@ async loadAvailableModules(selectElement) {
         const gridX = Math.floor((worldX - layer.x) / GRID_UNITS.X);
         const gridY = Math.floor((worldY - layer.y) / GRID_UNITS.Y);
 
-        // Ограничиваем grid координаты
-        const maxGridX = Math.floor(layer.width / GRID_UNITS.X) - 1;
-        const maxGridY = Math.floor(layer.visibleHeight / GRID_UNITS.Y) - 1;
-
-        if (
-          gridX >= 0 &&
-          gridX <= maxGridX &&
-          gridY >= 0 &&
-          gridY <= maxGridY
-        ) {
+        // ⭐ Подсветка работает ВЕЗДЕ (мир бесконечный)
+        {
           // Рисуем подсветку ячейки (в мировых координатах)
           this.ctx.fillStyle = 'rgba(255, 255, 0, 0.15)';
           this.ctx.fillRect(

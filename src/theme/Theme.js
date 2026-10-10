@@ -25,6 +25,12 @@ export class Theme {
                 controlWidth: 1.5,
                 ...(settings?.cables || {}),
             },
+            background: {                               // ⭐ НОВАЯ СЕКЦИЯ
+                image: null,
+                parallax: true,
+                parallaxStrength: 20,
+                ...(settings?.background || {}),
+            },
         };
     }
 
@@ -43,6 +49,22 @@ export class Theme {
     get isLcd() {
         return this.preset === 'lcd';
     }
+
+    /** URL фоновой картинки. null — фон выключен. */
+    getBackgroundImage() {
+        return this.settings.background?.image ?? null;
+    }
+
+    /** Включён ли parallax. */
+    isParallaxEnabled() {
+        return this.settings.background?.parallax !== false;
+    }
+
+    /** Сила parallax. */
+    getParallaxStrength() {
+        return this.settings.background?.parallaxStrength ?? 20;
+    }
+
 
     // ============================================================
     //  ЖК-ЦВЕТ И СВЕЧЕНИЕ

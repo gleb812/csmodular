@@ -35,7 +35,23 @@ export class PatchLoader {
         
         // Очищаем текущий патч
         this.clearCurrentPatch();
-        
+
+        // ⭐ Предварительный проход: ищем самый нижний Voice
+        let maxVoiceY = 0;
+        for (const moduleDef of patchData.modules) {
+            const isVoice = (moduleDef.area || 'VOICE').toUpperCase() !== 'FX';
+            if (isVoice) {
+                const bottom = (moduleDef.vpos || 0) + 2;   // +2 — примерная высота
+                if (bottom > maxVoiceY) maxVoiceY = bottom;
+            }
+        }
+          
+        // ⭐ Куда класть FX: после самого нижнего Voice + gap
+        const FX_START_Y = maxVoiceY + 10;
+        this._fxStartY = FX_START_Y;   // сохраняем для createModuleFromDef
+          
+        console.log(`📊 Voice max Y: ${maxVoiceY}, FX will start at: ${FX_START_Y}`);
+
         // Шаг 1: Загружаем модули
         const moduleLoadResults = [];
         for (let i = 0; i < patchData.modules.length; i++) {
@@ -118,7 +134,7 @@ export class PatchLoader {
         const moduleId = moduleDef.id;
         const area = moduleDef.area;
         const hpos = moduleDef.hpos || 0;
-        const vpos = moduleDef.vpos || 0;
+        let vpos = moduleDef.vpos || 0;
         
         // Проверяем валидность данных
         if (!moduleName) {
@@ -128,7 +144,13 @@ export class PatchLoader {
         
         // Конвертируем area в layer
         const layerName = area.toUpperCase() === 'FX' ? 'fx' : 'voice';
-        
+
+        // ⭐ Для FX: сдвигаем Y, чтобы модуль был ниже всех Voice
+        if (layerName === 'fx') {
+            const fxStartY = this._fxStartY || 0;
+            vpos = fxStartY + vpos;   // оригинальный vpos FX — это offset внутри FX-зоны
+        }
+
         // Загружаем модуль если нужно
         await this.ensureModuleLoaded(moduleName);
         

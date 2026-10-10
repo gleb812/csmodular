@@ -97,6 +97,12 @@ export class LayerManager {
     this.gridCache[layerName] = cache;
   }
 
+  getLayerAtPoint(x, y) {
+    // ⭐ Все новые модули — Voice по умолчанию.
+    return 'voice';
+  }
+
+
   // 🆕 Метод для получения кеша сетки
 
   getGridCache(layerName, offsetX, offsetY, scale) {
@@ -181,85 +187,23 @@ export class LayerManager {
     this.cacheDirty = true;
   }
 
-  // Геттер для получения divider (если нужен доступ извне)
-  getDivider() {
-    return this.divider;
-  }
-
-  // Получить позицию divider
-  getDividerY() {
-    return this.divider.y;
-  }
-
-  // Установить позицию divider (с проверками)
-  setDividerY(newY) {
-    const minY = 50;
-    const maxY = this.canvas.height - 50;
-
-    if (newY >= minY && newY <= maxY) {
-      this.divider.y = newY;
-      this.updateLayerSizes();
-      return true;
-    }
-    return false;
-  }
-
-  // Проверить, находится ли точка на divider
-  isPointOnDivider(x, y) {
-    const halfHeight = this.divider.height / 2;
-    return Math.abs(y - this.divider.y) < halfHeight * 2;
-  }
-
-  // Получить divider для отрисовки
-  getDividerForDrawing() {
-    return {
-      y: this.divider.y,
-      height: this.divider.height,
-      isDragging: this.divider.isDragging,
-    };
-  }
-
-  updateLayerSizes() {
-    this.layers.voice.visibleHeight = this.divider.y - this.layers.voice.y;
-    this.layers.fx.y = this.divider.y + 10;
-    this.layers.fx.visibleHeight = this.canvas.height - this.layers.fx.y - 10;
-
-    // 🆕 При изменении размеров - кеш надо обновить
-    this.invalidateCache();
-  }
-
-  // LayerManager.js - updateCanvasSize():
   updateCanvasSize() {
-    // Используем ФИКСИРОВАННЫЕ размеры canvas
-    const canvasWidth = this.system.baseCanvasWidth || 1200;
-    const canvasHeight = this.system.baseCanvasHeight || 800;
-
-    // UI панель справа (фиксированная ширина)
-    //const uiPanelWidth = 250; // пикселей
+    // ⭐ МИР БЕСКОНЕЧНЫЙ — размеры слоёв не привязаны к canvas
+    const HUGE = 100000;
 
     // Voice слой
-    this.layers.voice.x = 0; // Отступ от левого края canvas
-    this.layers.voice.y = 0; // Отступ от верхнего края canvas
-    this.layers.voice.width = canvasWidth; // Оставляем место под UI
-    this.layers.voice.visibleHeight = this.divider.y;
-    this.layers.voice.totalHeight = 2500;
+    this.layers.voice.x = 0;
+    this.layers.voice.y = 0;
+    this.layers.voice.width = HUGE;
+    this.layers.voice.visibleHeight = HUGE;
+    this.layers.voice.totalHeight = HUGE;
 
     // FX слой
-    this.layers.fx.x = 0; // ТАКОЙ ЖЕ ОТСТУП
-    this.layers.fx.y = this.divider.y + 10;
-    this.layers.fx.width = canvasWidth;
-    this.layers.fx.visibleHeight = canvasHeight - this.layers.fx.y;
-    this.layers.fx.totalHeight = 2500;
-  }
-
-  // Проверка, находится ли точка в слое
-  getLayerAtPoint(x, y) {
-    // Проверяем в экранных координатах
-    if (y < this.divider.y) {
-      return 'voice';
-    } else {
-      return 'fx';
-    }
+    this.layers.fx.x = 0;
+    this.layers.fx.y = 0;   // ← больше НЕ привязан к divider.y!
+    this.layers.fx.width = HUGE;
+    this.layers.fx.visibleHeight = HUGE;
+    this.layers.fx.totalHeight = HUGE;
   }
 
   // Получить объект слоя по имени
@@ -278,10 +222,12 @@ export class LayerManager {
     return false;
   }
 
-  // Удалить модуль из слоя
   removeModuleFromLayer(module) {
-    if (module.layer && this.layers[module.layer]) {
-      const layer = this.layers[module.layer];
+    // ⭐ Ищем модуль ВО ВСЕХ слоях, а не только в module.layer
+    for (const layerName of ['voice', 'fx']) {
+      const layer = this.layers[layerName];
+      if (!layer) continue;
+      
       const index = layer.modules.indexOf(module);
       if (index > -1) {
         layer.modules.splice(index, 1);
@@ -290,49 +236,6 @@ export class LayerManager {
       }
     }
     return false;
-  }
-
-  // === РАБОТА С РАЗДЕЛИТЕЛЕМ ===
-
-  checkDividerClick(y) {
-    const dividerHalfHeight = this.divider.height / 2;
-    return Math.abs(y - this.divider.y) < dividerHalfHeight * 2;
-  }
-
-  startDividerDrag(y) {
-    this.divider.isDragging = true;
-    this.divider.dragStartY = y;
-  }
-
-  updateDividerDrag(y) {
-    if (!this.divider.isDragging) return;
-
-    const deltaY = y - this.divider.dragStartY;
-    const newDividerY = this.divider.y + deltaY;
-
-    // Ограничиваем движение
-    const minY = 50;
-    const maxY = this.canvas.height - 50;
-
-    if (newDividerY >= minY && newDividerY <= maxY) {
-      this.divider.y = newDividerY;
-      this.divider.dragStartY = y;
-
-      // Обновляем размеры зон
-      this.updateLayerSizes();
-      return true;
-    }
-    return false;
-  }
-
-  endDividerDrag() {
-    this.divider.isDragging = false;
-  }
-
-  updateLayerSizes() {
-    this.layers.voice.visibleHeight = this.divider.y - this.layers.voice.y;
-    this.layers.fx.y = this.divider.y + 10;
-    this.layers.fx.visibleHeight = this.canvas.height - this.layers.fx.y - 10;
   }
 
   // === РАБОТА С СЕТКОЙ И ПОЗИЦИОНИРОВАНИЕМ ===
@@ -371,16 +274,8 @@ export class LayerManager {
     const layer = this.layers[layerName];
     if (!layer) return false;
 
-    // Проверяем границы слоя
-    const maxGridX = Math.floor(layer.width / GRID_UNITS.X) - gridWidth;
-    const maxGridY =
-      Math.floor(layer.visibleHeight / GRID_UNITS.Y) - gridHeight;
-
-    if (gridX < 0 || gridX > maxGridX || gridY < 0 || gridY > maxGridY) {
-      return false;
-    }
-
-    // Проверяем все модули в слое
+    // ⭐ УБРАЛИ проверку границ слоя — мир бесконечный
+    // Проверяем ТОЛЬКО коллизии с модулями
     for (const module of layer.modules) {
       if (excludeModule && module === excludeModule) {
         continue;
@@ -422,25 +317,36 @@ export class LayerManager {
     const layer = this.layers[layerName];
     if (!layer) return null;
 
-    const maxGridX = Math.floor(layer.width / GRID_UNITS.X) - gridWidth;
-    const maxGridY =
-      Math.floor(layer.visibleHeight / GRID_UNITS.Y) - gridHeight;
+    // ⭐ Ищем от startGrid, но с "разумным" лимитом — не бесконечно
+    const MAX_SEARCH = 200; // искать в пределах ±200 ячеек
+    
+    let baseX = startGridX !== null ? startGridX : 0;
+    let baseY = startGridY !== null ? startGridY : 0;
 
-    let startX = startGridX !== null ? startGridX : 0;
-    let startY = startGridY !== null ? startGridY : 0;
-
-    for (let y = startY; y <= maxGridY; y++) {
-      for (let x = startX; x <= maxGridX; x++) {
-        if (this.isGridCellFree(layerName, x, y, gridWidth, gridHeight)) {
-          return { gridX: x, gridY: y };
-        }
-      }
-      startX = 0;
+    // Сначала пробуем точку startGrid
+    if (this.isGridCellFree(layerName, baseX, baseY, gridWidth, gridHeight)) {
+      return { gridX: baseX, gridY: baseY };
     }
 
-    return null;
-  }
+    // Затем расширяемся по спирали
+    for (let radius = 1; radius < MAX_SEARCH; radius++) {
+      for (let dx = -radius; dx <= radius; dx++) {
+        for (let dy = -radius; dy <= radius; dy++) {
+          // Только граница квадрата (внутри уже проверено)
+          if (Math.abs(dx) !== radius && Math.abs(dy) !== radius) continue;
+          
+          const x = baseX + dx;
+          const y = baseY + dy;
+          
+          if (this.isGridCellFree(layerName, x, y, gridWidth, gridHeight)) {
+            return { gridX: x, gridY: y };
+          }
+        }
+      }
+    }
 
+    return null; // не нашли (что почти невозможно при бесконечном мире)
+  }
   // === ОТРИСОВКА ===
 
   drawLayerGrid(ctx, layerName, offsetX, offsetY, scale) {
@@ -474,63 +380,6 @@ export class LayerManager {
     }
 
     ctx.restore();
-  }
-
-  drawDivider(ctx) {
-    ctx.save();
-
-    // Линия разделителя
-    ctx.strokeStyle = '#0af';
-    ctx.lineWidth = 3;
-    ctx.setLineDash([5, 5]);
-    ctx.beginPath();
-    ctx.moveTo(0, this.divider.y);
-    ctx.lineTo(this.canvas.width, this.divider.y);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Кружок для перетаскивания
-    ctx.fillStyle = '#0af';
-    ctx.beginPath();
-    ctx.arc(this.canvas.width / 2, this.divider.y, 8, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Подписи зон
-    ctx.fillStyle = '#0af';
-    ctx.font = 'bold 14px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('VOICE', this.canvas.width / 2, this.layers.voice.y + 20);
-    ctx.fillText('FX', this.canvas.width / 2, this.layers.fx.y + 20);
-
-    ctx.restore();
-  }
-
-  // === СКРОЛЛ ===
-
-  handleWheel(deltaY, y) {
-    if (y < this.divider.y) {
-      // Voice зона
-      this.layers.voice.scrollY -= deltaY;
-      this.layers.voice.scrollY = Math.max(
-        0,
-        Math.min(
-          this.layers.voice.totalHeight - this.layers.voice.visibleHeight,
-          this.layers.voice.scrollY,
-        ),
-      );
-      return 'voice';
-    } else {
-      // FX зона
-      this.layers.fx.scrollY -= deltaY;
-      this.layers.fx.scrollY = Math.max(
-        0,
-        Math.min(
-          this.layers.fx.totalHeight - this.layers.fx.visibleHeight,
-          this.layers.fx.scrollY,
-        ),
-      );
-      return 'fx';
-    }
   }
 
   // === DEBUG ===
