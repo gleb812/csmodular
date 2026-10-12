@@ -71,6 +71,10 @@ class ModularSystem {
     }
     this.canvas = document.getElementById('modularCanvas');
     this.ctx = this.canvas.getContext('2d');
+    this.dynamicCanvas = document.getElementById('dynamicCanvas');
+    this.dynamicCtx = this.dynamicCanvas.getContext('2d');
+    this.overlayCanvas = document.getElementById('overlayCanvas');
+    this.overlayCtx = this.overlayCanvas.getContext('2d');
     this.components = [];
     this.draggingComponent = null;
     this.scale = 1.0;
@@ -255,41 +259,44 @@ class ModularSystem {
   }
 
 
-  _renderLeds() {
-      const ctx = this.ctx;
-      const layers = this.layerManager.layers;
-      
-      ctx.save();
-      ctx.translate(this.offsetX, this.offsetY);
-      ctx.scale(this.scale, this.scale);
-      
-      ['voice', 'fx'].forEach(layerName => {
-          const layer = layers[layerName];
-          if (!layer) return;
-          
-          layer.modules.forEach(module => {
-              if (!module.components) return;
-              if (module.pixelX === null || module.pixelY === null) return;
-              
-              const leds = module.components.filter(c => c.constructor.name === 'LED');
-              if (leds.length === 0) return;
-              
-              const bgColor = module.customColor || module.defaultColor || '#606060';
-              
-              leds.forEach(led => {
-                  // Затираем область LED цветом панели
-                  ctx.fillStyle = bgColor;
-                  ctx.fillRect(led.x - 1, led.y - 1, led.width + 2, led.height + 2);
-                  
-                  // Перерисовываем LED (внутри draw сам читает значение)
-                  led.draw(ctx);
-              });
-          });
-      });
-      
-      ctx.restore();
-  }
+_renderDynamic() {
+    const ctx = this.dynamicCtx;
+    if (!ctx) return;
 
+    // Очищаем весь динамический слой
+    ctx.clearRect(0, 0, this.dynamicCanvas.width, this.dynamicCanvas.height);
+
+    ctx.save();
+    ctx.translate(this.offsetX, this.offsetY);
+    ctx.scale(this.scale, this.scale);
+
+    const layers = this.layerManager.layers;
+
+    // ⭐ Типы компонентов, которые рисуются на динамическом слое
+    const DYNAMIC_TYPES = ['LED', 'MiniVU', 'Graph'];
+
+    ['voice', 'fx'].forEach(layerName => {
+        const layer = layers[layerName];
+        if (!layer) return;
+
+        layer.modules.forEach(module => {
+            if (!module.components) return;
+            if (module.pixelX === null || module.pixelY === null) return;
+
+            const dynamicComps = module.components.filter(
+                c => DYNAMIC_TYPES.includes(c.constructor.name)
+            );
+            if (dynamicComps.length === 0) return;
+
+            // this.x / this.y — мировые координаты
+            dynamicComps.forEach(comp => {
+                comp.draw(ctx);
+            });
+        });
+    });
+
+    ctx.restore();
+}
 
   _csoundStateLabel(state) {
       return {
@@ -646,6 +653,23 @@ class ModularSystem {
       // ⭐ Canvas = окно браузера
       this.resizeCanvasToWindow();
 
+      this.overlayCanvas.style.backgroundColor = 'transparent';
+      this.overlayCanvas.style.border = 'none';
+      this.overlayCanvas.style.zIndex = '3';
+      this.overlayCanvas.style.position = 'fixed';
+      this.overlayCanvas.style.left = '0';
+      this.overlayCanvas.style.top = '0';
+      this.overlayCanvas.style.pointerEvents = 'none';
+
+      // dynamicCanvas — поверх основного
+      this.dynamicCanvas.style.backgroundColor = 'transparent';
+      this.dynamicCanvas.style.border = 'none';
+      this.dynamicCanvas.style.zIndex = '2';
+      this.dynamicCanvas.style.position = 'fixed';
+      this.dynamicCanvas.style.left = '0';
+      this.dynamicCanvas.style.top = '0';
+      this.dynamicCanvas.style.pointerEvents = 'none';
+
       // Прозрачный фон
       this.canvas.style.backgroundColor = 'transparent';
       this.canvas.style.border = 'none';
@@ -670,7 +694,6 @@ class ModularSystem {
           }
       }, 100);
 
-      // ⭐ Ресайз — resize canvas
       window.addEventListener('resize', () => {
           this.resizeCanvasToWindow();
           this.layerManager.updateCanvasSize();
@@ -688,22 +711,35 @@ class ModularSystem {
       });
   }
 
-  // ⭐ Новый метод: подогнать canvas под окно
   resizeCanvasToWindow() {
       const dpr = window.devicePixelRatio || 1;
       const w = window.innerWidth;
       const h = window.innerHeight;
 
-      // Внутренние размеры — на весь экран (с учётом DPR)
+      // Основной канвас
       this.canvas.width = w * dpr;
       this.canvas.height = h * dpr;
-
-      // CSS-размеры — на весь экран
       this.canvas.style.width = `${w}px`;
       this.canvas.style.height = `${h}px`;
-
-      // Масштаб контекста — если DPR > 1 (Retina)
       this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // Динамический канвас (LED)
+      if (this.dynamicCanvas) {
+          this.dynamicCanvas.width = w * dpr;
+          this.dynamicCanvas.height = h * dpr;
+          this.dynamicCanvas.style.width = `${w}px`;
+          this.dynamicCanvas.style.height = `${h}px`;
+          this.dynamicCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      // Overlay-канвас (кабели, выделение)
+      if (this.overlayCanvas) {
+          this.overlayCanvas.width = w * dpr;
+          this.overlayCanvas.height = h * dpr;
+          this.overlayCanvas.style.width = `${w}px`;
+          this.overlayCanvas.style.height = `${h}px`;
+          this.overlayCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
   }
 
   openContextMenuAtMousePosition() {
@@ -1613,7 +1649,7 @@ async loadAvailableModules(selectElement) {
     const scaleFactor = this.scale / oldScale;
     this.offsetX = centerX - (centerX - this.offsetX) * scaleFactor;
     this.offsetY = centerY - (centerY - this.offsetY) * scaleFactor;
-
+    this.forceRedraw();
     this.updateZoomInfo();
   }
 
@@ -1649,27 +1685,29 @@ async loadAvailableModules(selectElement) {
       this.frameCount++;
       this.layerManager.frameCounter = this.frameCount;
 
-      // ⭐ LED — перерисовываем ТОЛЬКО сами LED, без перерисовки слоя
-      if (this.frameCount % 5 === 0) {
-          this._renderLeds();
+      // ⭐ SHAPE — пока есть активные переходы
+      if (this.patchManager.hasActiveTransitions()) {
+          this.patchManager.updateShapes();
+          this._cablesDirty = true;
+          this._voiceDirty = true;
+          this._fxDirty = true;
       }
 
-      // ⚠️ ИЗМЕНЕНИЕ: всегда перерисовываем хотя бы раз в 30 кадров
+      // ⭐ hasDragging — включая pan
       const hasDragging = this.draggingComponent ||
                           this.patchManager.draggingCable?.isDragging ||
-                          this.layerManager.divider.isDragging;
+                          this.layerManager.divider.isDragging ||
+                          this.isPanning;
 
-      // Добавляем флаг, что было перетаскивание и нужна финальная перерисовка
       if (hasDragging) {
           this._wasDragging = true;
       }
 
-      // Перерисовываем если: есть dirty флаги, или перетаскивание, или был драг и нужна финальная отрисовка
       const needsRedraw = hasDragging ||
                           this._voiceDirty ||
                           this._fxDirty ||
                           this._cablesDirty ||
-                          this._forceRedraw ||  
+                          this._forceRedraw ||
                           this.frameCount % 30 === 0;
 
       if (needsRedraw) {
@@ -1691,17 +1729,12 @@ async loadAvailableModules(selectElement) {
               this._fxDirty = false;
           }
 
+          // ⭐ Кабели и выделение — на overlay-слое
           if (this.selectedModule) {
               this.drawModuleSelections();
           }
+          this._renderCables();
 
-          if (this.patchManager.draggingCable?.isDragging) {
-              if (typeof this.startMeasure === 'function') this.startMeasure('drawCables');
-              this.drawDraggingCableIfNeeded();
-              if (typeof this.endMeasure === 'function') this.endMeasure('drawCables');
-          }
-
-          // Сбрасываем forceRedraw после отрисовки
           if (this._forceRedraw) {
               this._forceRedraw = false;
           }
@@ -1711,11 +1744,9 @@ async loadAvailableModules(selectElement) {
           this._cablesDirty = false;
       }
 
-      if (typeof this.endMeasure === 'function') this.endMeasure('total');
+      this._renderDynamic();
 
-      if (this.frameCount % 60 === 0) {
-          this.updateFPS(now);
-      }
+      if (typeof this.endMeasure === 'function') this.endMeasure('total');
 
       if (this.frameCount % 60 === 0) {
           this.updateFPS(now);
@@ -1953,98 +1984,66 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
     return maxVoiceY + 10;
   }
 
+  _renderCables() {
+      const ctx = this.overlayCtx;
+      if (!ctx) return;
 
-  drawDraggingCableIfNeeded() {
-    if (
-      this.patchManager.draggingCable &&
-      this.patchManager.draggingCable.isDragging
-    ) {
-      // Рисуем ПРЯМО на canvas без трансформаций
-      this.patchManager.drawDraggingCable(
-        this.ctx,
-        this.offsetX,
-        this.offsetY,
-        this.scale,
-      );
-    }
+      // Очищаем весь overlay-слой
+      ctx.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);
+
+      // Обычные кабели — в мировых координатах
+      ctx.save();
+      ctx.translate(this.offsetX, this.offsetY);
+      ctx.scale(this.scale, this.scale);
+
+      this.patchManager.cables.forEach((cable) => {
+          cable.draw(ctx);
+      });
+
+      ctx.restore();
+
+      // Перетаскиваемый кабель — сам трансформирует координаты,
+      // поэтому вызывается ВНЕ ctx.translate/scale
+      if (this.patchManager.draggingCable?.isDragging) {
+          this.patchManager.drawDraggingCable(
+              ctx,
+              this.offsetX,
+              this.offsetY,
+              this.scale,
+          );
+      }
   }
 
-  // Метод для отрисовки кабелей конкретного слоя
-  // нигде не вызывается!
-  // drawCablesForLayer(layerName) {
-  //     const layer = this.layerManager.layers[layerName];
-
-  //     // Сохраняем состояние контекста
-  //     this.ctx.save();
-
-  //     // Устанавливаем область отсечения для слоя
-  //     this.ctx.beginPath();
-  //     this.ctx.rect(layer.x, layer.y, layer.width, layer.visibleHeight);
-  //     this.ctx.clip();
-
-  //     // Рисуем только кабели этого слоя
-  //     this.patchManager.cables.forEach(cable => {
-  //         const fromModule = cable.fromJack?.module;
-  //         const toModule = cable.toJack?.module;
-
-  //         if (!fromModule || !toModule) return;
-
-  //         // Проверяем, что оба модуля в нужном слое
-  //         if (fromModule.layer === layerName && toModule.layer === layerName) {
-  //             cable.draw(this.ctx);
-  //         }
-  //     });
-
-  //     // Восстанавливаем контекст
-  //     this.ctx.restore();
-  // }
-
   drawModuleSelections() {
-    this.ctx.save();
-    this.ctx.translate(this.offsetX, this.offsetY);
-    this.ctx.scale(this.scale, this.scale);
+      const ctx = this.overlayCtx;   // ⭐ было this.ctx
+      if (!ctx) return;
 
-    // Рисуем выделения для ВСЕХ модулей
-    this.components.forEach((panel) => {
-      if (panel.isSelected && panel.pixelX !== null && panel.pixelY !== null) {
-        // // Рисуем голубую рамку
-        // this.ctx.strokeStyle = '#0af';
-        // this.ctx.lineWidth = 3;
-        // //this.ctx.setLineDash([5, 3]);
-        // this.ctx.strokeRect(
-        //     panel.pixelX - 5,
-        //     panel.pixelY - 5,
-        //     panel.width + 10,
-        //     panel.height + 10
-        // );
-        // this.ctx.setLineDash([]);
+      ctx.save();
+      ctx.translate(this.offsetX, this.offsetY);
+      ctx.scale(this.scale, this.scale);
 
-        // Полупрозрачная заливка
-        this.ctx.fillStyle = 'rgba(0, 170, 255, 0.1)';
-        this.ctx.fillRect(
-          panel.pixelX - 5,
-          panel.pixelY - 5,
-          panel.width + 10,
-          panel.height + 10,
-        );
-      }
-    });
+      this.components.forEach((panel) => {
+          if (panel.isSelected && panel.pixelX !== null && panel.pixelY !== null) {
+              ctx.fillStyle = 'rgba(0, 170, 255, 0.1)';
+              ctx.fillRect(
+                  panel.pixelX - 5,
+                  panel.pixelY - 5,
+                  panel.width + 10,
+                  panel.height + 10,
+              );
+          }
+      });
 
-    this.ctx.restore();
+      ctx.restore();
   }
 
   drawLayer(layerName) {
-    // if (layerName === 'voice' && !this._voiceDirty) {
-    //   // Все равно нужно рисовать фон и сетку? Они кешированы, так что можно пропустить все.
-    //   // Но если dirty false, значит ничего не изменилось, можно полностью пропустить отрисовку слоя.
-    //   return;
-    // }
     const layer = this.layerManager.getLayer(layerName);
     if (!layer) return;
 
     this.ctx.save();
 
-    this.layerManager.updateBackgroundCache(); // обновит только если нужно
+    this.layerManager.updateBackgroundCache(); 
     const cache = this.layerManager.backgroundCache[layerName];
     if (cache) {
       this.ctx.drawImage(
@@ -2251,20 +2250,6 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
       module.draw(this.ctx);
     });
 
-    // КАБЕЛИ ЭТОГО СЛОЯ - ПРЯМО ЗДЕСЬ!
-    this.patchManager.cables.forEach((cable) => {
-      const fromModule = cable.fromJack?.module;
-      const toModule = cable.toJack?.module;
-
-      if (!fromModule || !toModule) return;
-
-      // Только кабели этого слоя
-      if (fromModule.layer === layerName && toModule.layer === layerName) {
-        cable.draw(this.ctx);
-        //console.log('cable updated');
-      }
-    });
-
     this.ctx.restore();
     this.ctx.restore();
   }
@@ -2273,7 +2258,7 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
 
 let modularSystem; // Объявляем глобально
 
-// В конце main.js, после создания modularSystem:
+
 window.debugModuleInfo = (index = 0) => {
   if (!modularSystem || !modularSystem.components[index]) {
     console.error('Module not found');

@@ -45,7 +45,6 @@ export class ButtonRadio extends BaseComponent {
         
         // Для отслеживания состояния нажатия отдельных кнопок
         this.buttonPressedStates = new Array(buttonCount).fill(false);
-        this.buttonHoveredStates = new Array(buttonCount).fill(false);
         
         // Тултип
         this.showTooltip = false;
@@ -87,7 +86,7 @@ export class ButtonRadio extends BaseComponent {
             buttonCenterX = buttonX + this.buttonWidth / 2;
             buttonCenterY = buttonY + this.buttonHeight / 2;
 
-            // Анимация
+            // Анимация нажатия (визуальный отклик на клик)
             let scale = 1, offsetY = 0;
             if (this.buttonPressedStates[i]) {
                 const progress = this.animationProgress[i] / this.animationDuration;
@@ -100,30 +99,23 @@ export class ButtonRadio extends BaseComponent {
             const drawWidth = this.buttonWidth * scale;
             const drawHeight = this.buttonHeight * scale;
 
+            const isSelected = i === this.selectedIndex;
+            const isPressed = this.buttonPressedStates[i];
+
             // === ФОН КНОПКИ ===
             if (isLcd) {
-                const isSelected = i === this.selectedIndex;
-                const isHover = this.buttonHoveredStates[i];
-                const isPressed = this.buttonPressedStates[i];
-
-                // Selected → ярче, unselected → очень слабо
                 let intensity;
                 if (isSelected) {
-                    intensity = isPressed ? 0.4 : isHover ? 0.3 : 0.2;
+                    intensity = isPressed ? 0.25 : 0.15;
                 } else {
-                    intensity = isPressed ? 0.15 : isHover ? 0.1 : 0.03;
+                    intensity = isPressed ? 0.08 : 0.03;
                 }
                 ctx.fillStyle = theme.getAccentAlpha(intensity);
             } else {
-                // Classic (как было)
-                if (i === this.selectedIndex) {
-                    if (this.buttonPressedStates[i])        ctx.fillStyle = '#3730a3';
-                    else if (this.buttonHoveredStates[i])   ctx.fillStyle = '#2d3748';
-                    else                                    ctx.fillStyle = '#4f46e5';
+                if (isSelected) {
+                    ctx.fillStyle = isPressed ? '#3730a3' : '#4f46e5';
                 } else {
-                    if (this.buttonPressedStates[i])        ctx.fillStyle = '#2d3748';
-                    else if (this.buttonHoveredStates[i])   ctx.fillStyle = '#1a202c';
-                    else                                    ctx.fillStyle = '#2d3748';
+                    ctx.fillStyle = isPressed ? '#111827' : '#2d3748';
                 }
             }
 
@@ -144,12 +136,12 @@ export class ButtonRadio extends BaseComponent {
             // === РАМКА КНОПКИ ===
             if (isLcd) {
                 ctx.strokeStyle = accent;
-                ctx.lineWidth = theme.lineWidth(
-                    i === this.selectedIndex ? 1.5 : 1
-                );
-                theme.applyGlow(ctx);
+                ctx.lineWidth = isSelected
+                    ? theme.lineWidth(2)
+                    : theme.lineWidth(0.8);
+                if (isSelected) theme.applyGlow(ctx);
             } else {
-                ctx.strokeStyle = this.buttonHoveredStates[i] ? '#0af' : '#666';
+                ctx.strokeStyle = '#666';
                 ctx.lineWidth = 1;
             }
             this.drawRoundedRect(ctx, drawX, drawY, drawWidth, drawHeight, tl, tr, br, bl);
@@ -166,18 +158,22 @@ export class ButtonRadio extends BaseComponent {
                     ctx.moveTo(buttonX, buttonY + this.buttonHeight);
                     ctx.lineTo(buttonX + this.buttonWidth, buttonY + this.buttonHeight);
                 }
-                ctx.strokeStyle = isLcd ? theme.getAccentAlpha(0.4) : '#666';
+                ctx.strokeStyle = isLcd ? theme.getAccentAlpha(0.3) : '#666';
+                ctx.lineWidth = isLcd ? theme.lineWidth(0.6) : 1;
                 ctx.stroke();
             }
 
             // === ТЕКСТ ===
             if (isLcd) {
                 ctx.fillStyle = accent;
-                if (i === this.selectedIndex) theme.applyGlow(ctx);
+                ctx.font = isSelected
+                    ? 'bold 8px Arial, sans-serif'
+                    : '8px Arial, sans-serif';
+                if (isSelected) theme.applyGlow(ctx);
             } else {
                 ctx.fillStyle = '#fff';
+                ctx.font = 'bold 8px Arial, sans-serif';
             }
-            ctx.font = 'bold 8px Arial, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(this.labels[i], buttonCenterX, buttonCenterY + offsetY);
@@ -214,6 +210,8 @@ export class ButtonRadio extends BaseComponent {
         ctx.restore();
         ctx.restore();
     }
+
+
     drawRoundedRect(ctx, x, y, width, height, tl, tr, br, bl) {
         ctx.beginPath();
         ctx.moveTo(x + tl, y);
@@ -314,30 +312,25 @@ export class ButtonRadio extends BaseComponent {
     // === СОСТОЯНИЕ  ===
     
     handleMouseMove(x, y) {
-        const wasHovered = this.isHovered;
         super.handleMouseMove(x, y);
-        
+
         // Определяем, над какой кнопкой находится мышь
-        let newHoveredIndex = null;
+        // (нужно для курсора и, возможно, будущей логики)
         if (this.isHovered) {
+            let idx;
             if (this.orientation === 'horizontal') {
-                newHoveredIndex = Math.floor((x - this.x) / this.buttonWidth);
+                idx = Math.floor((x - this.x) / this.buttonWidth);
             } else {
-                newHoveredIndex = Math.floor((y - this.y) / this.buttonHeight);
+                idx = Math.floor((y - this.y) / this.buttonHeight);
             }
-            
-            if (newHoveredIndex >= 0 && newHoveredIndex < this.buttonCount) {
-                // Обновляем состояние hover для всех кнопок
-                this.buttonHoveredStates.fill(false);
-                this.buttonHoveredStates[newHoveredIndex] = true;
+            if (idx >= 0 && idx < this.buttonCount) {
+                this.hoveredButtonIndex = idx;
             } else {
-                newHoveredIndex = null;
+                this.hoveredButtonIndex = null;
             }
         } else {
-            this.buttonHoveredStates.fill(false);
+            this.hoveredButtonIndex = null;
         }
-        
-        this.hoveredButtonIndex = newHoveredIndex;
     }
     
     // === УПРАВЛЕНИЕ СОСТОЯНИЕМ ===

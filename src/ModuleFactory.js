@@ -386,8 +386,8 @@ export class ModuleFactory {
                     case 'LED':
                         component = new LED(
                             tempX, tempY,
-                            compDef.width || 16,
-                            compDef.height || 10,
+                            compDef.width || 8,
+                            compDef.height || 8,
                         );
                         // ⭐ Свойства LED
                         if (compDef.sourceComponentId !== undefined && compDef.sourceComponentId !== null) {

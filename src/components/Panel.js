@@ -160,8 +160,12 @@ export class Panel {
       );
     }
 
-    // Компоненты (уже отсортированы по zIndex)
-    this.components.forEach((comp) => comp.draw(ctx));
+    // ⭐ Динамические компоненты (LED, MiniVU, Graph) рисуются на отдельном слое
+    const DYNAMIC_TYPES = ['LED', 'MiniVU', 'Graph'];
+    this.components.forEach((comp) => {
+        if (DYNAMIC_TYPES.includes(comp.constructor.name)) return;
+        comp.draw(ctx);
+    });
 
     ctx.restore();
     this.dirty = false;

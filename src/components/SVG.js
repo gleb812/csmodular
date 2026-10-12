@@ -14,7 +14,7 @@ export class SVG extends BaseComponent {
         this.image = null;
         this.isLoaded = false;
         this.originalImage = null; // Храним оригинальное изображение
-        
+        this.classicTintColor = color;
         this.loadSVG();
     }
     
@@ -42,36 +42,38 @@ export class SVG extends BaseComponent {
         img.src = this.svgSrc;
     }
     
-    /**
-     * Применяет цвет тонирования к SVG
-     */
     applyTintColor() {
         if (!this.originalImage || !this.tintColor) {
             this.image = this.originalImage;
             return;
         }
-        
-        // Создаем временный canvas для обработки
+
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        
+
         canvas.width = this.originalImage.width;
         canvas.height = this.originalImage.height;
-        
-        // 1. Рисуем оригинальное SVG
+
+        // ⭐ Glow — запекаем в изображение (LCD)
+        const theme = getCurrentTheme();
+        if (theme.isLcd) {
+            const glow = theme.getGlow();
+            if (glow > 0) {
+                ctx.shadowBlur = 8 * glow;
+                ctx.shadowColor = this.tintColor;
+            }
+        }
+
+        // Рисуем оригинал (shadow даст glow вокруг)
         ctx.drawImage(this.originalImage, 0, 0);
-        
-        // 2. Сохраняем альфа-канал
+
+        // Тонируем через source-in
         ctx.globalCompositeOperation = 'source-in';
-        
-        // 3. Заливаем выбранным цветом
         ctx.fillStyle = this.tintColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // 4. Восстанавливаем composite operation
+
         ctx.globalCompositeOperation = 'source-over';
-        
-        // Создаем новое изображение
+
         const tintedImage = new Image();
         tintedImage.src = canvas.toDataURL();
         tintedImage.onload = () => {
@@ -83,18 +85,20 @@ export class SVG extends BaseComponent {
         const theme = getCurrentTheme();
         const isLcd = theme.isLcd;
 
-        // ⭐ В LCD: если цвет не задан, тонируем в цвет темы
-        if (isLcd && !this.tintColor && this.isLoaded && this.originalImage) {
-            // Однократно применяем тинт при первом рендере в LCD
-            if (!this._lcdTinted) {
-                this.setTintColor(theme.getAccentColor());
+        // ⭐ В LCD всегда используем акцент темы
+        if (isLcd && this.isLoaded && this.originalImage) {
+            const accent = theme.getAccentColor();
+            if (this._lcdTintColor !== accent) {
+                this.setTintColor(accent);
+                this._lcdTintColor = accent;
                 this._lcdTinted = true;
             }
         }
 
-        // ⭐ Если вернулись в classic — убираем тинт
+        // ⭐ Возврат в classic — восстанавливаем оригинальный цвет модуля
         if (!isLcd && this._lcdTinted) {
-            this.clearTintColor();
+            this.setTintColor(this.classicTintColor);
+            this._lcdTintColor = null;
             this._lcdTinted = false;
         }
 
@@ -107,7 +111,6 @@ export class SVG extends BaseComponent {
                 ctx.strokeRect(this.x, this.y, this.width, this.height);
             }
         } else {
-            // Заглушка — в LCD используем цвет темы
             ctx.fillStyle = isLcd
                 ? theme.getAccentAlpha(0.15)
                 : 'rgba(150, 150, 150, 0.2)';

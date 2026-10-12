@@ -23,32 +23,25 @@ export class ButtonFlat extends BaseComponent {
     draw(ctx) {
         const theme = getCurrentTheme();
         const isLcd = theme.isLcd;
+        const accent = theme.getAccentColor();
 
         // === ФОН ===
         if (isLcd) {
-            if (this.isPressed) {
-                ctx.fillStyle = theme.getAccentAlpha(0.25);
-            } else if (this.isHovered) {
-                ctx.fillStyle = theme.getAccentAlpha(0.15);
-            } else {
-                ctx.fillStyle = theme.getAccentAlpha(0.05);
-            }
+            ctx.fillStyle = this.isPressed
+                ? theme.getAccentAlpha(0.25)
+                : theme.getAccentAlpha(0.05);
         } else {
-            if (this.isPressed) {
-                ctx.fillStyle = '#4f46e5';
-            } else if (this.isHovered) {
-                ctx.fillStyle = '#4a5568';
-            } else {
-                ctx.fillStyle = '#2d3748';
-            }
+            ctx.fillStyle = this.isPressed ? '#4f46e5' : '#2d3748';
         }
         ctx.fillRect(this.x, this.y, this.width, this.height);
 
         // === РАМКА ===
         if (isLcd) {
-            ctx.strokeStyle = theme.getAccentColor();
-            ctx.lineWidth = theme.lineWidth(1);
-            theme.applyGlow(ctx);
+            ctx.strokeStyle = accent;
+            ctx.lineWidth = this.isPressed
+                ? theme.lineWidth(2)
+                : theme.lineWidth(0.8);
+            if (this.isPressed) theme.applyGlow(ctx);
         } else {
             ctx.strokeStyle = '#666';
             ctx.lineWidth = 1;
@@ -58,12 +51,15 @@ export class ButtonFlat extends BaseComponent {
 
         // === ТЕКСТ ===
         if (isLcd) {
-            ctx.fillStyle = theme.getTextColor();
-            theme.applyGlow(ctx);
+            ctx.fillStyle = accent;
+            ctx.font = this.isPressed
+                ? 'bold 8px Arial, sans-serif'
+                : '8px Arial, sans-serif';
+            if (this.isPressed) theme.applyGlow(ctx);
         } else {
             ctx.fillStyle = '#fff';
+            ctx.font = 'bold 8px Arial, sans-serif';
         }
-        ctx.font = 'bold 8px Arial, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(
@@ -77,10 +73,10 @@ export class ButtonFlat extends BaseComponent {
         if (this.positions.length > 1) {
             const segmentWidth = this.width / this.positions.length;
             if (isLcd) {
-                ctx.fillStyle = theme.getActiveFillColor();
-                theme.applyGlow(ctx);
+                ctx.fillStyle = accent;
+                if (this.isPressed) theme.applyGlow(ctx);
             } else {
-                ctx.fillStyle = this.isHovered ? '#0af' : '#4f46e5';
+                ctx.fillStyle = '#4f46e5';
             }
             ctx.fillRect(
                 this.x + this.currentIndex * segmentWidth,

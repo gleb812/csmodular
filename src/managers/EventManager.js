@@ -212,12 +212,16 @@ export class EventManager {
 
     // === ПАНОРАМИРОВАНИЕ ===
     if (this.system.isPanning) {
-      this.system.offsetX =
-        this.system.startOffsetX + (x - this.system.startPanX);
-      this.system.offsetY =
-        this.system.startOffsetY + (y - this.system.startPanY);
-      e.preventDefault();
-      return;
+        this.system.offsetX = this.system.startOffsetX + (x - this.system.startPanX);
+        this.system.offsetY = this.system.startOffsetY + (y - this.system.startPanY);
+
+        // ⭐ Панорамирование меняет вид — форсируем полную перерисовку каждый кадр
+        if (this.system.forceRedraw) {
+            this.system.forceRedraw();
+        }
+
+        e.preventDefault();
+        return;
     }
 
     // === ПРАВЫЙ КЛИК НА ДЖЕКЕ ===

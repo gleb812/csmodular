@@ -40,7 +40,7 @@ export class ButtonText extends BaseComponent {
 
         ctx.save();
 
-        // Анимация нажатия
+        // Анимация нажатия (только визуальный отклик на клик)
         let scale = 1;
         let offsetY = 0;
         if (this.isPressed) {
@@ -56,39 +56,41 @@ export class ButtonText extends BaseComponent {
         const drawWidth = this.width * scale;
         const drawHeight = ButtonText.FIXED_HEIGHT * scale;
 
+        const radius = 2;
+
         // === ФОН ===
         if (isLcd) {
-            // LCD: ярче при active, слабее при inactive
-            const intensity = this.isActive
-                ? (this.isPressed ? 0.4 : this.isHovered ? 0.3 : 0.2)
-                : (this.isPressed ? 0.15 : this.isHovered ? 0.1 : 0.03);
+            // Активна → чуть плотнее, неактивна → почти прозрачно
+            // Pressed → небольшой отклик
+            let intensity;
+            if (this.isActive) {
+                intensity = this.isPressed ? 0.25 : 0.15;
+            } else {
+                intensity = this.isPressed ? 0.08 : 0.03;
+            }
             ctx.fillStyle = theme.getAccentAlpha(intensity);
         } else {
-            // Classic: как было
+            // Classic — только active / inactive, pressed чуть темнее
             if (this.isActive) {
-                if (this.isPressed)        ctx.fillStyle = '#3730a3';
-                else if (this.isHovered)   ctx.fillStyle = '#3730a3';
-                else                       ctx.fillStyle = '#4f46e5';
+                ctx.fillStyle = this.isPressed ? '#3730a3' : '#4f46e5';
             } else {
-                if (this.isPressed)        ctx.fillStyle = '#4b5563';
-                else if (this.isHovered)   ctx.fillStyle = '#374151';
-                else                       ctx.fillStyle = '#1f2937';
+                ctx.fillStyle = this.isPressed ? '#111827' : '#1f2937';
             }
         }
 
-        const radius = 2;
         this.drawRoundedRect(ctx, drawX, drawY, drawWidth, drawHeight, radius);
         ctx.fill();
 
         // === РАМКА ===
         if (isLcd) {
+            // Active → толстая, Inactive → тонкая
             ctx.strokeStyle = accent;
-            ctx.lineWidth = theme.lineWidth(this.isActive ? 1.5 : 1);
-            theme.applyGlow(ctx);
+            ctx.lineWidth = this.isActive
+                ? theme.lineWidth(2)
+                : theme.lineWidth(0.8);
+            if (this.isActive) theme.applyGlow(ctx);
         } else {
-            ctx.strokeStyle = this.isActive
-                ? (this.isHovered ? '#0af' : '#6366f1')
-                : (this.isHovered ? '#9ca3af' : '#4b5563');
+            ctx.strokeStyle = this.isActive ? '#6366f1' : '#4b5563';
             ctx.lineWidth = 1;
         }
         this.drawRoundedRect(ctx, drawX, drawY, drawWidth, drawHeight, radius);
@@ -98,11 +100,14 @@ export class ButtonText extends BaseComponent {
         // === ТЕКСТ ===
         if (isLcd) {
             ctx.fillStyle = accent;
-            theme.applyGlow(ctx);
+            ctx.font = this.isActive
+                ? 'bold 10px Arial, sans-serif'
+                : '9px Arial, sans-serif';
+            if (this.isActive) theme.applyGlow(ctx);
         } else {
             ctx.fillStyle = this.isActive ? '#ffffff' : '#d1d5db';
+            ctx.font = 'bold 10px Arial, sans-serif';
         }
-        ctx.font = 'bold 10px Arial, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(this.text, centerX, centerY + offsetY);

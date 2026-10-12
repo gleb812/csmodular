@@ -20,13 +20,20 @@ body {
 }
 
 #modularCanvas {
-    /* Убираем всё, кроме позиционирования */
-    position: fixed;
-    top: 0;
+    position: absolute;
     left: 0;
-    width: 100vw;
-    height: 100vh;
-    /* НЕТ background, border, border-radius */
+    top: 0;
+    cursor: default;
+    z-index: 1;
+    pointer-events: auto;
+}
+
+#dynamicCanvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 2;
+    pointer-events: none;   /* мышь пропускается на mainCanvas */
 }
 
 #parallax-bg {
@@ -44,9 +51,10 @@ body {
     pointer-events: none;
 }
 
-#modularCanvas {
+#overlayCanvas {
     position: fixed;
-    top: 0;
     left: 0;
-    z-index: 1;
+    top: 0;
+    z-index: 3;
+    pointer-events: none;
 }

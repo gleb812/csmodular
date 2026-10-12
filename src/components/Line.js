@@ -28,9 +28,9 @@ export class Line extends BaseComponent {
         ctx.save();
 
         // === ЦВЕТ ===
-        // Classic: свой цвет
-        // LCD: цвет темы (или свой, если пользователь задал явно)
-        if (isLcd && (!this.color || this.color === '#666666' || this.color === '#666')) {
+        // Classic: свой цвет (как задано в модуле)
+        // LCD: всегда акцент темы — Line декоративная, не несёт смысла
+        if (isLcd) {
             ctx.strokeStyle = theme.getAccentColor();
             theme.applyGlow(ctx);
         } else {

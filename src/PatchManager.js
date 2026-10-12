@@ -1,5 +1,6 @@
 // src/PatchManager.js
 import { Cable } from './Cable.js';
+import { getCurrentTheme } from './theme/currentTheme.js';
 
 export class PatchManager {
   constructor(system) {
@@ -65,7 +66,6 @@ export class PatchManager {
       return cable;
   }
 
-  // PatchManager.js - добавить методы:
   getCablesForJack(jack) {
     return this.cables.filter(
       (cable) => cable.fromJack === jack || cable.toJack === jack,
@@ -85,7 +85,6 @@ export class PatchManager {
     return cables.length;
   }
 
-  // PatchManager.js
   changeCableColor(jack, colorHex, isVisual = true) {
     const cables = this.getCablesForJack(jack);
     //console.log(`Меняем ${isVisual ? 'визуальный' : 'функциональный'} цвет ${cables.length} кабелей на ${colorHex}`);
@@ -141,7 +140,6 @@ export class PatchManager {
     return cables.length;
   }
 
-  // Определение цвета кабеля
   determineCableColor(jack1, jack2) {
     // Ищем выходной джек
     let outputJack = null;
@@ -168,7 +166,6 @@ export class PatchManager {
     return this.CABLE_COLORS.other;
   }
 
-  // Поиск уже существующего цветного кабеля у входов
   findColoredCable(jack1, jack2) {
     // Проверяем все кабели джека 1
     for (const cable of jack1.cables) {
@@ -187,7 +184,6 @@ export class PatchManager {
     return null;
   }
 
-  // Обновление состояния джека при подключении
   updateJackConnection(jack, cable, color) {
     jack.addCable(cable);
     jack.updateCenterColor(color);
@@ -199,7 +195,6 @@ export class PatchManager {
     }
   }
 
-  // Синхронизация цветов всех кабелей входного джека
   synchronizeInputCables(inputJack) {
     // Ищем первый цветной кабель
     let targetColor = this.CABLE_COLORS.other;
@@ -296,7 +291,6 @@ export class PatchManager {
   }
 
   // === ПРОВЕРКИ СОЕДИНЕНИЙ ===
-
   canConnect(jack1, jack2) {
     //console.log('🔍 canConnect check:');
     //console.log('  Jack1:', jack1.type, jack1.direction, jack1.parentModule?.title);
@@ -339,7 +333,6 @@ export class PatchManager {
   }
 
   // === ПЕРЕТАСКИВАНИЕ КАБЕЛЕЙ ===
-
   startCableDrag(jack, mouseX, mouseY) {
     //console.log('🔗 START CABLE DRAG:');
     //console.log('  Джек:', jack.label);
@@ -412,6 +405,7 @@ export class PatchManager {
       
       return cable;
   }
+  
   cancelCableDrag() {
     this.draggingCable = null;
     this.startJack = null;
@@ -419,7 +413,6 @@ export class PatchManager {
   }
 
   // === ОТРИСОВКА ===
-
   draw(ctx, layerName = null) {
     // Рисуем кабели указанного слоя
     //console.log('🎨 PatchManager.draw() called');
@@ -450,7 +443,11 @@ export class PatchManager {
   drawDraggingCable(ctx, offsetX = 0, offsetY = 0, scale = 1) {
     if (!this.draggingCable) return;
 
+    const theme = getCurrentTheme();
+    const isLcd = theme.isLcd;
     const jack = this.draggingCable.from;
+    const cableType = jack?.type || 'audio';
+
     const from = jack.center || { x: 0, y: 0 };
     const to = this.draggingCable.to;
 
@@ -465,43 +462,88 @@ export class PatchManager {
       y: to.y * scale + offsetY,
     };
 
-    // Рисуем в экранных координатах (без трансформации ctx)
-    ctx.strokeStyle =
-      this.CABLE_COLORS[this.draggingCable.from.type] ||
-      this.CABLE_COLORS.other;
-    ctx.lineWidth = 2;
-    ctx.setLineDash([5, 3]);
+    // ⭐ Цвет как у обычного кабеля: LCD → из темы, classic → из палитры
+    const strokeColor = isLcd
+      ? theme.getCableColor(cableType)
+      : (this.CABLE_COLORS[cableType] || this.CABLE_COLORS.other);
+
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = theme.getCableWidth(cableType);
     ctx.lineCap = 'round';
+
+    // ⭐ Свечение в LCD
+    if (theme.shouldGlowCable()) {
+      theme.applyGlow(ctx);
+    }
+
+    ctx.setLineDash([5, 3]);
 
     ctx.beginPath();
     ctx.moveTo(screenFrom.x, screenFrom.y);
 
     const midX = (screenFrom.x + screenTo.x) / 2;
-    const curveHeight = Math.abs(screenTo.y - screenFrom.y) * 0.4;
+    const dx = Math.abs(screenTo.x - screenFrom.x);
+    const dy = Math.abs(screenTo.y - screenFrom.y);
 
-    if (screenFrom.y < screenTo.y) {
-      ctx.bezierCurveTo(
-        midX,
-        screenFrom.y - curveHeight,
-        midX,
-        screenTo.y + curveHeight,
-        screenTo.x,
-        screenTo.y,
-      );
-    } else {
-      ctx.bezierCurveTo(
-        midX,
-        screenFrom.y + curveHeight,
-        midX,
-        screenTo.y - curveHeight,
-        screenTo.x,
-        screenTo.y,
-      );
-    }
+    const sagBase = Math.min(dx * 0.3, 100) + dy * 0.15;
+    const sag = sagBase;   // для перетаскивания без randomFactor — детерминированно
 
+    const ctrl1Y = screenFrom.y + sag;
+    const ctrl2Y = screenTo.y   + sag;
+
+    ctx.bezierCurveTo(
+        midX, ctrl1Y,
+        midX, ctrl2Y,
+        screenTo.x, screenTo.y
+    );
     ctx.stroke();
     ctx.setLineDash([]);
+
+    theme.clearGlow(ctx);
   }
+
+
+  /**
+   * Сдвинуть все кабели патча в случайные положения.
+   * @param {number} range — максимальный сдвиг в px
+   */
+  shakeAllCables(range = 80) {
+    this.cables.forEach((cable, i) => {
+      // Небольшая задержка — эффект «волны»
+      const delay = i * 40;
+      setTimeout(() => cable.nextShape(range), delay);
+    });
+  }
+
+  /**
+   * Сдвинуть только кабели, подключённые к джеку.
+   */
+  shakeJackCables(jack, range = 80) {
+    const cables = this.getCablesForJack(jack);
+    cables.forEach((cable, i) => {
+      const delay = i * 30;
+      setTimeout(() => cable.nextShape(range), delay);
+    });
+    return cables.length;
+  }
+
+  /** Есть ли хоть один активный переход формы. */
+  hasActiveTransitions() {
+    return this.cables.some((c) => c.isTransitioning());
+  }
+
+  /** Обновить все активные переходы (вызывается из animate). */
+  updateShapes() {
+    this.cables.forEach((c) => c.updateShape());
+  }
+
+  /** Сбросить форму всех кабелей в базовую. */
+  resetAllShapes() {
+    this.cables.forEach((c, i) => {
+      setTimeout(() => c.resetShape(), i * 30);
+    });
+  }
+
 
   // === УТИЛИТЫ ===
 

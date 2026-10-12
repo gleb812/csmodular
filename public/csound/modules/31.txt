@@ -1,10 +1,10 @@
-;@ map d CLA000
-;@ map d CLA000
+;@ map CLA000
+;@ map CLA000
 
 ;@ outs a
-opcode Noise, 0, Kii ;
-  kColor, iMute, iOut  xin
+opcode Noise, 0, kkk ;
+  kColor, kMute, kOut  xin
   aout rand 0.5, 0.1 ; seed value ?
   ;aout tone a1, kColor
-  zaw aout, iOut
+  zaw aout, kOut
 endop

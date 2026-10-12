@@ -246,6 +246,28 @@ export class UIManager {
     zoomContainer.querySelector('#zoomInBtn').onclick = () =>
       this.system.zoom(0.2);
 
+    // ⭐ SHAKE ALL
+    const shakeContainer = document.createElement('div');
+    shakeContainer.style.marginTop = '8px';
+    shakeContainer.innerHTML = `
+      <button id="shakeAllBtn" style="
+        width: 100%;
+        padding: 8px;
+        background: #444;
+        color: #0af;
+        border: 1px solid #666;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.15s;
+      " title="Shake all cables">🌀 Shake All</button>
+    `;
+    shakeContainer.querySelector('#shakeAllBtn').onclick = () => {
+      this.system.patchManager.shakeAllCables(80);
+    };
+    zoomContainer.appendChild(shakeContainer);
+
+
     this.container.appendChild(zoomContainer);
     this.elements.zoomInfo = zoomContainer.querySelector('#zoomInfo');
   }

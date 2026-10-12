@@ -24,8 +24,83 @@ export class Cable {
             (acc << 5) - acc + char.charCodeAt(0), 0
         ) & 0xFFFF;
         this.randomFactor = (uniqueHash % 1000) / 1000; // 0.0 - 0.999
+        // === SHAPE OFFSET (сдвиг кривой при Shake) ===
+        this.shapeOffsetX = 0;
+        this.shapeOffsetY = 0;
 
+        // Текущее (анимируемое) значение
+        this.currentOffsetX = 0;
+        this.currentOffsetY = 0;
+
+        // Переход между формами
+        this.transitionFromX = 0;
+        this.transitionFromY = 0;
+        this.transitionToX = 0;
+        this.transitionToY = 0;
+        this.transitionStart = null;
+        this.transitionDuration = 300;
     }
+
+    /**
+     * Сдвинуть кривую кабеля в новое случайное положение.
+     * Форма (провис, S-образность) сохраняется — двигается только вся кривая.
+     * @param {number} range — максимальный сдвиг в px (по умолчанию 80)
+     */
+    nextShape(range = 80) {
+        // Новое случайное смещение
+        this.shapeOffsetX = (Math.random() - 0.5) * 2 * range;  // ±range
+        this.shapeOffsetY = (Math.random() - 0.5) * 2 * range;  // ±range
+
+        // Стартуем переход от текущего положения
+        this.transitionFromX = this.currentOffsetX;
+        this.transitionFromY = this.currentOffsetY;
+        this.transitionToX = this.shapeOffsetX;
+        this.transitionToY = this.shapeOffsetY;
+        this.transitionStart = performance.now();
+    }
+
+    /**
+     * Сбросить кривую в базовое положение (offset = 0).
+     */
+    resetShape() {
+        this.shapeOffsetX = 0;
+        this.shapeOffsetY = 0;
+
+        this.transitionFromX = this.currentOffsetX;
+        this.transitionFromY = this.currentOffsetY;
+        this.transitionToX = 0;
+        this.transitionToY = 0;
+        this.transitionStart = performance.now();
+    }
+
+    /**
+     * Обновить анимацию перехода. Вызывать каждый кадр, пока есть активный переход.
+     */
+    updateShape() {
+        if (this.transitionStart === null) return;
+
+        const t = (performance.now() - this.transitionStart) / this.transitionDuration;
+        if (t >= 1) {
+            this.currentOffsetX = this.transitionToX;
+            this.currentOffsetY = this.transitionToY;
+            this.transitionStart = null;
+            return;
+        }
+
+        // smoothstep — плавный вход/выход
+        const k = t * t * (3 - 2 * t);
+
+        this.currentOffsetX = this.transitionFromX
+            + (this.transitionToX - this.transitionFromX) * k;
+        this.currentOffsetY = this.transitionFromY
+            + (this.transitionToY - this.transitionFromY) * k;
+    }
+
+    /** Активен ли переход прямо сейчас. */
+    isTransitioning() {
+        return this.transitionStart !== null;
+    }
+
 
     getDisplayColor() {
         // Если есть кастомный цвет - используем его, иначе функциональный
@@ -98,29 +173,37 @@ export class Cable {
             theme.applyGlow(ctx);
         }
 
-        // === КРИВАЯ ===
+        // === КРИВАЯ: S-форма с направленным провисом ===
         ctx.beginPath();
         ctx.moveTo(from.x, from.y);
 
         const midX = (from.x + to.x) / 2;
-        const baseCurveHeight = Math.abs(to.y - from.y) * 0.4;
-        const curveVariation = (randomFactor - 0.5) * 0.2;
-        const curveHeight = baseCurveHeight * (1 + curveVariation);
+        const dx = Math.abs(to.x - from.x);
+        const dy = Math.abs(to.y - from.y);
+
+        // Сила провисания: зависит от расстояния по X, ограничена + вклад от dy
+        const sagBase = Math.min(dx * 0.3, 100) + dy * 0.15;
+
+        // Случайная вариативность (сохраняем randomFactor)
+        const sagVariation = 1 + (randomFactor - 0.5) * 0.2;
+        const sag = sagBase * sagVariation;
+
+        // Обе контрольные точки — ниже концов
+        const ctrl1Y = from.y + sag;
+        const ctrl2Y = to.y   + sag;
+
+        // Горизонтальный сдвиг для разнообразия (кабели не сливаются)
         const xOffset = (randomFactor - 0.5) * 30;
 
-        if (from.y < to.y) {
-            ctx.bezierCurveTo(
-                midX + xOffset, from.y - curveHeight,
-                midX - xOffset, to.y + curveHeight,
-                to.x, to.y
-            );
-        } else {
-            ctx.bezierCurveTo(
-                midX - xOffset, from.y + curveHeight,
-                midX + xOffset, to.y - curveHeight,
-                to.x, to.y
-            );
-        }
+        // ⭐ SHAPE: смещение всей кривой (сохраняя форму)
+        const offX = this.currentOffsetX;
+        const offY = this.currentOffsetY;
+
+        ctx.bezierCurveTo(
+            midX + xOffset + offX, ctrl1Y + offY,
+            midX - xOffset + offX, ctrl2Y + offY,
+            to.x, to.y
+        );
         ctx.stroke();
 
         // Сброс свечения

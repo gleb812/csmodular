@@ -85,10 +85,6 @@ export class JackContextMenu {
         }
     }
     
-// В JackContextMenu.js - аналогично!
-
-// В JackContextMenu.js - правильный updateMenuContent()
-
     updateMenuContent() {
         if (!this.currentJack) return;
         
@@ -108,7 +104,15 @@ export class JackContextMenu {
             ));
             this.menuElement.appendChild(this.createSeparator());
         }
-        
+
+        // ⭐ SHAKE для джека
+        if (cableCount > 0) {
+            this.menuElement.appendChild(this.createMenuItem(
+                `🌀 Shake cables (${cableCount})`,
+                () => this.shakeCables()
+            ));
+        }
+
         // 2. СЕКЦИЯ ЦВЕТОВ
         if (cableCount > 0) {
             const colorSection = document.createElement('div');
@@ -165,7 +169,11 @@ export class JackContextMenu {
         return separator;
     }
 
-    // В JackContextMenu.js - добавь метод createHeader()
+    shakeCables() {
+        if (!this.currentJack) return;
+        const count = this.system.patchManager.shakeJackCables(this.currentJack, 80);
+        this.system.showNotification(`🌀 Shaking ${count} cable(s)`);
+    }
 
     createHeader() {
         const header = document.createElement('div');

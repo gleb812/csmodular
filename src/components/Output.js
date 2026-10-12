@@ -48,24 +48,42 @@ export class Output extends BaseJack {
 
         // === ЦЕНТР (там где кабель) ===
         if (isLcd) {
-            // В LCD: центр рисуем ТОЛЬКО если джек подключён
+            // LCD: настоящая дырка в заливке внешнего квадрата.
+            // Под джеком — прозрачный канвас, через который виден parallax-фон.
+            ctx.save();
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
             if (this.connected) {
+                // Подключён — светящаяся точка в центре (перекрывает дырку)
                 ctx.fillStyle = style.centerFill;
                 theme.applyGlow(ctx);
                 ctx.beginPath();
                 ctx.arc(center.x, center.y, 2.5, 0, Math.PI * 2);
                 ctx.fill();
                 theme.clearGlow(ctx);
+            } else {
+                // Не подключён — тонкий ободок центрального кружка
+                ctx.strokeStyle = style.stroke;
+                ctx.lineWidth = style.strokeWidth;
+                if (style.glow) theme.applyGlow(ctx);
+                ctx.beginPath();
+                ctx.arc(center.x, center.y, 2.5, 0, Math.PI * 2);
+                ctx.stroke();
+                theme.clearGlow(ctx);
             }
-            // Если не подключён — НЕ рисуем центр (остаётся прозрачная дырка)
         } else {
-            // Classic: центр всегда есть
-            ctx.fillStyle = this.centerColor;
+            // Classic: подключён → цвет кабеля, отключён → чёрная дырка
+            ctx.fillStyle = this.connected
+                ? (this.centerColor || '#000000')
+                : '#000000';
             ctx.beginPath();
             ctx.arc(center.x, center.y, 2.5, 0, Math.PI * 2);
             ctx.fill();
 
-            // Обводка центра
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = 0.5;
             ctx.stroke();

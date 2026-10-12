@@ -3,7 +3,7 @@ import { BaseComponent } from './BaseComponent.js';
 import { getCurrentTheme } from '../theme/currentTheme.js';
 
 export class LED extends BaseComponent {
-    constructor(x, y, width = 16, height = 10) {
+    constructor(x, y, width = 10, height = 10) {
         super(x, y, width, height);
         
         // ⭐ Состояние отображения
