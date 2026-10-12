@@ -1,6 +1,3 @@
-
-```markdown
-
 # AI Context — CsModular
 
 This document is a short description of the system for the AI assistant.
@@ -39,6 +36,12 @@ Visual block with components. Consists of:
 - **JS description** (in `modules/` or user storage)
 - **UDO file** (in `public/csound/modules/` or user storage)
 - An instance of `Panel` with `components`
+
+**Every module has a `layer` attribute** — `'voice'` (default) or `'fx'`.
+- Voice modules are triggered per polyphony voice.
+- FX modules are global (reverb, master compressor, etc.).
+- **Cables are only allowed within one layer** — voice ↔ voice, fx ↔ fx.
+- Layer can be changed via **right-click → Layer → Voice / FX** in `ModuleContextMenu`.
 
 ### Module (JS description)
 
@@ -103,22 +106,44 @@ Line insertion in `CsoundGenerator.formatModuleLine()`.
 | `ModuleFactory` | `src/ModuleFactory.js` | Creates modules from JS descriptions |
 | `PatchManager` | `src/PatchManager.js` | Cables management |
 | `PatchLoader` | `src/PatchLoader.js` | Load/save patches |
-| `LayerManager` | `src/managers/LayerManager.js` | voice/fx layers, grid, divider |
-| `EventManager` | `src/managers/EventManager.js` | All mouse events |
-| `UIManager` | `src/managers/UIManager.js` | Control panel (right side) |
+| `LayerManager` | `src/managers/LayerManager.js` | voice/fx layer arrays, grid, collision checks |
+| `EventManager` | `src/managers/EventManager.js` | All mouse events, pan, zoom |
+| `UIManager` | `src/managers/UIManager.js` | Control panel (left side) |
+| `DesignSettingsPanel` | `src/ui/DesignSettingsPanel.js` | Theme editor (opened with `D` or 🎨 button) |
 | `CsoundGenerator` | `src/csound/CsoundGenerator.js` | Assembles ORC from modules and cables |
 | `CsoundEngine` | `src/csound/CsoundEngine.js` | Manages the Csound instance |
 | `MappingTables` | `src/csound/MappingTables.js` | Loads `value_maps.json` for `;@ map` |
 | `Input`, `Output` | `src/components/*.js` | Jacks (have `.type` — `'audio'` / `'control'` / `'logic'`) |
 | `Cable` | `src/Cable.js` | `fromJack.type` is the source of truth for cable type |
 | `moduleStore` | `src/api/moduleStore.*.js` | User module storage (Tauri fs / web stub) |
+| `Theme`, `themeStore`, `currentTheme` | `src/theme/*.js` | Theme system: classic / LCD presets |
+
+## World model (infinite space)
+
+The canvas **fills the browser window**. There are no fixed bounds for the working area — the world is **infinite**.
+
+- **Pan**: middle mouse button OR `Space + drag`
+- **Zoom**: `Ctrl + mouse wheel` (zooms around cursor)
+- **Vertical scroll**: `mouse wheel`
+- **Horizontal scroll**: `Shift + mouse wheel`
+- **Grid**: shows only when `showGrid === true`, always aligned to world grid
+
+There is **no physical divider** between voice and fx. The distinction is **logical** (see `module.layer`), not spatial.
+
+### Auto-layout for new FX modules
+
+When a new FX module is added (via `addNewModuleAtPosition`), it is placed **below the lowest voice module** using `_getFxFloorY()` — this ensures voice modules stay on top.
+
+### Loading FX modules from JSON
+
+When loading a patch, FX modules get their `vpos` shifted down by `maxVoiceY + 10` (via `_fxStartY` computed in `PatchLoader.loadPatch`). This keeps voice and fx from overlapping visually. **Reverse transformation is not needed** — we don't export back to pch2.
 
 ## Data flow
 
 ### Creating a module
 
 1. `main.js` → `ModuleFactory.createModule(type, ...)` → `Panel`
-2. `CsoundGenerator.addModule({ typeId, instanceId, instanceName, ... })`
+2. `CsoundGenerator.addModule({ typeId, instanceId, instanceName, layer, ... })`
    - **`instanceName` MUST be the module `type` (Csound-valid)**, not the UI title
 3. On recompile → ORC is regenerated
 
@@ -127,6 +152,17 @@ Line insertion in `CsoundGenerator.formatModuleLine()`.
 1. `PatchManager.addCable(from, to)` → `Cable`
 2. `CsoundGenerator.addCable(cable)` → bus assigned in `_cableBusMap`
 3. On recompile → ORC is regenerated
+
+### Changing module layer
+
+Via `ModuleContextMenu.setLayer(newLayer)`:
+1. Collect and remove all cables (with confirmation if any exist)
+2. `LayerManager.removeModuleFromLayer(module)` — searches in **all** layers
+3. `CsoundGenerator.removeModule(...)` for the old layer
+4. `module.layer = newLayer`
+5. `LayerManager.addModuleToLayer(module, newLayer)`
+6. `CsoundGenerator.addModule({ ..., layer: newLayer })`
+7. Force redraw + debounced recompile
 
 ### ORC generation
 
@@ -163,7 +199,7 @@ Via zak:
 - Module writes `zaw aOut, kOut` in opcode
 - Cable connects bus of input and output
 
-**Rule: cables only within one layer** (voice ↔ voice, fx ↔ fx). Cross-layer is forbidden.
+**Rule: cables only within one layer** (voice ↔ voice, fx ↔ fx). Cross-layer is forbidden (checked in `PatchManager.canConnect`).
 
 ### Cable type detection
 
@@ -174,6 +210,40 @@ Via zak:
 3. Last resort: color-based (legacy NM2 palette)
 
 **Important**: color is **visual only**. Custom cable coloring is supported, so color must never be the primary type source.
+
+## Theme system
+
+`src/theme/` contains:
+
+- `defaults.js` — `DEFAULT_THEME`, `LCD_COLOR_PRESETS`, `BACKGROUND_PRESETS`
+- `themeStore.js` — load/save via localStorage (singleton `themeStore`)
+- `Theme.js` — class that wraps settings and provides render-time getters:
+  - `isLcd`, `isClassic`, `getLineColor`, `getAccentColor`, `getAccentAlpha`, `getSurfaceColor`, `getElementBgColor`, `getTooltipBgColor`, `getActiveFillColor`, `getInactiveOutlineColor`, `getCableWidth`, `getCableColor`, `shouldGlowCable`, `applyGlow`, `clearGlow`, `lineWidth`, `getBackgroundImage`, `isParallaxEnabled`, `getParallaxStrength`, `getJackStyle`, `_hexToRgba`, `_darken`
+- `currentTheme.js` — singleton `getCurrentTheme()` / `setCurrentTheme()` / `initCurrentTheme()`; **also exposes `window.__theme__` for console debugging** (get/set/init)
+
+### Presets
+
+- **`classic`** — original NM2-style UI (colored panels, no glow)
+- **`lcd`** — Casio-style monochrome LCD (transparent panels, glowing lines, configurable accent color)
+
+### Applying theme
+
+Called via `DesignSettingsPanel.applyAndSave()`:
+1. `setCurrentTheme(new Theme(settings))`
+2. `themeStore.save(settings)`
+3. `system.applyBackgroundFromTheme()` — updates `#parallax-bg` element
+4. `system.forceRedraw()`
+
+**Important:** all components (`Panel`, `Knob`, `Slider`, `LED`, `ButtonText`, `ButtonRadio`, `ButtonIncDec`, `ButtonFlat`, `Input`, `Output`, `Cable`, `TextLabel`, `TextField`, `TextEdit`, `Line`, `SVG`, `MiniVU`, `LevelShift`, `PartSelector`) use `getCurrentTheme()` inside `draw()`.
+
+**Do not use top-level `await import(...)`** anywhere that runs during page init — use the lazy pattern (see `src/api/index.js`).
+
+## Background & Parallax
+
+- `#parallax-bg` in `index.html` — a `<div>` that fills the viewport with `background-size: cover`
+- `main.js.applyBackgroundFromTheme()` sets either `backgroundImage` (URL) or `backgroundColor` (solid), based on `_isColorValue()` check
+- `BACKGROUND_PRESETS` in `defaults.js` mixes solid colors (`#000000`, `#1a1a1a`, `#333333`) and image URLs (`/backgrounds/*.jpg`)
+- Parallax: mouse movement shifts the background by `parallaxStrength` px, smoothed with `parallaxSmoothing`
 
 ## User module storage
 
@@ -194,13 +264,25 @@ moduleStore.isUserModule(name)                  // → boolean
 
 **Platform detection**: `isTauri()` checks for `__TAURI_INTERNALS__` in `window`.
 
-**Do not use top-level `await import(...)`** in `index.js` — it blocks the whole module graph and breaks UI init. Use the lazy `_getImpl()` pattern.
-
 ## Tauri configuration
 
 - `src-tauri/tauri.conf.json` — window config, bundle targets, `frontendDist: "../dist"`
 - `src-tauri/capabilities/default.json` — permissions. **Important**: `windows` list must include **all** window labels that need fs access (e.g. `["main", "editor"]`)
 - `src-tauri/src/lib.rs` — Tauri builder with `.plugin(tauri_plugin_fs::init())`
+
+## Keyboard shortcuts
+
+- `Space` — open main context menu (add module)
+- `Space + drag` — pan the world
+- `Ctrl + wheel` — zoom
+- `Wheel` — vertical scroll
+- `Shift + wheel` — horizontal scroll
+- `D` (or `В` on Russian layout) — toggle Design Settings panel
+- `Delete` — delete selected module
+- `Escape` — deselect module / close menus
+- `Right click` on module — open Module Context Menu (color picker, layer switch, delete)
+- `Right click` on jack — open Jack Context Menu
+- `Right click` on empty space — open main Context Menu
 
 ## Csound name sanitization
 
@@ -234,6 +316,9 @@ Patcher `scripts/patch_params.py` regenerates `params` for all NM2 modules:
 8. **Csound names always from `type` / `jsonName`**, never from `displayName` / `title`
 9. **No direct `fetch('/api/...')`** — use `moduleStore`
 10. **Don't block module graph with top-level await** in entry points
+11. **All draw code uses `getCurrentTheme()`** — never hardcode colors outside of `classic` branches
+12. **`removeModuleFromLayer` searches ALL layers** — never assume `module.layer` is correct
+13. **`getLayerAtPoint` always returns `'voice'`** — new modules are Voice by default
 
 ## Known issues (short)
 
@@ -241,17 +326,22 @@ Patcher `scripts/patch_params.py` regenerates `params` for all NM2 modules:
 - `CsoundEngine._ledValues` not cleared on `stop()`
 - `ComponentPropertiesWindow` opens only via button
 - Web `moduleStore` is a stub — user modules don't persist in browser yet
+- `LayerManager` still has some dead divider code (`updateLayerSizes`, `drawLayerGrid`, `updateGridCache`)
+- `main.js` still has `updateCanvasSize` (dead code referencing `this.divider`)
+- `loadAvailableModules` in `main.js` still uses `fetch('/api/list-user-modules')` (legacy)
 
 ## TODO (short)
 
 - Web `moduleStore` via IndexedDB
 - Variant switching: `k` ↔ `a` module opcode based on incoming cable types
 - Jack recoloring on variant switch
-- Split rendering into 4 canvas layers
+- Split rendering into 4 canvas layers (overlay, bg, modules, cables)
 - Replace `getControlChannel` with `channelPtr` in `CsoundEngine`
 - Undo/Redo
 - Tests
-- Design Settings panel
+- Finish clean-up of dead divider code
+- Custom background upload (image file input)
+- Cable visual width per type (already partially done)
 
 ## How to start working
 
@@ -268,6 +358,3 @@ Style:
 - No "let's try" — concrete edits
 - Show diff or full methods
 - Do not change things not asked about
-
-
-```
