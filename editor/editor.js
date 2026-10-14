@@ -1,12 +1,43 @@
 // editor/editor.js
+import { DockLayout } from './ui/DockLayout.js';
+import { Toolbar } from './ui/Toolbar.js';
+import { PropertiesPanel } from './ui/PropertiesPanel.js';
 import { EditorApp } from './EditorApp.js';
 
-// Создаём приложение редактора
-// ⚠️ EditorApp сам делает всю инициализацию в конструкторе:
-//    setupCanvas, uiManager, createDefaultModule, animate, setupEvents
-const canvas = document.getElementById('editorCanvas');
+const root = document.getElementById('app');
+const layout = new DockLayout({ root });
+
+// Canvas + App
+const canvas = document.createElement('canvas');
+canvas.id = 'editorCanvas';
 const app = new EditorApp(canvas);
 
-// Дебаг
+// Toolbar
+const toolbar = new Toolbar({ app, layout });
+layout.mount('toolbar', toolbar.element);
+
+// Canvas
+layout.mount('leftTop', canvas);
+app.setupCanvas();
+
+// Code Viewer → правый верх
+if (app.codeViewerWindow) {
+    layout.mount('rightTop', app.codeViewerWindow.windowElement);
+    app.codeViewerWindow.show();
+}
+
+// Properties Panel → левый низ
+const propertiesPanel = new PropertiesPanel(app);
+app.propertiesPanel = propertiesPanel;
+layout.mount('leftBottom', propertiesPanel.element);
+
+// Terminal → правый низ
+import { TerminalPanel } from './ui/TerminalPanel.js';
+
+const terminal = new TerminalPanel(app);
+app.terminalPanel = terminal;
+layout.mount('rightBottom', terminal.element);
+
 window.editorApp = app;
-console.log('📝 Module Editor initialized');
+window.editorLayout = layout;
+console.log('📐 Editor initialized');

@@ -1,5 +1,6 @@
 // editor/EditorUIManager.js
 import { moduleStore } from '../src/api/index.js';
+import { getByCategory, createComponent } from './ComponentRegistry.js';
 export class EditorUIManager {
     constructor(app) {
         this.app = app;
@@ -76,41 +77,7 @@ export class EditorUIManager {
 
             <div style="font-size: 10px; color: #666; margin-bottom: 4px;">— Drag to module —</div>
             
-            <div style="font-size: 10px; color: #555; margin-bottom: 4px;">Controls</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; margin-bottom: 8px;">
-                <button data-type="knob" style="padding: 4px; background: #2a2a2a; border: 1px solid #f0e; color: #f0e; border-radius: 3px; cursor: pointer; font-size: 9px;">Knob</button>
-                <button data-type="slider" style="padding: 4px; background: #2a2a2a; border: 1px solid #f90; color: #f90; border-radius: 3px; cursor: pointer; font-size: 9px;">Slider</button>
-                <button data-type="buttonFlat" style="padding: 4px; background: #2a2a2a; border: 1px solid #4a9eff; color: #4a9eff; border-radius: 3px; cursor: pointer; font-size: 9px;">Btn</button>
-                <button data-type="buttonRadio" style="padding: 4px; background: #2a2a2a; border: 1px solid #ff6b6b; color: #ff6b6b; border-radius: 3px; cursor: pointer; font-size: 9px;">Radio</button>
-                <button data-type="buttonIncDec" style="padding: 4px; background: #2a2a2a; border: 1px solid #ffd93d; color: #ffd93d; border-radius: 3px; cursor: pointer; font-size: 9px;">IncDec</button>
-                <button data-type="buttonText" style="padding: 4px; background: #2a2a2a; border: 1px solid #6c5ce7; color: #6c5ce7; border-radius: 3px; cursor: pointer; font-size: 9px;">Toggle</button>
-            </div>
-            
-            <div style="font-size: 10px; color: #555; margin-bottom: 4px;">Display</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; margin-bottom: 8px;">
-                <button data-type="textLabel" style="padding: 4px; background: #2a2a2a; border: 1px solid #888; color: #aaa; border-radius: 3px; cursor: pointer; font-size: 9px;">Label</button>
-                <button data-type="textField" style="padding: 4px; background: #2a2a2a; border: 1px solid #0af; color: #0af; border-radius: 3px; cursor: pointer; font-size: 9px;">Field</button>
-                <button data-type="textEdit" style="padding: 4px; background: #2a2a2a; border: 1px solid #fd79a8; color: #fd79a8; border-radius: 3px; cursor: pointer; font-size: 9px;">Edit</button>
-                <button data-type="led" style="padding: 4px; background: #2a2a2a; border: 1px solid #00b894; color: #00b894; border-radius: 3px; cursor: pointer; font-size: 9px;">LED</button>
-                <button data-type="levelShift" style="padding: 4px; background: #2a2a2a; border: 1px solid #fdcb6e; color: #fdcb6e; border-radius: 3px; cursor: pointer; font-size: 9px;">Level</button>
-                <button data-type="partSelector" style="padding: 4px; background: #2a2a2a; border: 1px solid #e17055; color: #e17055; border-radius: 3px; cursor: pointer; font-size: 9px;">Select</button>
-            </div>
-            
-            <div style="font-size: 10px; color: #555; margin-bottom: 4px;">Jacks</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 3px; margin-bottom: 8px;">
-                <button data-type="input" data-jack-type="audio" style="padding: 3px 2px; background: #2a2a2a; border: 1px solid #ff4444; color: #ff4444; border-radius: 3px; cursor: pointer; font-size: 8px;">In 🔴</button>
-                <button data-type="input" data-jack-type="control" style="padding: 3px 2px; background: #2a2a2a; border: 1px solid #4488ff; color: #4488ff; border-radius: 3px; cursor: pointer; font-size: 8px;">In 🔵</button>
-                <button data-type="output" data-jack-type="audio" style="padding: 3px 2px; background: #2a2a2a; border: 1px solid #ff4444; color: #ff4444; border-radius: 3px; cursor: pointer; font-size: 8px;">Out 🔴</button>
-                <button data-type="output" data-jack-type="control" style="padding: 3px 2px; background: #2a2a2a; border: 1px solid #4488ff; color: #4488ff; border-radius: 3px; cursor: pointer; font-size: 8px;">Out 🔵</button>
-            </div>
-            
-            <div style="font-size: 10px; color: #555; margin-bottom: 4px;">Graphics</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; margin-bottom: 8px;">
-                <button data-type="svg" style="padding: 4px; background: #2a2a2a; border: 1px solid #a29bfe; color: #a29bfe; border-radius: 3px; cursor: pointer; font-size: 9px;">SVG</button>
-                <button data-type="line" style="padding: 4px; background: #2a2a2a; border: 1px solid #636e72; color: #636e72; border-radius: 3px; cursor: pointer; font-size: 9px;">Line</button>
-                <button data-type="graph" style="padding: 4px; background: #2a2a2a; border: 1px solid #00cec9; color: #00cec9; border-radius: 3px; cursor: pointer; font-size: 9px;">Graph</button>
-                <button data-type="miniVU" style="padding: 4px; background: #2a2a2a; border: 1px solid #fd79a8; color: #fd79a8; border-radius: 3px; cursor: pointer; font-size: 9px;">VU</button>
-            </div>
+            <div id="component-palette"></div>
             
             <button id="clear-module-btn" style="width: 100%; padding: 6px; margin-top: 4px; background: #2a2a2a; border: 1px solid #ff4444; color: #ff4444; border-radius: 4px; cursor: pointer; font-size: 11px;">
                 🗑️ Clear Module
@@ -124,21 +91,9 @@ export class EditorUIManager {
         `;
         
         document.body.appendChild(this.container);
-        
-        // ⭐ Все кнопки компонентов - запускают drag
-        const buttons = this.container.querySelectorAll('[data-type]');
-        buttons.forEach(btn => {
-            btn.onclick = () => {
-                const type = btn.dataset.type;
-                const jackType = btn.dataset.jackType || null;  // ← получаем тип джека
-                
-                // ⭐ Для джеков передаём jackType
-                this.app.startDraggingNewComponent(type, jackType);
-                
-                const label = btn.textContent.trim();
-                this.showNotification(`🔄 Drag ${label} into module`);
-            };
-        });
+        // ⭐ Генерируем палитру из реестра
+        this._renderPalette();
+
         
         this.container.querySelector('#clear-module-btn').onclick = () => this.app.clearModule();
 
@@ -195,6 +150,106 @@ export class EditorUIManager {
         };
 
 
+    }
+
+
+    _renderPalette() {
+        const container = this.container.querySelector('#component-palette');
+        if (!container) return;
+        
+        const byCat = getByCategory();
+        
+        // Порядок категорий и их подписи
+        const categories = [
+            { key: 'controls', title: 'Controls' },
+            { key: 'display',  title: 'Display'  },
+            { key: 'jacks',    title: 'Jacks'    },
+            { key: 'graphics', title: 'Graphics' },
+        ];
+        
+        // Для jacks — генерируем по два ряда кнопок (audio / control)
+        const jackColors = { audio: '#ff4444', control: '#4488ff' };
+        
+        let html = '';
+        
+        for (const cat of categories) {
+            const entries = byCat[cat.key] || [];
+            if (entries.length === 0) continue;
+            
+            html += `<div style="font-size: 10px; color: #555; margin-bottom: 4px;">${cat.title}</div>`;
+            
+            if (cat.key === 'jacks') {
+                // Джек-секция: Input × 2 типа + Output × 2 типа
+                html += `<div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 3px; margin-bottom: 8px;">`;
+                
+                for (const entry of entries) {
+                    for (const jackType of ['audio', 'control']) {
+                        const label = entry.type === 'Input'
+                            ? (jackType === 'audio' ? 'In 🔴' : 'In 🔵')
+                            : (jackType === 'audio' ? 'Out 🔴' : 'Out 🔵');
+                        const color = jackColors[jackType];
+                        
+                        html += `<button
+                            data-type="${entry.type}"
+                            data-jack-type="${jackType}"
+                            style="padding: 3px 2px; background: #2a2a2a; border: 1px solid ${color}; color: ${color}; border-radius: 3px; cursor: pointer; font-size: 8px;"
+                        >${label}</button>`;
+                    }
+                }
+                
+                html += `</div>`;
+            } else {
+                // Обычная секция: 3 колонки
+                html += `<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; margin-bottom: 8px;">`;
+                
+                for (const entry of entries) {
+                    const borderColor = this._paletteColor(entry.category, entry.type);
+                    const shortLabel = entry.label;
+                    
+                    html += `<button
+                        data-type="${entry.type}"
+                        style="padding: 4px; background: #2a2a2a; border: 1px solid ${borderColor}; color: ${borderColor}; border-radius: 3px; cursor: pointer; font-size: 9px;"
+                    >${shortLabel}</button>`;
+                }
+                
+                html += `</div>`;
+            }
+        }
+        
+        container.innerHTML = html;
+        
+        // ⭐ Навешиваем обработчики на все кнопки палитры
+        container.querySelectorAll('[data-type]').forEach(btn => {
+            btn.onclick = () => {
+                const type = btn.dataset.type;
+                const jackType = btn.dataset.jackType || null;
+                this.app.startDraggingNewComponent(type, jackType);
+                this.showNotification(`🔄 Drag ${btn.textContent.trim()} into module`);
+            };
+        });
+    }
+    
+    _paletteColor(category, type) {
+        // Цвета — как в старой палитре
+        const colors = {
+            Knob: '#f0e',
+            Slider: '#f90',
+            ButtonFlat: '#4a9eff',
+            ButtonRadio: '#ff6b6b',
+            ButtonIncDec: '#ffd93d',
+            ButtonText: '#6c5ce7',
+            TextLabel: '#888',
+            TextField: '#0af',
+            TextEdit: '#fd79a8',
+            LED: '#00b894',
+            LevelShift: '#fdcb6e',
+            PartSelector: '#e17055',
+            SVG: '#a29bfe',
+            Line: '#636e72',
+            Graph: '#00cec9',
+            MiniVU: '#fd79a8',
+        };
+        return colors[type] || '#888';
     }
 
     makeDraggable() {

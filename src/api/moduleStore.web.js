@@ -1,88 +1,109 @@
-// src/api/moduleStore.js
+// src/api/moduleStore.web.js
 //
-// Единый интерфейс для работы с пользовательскими модулями.
-// Реализация подменяется в зависимости от платформы:
-//   - web:    IndexedDB / localStorage
-//   - tauri:  fs через @tauri-apps/plugin-fs
-//   - (позже) electron: ipcRenderer
+// Web-реализация moduleStore на localStorage.
+// Хранит JS-код и DSP-код модулей как строки.
 //
-// Все методы возвращают Promise. Ошибки не бросают,
-// а возвращают null / пустой массив — чтобы UI не падал.
+// Ключи:
+//   csmodular:user_modules         → JSON-массив имён
+//   csmodular:user_module:<name>   → { code, dsp_code }
 
-/**
- * @typedef {Object} UserModule
- * @property {string} name
- * @property {string} code       // JS код модуля
- * @property {string|null} dsp_code  // Csound DSP код (может отсутствовать)
- */
+const PREFIX = 'csmodular:user_module:';
+const LIST_KEY = 'csmodular:user_modules';
 
-class ModuleStore {
+class WebModuleStore {
     constructor() {
-        this._cache = null; // список имён модулей, кешируется
+        this._cache = null;
     }
 
-    /**
-     * Список имён пользовательских модулей.
-     * @returns {Promise<string[]>}
-     */
+    _readList() {
+        try {
+            const raw = localStorage.getItem(LIST_KEY);
+            if (!raw) return [];
+            const arr = JSON.parse(raw);
+            return Array.isArray(arr) ? arr : [];
+        } catch (e) {
+            console.warn('[moduleStore/web] _readList failed:', e);
+            return [];
+        }
+    }
+
+    _writeList(names) {
+        try {
+            localStorage.setItem(LIST_KEY, JSON.stringify(names));
+        } catch (e) {
+            console.warn('[moduleStore/web] _writeList failed:', e);
+        }
+    }
+
     async list() {
-        // TODO: заменить на реальную реализацию (web: IndexedDB, tauri: fs)
-        console.log('[moduleStore] list() — stub, returns []');
-        return [];
+        const names = this._readList().sort();
+        console.log(`[moduleStore/web] list() → ${names.length} modules`, names);
+        return names;
     }
 
-    /**
-     * Загрузить модуль по имени.
-     * @param {string} name
-     * @returns {Promise<UserModule|null>}
-     */
     async load(name) {
-        // TODO: заменить на реальную реализацию
-        console.log(`[moduleStore] load(${name}) — stub, returns null`);
-        return null;
+        try {
+            const raw = localStorage.getItem(PREFIX + name);
+            if (!raw) {
+                console.warn(`[moduleStore/web] load("${name}") → not found`);
+                return null;
+            }
+            const data = JSON.parse(raw);
+            console.log(`[moduleStore/web] load("${name}") → OK (js: ${data.code?.length ?? 0}, dsp: ${data.dsp_code?.length ?? 0})`);
+            return {
+                name,
+                code: data.code,
+                dsp_code: data.dsp_code ?? null,
+            };
+        } catch (e) {
+            console.warn(`[moduleStore/web] load("${name}") failed:`, e);
+            return null;
+        }
     }
 
-    /**
-     * Сохранить модуль.
-     * @param {string} name
-     * @param {string} code
-     * @param {string|null} dspCode
-     * @returns {Promise<boolean>}
-     */
     async save(name, code, dspCode = null) {
-        // TODO: заменить на реальную реализацию
-        console.log(`[moduleStore] save(${name}) — stub, returns false`);
-        return false;
+        try {
+            localStorage.setItem(PREFIX + name, JSON.stringify({
+                code,
+                dsp_code: dspCode,
+            }));
+
+            const names = this._readList();
+            if (!names.includes(name)) {
+                names.push(name);
+                this._writeList(names);
+            }
+
+            console.log(`[moduleStore/web] save("${name}") → OK (js: ${code.length}, dsp: ${dspCode?.length ?? 0})`);
+            return true;
+        } catch (e) {
+            console.warn(`[moduleStore/web] save("${name}") failed:`, e);
+            return false;
+        }
     }
 
-    /**
-     * Удалить модуль.
-     * @param {string} name
-     * @returns {Promise<boolean>}
-     */
     async remove(name) {
-        // TODO: заменить на реальную реализацию
-        console.log(`[moduleStore] remove(${name}) — stub, returns false`);
-        return false;
+        try {
+            localStorage.removeItem(PREFIX + name);
+
+            const names = this._readList().filter(n => n !== name);
+            this._writeList(names);
+
+            console.log(`[moduleStore/web] remove("${name}") → OK`);
+            return true;
+        } catch (e) {
+            console.warn(`[moduleStore/web] remove("${name}") failed:`, e);
+            return false;
+        }
     }
 
-    /**
-     * Проверить, является ли модуль пользовательским.
-     * @param {string} name
-     * @returns {Promise<boolean>}
-     */
     async isUserModule(name) {
-        const names = await this.list();
-        return names.includes(name);
+        return this._readList().includes(name);
     }
 
-    /**
-     * Сбросить кеш (например, после сохранения/удаления).
-     */
     invalidateCache() {
         this._cache = null;
     }
 }
 
-// Singleton
-export const moduleStore = new ModuleStore();
+export const moduleStore = new WebModuleStore();

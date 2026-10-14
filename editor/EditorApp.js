@@ -1,4 +1,11 @@
 // editor/EditorApp.js - обновлённая версия
+import {
+    deserializeComponents,
+    collectPorts,
+    createComponent,
+    ComponentRegistry,
+} from './ComponentRegistry.js';
+
 
 import { EditorPanel } from './EditorPanel.js';
 import { EditorUIManager } from './EditorUIManager.js';
@@ -33,30 +40,7 @@ const GRID_UNITS = {
 };
 
 const MIN_GRID_WIDTH = 1;
-const MIN_GRID_HEIGHT = 3;
-
-const COMPONENT_SIZES = {
-    knob: { width: 24, height: 24, label: 'Knob' },
-    buttonFlat: { width: 50, height: 16, label: 'Btn' },
-    buttonRadio: { width: 120, height: 16, label: 'Radio' },
-    buttonIncDec: { width: 50, height: 16, label: 'IncDec' },
-    buttonText: { width: 40, height: 16, label: 'M' },
-    slider: { width: 14, height: 50, label: 'Slider' },
-    textLabel: { width: 60, height: 16, label: 'Label' },
-    textField: { width: 50, height: 16, label: 'Field' },
-    textEdit: { width: 50, height: 16, label: 'Edit' },
-    levelShift: { width: 20, height: 16, label: 'Level' },
-    led: { width: 16, height: 10, label: 'LED' },
-    inputAudio: { width: 14, height: 14, label: 'In(A)' },
-    inputControl: { width: 14, height: 14, label: 'In(C)' },
-    outputAudio: { width: 14, height: 14, label: 'Out(A)' },
-    outputControl: { width: 14, height: 14, label: 'Out(C)' },
-    partSelector: { width: 70, height: 16, label: 'Select' },
-    svg: { width: 28, height: 28, label: 'SVG' },
-    line: { width: 60, height: 2, label: 'Line' },
-    graph: { width: 60, height: 24, label: 'Graph' },
-    miniVU: { width: 40, height: 24, label: 'VU' },
-};
+const MIN_GRID_HEIGHT = 1;
 
 export class EditorApp {
     constructor(canvas) {
@@ -99,12 +83,67 @@ export class EditorApp {
         this.snapGridSize = 5; // размер ячейки микросетки в пикселях
         this.showMicroGrid = true;
 
-        
-        this.setupCanvas();
-        this.uiManager = new EditorUIManager(this);
+        // Временный uiManager: рабочий showLoadDialog + заглушки
+        const self = this;
+        this.uiManager = {
+            showNotification: (msg) => console.log('📢', msg),
+            updateZoomInfo: () => {},
+            async showLoadDialog() {
+                const { moduleStore } = await import('../src/api/index.js');
+                const modules = await moduleStore.list();
+                
+                if (modules.length === 0) {
+                    console.log('📭 No user modules found');
+                    return;
+                }
+                
+                const name = prompt(
+                    `Load module (${modules.length} available):\n${modules.join(', ')}\n\nEnter name:`
+                );
+                if (!name) return;
+                if (!modules.includes(name)) {
+                    alert(`Module "${name}" not found`);
+                    return;
+                }
+                
+                // Логика та же, что в старом EditorUIManager.loadModule()
+                const data = await moduleStore.load(name);
+                if (!data) return;
+                
+                try {
+                    // Парсим JS
+                    const match = data.code.match(/export\s+const\s+\w+\s*=\s*(\{[\s\S]*\});?\s*$/m);
+                    if (!match) throw new Error('Cannot parse module code');
+                    const moduleData = new Function(`return ${match[1]}`)();
+                    
+                    self.restoreModuleFromData(moduleData, data.dsp_code);
+                    console.log(`📂 Loaded: ${name}`);
+                } catch (e) {
+                    console.error('Load error:', e);
+                    alert(`Parse error: ${e.message}`);
+                }
+            },
+        };
         this.propertiesWindow = new ModulePropertiesWindow(this);
         this.codeViewerWindow = new CodeViewerWindow(this);
         this.componentPropertiesWindow = new ComponentPropertiesWindow(this);
+
+        // ⚠️ Эти окна больше не отображаются, но их API (saveModule, _showMappingBrowser)
+        //    используется новыми панелями.
+        this.propertiesWindow.hide();
+        this.componentPropertiesWindow.hide();
+
+        // Убираем их DOM из body (если был добавлен)
+        if (this.propertiesWindow.windowElement?.parentNode) {
+            this.propertiesWindow.windowElement.parentNode.removeChild(
+                this.propertiesWindow.windowElement
+            );
+        }
+        if (this.componentPropertiesWindow.windowElement?.parentNode) {
+            this.componentPropertiesWindow.windowElement.parentNode.removeChild(
+                this.componentPropertiesWindow.windowElement
+            );
+        }
         // ⭐ Mapping tables (для редактора)
         this.mappingTables = new MappingTables();
         this.mappingTables.load();
@@ -114,18 +153,45 @@ export class EditorApp {
     }
 
     setupCanvas() {
-        this.canvas.width = this.width;
-        this.canvas.height = this.height;
-        
-        this.canvas.style.width = `${this.width}px`;
-        this.canvas.style.height = `${this.height}px`;
-        this.canvas.style.position = 'fixed';
-        this.canvas.style.left = '50%';
-        this.canvas.style.top = '50%';
-        this.canvas.style.transform = 'translate(-50%, -50%)';
-        this.canvas.style.backgroundColor = 'transparent';
-        this.canvas.style.border = '1px solid #333';
-        this.canvas.style.zIndex = '1';
+        // Размеры canvas теперь берутся из контейнера (слота dock'а)
+        this.canvas.style.display = 'block';
+        this.canvas.style.background = '#111';
+        this.canvas.style.border = 'none';
+        this.canvas.style.position = 'relative';
+
+        this._fitCanvasToContainer();
+        this._setupResizeObserver();
+    }
+
+    _fitCanvasToContainer() {
+        const parent = this.canvas.parentElement;
+        if (!parent) return;
+
+        const rect = parent.getBoundingClientRect();
+        const w = Math.max(100, Math.floor(rect.width));
+        const h = Math.max(100, Math.floor(rect.height));
+
+        if (this.canvas.width === w && this.canvas.height === h) return;
+
+        this.width = w;
+        this.height = h;
+        this.canvas.width = w;
+        this.canvas.height = h;
+        this.canvas.style.width = `${w}px`;
+        this.canvas.style.height = `${h}px`;
+
+        // Пересчитать offset модуля относительно нового размера
+        if (this.module) {
+            this.centerModuleInGrid();
+        }
+    }
+
+    _setupResizeObserver() {
+        if (this._resizeObserver) this._resizeObserver.disconnect();
+        this._resizeObserver = new ResizeObserver(() => {
+            this._fitCanvasToContainer();
+        });
+        this._resizeObserver.observe(this.canvas.parentElement);
     }
 
     createDefaultModule() {
@@ -174,17 +240,14 @@ export class EditorApp {
 // editor/EditorApp.js - обновлённый startDraggingNewComponent()
 
     startDraggingNewComponent(type, jackType = null) {
-        // ⭐ Для джеков используем специальные ключи в размерах
-        let sizeKey = type;
-        if (type === 'input' || type === 'output') {
-            sizeKey = type + (jackType === 'audio' ? 'Audio' : 'Control');
-        }
+        // ⭐ type приходит как ClassName (Knob, Slider, Input, Output, ...)
         
-        const size = COMPONENT_SIZES[sizeKey];
-        if (!size) {
+        const def = ComponentRegistry[type];
+        if (!def) {
             console.warn('Unknown component type:', type, jackType);
             return;
         }
+        const size = def.paletteSize;
         
         // Получаем позицию для спавна
         const panel = document.getElementById('editor-ui-panel');
@@ -248,112 +311,26 @@ export class EditorApp {
         };
     }
 
-    // Создаёт экземпляр компонента по типу
     createComponentInstance(type, x, y, size, jackType = null) {
-        let component = null;
-        const newId = this._generateComponentId();
-
-        switch(type) {
-            case 'knob':
-                component = new Knob(x, y, 'medium', 0, 127, 64, false, 0);
-                component.label = 'Knob';
-                break;
-            case 'buttonFlat':
-                component = new ButtonFlat(x, y, size.width, size.height, 'Off,On');
-                break;
-            case 'buttonRadio':
-                component = new ButtonRadio(x, y, 4, 30, 'One,Two,Three,Four', 'horizontal');
-                break;
-            case 'buttonIncDec':
-                component = new ButtonIncDec(x, y, size.width, 'Item1,Item2,Item3,Item4', 0);
-                break;
-            case 'buttonText':
-                component = new ButtonText(x, y, size.width, 'M', true);
-                break;
-            case 'slider':
-                component = new Slider(x, y, size.width, size.height, 0, 127, 64);
-                break;
-            case 'textLabel':
-                component = new TextLabel(x, y, 'Label', 10, '#888888', 'left', 'top');
-                break;
-            case 'textField':
-                component = new TextField(x, y, size.width, null, 'number', null);
-                break;
-            case 'textEdit':
-                component = new TextEdit(x, y, size.width, 'Ch 1', false);
-                break;
-            case 'levelShift':
-                component = new LevelShift(x, y, 'small');
-                break;
-            case 'led':
-                component = new LED(x, y, size.width, size.height);
-                break;
-            case 'input':
-                // ⭐ Проверяем тип джека
-                const inputJackType = jackType || 'audio';
-                const inputColor = inputJackType === 'audio' ? '#ff4444' : '#4488ff';
-                component = new Input(x, y, { 
-                    jackType: inputJackType, 
-                    label: inputJackType === 'audio' ? 'In' : 'In(C)',
-                    color: inputColor,
-                    type: inputJackType
-                });
-                component._jackType = inputJackType;
-                component._isAudioJack = inputJackType === 'audio';
-                break;
-                
-            case 'output':
-                const outputJackType = jackType || 'audio';
-                const outputColor = outputJackType === 'audio' ? '#ff4444' : '#4488ff';
-                component = new Output(x, y, { 
-                    jackType: outputJackType, 
-                    label: outputJackType === 'audio' ? 'Out' : 'Out(C)',
-                    color: outputColor,
-                    type: outputJackType
-                });
-                component._jackType = outputJackType;
-                component._isAudioJack = outputJackType === 'audio';
-                break;
-            case 'partSelector':
-                component = new PartSelector(x, y, size.width, size.height, 5, 0, 
-                    ['Item1', 'Item2', 'Item3', 'Item4', 'Item5']);
-                break;
-            case 'svg':
-                const svgData = 'data:image/svg+xml,' + encodeURIComponent(`
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#0af" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M12 8v8M8 12h8"/>
-                    </svg>
-                `);
-                component = new SVG(x, y, size.width, size.height, svgData, null);
-                break;
-            case 'line':
-                component = new Line(x, y, size.width, 'Horizontal', 1, '#444444');
-                break;
-            case 'graph':
-                component = new Graph(x, y, size.width, size.height);
-                break;
-            case 'miniVU':
-                component = new MiniVU(x, y, size.width, size.height);
-                break;
-            default:
-                console.warn('Unknown component type:', type);
-                return null;
+        const opts = { x, y };
+        
+        // ⭐ type уже ClassName (Knob, Slider, Input, Output, ...)
+        if (type === 'Input' || type === 'Output') {
+            opts.jackType = jackType || 'audio';
         }
-
-        // Общие настройки
-        if (component) {
-            component.id = newId.toString();
-            component.originalID = newId.toString();
-            component.parameterId = newId;
-
-            component.width = size.width;
-            component.height = size.height;
-            component.parent = this.module;
-            component._editorModule = this.module;
-            component._isNewDragging = true; // Маркер что это новый компонент
-        }
-
+        
+        const component = createComponent(type, opts);
+        if (!component) return null;
+        
+        component.id = this._generateComponentId().toString();
+        component.originalID = component.id;
+        component.parameterId = parseInt(component.id);
+        component.width = size.width;
+        component.height = size.height;
+        component.parent = this.module;
+        component._editorModule = this.module;
+        component._isNewDragging = true;
+        
         return component;
     }
 
@@ -398,7 +375,10 @@ export class EditorApp {
         this.canvas.addEventListener('mousedown', (e) => this.onMouseDown(e));
         this.canvas.addEventListener('mousemove', (e) => this.onMouseMove(e));
         this.canvas.addEventListener('mouseup', (e) => this.onMouseUp(e));
-        this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+        this.canvas.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            this._onContextMenu(e);
+        });
         this.canvas.addEventListener('dblclick', (e) => this.onDoubleClick(e));
         
         this.canvas.addEventListener('wheel', (e) => {
@@ -513,12 +493,11 @@ export class EditorApp {
             
             if (isInside) {
                 this.selectedComponent = comp;
-                
-                // ⭐ Начинаем перетаскивание существующего компонента
                 this.draggingExistingComponent = comp;
-                // ⭐ Обновляем окно свойств
-                if (this.componentPropertiesWindow) {
-                    this.componentPropertiesWindow.show(comp);
+                
+                // Переключаем на таб Component в панели свойств
+                if (this.propertiesPanel) {
+                    this.propertiesPanel.setTab('component');
                 }
                 this.dragOffsetX = worldX - comp.x;
                 this.dragOffsetY = worldY - comp.y;
@@ -603,9 +582,7 @@ export class EditorApp {
             const dx = worldX - this.resizingCorner.startX;
             const dy = worldY - this.resizingCorner.startY;
             
-            let newGridWidth = Math.round(
-                (this.resizingCorner.startGridWidth * GRID_UNITS.X + dx) / GRID_UNITS.X
-            );
+            let newGridWidth = 1;
             let newGridHeight = Math.round(
                 (this.resizingCorner.startGridHeight * GRID_UNITS.Y + dy) / GRID_UNITS.Y
             );
@@ -614,6 +591,12 @@ export class EditorApp {
             newGridHeight = Math.max(MIN_GRID_HEIGHT, newGridHeight);
             
             this.module.resize(newGridWidth, newGridHeight);
+
+            // ⭐ Обновляем Properties Panel, если открыт таб Module
+            if (this.propertiesPanel && this.propertiesPanel.activeTab === 'module') {
+                this.propertiesPanel._render();
+            }
+            
             
             // Обновляем позиции всех компонентов при ресайзе
             for (const comp of this.components) {
@@ -714,6 +697,38 @@ export class EditorApp {
         }
     }
 
+    async _onContextMenu(e) {
+        const { showCanvasContextMenu, showComponentContextMenu } = await import('./ui/ModuleContextMenu.js');
+
+        const rect = this.canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) * (this.width / rect.width);
+        const y = (e.clientY - rect.top) * (this.height / rect.height);
+
+        const worldX = (x - this.offsetX) / this.zoom;
+        const worldY = (y - this.offsetY) / this.zoom;
+
+        // Ищем компонент под курсором (topmost first)
+        for (let i = this.components.length - 1; i >= 0; i--) {
+            const comp = this.components[i];
+            if (comp._isNewDragging) continue;
+
+            let isInside = false;
+            if (typeof comp.isPointInside === 'function') {
+                isInside = comp.isPointInside(worldX, worldY);
+            } else if (typeof comp.contains === 'function') {
+                isInside = comp.contains(worldX, worldY);
+            }
+
+            if (isInside) {
+                showComponentContextMenu(this, comp, e.clientX, e.clientY);
+                return;
+            }
+        }
+
+        // Не на компоненте → меню canvas
+        showCanvasContextMenu(this, e.clientX, e.clientY);
+    }
+
     restoreModuleFromData(moduleData, dspCode) {
         console.log('🔄 Restoring module from data:', moduleData);
         
@@ -740,19 +755,16 @@ export class EditorApp {
             this.module.customColor = null;
         }
 
-        // ⭐ 3. Восстанавливаем компоненты
         const components = moduleData.components || [];
+        const restored = deserializeComponents(components, { module: this.module });
         
-        for (const compData of components) {
-            const component = this._createComponentFromData(compData);
-            if (component) {
-                this.components.push(component);
-                
-                // Обновляем счётчик ID
-                const id = parseInt(component.id);
-                if (!isNaN(id) && id >= this._nextComponentId) {
-                    this._nextComponentId = id + 1;
-                }
+        for (const component of restored) {
+            this.components.push(component);
+            
+            // Обновляем счётчик ID
+            const id = parseInt(component.id);
+            if (!isNaN(id) && id >= this._nextComponentId) {
+                this._nextComponentId = id + 1;
             }
         }
         
@@ -783,133 +795,8 @@ export class EditorApp {
     }
 
     _createComponentFromData(compData) {
-        const type = compData.componentType;
-        const id = compData.id;
-        const relX = compData.x;
-        const relY = compData.y;
-        
-        let component = null;
-        
-        switch (type) {
-            case 'Knob':
-                component = new Knob(0, 0, compData.size || 'medium', 
-                                     compData.min || 0, compData.max || 127, 
-                                     compData.defaultValue || 0, false, compData.infoFunc || 0);
-                break;
-            case 'Slider':
-                component = new Slider(0, 0, compData.width || 10, compData.height || 60,
-                                       compData.min || 0, compData.max || 127, 
-                                       compData.defaultValue || 0);
-                break;
-            case 'ButtonFlat':
-                component = new ButtonFlat(0, 0, compData.width || 40, compData.height || 13,
-                                           (compData.labels || ['Off', 'On']).join(','));
-                break;
-            case 'ButtonRadio':
-                component = new ButtonRadio(0, 0, compData.buttonCount || 4, 
-                                             compData.buttonWidth || 40,
-                                             (compData.labels || ['One','Two','Three','Four']).join(','),
-                                             compData.orientation || 'horizontal');
-                break;
-            case 'ButtonIncDec':
-                component = new ButtonIncDec(0, 0, compData.width || 40,
-                                              (compData.labels || ['One','Two','Three','Four']).join(','),
-                                              0);
-                break;
-            case 'ButtonText':
-                component = new ButtonText(0, 0, compData.width || 40, 
-                                            compData.text || 'M', 
-                                            compData.initialState !== false);
-                break;
-            case 'TextLabel':
-                component = new TextLabel(0, 0, compData.text || 'Label',
-                                           compData.fontSize || 10,
-                                           compData.color || '#888888',
-                                           compData.align || 'left', 'top');
-                break;
-            case 'Input':
-                component = new Input(0, 0, {
-                    jackType: compData.jackType || 'audio',
-                    label: compData.ConnectorName || 'In',
-                    type: compData.jackType || 'audio'
-                });
-                break;
-            case 'Output':
-                component = new Output(0, 0, {
-                    jackType: compData.jackType || 'audio',
-                    label: compData.ConnectorName || 'Out',
-                    type: compData.jackType || 'audio'
-                });
-                break;
-            case 'LevelShift':
-                component = new LevelShift(0, 0, compData.size || 'small');
-                break;
-            case 'LED':
-                component = new LED(0, 0, compData.width || 16, compData.height || 10);
-                if (compData.sourceComponentId !== undefined && compData.sourceComponentId !== null) {
-                    component.sourceComponentId = compData.sourceComponentId;
-                }
-                if (compData.ledType) {
-                    component.ledType = compData.ledType;
-                }
-                break;
-            case 'TextField':
-                component = new TextField(0, 0, compData.width || 50, 
-                                           compData.referenceElementId || null, 'number', null);
-                break;
-            case 'TextEdit':
-                component = new TextEdit(0, 0, compData.width || 50, compData.text || '', false);
-                break;
-            case 'PartSelector':
-                component = new PartSelector(0, 0, compData.width || 70, compData.height || 16,
-                                              compData.imageCount || 5, compData.menuOffset || 0,
-                                              compData.menuItems || ['Item1','Item2','Item3','Item4','Item5']);
-                break;
-            case 'Line':
-                component = new Line(0, 0, compData.length || 60, compData.orientation || 'Horizontal',
-                                      compData.width || 1, compData.color || '#444');
-                break;
-            case 'SVG':
-                component = new SVG(0, 0, compData.width || 28, compData.height || 28,
-                                     compData.svgSrc || '', compData.color || null);
-                break;
-            case 'Graph':
-                component = new Graph(0, 0, compData.width || 60, compData.height || 24);
-                break;
-            case 'MiniVU':
-                component = new MiniVU(0, 0, compData.width || 40, compData.height || 24);
-                break;
-            default:
-                console.warn(`⚠️ Unknown component type: ${type}`);
-                return null;
-        }
-        
-        if (!component) return null;
-        
-        // ⭐ Устанавливаем атрибуты
-        component.id = id;
-        component.originalID = id;
-        component.parameterId = parseInt(id);
-        
-        // ⭐ Позиция — относительно модуля
-        component.relX = relX;
-        component.relY = relY;
-        // Абсолютная позиция — модуль.x + relX
-        component.x = this.module.x + relX;
-        component.y = this.module.y + relY;
-        
-        // ⭐ ConnectorIndex — если есть
-        if (compData.ConnectorIndex !== undefined) {
-            component.ConnectorIndex = compData.ConnectorIndex;
-            component.index = compData.ConnectorIndex;
-        }
-        
-        // ⭐ Parent
-        component.parent = this.module;
-        component._editorModule = this.module;
-        component._isNewDragging = false;
-        
-        return component;
+        const result = deserializeComponents([compData], { module: this.module });
+        return result[0] || null;
     }
 
     onMouseUp(e) {
@@ -1132,26 +1019,8 @@ export class EditorApp {
 // editor/EditorApp.js - обновлённый removeComponent()
 // editor/EditorApp.js - добавьте этот метод
 
-    // ⭐ Получить вектора inputs и outputs для сохранения модуля
     getComponentPorts() {
-        const inputs = [];
-        const outputs = [];
-        
-        // Сортируем компоненты по ID
-        const sortedComponents = [...this.components]
-            .filter(c => !c._isNewDragging)
-            .sort((a, b) => parseInt(a.id) - parseInt(b.id));
-        
-        for (const comp of sortedComponents) {
-            const type = comp.constructor.name;
-            if (type === 'Input') {
-                inputs.push(parseInt(comp.id));
-            } else if (type === 'Output') {
-                outputs.push(parseInt(comp.id));
-            }
-        }
-        
-        return { inputs, outputs };
+        return collectPorts(this.components);
     }
     
     removeComponent(component) {
@@ -1178,6 +1047,10 @@ export class EditorApp {
     // ========== ОТРИСОВКА ==========
 
     animate() {
+        if (!this.width || !this.height) {
+            requestAnimationFrame(() => this.animate());
+            return;
+        }
         this.ctx.clearRect(0, 0, this.width, this.height);
         
         this.drawBackground();

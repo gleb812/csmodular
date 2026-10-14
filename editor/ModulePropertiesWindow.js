@@ -1,6 +1,11 @@
 // editor/ModulePropertiesWindow.js
 import { ColorPicker } from '../src/ui/ColorPicker.js';
 import { moduleStore } from '../src/api/index.js';
+import {
+    serializeComponents,
+    collectParamIds,
+    collectPorts,
+} from './ComponentRegistry.js';
 export class ModulePropertiesWindow {
     constructor(app) {
         this.app = app;
@@ -335,112 +340,22 @@ export class ModulePropertiesWindow {
             this.app.uiManager.showNotification(`⬇️ Module "${name}" downloaded (server unavailable)`);
         }
     }
-// editor/ModulePropertiesWindow.js - исправленный collectModuleData()
 
     collectModuleData() {
         const module = this.app.module;
         let name = module.title || 'NewModule';
         name = name.replace(/[^a-zA-Z0-9_]/g, '');
-               
+
         if (!name || name.length === 0) {
             name = 'NewModule';
-            this.windowElement.querySelector('#module-name-input').value = name;
+            const input = this.windowElement.querySelector('#module-name-input');
+            if (input) input.value = name;
             module.title = name;
         }
-        const ports = this.app.getComponentPorts();
-        
-        // Собираем компоненты
-        const components = [];
-        let nextId = 1;
-        
-        for (const comp of this.app.components) {
-            if (comp._isNewDragging) continue;
-            
-            const compData = {
-                componentType: comp.constructor.name,
-                id: comp.id,
-                x: Math.round(comp.relX || comp.x - module.x),
-                y: Math.round(comp.relY || comp.y - module.y),
-            };
-            
-            // Добавляем специфичные свойства
-            if (comp.constructor.name === 'Knob') {
-                compData.size = comp.sizeParam || 'medium';
-                compData.min = comp.min || 0;
-                compData.max = comp.max || 127;
-                compData.defaultValue = comp.value || 0;
-                compData.infoFunc = comp.infoFunc || 0;
-            } else if (comp.constructor.name === 'ButtonFlat') {
-                compData.width = comp.width || 40;
-                compData.height = comp.height || 13;
-                compData.labels = comp.positions || ['Off', 'On'];
-            } else if (comp.constructor.name === 'ButtonRadio') {
-                compData.buttonCount = comp.buttonCount || 4;
-                compData.buttonWidth = comp.buttonWidth || 40;
-                compData.labels = comp.labels || ['One', 'Two', 'Three', 'Four'];
-                compData.orientation = comp.orientation || 'horizontal';
-            } else if (comp.constructor.name === 'ButtonText') {
-                compData.width = comp.width || 40;
-                compData.text = comp.text || 'M';
-                compData.initialState = comp.isActive || true;
-            } else if (comp.constructor.name === 'TextLabel') {
-                compData.text = comp.text || 'Label';
-                compData.fontSize = comp.fontSize || 10;
-                compData.color = comp.color || '#888888';
-                compData.align = comp.align || 'left';
-            } else if (comp.constructor.name === 'Input' || comp.constructor.name === 'Output') {
-                compData.jackType = comp.type || 'audio';
-                compData.bandwidth = 'dynamic';
-                compData.ConnectorName = comp.label || (comp.constructor.name === 'Input' ? 'In' : 'Out');
-                
-                // ⭐ Позиция этого компонента среди компонентов того же типа.
-                // Для трёх Output'ов: 0, 1, 2. НЕ количество остальных!
-                const sameTypeComponents = this.app.components.filter(c => 
-                    c.constructor.name === comp.constructor.name
-                );
-                compData.ConnectorIndex = sameTypeComponents.indexOf(comp);
-            } else if (comp.constructor.name === 'Slider') {
-                compData.width = comp.width || 10;
-                compData.height = comp.height || 60;
-                compData.min = comp.min || 0;
-                compData.max = comp.max || 127;
-                compData.defaultValue = comp.value || 0;
-            } else if (comp.constructor.name === 'LED') {
-                // ⭐ Свойства LED
-                if (typeof comp.getPropertiesForExport === 'function') {
-                    const ledProps = comp.getPropertiesForExport();
-                    Object.assign(compData, ledProps);
-                } else {
-                    compData.width = comp.width || 16;
-                    compData.height = comp.height || 10;
-                    if (comp.sourceComponentId !== null && comp.sourceComponentId !== undefined) {
-                        compData.sourceComponentId = String(comp.sourceComponentId);
-                    }
-                    if (comp.ledType) {
-                        compData.ledType = comp.ledType;
-                    }
-                }
-            } else if (comp.constructor.name === 'LevelShift') {
-                compData.size = comp.sizeParam || 'small';
-            } else if (comp.constructor.name === 'PartSelector') {
-                compData.width = comp.width || 60;
-                compData.height = comp.height || 14;
-                compData.imageCount = comp.imageCount || 5;
-                compData.menuOffset = comp.menuOffset || 0;
-                compData.menuItems = comp.menuItems || ['Item1', 'Item2', 'Item3', 'Item4', 'Item5'];
-            }
-            
-            nextId++;
-            components.push(compData);
-        }
-        
-        // ⭐ Собираем params: все интерактивные компоненты (не джеки), по id
-        const params = this.app.components
-            .filter(c => !c._isNewDragging)
-            .filter(c => this._isParametricComponent(c.constructor.name))
-            .map(c => parseInt(c.id))
-            .filter(id => !isNaN(id))
-            .sort((a, b) => a - b);
+
+        const components = serializeComponents(this.app.components);
+        const params = collectParamIds(this.app.components);
+        const ports = collectPorts(this.app.components);
 
         return {
             name: name,
@@ -450,23 +365,12 @@ export class ModulePropertiesWindow {
             typeID: null,
             defaultParams: [],
             tooltip: name,
-            params: params,                 
+            params: params,
             inputs: ports.inputs,
             outputs: ports.outputs,
             customColor: module.customColor || null,
-            components: components
+            components: components,
         };
-    }
-
-    _isParametricComponent(type) {
-        return [
-            'Knob',
-            'Slider',
-            'ButtonFlat',
-            'ButtonText',
-            'ButtonRadio',
-            'ButtonIncDec'
-        ].includes(type);
     }
 
     generateModuleCode(moduleData) {

@@ -84,6 +84,13 @@ export class EditorPanel {
         
         ctx.shadowColor = 'transparent';
         
+        // ── Название модуля в левом верхнем углу ──
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.font = 'bold 10px Arial, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillText(this.title || 'Module', this.x + 5, this.y + 4);
+        
         ctx.restore();
     }
 
