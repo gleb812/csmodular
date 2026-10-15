@@ -436,6 +436,13 @@ export class EditorApp {
         });
         
         document.addEventListener('keydown', (e) => {
+            // ⭐ Не перехватываем клавиши, если фокус в input/textarea
+            const target = e.target;
+            const isEditable = target.tagName === 'INPUT' ||
+                              target.tagName === 'TEXTAREA' ||
+                              target.isContentEditable;
+            if (isEditable) return;
+
             if (e.key === 'Delete' && this.selectedComponent) {
                 this.removeComponent(this.selectedComponent);
             }
