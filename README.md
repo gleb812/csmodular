@@ -1,4 +1,5 @@
 
+```markdown
 # CsModular
 
 A web-based modular synthesizer built with Csound and vanilla JavaScript + Canvas.
@@ -18,7 +19,7 @@ This project is a next level of the *pch2csd* project: https://github.com/gleb81
   - **LCD** — monochrome glowing interface inspired by Casio watches
 - **Design Settings panel** (press `D`) — live theme editing, color pickers, glow, line weight, cable widths, background
 - **Custom backgrounds** — solid colors or images, with parallax effect
-- Built-in graphical editor for user modules
+- **Module Editor** — built-in IDE-style editor with dock panels and command terminal
 - User modules stored as plain files (in Tauri) — easy to back up, share, version
 
 ## Architecture
@@ -27,9 +28,9 @@ This project is a next level of the *pch2csd* project: https://github.com/gleb81
 - **Audio**: `@csound/browser` 6.18.7
 - **Desktop shell**: Tauri 2.x (Rust)
 - **Storage**:
-  - Web: IndexedDB / localStorage (planned)
-  - Desktop: filesystem via `@tauri-apps/plugin-fs`
-  - Abstraction: `src/api/moduleStore.js`
+  - Web: localStorage (`moduleStore.web.js`)
+  - Desktop: filesystem via `@tauri-apps/plugin-fs` (`moduleStore.tauri.js`)
+  - Abstraction: `src/api/index.js` — lazy `moduleStore` singleton
 - **Theme system**: `src/theme/` (`Theme.js`, `themeStore.js`, `currentTheme.js`, `defaults.js`)
 - **Csound code**: UDO files in `public/csound/modules/*.txt`
 - **Scripts**: Python patchers in `scripts/` (params, mapping tables, NM2 cleanup)
@@ -90,6 +91,8 @@ Output:
 
 ## Keyboard shortcuts
 
+### Main app
+
 | Shortcut | Action |
 |---|---|
 | `Space` | Open context menu (add module) |
@@ -104,18 +107,50 @@ Output:
 | `Right click` on jack | Jack menu |
 | `Right click` on empty space | Main context menu |
 
+### Module Editor
+
+| Shortcut | Action |
+|---|---|
+| `Ctrl + wheel` / `+` / `-` | Zoom canvas |
+| `0` | Reset zoom (only when canvas has focus) |
+| `Escape` | Cancel current drag |
+| `Delete` | Delete selected component |
+| `Right click` on canvas | Context menu (add / rename module) |
+| `Right click` on component | Context menu (properties / delete) |
+| `Ctrl + S` (in code editor) | Save Csound code |
+| `↑` / `↓` (in terminal) | Command history |
+| `Tab` (in code editor) | Insert 4 spaces |
+
 ## Project Structure
 
 ```
 .
 ├── src/                 # Frontend JavaScript + Canvas UI
 │   ├── api/             # moduleStore — unified user-module interface
+│   │   ├── index.js         # lazy singleton picker (Tauri / web)
+│   │   ├── moduleStore.tauri.js
+│   │   └── moduleStore.web.js
 │   ├── csound/          # CsoundEngine, CsoundGenerator, MappingTables
 │   ├── components/      # UI components (Knob, Slider, Input, Output, ...)
 │   ├── managers/        # EventManager, LayerManager, UIManager
 │   ├── theme/           # Theme system (Classic / LCD)
 │   └── ui/              # ContextMenu, DesignSettingsPanel, CSoundWindow, ...
-├── editor/              # Module editor (separate HTML entry)
+├── editor/              # Module Editor (separate HTML entry)
+│   ├── editor.html          # entry point
+│   ├── editor.js            # bootstrap
+│   ├── EditorApp.js         # main editor controller
+│   ├── EditorPanel.js       # module panel (canvas)
+│   ├── ComponentRegistry.js # unified component registry (create / serialize / deserialize)
+│   ├── CodeViewerWindow.js  # Csound code editor (with syntax highlight)
+│   ├── ModulePropertiesWindow.js    # headless (legacy, used for save API)
+│   ├── ComponentPropertiesWindow.js # headless (legacy, used for mapping browser)
+│   └── ui/
+│       ├── DockLayout.js        # split-pane container with presets
+│       ├── Toolbar.js           # New / Load / Save + layout presets
+│       ├── PropertiesPanel.js   # Module / Component tabs
+│       ├── TerminalPanel.js     # command terminal
+│       ├── ContextMenu.js       # generic context menu
+│       └── ModuleContextMenu.js # editor-specific menu builder
 ├── public/              # Static assets (csound/, tables/, backgrounds/)
 │   ├── csound/          # UDO files, mapping tables
 │   ├── tables/          # Value maps
@@ -169,6 +204,86 @@ Design Settings allows live editing of:
 
 All settings are saved to `localStorage`.
 
+## Module Editor
+
+The editor is a separate HTML entry (`editor.html`) that opens in its own window
+(in Tauri) or tab (web). It provides an IDE-style workspace for designing
+custom modules visually.
+
+### Layout
+
+The editor uses a **fixed dock layout** with resizable splitters and presets
+(`Default`, `Code`, `Canvas`). All panel sizes persist in `localStorage`.
+
+```
+┌─────────────────────────────────────────────────┐
+│ toolbar: [New] [Load] [Save]  |  Layout presets │
+├──────────────────────┬──────────────────────────┤
+│                      │                          │
+│   Canvas (module)    │   Csound Code            │
+│                      │                          │
+├──────────────────────┼──────────────────────────┤
+│                      │                          │
+│   Properties         │   Terminal               │
+│   (Module/Component) │   (command language)     │
+│                      │                          │
+└──────────────────────┴──────────────────────────┘
+```
+
+- **Canvas** — visual module layout, drag components, resize module
+- **Properties** — two tabs: `Module` (name, height, color) and `Component`
+  (schema-driven fields from `getPropertySchema()`)
+- **Csound Code** — live-generated `opcode` code with syntax highlighting,
+  line numbers, font size controls
+- **Terminal** — command language for the module (see below)
+
+### Adding components
+
+Right-click on the canvas → **Add Component** → pick from submenu
+(Controls / Display / Jacks / Graphics).
+
+All components live in `editor/ComponentRegistry.js` — a single source of
+truth describing how each component is created, serialized, deserialized,
+and what Csound ports it has. Adding a new component type = adding one
+entry to the registry.
+
+### Terminal commands
+
+The terminal supports a small DSL for fast module editing:
+
+| Command | Description |
+|---|---|
+| `add <type> [x y]` | Add component (auto-place or at x,y) |
+| `in` / `out` | Shorthand for `add input` / `add output` |
+| `ls [type] [-l]` | List components |
+| `del <id\|type\|range>...` | Delete (e.g. `del 3`, `del knob`, `del 3 4 5`, `del 3..7`) |
+| `mv <id> <x> <y>` | Move (absolute) |
+| `mv <id> +dx +dy` | Move (relative) |
+| `map <id> <table>` | Bind mapping table (or unset) |
+| `align <ids...> l\|r\|u\|d` | Align components |
+| `distr <ids...> h\|v` | Distribute evenly |
+| `grid on\|off\|N` | Toggle micro-grid or set step |
+| `new` | Clear module |
+| `save [as <name>]` | Save module |
+| `load <name>` | Load module |
+| `stats` | Module statistics |
+| `help [cmd]` | Help |
+
+Component types (aliases): `knob`, `slider`, `button` (or `btn`), `radio`,
+`incdec`, `toggle`, `label`, `field`, `edit`, `led`, `level`, `select`,
+`svg`, `line`, `graph`, `vu`, `input` (or `in`), `output` (or `out`).
+
+### Saving & loading
+
+- **Web**: modules persist in `localStorage` under
+  `csmodular:user_modules` (list) and `csmodular:user_module:<name>` (data)
+- **Tauri**: modules are written to
+  `~/Documents/CsModular/modules/user/<name>.js` and
+  `~/Documents/CsModular/csound/modules/user/<name>.txt`
+
+Both JS and DSP code are stored. Round-trip load/save preserves the module
+as designed.
+
 ## Development
 
 ### Web only
@@ -208,8 +323,16 @@ Use to verify Tauri-specific functionality (fs, native windows).
 - Ensure theme has `background` section — reset via `localStorage.removeItem('csmodular.theme')`
 
 **User modules not visible in browser:**
-- Web `moduleStore` is currently a stub — user modules only persist in Tauri
-- For web persistence, IndexedDB support is planned
+- Web `moduleStore` uses `localStorage`
+- Check DevTools → Application → Local Storage → `csmodular:user_modules`
+- To reset: `localStorage.removeItem('csmodular:user_modules')`
+
+**Can't type `0` in editor inputs:**
+- Fixed: keyboard shortcuts now skip when focus is in an `<input>` or `<textarea>`
+- If it happens again, check `EditorApp.setupEvents()` for `preventDefault()` calls
+
+**Editor layout reset:**
+- `localStorage.removeItem('csmodular:editor-layout')`
 
 ## Contributing
 
@@ -233,4 +356,4 @@ MIT License — see the [LICENSE](LICENSE) file for details.
 ## Author
 
 **Gleb Rogozinski** — [GitHub](https://github.com/gleb812)
-
+```

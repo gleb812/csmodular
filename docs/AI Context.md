@@ -1,3 +1,5 @@
+
+```markdown
 # AI Context — CsModular
 
 This document is a short description of the system for the AI assistant.
@@ -9,15 +11,19 @@ Goal: reduce onboarding time to 5 minutes.
 Runs in the browser **and** as a native desktop app (Tauri).
 The user assembles a patch from modules, connects them with cables, hears the result.
 
+Two entry points:
+- **`index.html`** → main app (patch building, playback)
+- **`editor.html`** → Module Editor (design custom modules)
+
 ## Stack
 
 - **Frontend**: vanilla JS (ES modules), Vite
 - **Audio**: `@csound/browser` 6.18.7
 - **Desktop shell**: Tauri 2.x (Rust)
 - **Storage**:
-  - `src/api/moduleStore.js` — unified interface for user modules
-  - Web: IndexedDB / localStorage (planned)
-  - Tauri: filesystem via `@tauri-apps/plugin-fs`
+  - `src/api/index.js` — lazy `moduleStore` singleton
+  - Web: `localStorage` (`moduleStore.web.js`)
+  - Tauri: filesystem via `@tauri-apps/plugin-fs` (`moduleStore.tauri.js`)
     - `~/Documents/CsModular/modules/user/*.js`
     - `~/Documents/CsModular/csound/modules/user/*.txt`
 - **Csound code**: UDO files in `public/csound/modules/*.txt`
@@ -65,6 +71,8 @@ Visual block with components. Consists of:
 
 **Important**: `type` is the Csound-valid identifier. `displayName` is only for UI. **Never use `displayName` or `title` in Csound variable names, chnget channels, or opcode calls** — only `type` / `jsonName`.
 
+**params order**: matches the order in which components appear in the `components` array — **not sorted by id**. Patcher `scripts/patch_params.py` regenerates `params` for NM2 modules.
+
 ### UDO file (Csound)
 
 ```csound
@@ -98,7 +106,7 @@ When a cable's source type differs from the destination input type, a converter 
 Bus allocation in `CsoundGenerator._prepareConverters()`.
 Line insertion in `CsoundGenerator.formatModuleLine()`.
 
-## Main classes
+## Main classes (main app)
 
 | Class | File | Role |
 |-------|------|------|
@@ -115,8 +123,156 @@ Line insertion in `CsoundGenerator.formatModuleLine()`.
 | `MappingTables` | `src/csound/MappingTables.js` | Loads `value_maps.json` for `;@ map` |
 | `Input`, `Output` | `src/components/*.js` | Jacks (have `.type` — `'audio'` / `'control'` / `'logic'`) |
 | `Cable` | `src/Cable.js` | `fromJack.type` is the source of truth for cable type |
-| `moduleStore` | `src/api/moduleStore.*.js` | User module storage (Tauri fs / web stub) |
+| `moduleStore` | `src/api/index.js` | User module storage (lazy singleton) |
 | `Theme`, `themeStore`, `currentTheme` | `src/theme/*.js` | Theme system: classic / LCD presets |
+
+## Module Editor
+
+**Separate HTML entry**: `editor.html` → `editor/editor.js` → `EditorApp`.
+
+Opens in its own window (Tauri) or tab (web). Provides an **IDE-style workspace**
+for designing custom modules visually.
+
+### Layout — fixed dock
+
+Resizable splitters + presets (`Default`, `Code`, `Canvas`). Sizes persist in
+`localStorage` under `csmodular:editor-layout`.
+
+```
+┌─────────────────────────────────────────────────┐
+│ toolbar: [New] [Load] [Save] | Layout presets   │
+├──────────────────────┬──────────────────────────┤
+│                      │                          │
+│   Canvas (module)    │   Csound Code            │
+│                      │                          │
+├──────────────────────┼──────────────────────────┤
+│                      │                          │
+│   Properties         │   Terminal               │
+│   (Module/Component) │   (command language)     │
+│                      │                          │
+└──────────────────────┴──────────────────────────┘
+```
+
+### Editor classes
+
+| Class | File | Role |
+|-------|------|------|
+| `EditorApp` | `editor/EditorApp.js` | Main editor controller |
+| `EditorPanel` | `editor/EditorPanel.js` | Module "panel" on canvas (title, size, color) |
+| `ComponentRegistry` | `editor/ComponentRegistry.js` | **Single source of truth** for all components |
+| `CodeViewerWindow` | `editor/CodeViewerWindow.js` | Csound code editor with syntax highlight |
+| `ModulePropertiesWindow` | `editor/ModulePropertiesWindow.js` | **Headless** (legacy) — provides `saveModule()` / `collectModuleData()` API |
+| `ComponentPropertiesWindow` | `editor/ComponentPropertiesWindow.js` | **Headless** (legacy) — provides `_showMappingBrowser()` |
+| `DockLayout` | `editor/ui/DockLayout.js` | Split-pane container with presets |
+| `Toolbar` | `editor/ui/Toolbar.js` | New / Load / Save + layout presets |
+| `PropertiesPanel` | `editor/ui/PropertiesPanel.js` | Module / Component tabs |
+| `TerminalPanel` | `editor/ui/TerminalPanel.js` | Command terminal |
+| `ContextMenu` | `editor/ui/ContextMenu.js` | Generic context menu (with submenus) |
+| `ModuleContextMenu` | `editor/ui/ModuleContextMenu.js` | Editor-specific menu builder |
+
+### ComponentRegistry — single source of truth
+
+Each component type is described **once** in `editor/ComponentRegistry.js`:
+
+```js
+Knob: {
+    label: 'Knob',
+    category: 'controls',
+    paletteSize: { width: 24, height: 24 },
+    isParametric: true,       // goes into params[]
+    isJack: false,            // or 'in' / 'out'
+    create(opts),             // factory
+    serialize(comp),          // → JS module data
+    deserialize(data, ctx),   // ← JS module data
+    csoundPorts(comp),        // { kind, dir } | null
+}
+```
+
+Used by:
+- `ModulePropertiesWindow.collectModuleData()` — serialization
+- `EditorApp._createComponentFromData()` — deserialization
+- `CodeViewerWindow.generateCsoundCode()` — Csound port discovery
+- `ModuleContextMenu._componentSubmenu()` — context menu
+- `TerminalPanel` — terminal commands
+- `PropertiesPanel` — palette sizes
+
+**Adding a new component type = adding one entry to the registry.**
+
+Helpers exported:
+- `serializeComponents(components)` → array of data
+- `deserializeComponents(dataArray, ctx)` → array of instances
+- `collectParamIds(components)` → params[] (order preserved, no sort)
+- `collectPorts(components)` → { inputs, outputs }
+- `getCsoundPorts(component)` → port or null
+- `getByCategory()` → for palette generation
+- `createComponent(type, opts)` → factory
+- `isParametric(component)`, `getJackDir(component)`, `getTypeOf(component)`
+
+### Properties panel — tabs
+
+- **Module** — name, height (grid cells), color (preset buttons + hex input)
+- **Component** — schema-driven fields from `static getPropertySchema()`
+
+Clicking a component in canvas switches the tab to Component. Clicking empty canvas
+keeps the tab, shows "No component selected".
+
+### Terminal — command DSL
+
+Persistent at right-bottom. Commands:
+
+| Command | Description |
+|---|---|
+| `add <type> [x y]` | Add component |
+| `in` / `out` | Shorthand for `add input` / `add output` |
+| `ls [type] [-l]` | List components |
+| `del <id\|type\|range>...` | Delete (`del 3`, `del knob`, `del 3 4 5`, `del 3..7`) |
+| `mv <id> <x> <y>` | Move (absolute) |
+| `mv <id> +dx +dy` | Move (relative) |
+| `map <id> <table>` | Bind mapping table (or unset) |
+| `align <ids...> l\|r\|u\|d` | Align |
+| `distr <ids...> h\|v` | Distribute evenly |
+| `grid on\|off\|N` | Grid toggle / step |
+| `new` | Clear module |
+| `save [as <name>]` | Save |
+| `load <name>` | Load |
+| `stats` | Statistics |
+| `help [cmd]` | Help |
+
+Command history via `↑` / `↓`. All commands go through `ComponentRegistry`.
+
+### Code Viewer
+
+- Live-generated `opcode` code from module components
+- **Syntax highlight** via overlay method: transparent `<textarea>` on top of
+  highlighted `<div>` (`#code-highlight-layer`), pointer-events: none
+- Highlight rules in `_highlightCsound()` (single regex pass):
+  - `;@ map ...` → pink bold
+  - `;...` comments → grey italic
+  - `opcode` / `endop` / `instr` / `xin` / ... → blue bold
+  - numbers → yellow
+  - strings → light blue
+  - variables (`kFoo`, `aFoo`, `giFoo`, ...) → lavender
+- **Line numbers** in `#code-gutter`, synced via `_syncScroll()`
+- Font size controls `[A] [A]` — affects textarea, gutter, highlight layer
+- `Ctrl+S` — save code, `⟳` — resync from module, `📋` — copy
+
+### Editor keyboard shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `Ctrl + wheel` / `+` / `-` | Zoom canvas |
+| `0` | Reset zoom (only when canvas has focus, not in inputs) |
+| `Escape` | Cancel current drag |
+| `Delete` | Delete selected component |
+| `Right click` on canvas | Context menu (Add / Rename) |
+| `Right click` on component | Context menu (Properties / Delete) |
+| `Ctrl + S` in editor | Save Csound code |
+| `↑` / `↓` in terminal | Command history |
+| `Tab` in code editor | Insert 4 spaces |
+
+**⚠️ Keyboard shortcut rule**: global handlers must skip when `e.target` is
+`<input>`, `<textarea>`, or `contentEditable`. Otherwise users can't type `0`
+(which used to trigger `resetZoom()`).
 
 ## World model (infinite space)
 
@@ -140,7 +296,7 @@ When loading a patch, FX modules get their `vpos` shifted down by `maxVoiceY + 1
 
 ## Data flow
 
-### Creating a module
+### Creating a module (main app)
 
 1. `main.js` → `ModuleFactory.createModule(type, ...)` → `Panel`
 2. `CsoundGenerator.addModule({ typeId, instanceId, instanceName, layer, ... })`
@@ -247,10 +403,11 @@ Called via `DesignSettingsPanel.applyAndSave()`:
 
 ## User module storage
 
-`src/api/index.js` exposes a `moduleStore` singleton. It picks the implementation lazily:
+`src/api/index.js` exposes a **lazy** `moduleStore` singleton. It picks the implementation on first call:
 
 - **Tauri** → `src/api/moduleStore.tauri.js` (via `@tauri-apps/plugin-fs`)
-- **Web** → `src/api/moduleStore.web.js` (currently a stub; IndexedDB planned)
+- **Web** → `src/api/moduleStore.web.js` (uses `localStorage`)
+- **Fallback** → in-memory stub (returns empty / false)
 
 API:
 
@@ -260,9 +417,16 @@ moduleStore.load(name)                          // → { name, code, dsp_code } 
 moduleStore.save(name, code, dspCode)           // → boolean
 moduleStore.remove(name)                        // → boolean
 moduleStore.isUserModule(name)                  // → boolean
+moduleStore.invalidateCache()                   // sync
 ```
 
+**Web storage keys**:
+- `csmodular:user_modules` — JSON array of names
+- `csmodular:user_module:<name>` — JSON `{ code, dsp_code }`
+
 **Platform detection**: `isTauri()` checks for `__TAURI_INTERNALS__` in `window`.
+
+**No top-level await** — lazy init pattern keeps module graph clean.
 
 ## Tauri configuration
 
@@ -270,7 +434,7 @@ moduleStore.isUserModule(name)                  // → boolean
 - `src-tauri/capabilities/default.json` — permissions. **Important**: `windows` list must include **all** window labels that need fs access (e.g. `["main", "editor"]`)
 - `src-tauri/src/lib.rs` — Tauri builder with `.plugin(tauri_plugin_fs::init())`
 
-## Keyboard shortcuts
+## Keyboard shortcuts (main app)
 
 - `Space` — open main context menu (add module)
 - `Space + drag` — pan the world
@@ -280,9 +444,9 @@ moduleStore.isUserModule(name)                  // → boolean
 - `D` (or `В` on Russian layout) — toggle Design Settings panel
 - `Delete` — delete selected module
 - `Escape` — deselect module / close menus
-- `Right click` on module — open Module Context Menu (color picker, layer switch, delete)
-- `Right click` on jack — open Jack Context Menu
-- `Right click` on empty space — open main Context Menu
+- `Right click` on module — Module Context Menu (color picker, layer switch, delete)
+- `Right click` on jack — Jack Context Menu
+- `Right click` on empty space — main Context Menu
 
 ## Csound name sanitization
 
@@ -319,29 +483,51 @@ Patcher `scripts/patch_params.py` regenerates `params` for all NM2 modules:
 11. **All draw code uses `getCurrentTheme()`** — never hardcode colors outside of `classic` branches
 12. **`removeModuleFromLayer` searches ALL layers** — never assume `module.layer` is correct
 13. **`getLayerAtPoint` always returns `'voice'`** — new modules are Voice by default
+14. **Keyboard shortcuts must skip when focus is in an `<input>` / `<textarea>` / `contentEditable`** — see `EditorApp.setupEvents()`
+15. **Editor component serialization goes through `ComponentRegistry`** — do not hand-roll `if/else` on `constructor.name` anywhere
+16. **`params` order = order in `components` array** — never sort
 
 ## Known issues (short)
 
 - Variant switching not yet wired to UI (parsing done, switching not)
 - `CsoundEngine._ledValues` not cleared on `stop()`
-- `ComponentPropertiesWindow` opens only via button
-- Web `moduleStore` is a stub — user modules don't persist in browser yet
+- `ModulePropertiesWindow` / `ComponentPropertiesWindow` are **headless** in editor — they exist only for `saveModule()` and `_showMappingBrowser()`. Will be fully replaced by `PropertiesPanel` eventually
+- `TerminalPanel._cmdSave` duplicates JS code generation from `ModulePropertiesWindow.generateModuleCode` — should be unified
+- `add` in terminal always uses `audio` jack type for Input/Output — control jacks only via UI
 - `LayerManager` still has some dead divider code (`updateLayerSizes`, `drawLayerGrid`, `updateGridCache`)
 - `main.js` still has `updateCanvasSize` (dead code referencing `this.divider`)
 - `loadAvailableModules` in `main.js` still uses `fetch('/api/list-user-modules')` (legacy)
+- Module Editor context menu still has `Change Color` — should be removed (color lives in Properties)
+- Terminal has no autocomplete
+- Code Viewer line numbers / highlight not yet virtualized (fine for typical module sizes, may lag on very large code)
 
 ## TODO (short)
 
-- Web `moduleStore` via IndexedDB
+**Main app:**
 - Variant switching: `k` ↔ `a` module opcode based on incoming cable types
 - Jack recoloring on variant switch
 - Split rendering into 4 canvas layers (overlay, bg, modules, cables)
 - Replace `getControlChannel` with `channelPtr` in `CsoundEngine`
-- Undo/Redo
-- Tests
-- Finish clean-up of dead divider code
 - Custom background upload (image file input)
 - Cable visual width per type (already partially done)
+- Finish clean-up of dead divider code
+- Fix `loadAvailableModules` to use `moduleStore`
+
+**Module Editor:**
+- Remove `Change Color` from context menu
+- Terminal: autocomplete, `history`, `!!` repeat, `add in c` / `out c` for control jacks
+- Terminal: unify JS code generation with `ModulePropertiesWindow`
+- Remove legacy `ModulePropertiesWindow` / `ComponentPropertiesWindow` once `PropertiesPanel` is full
+- CodeMirror (5 or 6) instead of textarea + overlay — proper undo, search, autocomplete
+- `DockLayout`: collapsible panels, tabs in properties for multiple components
+- Component grouping / align/distribute UI (already in terminal, not in UI)
+- `preview` command — send generated UDO to main app for live playback
+- Snapshot / undo-redo in editor
+
+**Shared:**
+- Web `moduleStore` — IndexedDB instead of `localStorage` (for larger modules / no quota issues)
+- Tests
+- Undo/Redo in main app too
 
 ## How to start working
 
@@ -358,3 +544,4 @@ Style:
 - No "let's try" — concrete edits
 - Show diff or full methods
 - Do not change things not asked about
+```
