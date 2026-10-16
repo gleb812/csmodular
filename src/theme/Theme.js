@@ -176,11 +176,6 @@ export class Theme {
         };
     }
 
-
-    // ============================================================
-    //  КАБЕЛИ
-    // ============================================================
-
     /**
      * Толщина кабеля по типу.
      * @param {'audio'|'control'|'logic'|'other'} type
@@ -231,7 +226,7 @@ export class Theme {
             return {
                 color: 'rgba(140, 140, 140, 0.35)',
                 size,
-                lineWidth: 1,
+                lineWidth: 0.5,
                 glow: false,
             };
         }
