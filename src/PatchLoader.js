@@ -1,5 +1,5 @@
 // src/PatchLoader.js
-    
+import { NM2_HPOS_TO_GRIDX, PANEL_GRID_WIDTH } from './constants.js';
 import { createFileInput, triggerFileInput } from './utils/fileInput.js';
 
 export class PatchLoader {
@@ -133,8 +133,11 @@ export class PatchLoader {
         const moduleName = moduleDef.name;
         const moduleId = moduleDef.id;
         const area = moduleDef.area;
-        const hpos = moduleDef.hpos || 0;
-        let vpos = moduleDef.vpos || 0;
+        // ⭐ NM2-совместимость: hpos в старых патчах шёл с шагом 260px (целая панель).
+        // Конвертируем в новую grid-систему с шагом 20px.
+        // hpos = 1 → gridX = 13 → pixelX = 260. Расстояние сохраняется.
+        const hpos = (moduleDef.hpos || 0) * NM2_HPOS_TO_GRIDX;
+        let vpos = moduleDef.vpos || 0;   // шаг по Y не менялся
         
         // Проверяем валидность данных
         if (!moduleName) {
@@ -225,11 +228,11 @@ export class PatchLoader {
     }
     
     findModulePosition(layerName, preferredX, preferredY) {
-        if (this.system.isGridCellFree(layerName, preferredX, preferredY, 1, 1)) {
+        if (this.system.isGridCellFree(layerName, preferredX, preferredY, PANEL_GRID_WIDTH, 1)) {
             return { x: preferredX, y: preferredY };
         }
         
-        const freeSpace = this.system.findFreeSpace(layerName, 1, 1, preferredX, preferredY);
+        const freeSpace = this.system.findFreeSpace(layerName, PANEL_GRID_WIDTH, 1, preferredX, preferredY);
         if (freeSpace) {
             console.log(`Position occupied, moving to [${freeSpace.gridX}, ${freeSpace.gridY}]`);
             return freeSpace;

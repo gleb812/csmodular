@@ -4,25 +4,33 @@
 // Используются при первом запуске и при сбросе.
 
 export const DEFAULT_THEME = {
-    preset: 'classic',  // 'classic' | 'lcd'
+    preset: 'classic',
 
     lcd: {
-        color: '#4ec9c9',       // ЖК-цвет (оливково-зелёный, как Casio)
-        glow: 0.2,              // Свечение 0..1
-        panelOpacity: 0.15,     // Прозрачность фона панели 0..1
-        lineWeight: 0.2,        // Множитель толщины линий 0.5..2
+        color: '#4ec9c9',
+        glow: 0.2,
+        panelOpacity: 0.15,
+        lineWeight: 0.2,
     },
 
     cables: {
         audioWidth: 3.0,
         controlWidth: 1.5,
-        glow: false,   // ← отдельный флаг для кабелей
+        glow: false,
     },
 
     background: {
-        image: null,  // или null — если фон выключен
-        parallax: true,                      // parallax-эффект включён?
-        parallaxStrength: 20,                // сила смещения
+        image: null,
+        parallax: true,
+        parallaxStrength: 20,
+    },
+
+    // ⭐ НОВОЕ
+    grid: {
+        multX: 1,      // множитель шага по X (1 = 20px)
+        multY: 1,      // множитель шага по Y (1 = 15px)
+        snap: true,    // прилипание при drag
+        size: 4,       // длина луча крестика (экранные px)
     },
 };
 

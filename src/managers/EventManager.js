@@ -250,7 +250,6 @@ export class EventManager {
       this.canvas.style.cursor = 'context-menu';
     } else if (
       !this.system.patchManager.draggingCable &&
-      !this.system.layerManager.divider.isDragging &&
       !this.system.isPanning
     ) {
       this.canvas.style.cursor = 'default';

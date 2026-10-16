@@ -119,6 +119,14 @@ export class DesignSettingsPanel {
             this.buildSlider('cables.controlWidth', 'Control Width', settings.cables.controlWidth, 0.5, 5, 0.25),
         ]));
 
+        // === GRID ===
+        const gridSettings = settings.grid || { multX: 1, multY: 1, snap: true, size: 4 };
+        content.appendChild(this.buildSection('Grid', [
+            this.buildSlider('grid.multX', 'Step X ×', gridSettings.multX, 1, 10, 1),
+            this.buildSlider('grid.multY', 'Step Y ×', gridSettings.multY, 1, 10, 1),
+            this.buildSlider('grid.size', 'Cross Size', gridSettings.size, 2, 10, 1),
+            this.buildCheckbox('grid.snap', 'Snap to grid', gridSettings.snap !== false),
+        ]));
 
         // === BACKGROUND ===
         content.appendChild(this.buildSection('Background', [
@@ -278,11 +286,45 @@ export class DesignSettingsPanel {
         input.oninput = () => {
             const v = parseFloat(input.value);
             valueEl.textContent = this.formatValue(v);
-            this.setPath(path, v);
+            this.setPath(path, v, { silent: true });
         };
 
         wrapper.appendChild(labelRow);
         wrapper.appendChild(input);
+        return wrapper;
+    }
+
+    buildCheckbox(path, label, checked) {
+        const wrapper = document.createElement('label');
+        wrapper.style.cssText = `
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            user-select: none;
+        `;
+
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.checked = !!checked;
+        input.style.cssText = `
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+            accent-color: #0af;
+        `;
+
+        const span = document.createElement('span');
+        span.textContent = label;
+        span.style.cssText = 'color: #aaa; font-size: 11px;';
+
+        input.onchange = () => {
+            this.setPath(path, input.checked);
+        };
+
+        wrapper.appendChild(input);
+        wrapper.appendChild(span);
         return wrapper;
     }
 
@@ -464,11 +506,7 @@ export class DesignSettingsPanel {
     //  ЛОГИКА
     // ============================================================
 
-    /**
-     * Установить значение по пути "a.b.c" в settings темы.
-     * Сохраняет в localStorage, применяет, перерисовывает.
-     */
-    setPath(path, value) {
+    setPath(path, value, options = {}) {
         const theme = getCurrentTheme();
         const parts = path.split('.');
 
@@ -480,18 +518,21 @@ export class DesignSettingsPanel {
         target[parts[parts.length - 1]] = value;
 
         // Применяем и сохраняем
-        this.applyAndSave();
+        this.applyAndSave({ rerender: !options.silent });
     }
 
-    /**
-     * Применить текущие settings и сохранить.
-     */
-    applyAndSave() {
+    applyAndSave(options = {}) {
+        const { rerender = true } = options;
+
         const theme = getCurrentTheme();
         setCurrentTheme(new Theme(theme.settings));
         themeStore.save(theme.settings);
 
-        // ⭐ Обновляем фон
+        // ⭐ Синхронизация с grid
+        if (this.system?.applyGridFromTheme) {
+            this.system.applyGridFromTheme();
+        }
+
         if (this.system?.applyBackgroundFromTheme) {
             this.system.applyBackgroundFromTheme();
         }
@@ -500,7 +541,7 @@ export class DesignSettingsPanel {
             this.system.forceRedraw();
         }
 
-        if (!this._isSliderUpdate) {
+        if (rerender) {
             this.renderContent();
         }
     }

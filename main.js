@@ -1,6 +1,8 @@
 // main.js
 import { ModuleFactory } from './src/ModuleFactory.js';
-import { GRID_UNITS } from './constants.js';
+import { Grid } from './src/grid/Grid.js';
+import { BASE_STEP_X, BASE_STEP_Y, PANEL_GRID_WIDTH } from './src/constants.js';
+import { themeStore } from './src/theme/themeStore.js';
 import { Panel } from './src/components/Panel.js';
 import { PatchManager } from './src/PatchManager.js';
 import { PatchLoader } from './src/PatchLoader.js';
@@ -92,7 +94,7 @@ class ModularSystem {
     this.debugCables = false;
     this.currentPatchFilename = null;
     this.showGrid = true;   // ← НОВОЕ
-
+    this.grid = new Grid();
     this.layerManager = new LayerManager(this.canvas);
     this.layerManager.system = this;
     this.patchManager = new PatchManager(this);
@@ -242,6 +244,13 @@ class ModularSystem {
            v.startsWith('rgba(') ||
            v.startsWith('hsl(') ||
            v.startsWith('hsla(');
+  }
+
+  applyGridFromTheme() {
+    if (!this.grid) return;
+    if (this.grid.applyThemeSettings()) {
+      this.forceRedraw();
+    }
   }
 
   updateParallax() {
@@ -684,9 +693,6 @@ _renderDynamic() {
       this.baseCanvasWidth = this.canvas.width;
       this.baseCanvasHeight = this.canvas.height;
 
-      // Обновляем LayerManager
-      this.layerManager.updateCanvasSize();
-
       // Обновляем UI
       setTimeout(() => {
           if (this.uiManager && this.uiManager.updatePosition) {
@@ -696,8 +702,6 @@ _renderDynamic() {
 
       window.addEventListener('resize', () => {
           this.resizeCanvasToWindow();
-          this.layerManager.updateCanvasSize();
-          this.layerManager.invalidateCache();   // сбросить кеши
           this.forceRedraw();
           
           if (this.uiManager && this.uiManager.updatePosition) {
@@ -763,61 +767,10 @@ _renderDynamic() {
         if (this.uiManager && this.uiManager.updatePosition) {
           this.uiManager.updatePosition();
         }
-
-        // Пересчитываем видимую область
-        this.updateVisibleArea();
       }, 100);
     });
   }
 
-  updateVisibleArea() {
-    // Левый край всегда виден (x=0)
-    // Правый край может обрезаться
-    const canvasRect = this.canvas.getBoundingClientRect();
-
-    //console.log(`Visible area: x=${canvasRect.left}-${canvasRect.right}, width=${canvasRect.width}`);
-
-    // Можно добавить индикатор, что часть canvas не видна
-    // if (canvasRect.right < window.innerWidth) {
-    //     console.log('✅ Весь canvas виден');
-    // } else {
-    //     console.log(`⚠️ Правая часть canvas обрезана на ${canvasRect.right - window.innerWidth}px`);
-    // }
-  }
-
-  updateUIPosition() {
-    if (!this.uiManager || !this.uiManager.updatePosition) return;
-
-    // Получаем реальные размеры canvas на экране
-    const canvasRect = this.canvas.getBoundingClientRect();
-
-    // Передаем в UI Manager
-    this.uiManager.updatePosition(canvasRect);
-  }
-
-  updateCanvasSize() {
-      // ⭐ Используем актуальные размеры canvas
-      const canvasWidth = this.canvas.width;
-      const canvasHeight = this.canvas.height;
-
-      // Voice слой
-      this.layers.voice.x = 0;
-      this.layers.voice.y = 0;
-      this.layers.voice.width = canvasWidth;
-      this.layers.voice.visibleHeight = this.divider.y;
-      this.layers.voice.totalHeight = 2500;
-
-      // FX слой
-      this.layers.fx.x = 0;
-      this.layers.fx.y = this.divider.y + 10;
-      this.layers.fx.width = canvasWidth;
-      this.layers.fx.visibleHeight = canvasHeight - this.layers.fx.y;
-      this.layers.fx.totalHeight = 2500;
-
-      // Сбросить кеши (размеры изменились)
-      this.invalidateCache();
-      this._gridCacheKey = null;   // сбросить grid-кеш
-  }
 
   async loadPatchFromJson(patchData) {
     return await this.patchLoader.loadPatch(patchData);
@@ -1196,13 +1149,13 @@ _renderDynamic() {
   }
 
   async addNewModule(moduleType, layerName, gridX = null, gridY = null) {
-    // Если переданы координаты - используем их
+    console.log('🔍 addNewModule:', { moduleType, layerName, gridX, gridY }); 
     if (gridX !== null && gridY !== null) {
       return this.addNewModuleAtPosition(moduleType, layerName, gridX, gridY);
     }
 
     // Иначе ищем свободное место
-    const freeSpace = this.findFreeSpace(layerName, 1, 2);
+    const freeSpace = this.findFreeSpace(layerName, PANEL_GRID_WIDTH, 2);
     if (freeSpace) {
       return this.addNewModuleAtPosition(
         moduleType,
@@ -1664,6 +1617,50 @@ async loadAvailableModules(selectElement) {
     this.uiManager.updateZoomInfo(this.scale);
   }
 
+  /**
+   * Изменить множители шага сетки.
+   * Существующие модули НЕ двигаются — только следующий drag.
+   * Сохраняется в тему.
+   */
+  setGridMultipliers(multX, multY) {
+    if (!this.grid) return;
+    const mx = Math.max(1, Math.round(multX));
+    const my = Math.max(1, Math.round(multY));
+
+    this.grid.multX = mx;
+    this.grid.multY = my;
+
+    // ⭐ Пишем в тему и сохраняем
+    const theme = getCurrentTheme();
+    if (!theme.settings.grid) theme.settings.grid = {};
+    theme.settings.grid.multX = mx;
+    theme.settings.grid.multY = my;
+    themeStore.save(theme.settings);
+
+    this.forceRedraw();
+  }
+
+  /**
+   * Включить/выключить прилипание. Сохраняется в тему.
+   */
+  setGridSnap(enabled) {
+    if (!this.grid) return;
+    this.grid.snap = !!enabled;
+
+    const theme = getCurrentTheme();
+    if (!theme.settings.grid) theme.settings.grid = {};
+    theme.settings.grid.snap = !!enabled;
+    themeStore.save(theme.settings);
+  }
+
+  /**
+   * Включить/выключить прилипание.
+   */
+  setGridSnap(enabled) {
+    if (!this.grid) return;
+    this.grid.snap = !!enabled;
+  }
+
   animate() {
       this.updateParallax();
       const now = performance.now();
@@ -1676,7 +1673,13 @@ async loadAvailableModules(selectElement) {
       this.lastFrameTime = now;
 
       if (!this.profiler) {
-          this.profiler = { enabled: true, marks: {}, times: {}, frameCount: 0, lastLogTime: now };
+          this.profiler = {
+              enabled: true,
+              marks: {},
+              times: {},
+              frameCount: 0,
+              lastLogTime: now,
+          };
       }
       this.profiler.frameCount = (this.profiler.frameCount || 0) + 1;
 
@@ -1694,42 +1697,71 @@ async loadAvailableModules(selectElement) {
       }
 
       // ⭐ hasDragging — включая pan
-      const hasDragging = this.draggingComponent ||
-                          this.patchManager.draggingCable?.isDragging ||
-                          this.layerManager.divider.isDragging ||
-                          this.isPanning;
+      const hasDragging =
+          this.draggingComponent ||
+          this.patchManager.draggingCable?.isDragging ||
+          this.isPanning;
 
       if (hasDragging) {
           this._wasDragging = true;
       }
 
-      const needsRedraw = hasDragging ||
-                          this._voiceDirty ||
-                          this._fxDirty ||
-                          this._cablesDirty ||
-                          this._forceRedraw ||
-                          this.frameCount % 30 === 0;
+      const needsRedraw =
+          hasDragging ||
+          this._voiceDirty ||
+          this._fxDirty ||
+          this._cablesDirty ||
+          this._forceRedraw ||
+          this.frameCount % 30 === 0;
 
       if (needsRedraw) {
+          // === CLEAR ===
           if (typeof this.startMeasure === 'function') this.startMeasure('clear');
           this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
           if (typeof this.endMeasure === 'function') this.endMeasure('clear');
 
-          if (this._voiceDirty || hasDragging || this.frameCount % 30 === 0 || this._forceRedraw) {
+          // === СЕТКА — один раз для всего мира, ДО модулей ===
+          if (this.showGrid && this.grid) {
+              this.ctx.save();
+              this.ctx.translate(this.offsetX, this.offsetY);
+              this.ctx.scale(this.scale, this.scale);
+              this.grid.draw(this.ctx, {
+                  offsetX: this.offsetX,
+                  offsetY: this.offsetY,
+                  scale: this.scale,
+                  width: window.innerWidth,
+                  height: window.innerHeight,
+              });
+              this.ctx.restore();
+          }
+
+          // === VOICE ===
+          if (
+              this._voiceDirty ||
+              hasDragging ||
+              this.frameCount % 30 === 0 ||
+              this._forceRedraw
+          ) {
               if (typeof this.startMeasure === 'function') this.startMeasure('drawVoice');
               this.drawLayer('voice');
               if (typeof this.endMeasure === 'function') this.endMeasure('drawVoice');
               this._voiceDirty = false;
           }
 
-          if (this._fxDirty || hasDragging || this.frameCount % 30 === 0 || this._forceRedraw) {
+          // === FX ===
+          if (
+              this._fxDirty ||
+              hasDragging ||
+              this.frameCount % 30 === 0 ||
+              this._forceRedraw
+          ) {
               if (typeof this.startMeasure === 'function') this.startMeasure('drawFx');
               this.drawLayer('fx');
               if (typeof this.endMeasure === 'function') this.endMeasure('drawFx');
               this._fxDirty = false;
           }
 
-          // ⭐ Кабели и выделение — на overlay-слое
+          // === OVERLAY: кабели и выделение ===
           if (this.selectedModule) {
               this.drawModuleSelections();
           }
@@ -1744,6 +1776,7 @@ async loadAvailableModules(selectElement) {
           this._cablesDirty = false;
       }
 
+      // === DYNAMIC (LED, MiniVU, Graph) ===
       this._renderDynamic();
 
       if (typeof this.endMeasure === 'function') this.endMeasure('total');
@@ -1808,7 +1841,7 @@ async loadAvailableModules(selectElement) {
   })();
 
 async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
-
+      console.log('🔍 addNewModuleAtPosition:', { moduleType, layerName, gridX, gridY });
       try {
         // Проверяем слой
         if (!layerName || !this.layerManager.layers[layerName]) {
@@ -1862,7 +1895,7 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
         }
 
         // Проверяем, свободно ли место
-        const gridWidth = 1;
+        const gridWidth = PANEL_GRID_WIDTH;
         const gridHeight = moduleDef.gridHeight || 2;
 
         if (!this.isGridCellFree(layerName, gridX, gridY, gridWidth, gridHeight)) {
@@ -2038,220 +2071,109 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
   }
 
   drawLayer(layerName) {
-    const layer = this.layerManager.getLayer(layerName);
-    if (!layer) return;
+      const layer = this.layerManager.getLayer(layerName);
+      if (!layer) return;
 
-    this.ctx.save();
+      // Сетка рисуется ОДИН РАЗ в animate() ДО drawLayer — не здесь.
 
-    this.layerManager.updateBackgroundCache(); 
-    const cache = this.layerManager.backgroundCache[layerName];
-    if (cache) {
-      this.ctx.drawImage(
-        cache,
-        layer.x,
-        layer.y, // позиция на canvas
-        cache.width,
-        cache.height, // рисуем полностью
-      );
-    }
+      this.ctx.save();
+      this.ctx.translate(this.offsetX, this.offsetY);
+      this.ctx.scale(this.scale, this.scale);
 
-    // СЕТКА - только если включена
-    if (this.showGrid) {
-        const gridCache = this.layerManager.getGridCache(
-            layerName,
-            this.offsetX,
-            this.offsetY,
-            this.scale,
-        );
-        if (gridCache) {
-            this.ctx.drawImage(gridCache, 0, 0);
-        }
-    }
-
-    // Рисуем модули этого слоя с учетом скролла
-    this.ctx.save();
-    this.ctx.translate(this.offsetX, this.offsetY);
-    this.ctx.scale(this.scale, this.scale);
-
-    // === ПОДСВЕТКА GRID CELL ПОД КУРСОРОМ ===
-    if (this.lastMouseX !== null && this.lastMouseY !== null) {
-      // Конвертируем экранные координаты в мировые (уже с учетом scale из transform выше)
-      const worldX = (this.lastMouseX - this.offsetX) / this.scale;
-      const worldY = (this.lastMouseY - this.offsetY) / this.scale;
-
-      // Проверяем, находится ли мышь в пределах этого слоя
+      // === ВИЗУАЛЬНАЯ ПОДСВЕТКА КОЛЛИЗИЙ ПРИ DRAG ===
       if (
-        worldX >= layer.x &&
-        worldX <= layer.x + layer.width &&
-        worldY >= layer.y &&
-        worldY <= layer.y + layer.visibleHeight
+          this.draggingComponent &&
+          this.draggingComponent.type === 'drag' &&
+          this.draggingComponent.module &&
+          this.draggingComponent.module.layer === layerName
       ) {
-        // Вычисляем grid координаты (относительно начала слоя)
-        const gridX = Math.floor((worldX - layer.x) / GRID_UNITS.X);
-        const gridY = Math.floor((worldY - layer.y) / GRID_UNITS.Y);
+          const module = this.draggingComponent.module;
 
-        // ⭐ Подсветка работает ВЕЗДЕ (мир бесконечный)
-        {
-          // Рисуем подсветку ячейки (в мировых координатах)
-          this.ctx.fillStyle = 'rgba(255, 255, 0, 0.15)';
-          this.ctx.fillRect(
-            layer.x + gridX * GRID_UNITS.X,
-            layer.y + gridY * GRID_UNITS.Y,
-            GRID_UNITS.X,
-            GRID_UNITS.Y,
+          const worldX = (this.lastMouseX - this.offsetX) / this.scale;
+          const worldY = (this.lastMouseY - this.offsetY) / this.scale;
+
+          // Snap через grid
+          const snapped = this.grid.snapToGrid(worldX, worldY);
+          const targetGridX = snapped.gridX - module.dragOffsetGridX;
+          const targetGridY = snapped.gridY - module.dragOffsetGridY;
+
+          const isFree = this.isGridCellFree(
+              layerName,
+              targetGridX,
+              targetGridY,
+              module.gridWidth,
+              module.gridHeight,
+              module,
           );
 
-          // Отображаем координаты
-          this.ctx.fillStyle = '#ff0';
-          this.ctx.font = 'bold 11px Arial';
+          // Пиксельные координаты целевой позиции
+          const pixelX = targetGridX * BASE_STEP_X;
+          const pixelY = targetGridY * BASE_STEP_Y;
+
+          // 1. Призрак
+          this.ctx.save();
+          this.ctx.globalAlpha = 0.3;
+          this.ctx.fillStyle = isFree ? '#00ff00' : '#ff0000';
+          this.ctx.fillRect(pixelX, pixelY, module.width, module.height);
+          this.ctx.restore();
+
+          // 2. Контур
+          this.ctx.strokeStyle = isFree ? '#00ff00' : '#ff0000';
+          this.ctx.lineWidth = 2;
+          this.ctx.setLineDash([5, 5]);
+          this.ctx.strokeRect(pixelX, pixelY, module.width, module.height);
+          this.ctx.setLineDash([]);
+
+          // 3. Текущая реальная позиция модуля
+          const currentPixelX = module.gridX * BASE_STEP_X;
+          const currentPixelY = module.gridY * BASE_STEP_Y;
+          this.ctx.strokeStyle = '#ffff00';
+          this.ctx.lineWidth = 3;
+          this.ctx.strokeRect(
+              currentPixelX,
+              currentPixelY,
+              module.width,
+              module.height,
+          );
+
+          // 4. Текст с координатами
+          this.ctx.fillStyle = isFree ? '#00ff00' : '#ff0000';
+          this.ctx.font = 'bold 12px Arial';
           this.ctx.textAlign = 'center';
-          this.ctx.textBaseline = 'middle';
-          this.ctx.fillText(
-            `${gridX},${gridY}`,
-            layer.x + gridX * GRID_UNITS.X + GRID_UNITS.X / 2,
-            layer.y + gridY * GRID_UNITS.Y + GRID_UNITS.Y / 2,
-          );
-        }
+          this.ctx.textBaseline = 'top';
+
+          if (isFree) {
+              this.ctx.fillText(
+                  `[${targetGridX}, ${targetGridY}] ✓`,
+                  pixelX + module.width / 2,
+                  pixelY + 5,
+              );
+          } else {
+              this.ctx.fillText(
+                  `[${targetGridX}, ${targetGridY}] ✗ BLOCKED`,
+                  pixelX + module.width / 2,
+                  pixelY + 5,
+              );
+              this.ctx.fillStyle = '#ffff00';
+              this.ctx.fillText(
+                  `Will return to [${module.lastValidGridX}, ${module.lastValidGridY}]`,
+                  pixelX + module.width / 2,
+                  pixelY + 25,
+              );
+          }
       }
-    }
 
-    // === ВИЗУАЛЬНАЯ ПОДСВЕТКА КОЛЛИЗИЙ ===
-    if (
-      this.draggingComponent &&
-      this.draggingComponent.type === 'drag' &&
-      this.draggingComponent.module &&
-      this.draggingComponent.module.layer === layerName
-    ) {
-      const module = this.draggingComponent.module;
-      const layer = this.layerManager.layers[layerName];
+      // === МОДУЛИ СЛОЯ ===
+      layer.modules.forEach((module) => {
+          // Grid → пиксели (мир бесконечный, слой без смещения)
+          const pixelX = module.gridX * BASE_STEP_X;
+          const pixelY = module.gridY * BASE_STEP_Y;
 
-      // Вычисляем целевую позицию
-      const worldX = (this.lastMouseX - this.offsetX) / this.scale;
-      const worldY = (this.lastMouseY - this.offsetY) / this.scale;
+          module.setPixelPosition(pixelX, pixelY);
+          module.draw(this.ctx);
+      });
 
-      if (
-        worldX >= layer.x &&
-        worldX <= layer.x + layer.width &&
-        worldY >= layer.y &&
-        worldY <= layer.y + layer.visibleHeight
-      ) {
-        // Вычисляем grid координаты мыши
-        const mouseGridX = Math.floor((worldX - layer.x) / GRID_UNITS.X);
-        const mouseGridY = Math.floor((worldY - layer.y) / GRID_UNITS.Y);
-
-        // Вычисляем целевую позицию модуля
-        const targetGridX = mouseGridX - module.dragOffsetGridX;
-        const targetGridY = mouseGridY - module.dragOffsetGridY;
-
-        // Проверяем, свободно ли это место
-        const isFree = this.isGridCellFree(
-          layerName,
-          targetGridX,
-          targetGridY,
-          module.gridWidth,
-          module.gridHeight,
-          module,
-        );
-
-        // Показываем целевую область (куда пытаемся переместить)
-        const pixelX = layer.x + targetGridX * GRID_UNITS.X;
-        const pixelY = layer.y + targetGridY * GRID_UNITS.Y;
-
-        // 1. Рисуем "призрак" модуля на целевой позиции
-        this.ctx.save();
-        this.ctx.globalAlpha = 0.3;
-
-        if (isFree) {
-          // Зеленый "призрак" для свободного места
-          this.ctx.fillStyle = '#00ff00';
-        } else {
-          // Красный "призрак" для занятого места
-          this.ctx.fillStyle = '#ff0000';
-        }
-
-        this.ctx.fillRect(
-          pixelX,
-          pixelY,
-          module.gridWidth * GRID_UNITS.X,
-          module.gridHeight * GRID_UNITS.Y,
-        );
-
-        this.ctx.restore();
-
-        // 2. Рисуем контур "призрака"
-        this.ctx.strokeStyle = isFree ? '#00ff00' : '#ff0000';
-        this.ctx.lineWidth = 2;
-        this.ctx.setLineDash([5, 5]);
-        this.ctx.strokeRect(
-          pixelX,
-          pixelY,
-          module.gridWidth * GRID_UNITS.X,
-          module.gridHeight * GRID_UNITS.Y,
-        );
-        this.ctx.setLineDash([]);
-
-        // 3. Показываем текущую реальную позицию модуля
-        const currentPixelX = layer.x + module.gridX * GRID_UNITS.X;
-        const currentPixelY = layer.y + module.gridY * GRID_UNITS.Y;
-
-        // Желтый контур для текущей позиции
-        this.ctx.strokeStyle = '#ffff00';
-        this.ctx.lineWidth = 3;
-        this.ctx.strokeRect(
-          currentPixelX,
-          currentPixelY,
-          module.gridWidth * GRID_UNITS.X,
-          module.gridHeight * GRID_UNITS.Y,
-        );
-
-        // 4. Добавляем текст с информацией
-        this.ctx.fillStyle = isFree ? '#00ff00' : '#ff0000';
-        this.ctx.font = 'bold 12px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'top';
-
-        if (isFree) {
-          this.ctx.fillText(
-            `[${targetGridX}, ${targetGridY}] ✓`,
-            pixelX + (module.gridWidth * GRID_UNITS.X) / 2,
-            pixelY + 5,
-          );
-        } else {
-          this.ctx.fillText(
-            `[${targetGridX}, ${targetGridY}] ✗ BLOCKED`,
-            pixelX + (module.gridWidth * GRID_UNITS.X) / 2,
-            pixelY + 5,
-          );
-
-          // Показываем, куда вернется модуль
-          this.ctx.fillStyle = '#ffff00';
-          this.ctx.fillText(
-            `Will return to [${module.lastValidGridX}, ${module.lastValidGridY}]`,
-            pixelX + (module.gridWidth * GRID_UNITS.X) / 2,
-            pixelY + 25,
-          );
-        }
-      }
-    }
-
-    layer.modules.forEach((module) => {
-      // 1. Grid → базовые пиксели
-      let pixelX = module.gridX * GRID_UNITS.X;
-      let pixelY = module.gridY * GRID_UNITS.Y;
-
-      // 2. Добавляем смещение слоя
-      pixelX += layer.x;
-      pixelY += layer.y - layer.scrollY;
-
-      // 3. Устанавливаем панели
-      module.setPixelPosition(pixelX, pixelY);
-
-      // 4. Рисуем
-      module.draw(this.ctx);
-    });
-
-    this.ctx.restore();
-    this.ctx.restore();
+      this.ctx.restore();
   }
 
 }

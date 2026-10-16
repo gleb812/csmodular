@@ -1,6 +1,6 @@
 import { moduleStore } from './api/index.js';
 import { Panel } from './components/Panel.js';
-import { GRID_UNITS } from '../constants.js';
+import { PANEL_GRID_WIDTH, PANEL_WIDTH, BASE_STEP_X, BASE_STEP_Y } from './constants.js';
 
 import { Knob } from './components/Knob.js';
 import { ButtonFlat } from './components/ButtonFlat.js';
@@ -197,6 +197,7 @@ export class ModuleFactory {
     }
 
     createModule(type, gridX, gridY, layer = null) {
+        console.log('🔍 createModule:', { type, gridX, gridY, layer });
         const definition = this.moduleRegistry[type];
         
         if (!definition) {
@@ -205,7 +206,8 @@ export class ModuleFactory {
         }
 
         // Определяем grid размеры модуля
-        const gridWidth = 1;
+        // Ширина панели — всегда 13 клеток (PANEL_WIDTH / BASE_STEP_X)
+        const gridWidth = PANEL_GRID_WIDTH;
         const gridHeight = definition.gridHeight;
         if (!gridHeight || gridHeight < 1) {
             console.error(`Module ${type}: gridHeight is missing or invalid`, definition);
@@ -230,8 +232,9 @@ export class ModuleFactory {
         this._addComponentsToPanel(panel, definition.components);
         
         // Сохраняем оригинальные размеры для масштабирования
-        panel.originalPixelWidth = definition.width || (gridWidth * GRID_UNITS.X);
-        panel.originalPixelHeight = definition.height || (gridHeight * GRID_UNITS.Y);
+        // Сохраняем оригинальные размеры для масштабирования
+        panel.originalPixelWidth = definition.width || PANEL_WIDTH;
+        panel.originalPixelHeight = definition.height || (gridHeight * BASE_STEP_Y);
         
         return panel;
     }

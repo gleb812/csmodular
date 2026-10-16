@@ -1,6 +1,7 @@
 // src/ui/ContextMenu.js
 import { moduleStore } from '../api/index.js';
-import { GRID_UNITS } from '../constants.js'; 
+import { PANEL_GRID_WIDTH } from '../constants.js';
+
 
 export class ContextMenu {
     constructor(system) {
@@ -1468,82 +1469,46 @@ export class ContextMenu {
     }
     
     handleModuleSelect(moduleName) {
-       //console.log(`Selected module: ${moduleName}`);
-        
-        // Получаем координаты мыши из show() или используем центр canvas
         let targetLayer = 'voice';
         let targetGridX = 0;
         let targetGridY = 0;
-        
+
+        // Конвертируем экранные координаты мыши в grid-координаты
         if (this.lastOpenMouseX !== null && this.lastOpenMouseY !== null) {
-            // 🎯 Конвертируем экранные координаты в координаты canvas
             const canvas = this.system.canvas;
             const rect = canvas.getBoundingClientRect();
-            
-            // Проверяем, была ли мышь над canvas
-            if (this.lastOpenMouseX >= rect.left && this.lastOpenMouseX <= rect.right &&
-                this.lastOpenMouseY >= rect.top && this.lastOpenMouseY <= rect.bottom) {
-                
-                // Конвертируем в координаты canvas
-                const canvasX = (this.lastOpenMouseX - rect.left) * (canvas.width / rect.width);
-                const canvasY = (this.lastOpenMouseY - rect.top) * (canvas.height / rect.height);
-                
-                // Определяем слой
-                targetLayer = this.system.layerManager.getLayerAtPoint(canvasX, canvasY);
-                
-                // Конвертируем в grid координаты
-                const layer = this.system.layerManager.getLayer(targetLayer);
-                if (layer) {
-                    const gridX = Math.floor((canvasX - layer.x) / GRID_UNITS.X);
-                    const gridY = Math.floor((canvasY - layer.y) / GRID_UNITS.Y);
-                    
-                    targetGridX = Math.max(0, gridX);
-                    targetGridY = Math.max(0, gridY);
-                }
+
+            if (
+                this.lastOpenMouseX >= rect.left &&
+                this.lastOpenMouseX <= rect.right &&
+                this.lastOpenMouseY >= rect.top &&
+                this.lastOpenMouseY <= rect.bottom
+            ) {
+                const dpr = window.devicePixelRatio || 1;
+                // CSS-пиксели canvas
+                const canvasX = (this.lastOpenMouseX - rect.left) * (canvas.width / rect.width) / dpr;
+                const canvasY = (this.lastOpenMouseY - rect.top) * (canvas.height / rect.height) / dpr;
+
+                // Мировые координаты
+                const worldX = (canvasX - this.system.offsetX) / this.system.scale;
+                const worldY = (canvasY - this.system.offsetY) / this.system.scale;
+
+                targetLayer = this.system.layerManager.getLayerAtPoint(worldX, worldY);
+
+                // Snap к сетке
+                const snapped = this.system.grid.snapToGrid(worldX, worldY);
+                targetGridX = Math.max(0, snapped.gridX);
+                targetGridY = Math.max(0, snapped.gridY);
             }
         }
-        
-        // 🔍 Получаем размеры модуля из фабрики
-        let moduleWidth = 1;
-        let moduleHeight = 2; // по умолчанию
-        
-        const definition = this.system.moduleFactory.moduleRegistry[moduleName];
-        if (definition) {
-            moduleHeight = definition.gridHeight || 2;
+
+        // ⭐ addNewModuleAtPosition сам разрулит коллизии и найдёт свободное место
+        if (this.system?.addNewModuleAtPosition) {
+            this.system.addNewModuleAtPosition(moduleName, targetLayer, targetGridX, targetGridY);
+        } else if (this.system?.addNewModule) {
+            this.system.addNewModule(moduleName, targetLayer, targetGridX, targetGridY);
         }
-        
-        // 🔍 Ищем свободное место
-        let position;
-        if (this.system.isGridCellFree(targetLayer, targetGridX, targetGridY, moduleWidth, moduleHeight)) {
-            position = { gridX: targetGridX, gridY: targetGridY };
-        } else {
-            console.log(`❌ Position (${targetGridX}, ${targetGridY}) is occupied, searching nearby...`);
-            
-            // Ищем ближайшее свободное место
-            position = this.system.findFreeSpace(targetLayer, moduleWidth, moduleHeight, targetGridX, targetGridY);
-            
-            if (position) {
-                console.log(`✅ Found free space at (${position.gridX}, ${position.gridY})`);
-            } else {
-                console.log(`❌ No free space in layer ${targetLayer}, trying default position`);
-                // Пробуем найти любое свободное место
-                position = this.system.findFreeSpace(targetLayer, moduleWidth, moduleHeight, 0, 0);
-            }
-        }
-        
-        if (position) {
-            // Добавляем модуль в найденную позицию
-            if (this.system && this.system.addNewModuleAtPosition) {
-                this.system.addNewModuleAtPosition(moduleName, targetLayer, position.gridX, position.gridY);
-            } else {
-                // Fallback - используем старый метод, но с переданными координатами
-                this.system.addNewModule(moduleName, targetLayer, position.gridX, position.gridY);
-            }
-        } else {
-            console.error(`❌ No free space in layer ${targetLayer} at all!`);
-            this.system.showNotification(`❌ No free space in ${targetLayer === 'voice' ? 'VA' : 'FX'} layer`);
-        }
-        
+
         this.hide();
     }
     

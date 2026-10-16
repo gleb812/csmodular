@@ -1,22 +1,23 @@
-// Panel.js
 import { getCurrentTheme } from '../theme/currentTheme.js';
-export const GRID_UNITS = {
-  X: 260,
-  Y: 15,
-};
+import {
+  PANEL_WIDTH,
+  PANEL_GRID_WIDTH,
+  BASE_STEP_X,
+  BASE_STEP_Y,
+} from '../constants.js';
 
 export class Panel {
   constructor(gridX, gridY, gridWidth, gridHeight, title, bgImage = null) {
     this.gridX = gridX;
     this.gridY = gridY;
-    this.gridWidth = gridWidth;
+    this.gridWidth = gridWidth || PANEL_GRID_WIDTH;
     this.gridHeight = gridHeight;
     this.pixelX = null; // будет вычисляться
     this.pixelY = null; // будет вычисляться
 
     // Pixel координаты из grid
-    this.width = gridWidth * GRID_UNITS.X;
-    this.height = gridHeight * GRID_UNITS.Y;
+    this.width = PANEL_WIDTH;
+    this.height = this.gridHeight * BASE_STEP_Y;
 
     this.title = title;
     this.components = [];
@@ -246,74 +247,33 @@ export class Panel {
     });
   }
 
-  // Panel.js - исправленный startDrag
   startDrag(startX, startY, systemRef) {
-    if (this.isPointInsidePanel(startX, startY)) {
-      this.isDragging = true;
+    if (!this.isPointInsidePanel(startX, startY)) return null;
 
-      // ВАЖНО: получаем позицию слоя из системы
-      let layerX = 0;
-      let layerY = 0;
+    this.isDragging = true;
 
-      if (systemRef && this.layer && systemRef.layers[this.layer]) {
-        const layer = systemRef.layers[this.layer];
-        layerX = layer.x;
-        layerY = layer.y;
-      }
-
-      // Вычисляем grid координаты ОТНОСИТЕЛЬНО СЛОЯ
-      const relativeX = startX - layerX;
-      const relativeY = startY - layerY;
-
-      const mouseGridX = Math.floor(relativeX / GRID_UNITS.X);
-      const mouseGridY = Math.floor(relativeY / GRID_UNITS.Y);
-
-      // Запоминаем смещение
-      this.dragOffsetGridX = mouseGridX - this.gridX;
-      this.dragOffsetGridY = mouseGridY - this.gridY;
-      return {
-        handleDrag: (x, y) => {
-          this.handlePanelDrag(x, y, systemRef);
-        },
-        endDrag: () => {
-          this.isDragging = false;
-        },
-        type: 'drag',
-        module: this,
-      };
+    // ⭐ Используем system.grid
+    const grid = systemRef?.grid;
+    if (!grid) {
+      console.warn('startDrag: no grid in system');
+      return null;
     }
 
-    return null;
-  }
+    // Позиция курсора в grid-координатах (с учётом snap)
+    const snapped = grid.snapToGrid(startX, startY);
 
-  // Panel.js - измени startPanelDrag
-  startPanelDrag(startX, startY, systemRef) {
-    // <-- Добавили третий параметр
-    if (this.isPointInsidePanel(startX, startY)) {
-      this.isDragging = true;
+    // Запоминаем смещение курсора относительно модуля (в grid-координатах)
+    this.dragOffsetGridX = snapped.gridX - this.gridX;
+    this.dragOffsetGridY = snapped.gridY - this.gridY;
 
-      const mouseGridX = Math.floor(startX / GRID_UNITS.X);
-      const mouseGridY = Math.floor(startY / GRID_UNITS.Y);
-      this.dragOffsetGridX = mouseGridX - this.gridX;
-      this.dragOffsetGridY = mouseGridY - this.gridY;
-
-      // Сохраняем ссылки для использования в замыкании
-      const panelInstance = this;
-
-      return {
-        handleDrag: (x, y, systemRefFromCall, scale) => {
-          // Используем systemRef из параметра или из замыкания
-          const finalSystemRef = systemRefFromCall || systemRef;
-          panelInstance.handlePanelDrag(x, y, finalSystemRef, scale);
-        },
-        endDrag: () => {
-          panelInstance.endPanelDrag();
-        },
-        type: 'drag',
-        module: this,
-      };
-    }
-    return null;
+    return {
+      handleDrag: (x, y) => this.handlePanelDrag(x, y, systemRef),
+      endDrag: () => {
+        this.isDragging = false;
+      },
+      type: 'drag',
+      module: this,
+    };
   }
 
   // Временная отладка в Panel.js
@@ -330,32 +290,17 @@ export class Panel {
     return isInside;
   }
 
-  // Panel.js - исправленный handlePanelDrag
   handlePanelDrag(x, y, systemRef = null) {
     if (!this.isDragging) return;
 
-    // Получаем позицию слоя
-    let layerX = 0;
-    let layerY = 0;
+    const grid = systemRef?.grid;
+    if (!grid) return;
 
-    if (systemRef && this.layer && systemRef.layers[this.layer]) {
-      const layer = systemRef.layers[this.layer];
-      layerX = layer.x;
-      layerY = layer.y;
-    }
+    // ⭐ Snap к сетке
+    const snapped = grid.snapToGrid(x, y);
+    const targetGridX = snapped.gridX - this.dragOffsetGridX;
+    const targetGridY = snapped.gridY - this.dragOffsetGridY;
 
-    // Вычисляем grid координаты ОТНОСИТЕЛЬНО СЛОЯ
-    const relativeX = x - layerX;
-    const relativeY = y - layerY;
-
-    const mouseGridX = Math.floor(relativeX / GRID_UNITS.X);
-    const mouseGridY = Math.floor(relativeY / GRID_UNITS.Y);
-
-    // Вычисляем целевую позицию
-    const targetGridX = mouseGridX - this.dragOffsetGridX;
-    const targetGridY = mouseGridY - this.dragOffsetGridY;
-
-    // Проверяем коллизии
     if (systemRef && this.layer) {
       const canMove = systemRef.isGridCellFree(
         this.layer,
@@ -369,19 +314,17 @@ export class Panel {
       if (canMove) {
         this.gridX = targetGridX;
         this.gridY = targetGridY;
-        // ===== ДОБАВИТЬ =====
+        this.lastValidGridX = targetGridX;
+        this.lastValidGridY = targetGridY;
         this.setDirty(true);
-      } //else {
-        //console.log(`     ❌ Collision at: [${targetGridX}, ${targetGridY}]`);
-      //}
+      }
     } else {
-      // Без проверки
       this.gridX = targetGridX;
       this.gridY = targetGridY;
-      // ===== ДОБАВИТЬ =====
       this.setDirty(true);
     }
   }
+
   endPanelDrag() {
     this.isDragging = false;
     this.isResizing = false;

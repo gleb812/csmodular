@@ -1,5 +1,5 @@
 // src/theme/Theme.js
-//
+import { DEFAULT_THEME } from './defaults.js';
 // Класс-обёртка над настройками темы.
 // Знает, как преобразовать настройки в конкретные значения
 // для рисования: цвета, толщины, свечение.
@@ -10,27 +10,14 @@
 
 export class Theme {
     constructor(settings) {
-        // Гарантируем, что все секции есть
         this.settings = {
-            preset: settings?.preset || 'classic',
-            lcd: {
-                color: '#8fbc8f',
-                glow: 0.5,
-                panelOpacity: 0.15,
-                lineWeight: 1.0,
-                ...(settings?.lcd || {}),  // перезаписываем сохранёнными
-            },
-            cables: {
-                audioWidth: 3.0,
-                controlWidth: 1.5,
-                ...(settings?.cables || {}),
-            },
-            background: {                               // ⭐ НОВАЯ СЕКЦИЯ
-                image: null,
-                parallax: true,
-                parallaxStrength: 20,
-                ...(settings?.background || {}),
-            },
+            ...DEFAULT_THEME,
+            ...(settings || {}),
+            // Секции с вложенными объектами — merge'им, чтобы не потерять дефолтные поля
+            lcd: { ...DEFAULT_THEME.lcd, ...(settings?.lcd || {}) },
+            cables: { ...DEFAULT_THEME.cables, ...(settings?.cables || {}) },
+            background: { ...DEFAULT_THEME.background, ...(settings?.background || {}) },
+            grid: { ...DEFAULT_THEME.grid, ...(settings?.grid || {}) },
         };
     }
 
@@ -226,6 +213,35 @@ export class Theme {
      */
     shouldGlowCable() {
         return this.isLcd && this.settings.cables?.glow !== false && this.getGlow() > 0;
+    }
+
+
+    // ============================================================
+    //  СЕТКА
+    // ============================================================
+
+    /**
+     * Стиль отрисовки крестиков сетки.
+     * Форма всегда крестики — отличается только цвет/свечение.
+     */
+    getGridStyle() {
+        const size = this.settings.grid?.size ?? 4;
+
+        if (this.isClassic) {
+            return {
+                color: 'rgba(140, 140, 140, 0.35)',
+                size,
+                lineWidth: 1,
+                glow: false,
+            };
+        }
+        // LCD
+        return {
+            color: this.getAccentAlpha(0.4),
+            size,
+            lineWidth: this.lineWidth(1),
+            glow: this.getGlow() > 0,
+        };
     }
 
 
