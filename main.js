@@ -716,7 +716,7 @@ _renderDynamic() {
   }
 
   resizeCanvasToWindow() {
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = 1;//window.devicePixelRatio || 1;
       const w = window.innerWidth;
       const h = window.innerHeight;
 
@@ -1149,26 +1149,41 @@ _renderDynamic() {
   }
 
   async addNewModule(moduleType, layerName, gridX = null, gridY = null) {
-    console.log('🔍 addNewModule:', { moduleType, layerName, gridX, gridY }); 
+    // Если переданы координаты — используем их
     if (gridX !== null && gridY !== null) {
       return this.addNewModuleAtPosition(moduleType, layerName, gridX, gridY);
     }
 
     // Иначе ищем свободное место
-    const freeSpace = this.findFreeSpace(layerName, PANEL_GRID_WIDTH, 2);
-    if (freeSpace) {
-      return this.addNewModuleAtPosition(
-        moduleType,
+    const freeSpace = this.findFreeSpace(
         layerName,
-        freeSpace.gridX,
-        freeSpace.gridY,
-      );
-    } else {
+        PANEL_GRID_WIDTH,
+        2,
+        null,
+        null,
+        this.grid.multX,
+        this.grid.multY,
+    );
+    
+    if (!freeSpace) {
       this.showNotification(
         `❌ Нет места в слое ${layerName === 'voice' ? 'VA' : 'FX'}`,
       );
       return null;
     }
+
+    // ⭐ Прилипаем к разрешённой сетке (multX/multY)
+    const snapped = this.grid.snapToGrid(
+      freeSpace.gridX * BASE_STEP_X,
+      freeSpace.gridY * BASE_STEP_Y,
+    );
+
+    return this.addNewModuleAtPosition(
+      moduleType,
+      layerName,
+      snapped.gridX,
+      snapped.gridY,
+    );
   }
 
   updatePatchInfo() {
@@ -1343,19 +1358,23 @@ _renderDynamic() {
   }
 
   findFreeSpace(
-    layerName,
-    gridWidth = 1,
-    gridHeight = 1,
-    startGridX = null,
-    startGridY = null,
-  ) {
-    return this.layerManager.findFreeSpace(
       layerName,
-      gridWidth,
-      gridHeight,
-      startGridX,
-      startGridY,
-    );
+      gridWidth = 1,
+      gridHeight = 1,
+      startGridX = null,
+      startGridY = null,
+      stepX = 1,
+      stepY = 1,
+  ) {
+      return this.layerManager.findFreeSpace(
+          layerName,
+          gridWidth,
+          gridHeight,
+          startGridX,
+          startGridY,
+          stepX,
+          stepY,
+      );
   }
 
   showNotification(message) {
@@ -1653,14 +1672,6 @@ async loadAvailableModules(selectElement) {
     themeStore.save(theme.settings);
   }
 
-  /**
-   * Включить/выключить прилипание.
-   */
-  setGridSnap(enabled) {
-    if (!this.grid) return;
-    this.grid.snap = !!enabled;
-  }
-
   animate() {
       this.updateParallax();
       const now = performance.now();
@@ -1849,6 +1860,20 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
           return;
         }
 
+        // ⭐ Прилипаем к разрешённой сетке (если snap включён)
+        if (this.grid.snap) {
+            const snapped = this.grid.snapToGrid(
+                gridX * BASE_STEP_X,
+                gridY * BASE_STEP_Y,
+            );
+            if (snapped.gridX !== gridX || snapped.gridY !== gridY) {
+                console.log(`📐 Snapped: (${gridX}, ${gridY}) → (${snapped.gridX}, ${snapped.gridY})`);
+                gridX = snapped.gridX;
+                gridY = snapped.gridY;
+            }
+        }
+
+
         if (!this.moduleFactory.moduleRegistry[moduleType]) {
             let loaded = false;
             
@@ -1901,13 +1926,15 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
         if (!this.isGridCellFree(layerName, gridX, gridY, gridWidth, gridHeight)) {
           console.log(`❌ Position (${gridX}, ${gridY}) is occupied, searching nearby...`);
           
-          const freeSpace = this.findFreeSpace(
+        const freeSpace = this.findFreeSpace(
             layerName,
             gridWidth,
             gridHeight,
             gridX,
             gridY,
-          );
+            this.grid.snap ? this.grid.multX : 1,
+            this.grid.snap ? this.grid.multY : 1,
+        );
           
           if (!freeSpace) {
             this.showNotification(

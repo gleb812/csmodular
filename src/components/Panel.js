@@ -291,38 +291,42 @@ export class Panel {
   }
 
   handlePanelDrag(x, y, systemRef = null) {
-    if (!this.isDragging) return;
+      if (!this.isDragging) return;
+      const grid = systemRef?.grid;
+      if (!grid) return;
 
-    const grid = systemRef?.grid;
-    if (!grid) return;
+      const snapped = grid.snapToGrid(x, y);
+      let targetGridX = snapped.gridX - this.dragOffsetGridX;
+      let targetGridY = snapped.gridY - this.dragOffsetGridY;
 
-    // ⭐ Snap к сетке
-    const snapped = grid.snapToGrid(x, y);
-    const targetGridX = snapped.gridX - this.dragOffsetGridX;
-    const targetGridY = snapped.gridY - this.dragOffsetGridY;
-
-    if (systemRef && this.layer) {
-      const canMove = systemRef.isGridCellFree(
-        this.layer,
-        targetGridX,
-        targetGridY,
-        this.gridWidth,
-        this.gridHeight,
-        this,
-      );
-
-      if (canMove) {
-        this.gridX = targetGridX;
-        this.gridY = targetGridY;
-        this.lastValidGridX = targetGridX;
-        this.lastValidGridY = targetGridY;
-        this.setDirty(true);
+      // ⭐ Округляем target до разрешённой сетки (multX/multY)
+      if (grid.snap) {
+          targetGridX = Math.round(targetGridX / grid.multX) * grid.multX;
+          targetGridY = Math.round(targetGridY / grid.multY) * grid.multY;
       }
-    } else {
-      this.gridX = targetGridX;
-      this.gridY = targetGridY;
-      this.setDirty(true);
-    }
+
+      if (systemRef && this.layer) {
+          const canMove = systemRef.isGridCellFree(
+              this.layer,
+              targetGridX,
+              targetGridY,
+              this.gridWidth,
+              this.gridHeight,
+              this,
+          );
+
+          if (canMove) {
+              this.gridX = targetGridX;
+              this.gridY = targetGridY;
+              this.lastValidGridX = targetGridX;
+              this.lastValidGridY = targetGridY;
+              this.setDirty(true);
+          }
+      } else {
+          this.gridX = targetGridX;
+          this.gridY = targetGridY;
+          this.setDirty(true);
+      }
   }
 
   endPanelDrag() {

@@ -104,37 +104,40 @@ export class LayerManager {
     return true;
   }
 
-  // Найти свободное место в слое
   findFreeSpace(
     layerName,
     gridWidth = 1,
     gridHeight = 1,
     startGridX = null,
     startGridY = null,
+    stepX = 1,
+    stepY = 1,
   ) {
     const layer = this.layers[layerName];
     if (!layer) return null;
 
-    // ⭐ Ищем от startGrid, но с "разумным" лимитом — не бесконечно
-    const MAX_SEARCH = 200; // искать в пределах ±200 ячеек
+    const MAX_SEARCH = 200;
     
     let baseX = Number.isFinite(startGridX) ? startGridX : 0;
     let baseY = Number.isFinite(startGridY) ? startGridY : 0;
+
+    // ⭐ Округляем base до разрешённой сетки
+    baseX = Math.round(baseX / stepX) * stepX;
+    baseY = Math.round(baseY / stepY) * stepY;
 
     // Сначала пробуем точку startGrid
     if (this.isGridCellFree(layerName, baseX, baseY, gridWidth, gridHeight)) {
       return { gridX: baseX, gridY: baseY };
     }
 
-    // Затем расширяемся по спирали
+    // Затем расширяемся по спирали (шаг = stepX/stepY)
     for (let radius = 1; radius < MAX_SEARCH; radius++) {
       for (let dx = -radius; dx <= radius; dx++) {
         for (let dy = -radius; dy <= radius; dy++) {
-          // Только граница квадрата (внутри уже проверено)
           if (Math.abs(dx) !== radius && Math.abs(dy) !== radius) continue;
           
-          const x = baseX + dx;
-          const y = baseY + dy;
+          const x = baseX + dx * stepX;
+          const y = baseY + dy * stepY;
           
           if (this.isGridCellFree(layerName, x, y, gridWidth, gridHeight)) {
             return { gridX: x, gridY: y };
@@ -143,7 +146,7 @@ export class LayerManager {
       }
     }
 
-    return null; // не нашли (что почти невозможно при бесконечном мире)
+    return null;
   }
 
   // === DEBUG ===
