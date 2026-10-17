@@ -106,15 +106,67 @@ When a cable's source type differs from the destination input type, a converter 
 Bus allocation in `CsoundGenerator._prepareConverters()`.
 Line insertion in `CsoundGenerator.formatModuleLine()`.
 
+## Grid system
+
+The world is **infinite**. Grid is managed by a single `Grid` class (`src/grid/Grid.js`), stored as `system.grid`.
+
+### Constants (`src/constants.js`)
+
+- `PANEL_WIDTH = 260` — panel width in px, **always constant** (NM2 compatibility).
+- `BASE_STEP_X = 20`, `BASE_STEP_Y = 15` — base cell size in px.
+- `PANEL_GRID_WIDTH = 13` (= 260 / 20) — panel spans **13 cells** by X.
+- `NM2_HPOS_TO_GRIDX = 13` — when loading NM2 patches: `gridX = hpos * 13`.
+
+### Module position
+
+- `module.gridX`, `module.gridY` — **integer cell coordinates** (base cells 20×15).
+- `module.gridWidth = 13` (constant), `module.gridHeight` — from module definition.
+- Pixel position: `pixelX = gridX * BASE_STEP_X`, `pixelY = gridY * BASE_STEP_Y`.
+
+### Multipliers (in theme)
+
+- `settings.grid.multX`, `settings.grid.multY` — integer ≥ 1, default **1**.
+- `system.grid.stepX = BASE_STEP_X * multX`, `stepY = BASE_STEP_Y * multY`.
+- The visual grid (crosses) is drawn with this step; the snap also uses it.
+- **Existing modules do NOT move when multipliers change** — only the next drag/snap uses the new step.
+
+### Snap
+
+- `system.grid.snap` — boolean (from `settings.grid.snap`).
+- `grid.snapToGrid(worldX, worldY)` → `{ gridX, gridY }` — integer cells, **multiples of multX/multY** if snap is on.
+- If snap is on: `gridX = round(cellX / multX) * multX`. Same for Y.
+- If snap is off: rounds to nearest base cell (integer), no multX/multY.
+
+### Drag
+
+`Panel.startDrag` / `Panel.handlePanelDrag` call `system.grid.snapToGrid()`. Target is rounded again to a multiple of `multX/multY` in `handlePanelDrag` (to handle modules that were placed at a non-multiple position before multipliers changed).
+
+### findFreeSpace with step
+
+`LayerManager.findFreeSpace(layerName, w, h, startX, startY, stepX, stepY)` — searches **only at multiples** of `stepX/stepY` (spiral expands with this step). `main.js` passes `system.grid.multX/multY` when snap is on, `1/1` otherwise.
+
+### Grid rendering
+
+`Grid.draw(ctx, viewport)` — draws **crosses** (not lines) in the visible area. Style from `theme.getGridStyle()`:
+- `color` — classic: grey; LCD: accent alpha 0.4
+- `size` — cross arm length in screen px (`settings.grid.size`, default 4)
+- `lineWidth` — classic 1; LCD `theme.lineWidth(1)`
+- `glow` — LCD only, `theme.applyGlow()`
+
+`Grid.draw` is called **once per frame** in `animate()` before drawing modules, inside `ctx.translate(offsetX, offsetY) + scale(scale)`.
+
+**Legacy removed:** `LayerManager.drawLayerGrid`, `updateGridCache`, `getGridCache`, `backgroundCache`, `divider`, `main.js.updateCanvasSize`, `this.divider`, cell highlight under cursor.
+
 ## Main classes (main app)
 
 | Class | File | Role |
 |-------|------|------|
-| `ModularSystem` | `main.js` | Main coordinator (Canvas, layers, animation) |
+| `ModularSystem` | `main.js` | Main coordinator (Canvas, layers, animation, grid) |
 | `ModuleFactory` | `src/ModuleFactory.js` | Creates modules from JS descriptions |
 | `PatchManager` | `src/PatchManager.js` | Cables management |
 | `PatchLoader` | `src/PatchLoader.js` | Load/save patches |
-| `LayerManager` | `src/managers/LayerManager.js` | voice/fx layer arrays, grid, collision checks |
+| `LayerManager` | `src/managers/LayerManager.js` | voice/fx layer arrays, collision checks, findFreeSpace |
+| `Grid` | `src/grid/Grid.js` | Grid step, snap, crosses rendering |
 | `EventManager` | `src/managers/EventManager.js` | All mouse events, pan, zoom |
 | `UIManager` | `src/managers/UIManager.js` | Control panel (left side) |
 | `DesignSettingsPanel` | `src/ui/DesignSettingsPanel.js` | Theme editor (opened with `D` or 🎨 button) |
@@ -282,7 +334,7 @@ The canvas **fills the browser window**. There are no fixed bounds for the worki
 - **Zoom**: `Ctrl + mouse wheel` (zooms around cursor)
 - **Vertical scroll**: `mouse wheel`
 - **Horizontal scroll**: `Shift + mouse wheel`
-- **Grid**: shows only when `showGrid === true`, always aligned to world grid
+- **Grid**: drawn when `system.grid.enabled` (synced with `system.showGrid`), always aligned to world grid; see **Grid system**
 
 There is **no physical divider** between voice and fx. The distinction is **logical** (see `module.layer`), not spatial.
 
@@ -298,10 +350,18 @@ When loading a patch, FX modules get their `vpos` shifted down by `maxVoiceY + 1
 
 ### Creating a module (main app)
 
-1. `main.js` → `ModuleFactory.createModule(type, ...)` → `Panel`
+1. `main.js` → `ModuleFactory.createModule(type, gridX, gridY, ...)` → `Panel`
+   - `gridWidth = PANEL_GRID_WIDTH = 13` (constant)
+   - `width = PANEL_WIDTH = 260` (constant)
 2. `CsoundGenerator.addModule({ typeId, instanceId, instanceName, layer, ... })`
    - **`instanceName` MUST be the module `type` (Csound-valid)**, not the UI title
 3. On recompile → ORC is regenerated
+
+**Snap on create:**
+- `addNewModuleAtPosition` — if `snap` is on, `gridX/gridY` are snapped to multiples of `multX/multY` **before** collision check.
+- If position is occupied → `findFreeSpace(..., stepX = multX, stepY = multY)` (if snap on) → snapped again.
+- `addNewModule` (no position) — same: `findFreeSpace` with `multX/multY`, then `snapToGrid`.
+- `ContextMenu.handleModuleSelect` — `snapToGrid(worldX, worldY)` first, then `addNewModuleAtPosition`.
 
 ### Adding a cable
 
@@ -319,6 +379,15 @@ Via `ModuleContextMenu.setLayer(newLayer)`:
 5. `LayerManager.addModuleToLayer(module, newLayer)`
 6. `CsoundGenerator.addModule({ ..., layer: newLayer })`
 7. Force redraw + debounced recompile
+
+### Changing grid step (multipliers)
+
+Via `DesignSettingsPanel` (section **Grid**) or `system.setGridMultipliers(multX, multY)`:
+1. `system.grid.multX = mx`, `system.grid.multY = my` (integers ≥ 1)
+2. `theme.settings.grid.multX/multY = mx/my` → `themeStore.save(settings)`
+3. `system.forceRedraw()`
+4. **Existing modules do NOT move.** They keep their `gridX/gridY`.
+5. Next drag: `Panel.handlePanelDrag` rounds `targetGridX/Y` to multiples of `multX/multY`.
 
 ### ORC generation
 
@@ -374,8 +443,10 @@ Via zak:
 - `defaults.js` — `DEFAULT_THEME`, `LCD_COLOR_PRESETS`, `BACKGROUND_PRESETS`
 - `themeStore.js` — load/save via localStorage (singleton `themeStore`)
 - `Theme.js` — class that wraps settings and provides render-time getters:
-  - `isLcd`, `isClassic`, `getLineColor`, `getAccentColor`, `getAccentAlpha`, `getSurfaceColor`, `getElementBgColor`, `getTooltipBgColor`, `getActiveFillColor`, `getInactiveOutlineColor`, `getCableWidth`, `getCableColor`, `shouldGlowCable`, `applyGlow`, `clearGlow`, `lineWidth`, `getBackgroundImage`, `isParallaxEnabled`, `getParallaxStrength`, `getJackStyle`, `_hexToRgba`, `_darken`
+  - `isLcd`, `isClassic`, `getLineColor`, `getAccentColor`, `getAccentAlpha`, `getSurfaceColor`, `getElementBgColor`, `getTooltipBgColor`, `getActiveFillColor`, `getInactiveOutlineColor`, `getCableWidth`, `getCableColor`, `shouldGlowCable`, `applyGlow`, `clearGlow`, `lineWidth`, `getBackgroundImage`, `isParallaxEnabled`, `getParallaxStrength`, `getJackStyle`, `getGridStyle`, `_hexToRgba`, `_darken`
 - `currentTheme.js` — singleton `getCurrentTheme()` / `setCurrentTheme()` / `initCurrentTheme()`; **also exposes `window.__theme__` for console debugging** (get/set/init)
+
+**`Theme` constructor** merges `DEFAULT_THEME` with the incoming `settings` (deep merge for `lcd`, `cables`, `background`, `grid`). Do not filter unknown sections — unknown fields are kept.
 
 ### Presets
 
@@ -387,8 +458,9 @@ Via zak:
 Called via `DesignSettingsPanel.applyAndSave()`:
 1. `setCurrentTheme(new Theme(settings))`
 2. `themeStore.save(settings)`
-3. `system.applyBackgroundFromTheme()` — updates `#parallax-bg` element
-4. `system.forceRedraw()`
+3. `system.applyGridFromTheme()` — sync `system.grid` with `settings.grid`
+4. `system.applyBackgroundFromTheme()` — updates `#parallax-bg` element
+5. `system.forceRedraw()`
 
 **Important:** all components (`Panel`, `Knob`, `Slider`, `LED`, `ButtonText`, `ButtonRadio`, `ButtonIncDec`, `ButtonFlat`, `Input`, `Output`, `Cable`, `TextLabel`, `TextField`, `TextEdit`, `Line`, `SVG`, `MiniVU`, `LevelShift`, `PartSelector`) use `getCurrentTheme()` inside `draw()`.
 
@@ -486,6 +558,10 @@ Patcher `scripts/patch_params.py` regenerates `params` for all NM2 modules:
 14. **Keyboard shortcuts must skip when focus is in an `<input>` / `<textarea>` / `contentEditable`** — see `EditorApp.setupEvents()`
 15. **Editor component serialization goes through `ComponentRegistry`** — do not hand-roll `if/else` on `constructor.name` anywhere
 16. **`params` order = order in `components` array** — never sort
+17. **Grid step = `BASE_STEP_X/Y * multX/multY`.** Do not hardcode 20/15 anywhere — use `system.grid.stepX/stepY` or `BASE_STEP_X/Y` from `constants.js`.
+18. **`gridX/gridY` are integers in base cells (20×15).** `multX/multY` only affect snap and rendering, not storage.
+19. **Changing `multX/multY` does not move existing modules.** Only the next drag uses the new step.
+20. **When creating modules / finding free space, always use `findFreeSpace(..., stepX, stepY)` with `multX/multY` (if snap) or `1/1`.**
 
 ## Known issues (short)
 
@@ -494,12 +570,12 @@ Patcher `scripts/patch_params.py` regenerates `params` for all NM2 modules:
 - `ModulePropertiesWindow` / `ComponentPropertiesWindow` are **headless** in editor — they exist only for `saveModule()` and `_showMappingBrowser()`. Will be fully replaced by `PropertiesPanel` eventually
 - `TerminalPanel._cmdSave` duplicates JS code generation from `ModulePropertiesWindow.generateModuleCode` — should be unified
 - `add` in terminal always uses `audio` jack type for Input/Output — control jacks only via UI
-- `LayerManager` still has some dead divider code (`updateLayerSizes`, `drawLayerGrid`, `updateGridCache`)
-- `main.js` still has `updateCanvasSize` (dead code referencing `this.divider`)
 - `loadAvailableModules` in `main.js` still uses `fetch('/api/list-user-modules')` (legacy)
 - Module Editor context menu still has `Change Color` — should be removed (color lives in Properties)
 - Terminal has no autocomplete
 - Code Viewer line numbers / highlight not yet virtualized (fine for typical module sizes, may lag on very large code)
+- **HiDPI (dpr > 1) is temporarily disabled** — `resizeCanvasToWindow()` uses `dpr = 1`. Modules don't drag correctly on macOS Retina when dpr > 1. To be investigated. On Windows with 125–150% scaling the same issue may appear.
+- **`Panel.startDrag` / `handlePanelDrag`** may need to align a module to the grid on the first drag if `multX/multY` changed after the module was placed at a non-multiple position. Current behaviour: rounds `targetGridX/Y` in `handlePanelDrag`.
 
 ## TODO (short)
 
@@ -510,8 +586,8 @@ Patcher `scripts/patch_params.py` regenerates `params` for all NM2 modules:
 - Replace `getControlChannel` with `channelPtr` in `CsoundEngine`
 - Custom background upload (image file input)
 - Cable visual width per type (already partially done)
-- Finish clean-up of dead divider code
 - Fix `loadAvailableModules` to use `moduleStore`
+- **HiDPI**: fix dpr > 1 drag bug (macOS Retina, Windows scaling)
 
 **Module Editor:**
 - Remove `Change Color` from context menu

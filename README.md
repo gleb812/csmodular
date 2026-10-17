@@ -1,4 +1,3 @@
-
 ```markdown
 # CsModular
 
@@ -11,29 +10,31 @@ This project is a next level of the *pch2csd* project: https://github.com/gleb81
 - Modular architecture with interchangeable audio modules
 - Real-time Csound synthesis engine (via `@csound/browser`)
 - Web-based UI with Canvas rendering
-- Runs as a **web app** (browser) or **desktop app** (Tauri: Windows / Linux / macOS)
-- **Infinite workspace** with pan, zoom and scroll
-- **Voice / FX layers** — modules can be assigned to either, with auto-layout for FX
-- **Two visual themes**:
-  - **Classic** — original NM2-style colored UI
-  - **LCD** — monochrome glowing interface inspired by Casio watches
-- **Design Settings panel** (press `D`) — live theme editing, color pickers, glow, line weight, cable widths, background
-- **Custom backgrounds** — solid colors or images, with parallax effect
-- **Module Editor** — built-in IDE-style editor with dock panels and command terminal
+- Runs as a web app (browser) or desktop app (Tauri: Windows / Linux / macOS)
+- Infinite workspace with pan, zoom and scroll
+- Voice / FX layers — modules can be assigned to either, with auto-layout for FX
+- Grid system with configurable step (X/Y multipliers) and snap-to-grid
+- Two visual themes:
+  - Classic — original NM2-style colored UI
+  - LCD — monochrome glowing interface inspired by Casio watches
+- Design Settings panel (press `D`) — live theme editing, color pickers, glow, line weight, cable widths, background, grid
+- Custom backgrounds — solid colors or images, with parallax effect
+- Module Editor — built-in IDE-style editor with dock panels and command terminal
 - User modules stored as plain files (in Tauri) — easy to back up, share, version
 
 ## Architecture
 
-- **Frontend**: vanilla JS (ES modules), Vite
-- **Audio**: `@csound/browser` 6.18.7
-- **Desktop shell**: Tauri 2.x (Rust)
-- **Storage**:
+- Frontend: vanilla JS (ES modules), Vite
+- Audio: `@csound/browser` 6.18.7
+- Desktop shell: Tauri 2.x (Rust)
+- Storage:
   - Web: localStorage (`moduleStore.web.js`)
   - Desktop: filesystem via `@tauri-apps/plugin-fs` (`moduleStore.tauri.js`)
   - Abstraction: `src/api/index.js` — lazy `moduleStore` singleton
-- **Theme system**: `src/theme/` (`Theme.js`, `themeStore.js`, `currentTheme.js`, `defaults.js`)
-- **Csound code**: UDO files in `public/csound/modules/*.txt`
-- **Scripts**: Python patchers in `scripts/` (params, mapping tables, NM2 cleanup)
+- Theme system: `src/theme/` (`Theme.js`, `themeStore.js`, `currentTheme.js`, `defaults.js`)
+- Grid system: `src/grid/Grid.js`
+- Csound code: UDO files in `public/csound/modules/*.txt`
+- Scripts: Python patchers in `scripts/` (params, mapping tables, NM2 cleanup)
 
 ## Requirements
 
@@ -74,9 +75,9 @@ npx tauri dev
 
 Opens a native window with the same UI. User modules are stored in:
 
-- **Windows**: `C:\Users\<User>\Documents\CsModular\`
-- **macOS**: `~/Documents/CsModular/`
-- **Linux**: `~/Documents/CsModular/`
+- Windows: `C:\Users\<User>\Documents\CsModular\`
+- macOS: `~/Documents/CsModular/`
+- Linux: `~/Documents/CsModular/`
 
 ### Build desktop executable
 
@@ -132,6 +133,7 @@ Output:
 │   │   └── moduleStore.web.js
 │   ├── csound/          # CsoundEngine, CsoundGenerator, MappingTables
 │   ├── components/      # UI components (Knob, Slider, Input, Output, ...)
+│   ├── grid/            # Grid system (step, snap, crosses)
 │   ├── managers/        # EventManager, LayerManager, UIManager
 │   ├── theme/           # Theme system (Classic / LCD)
 │   └── ui/              # ContextMenu, DesignSettingsPanel, CSoundWindow, ...
@@ -176,21 +178,32 @@ See `AI Context.md` for a quick system overview.
 
 Every module belongs to one of two layers:
 
-- **Voice** — triggered per polyphony voice (default)
-- **FX** — global effects, master processing
+- Voice — triggered per polyphony voice (default)
+- FX — global effects, master processing
 
 Rules:
-- Cables are only allowed **within one layer** (voice ↔ voice, fx ↔ fx)
-- Change layer via **right-click → Layer → Voice / FX**
+- Cables are only allowed within one layer (voice ↔ voice, fx ↔ fx)
+- Change layer via right-click → Layer → Voice / FX
 - When changing layer, all cables are removed (with confirmation)
-- New FX modules are **automatically placed below the lowest voice module**
+- New FX modules are automatically placed below the lowest voice module
+
+## Grid
+
+The world is infinite, with a configurable grid:
+
+- Base cell 20×15 px, panel always 13 cells wide (= 260 px, NM2 compatibility)
+- Step multipliers `multX` / `multY` (≥ 1) — configurable in Design Settings → Grid
+- Visible as crosses (not lines), style depends on theme
+- Snap to grid can be toggled on/off
+- Changing multipliers does not move existing modules — only the next drag uses the new step
+- Grid settings persist in localStorage as part of the theme (`settings.grid`)
 
 ## Themes
 
 The UI supports two visual themes, switchable in Design Settings (`D`):
 
-- **Classic** — original NM2-style, colored panels
-- **LCD** — monochrome Casio-style, transparent panels, glowing lines
+- Classic — original NM2-style, colored panels
+- LCD — monochrome Casio-style, transparent panels, glowing lines
 
 Design Settings allows live editing of:
 - Preset (Classic / LCD)
@@ -199,6 +212,7 @@ Design Settings allows live editing of:
 - Panel opacity
 - Line weight
 - Cable widths (audio / control)
+- Grid: `Step X ×`, `Step Y ×`, `Cross Size`, `Snap to grid`
 - Background (solid colors or images)
 - Parallax strength
 
@@ -212,7 +226,7 @@ custom modules visually.
 
 ### Layout
 
-The editor uses a **fixed dock layout** with resizable splitters and presets
+The editor uses a fixed dock layout with resizable splitters and presets
 (`Default`, `Code`, `Canvas`). All panel sizes persist in `localStorage`.
 
 ```
@@ -230,16 +244,16 @@ The editor uses a **fixed dock layout** with resizable splitters and presets
 └──────────────────────┴──────────────────────────┘
 ```
 
-- **Canvas** — visual module layout, drag components, resize module
-- **Properties** — two tabs: `Module` (name, height, color) and `Component`
+- Canvas — visual module layout, drag components, resize module
+- Properties — two tabs: `Module` (name, height, color) and `Component`
   (schema-driven fields from `getPropertySchema()`)
-- **Csound Code** — live-generated `opcode` code with syntax highlighting,
+- Csound Code — live-generated `opcode` code with syntax highlighting,
   line numbers, font size controls
-- **Terminal** — command language for the module (see below)
+- Terminal — command language for the module (see below)
 
 ### Adding components
 
-Right-click on the canvas → **Add Component** → pick from submenu
+Right-click on the canvas → Add Component → pick from submenu
 (Controls / Display / Jacks / Graphics).
 
 All components live in `editor/ComponentRegistry.js` — a single source of
@@ -275,9 +289,9 @@ Component types (aliases): `knob`, `slider`, `button` (or `btn`), `radio`,
 
 ### Saving & loading
 
-- **Web**: modules persist in `localStorage` under
+- Web: modules persist in `localStorage` under
   `csmodular:user_modules` (list) and `csmodular:user_module:<name>` (data)
-- **Tauri**: modules are written to
+- Tauri: modules are written to
   `~/Documents/CsModular/modules/user/<name>.js` and
   `~/Documents/CsModular/csound/modules/user/<name>.txt`
 
@@ -302,37 +316,44 @@ npx tauri dev
 
 Use to verify Tauri-specific functionality (fs, native windows).
 
-**Note:** Do not run `npm run dev` and `npx tauri dev` simultaneously — both use port 3000.
+Note: Do not run `npm run dev` and `npx tauri dev` simultaneously — both use port 3000.
 
 ## Troubleshooting
 
-**Csound WASM not loading:**
+Csound WASM not loading:
 - Check browser console for errors
 - Ensure `@csound/browser` is accessible (CDN or bundled)
 
-**Tauri build fails:**
+Tauri build fails:
 - On Windows: install Microsoft C++ Build Tools
 - Install WebView2 Runtime (Windows 10)
 - Ensure `rustc --version` works
 
-**Port 3000 already in use:**
+Port 3000 already in use:
 - Kill the process, or change port in `vite.config.js`
 
-**Background not changing:**
+Background not changing:
 - Check DevTools Console for errors
 - Ensure theme has `background` section — reset via `localStorage.removeItem('csmodular.theme')`
 
-**User modules not visible in browser:**
+User modules not visible in browser:
 - Web `moduleStore` uses `localStorage`
 - Check DevTools → Application → Local Storage → `csmodular:user_modules`
 - To reset: `localStorage.removeItem('csmodular:user_modules')`
 
-**Can't type `0` in editor inputs:**
+Can't type `0` in editor inputs:
 - Fixed: keyboard shortcuts now skip when focus is in an `<input>` or `<textarea>`
 - If it happens again, check `EditorApp.setupEvents()` for `preventDefault()` calls
 
-**Editor layout reset:**
+Editor layout reset:
 - `localStorage.removeItem('csmodular:editor-layout')`
+
+Grid settings reset:
+- `localStorage.removeItem('csmodular.theme')` — resets theme including `settings.grid`
+
+Modules don't drag correctly on macOS Retina (dpr > 1):
+- Known issue. `resizeCanvasToWindow` temporarily uses `dpr = 1` as a workaround.
+- See TODO.md → Grid system → HiDPI.
 
 ## Contributing
 
@@ -355,5 +376,5 @@ MIT License — see the [LICENSE](LICENSE) file for details.
 
 ## Author
 
-**Gleb Rogozinski** — [GitHub](https://github.com/gleb812)
+Gleb Rogozinski — [GitHub](https://github.com/gleb812)
 ```
