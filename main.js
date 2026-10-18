@@ -24,6 +24,7 @@ import { drawSticker, drawStickerSelection } from './src/stickers/StickerRendere
 import { StickerContextMenu } from './src/ui/StickerContextMenu.js';
 import { StickerPropertiesPanel } from './src/ui/StickerPropertiesPanel.js';
 import { releaseSvg } from './src/stickers/svgCache.js';
+import { BottomBar } from './src/ui/BottomBar.js';
 
 
 // Глобальный обработчик ошибок
@@ -109,11 +110,13 @@ class ModularSystem {
     this.patchManager = new PatchManager(this);
     this.eventManager = new EventManager(this.canvas, this);
     this.uiManager = new UIManager(this);
+    this.uiManager.container.style.display = 'none';
     this.contextMenu = new ContextMenu(this);
     this.jackContextMenu = new JackContextMenu(this);
     this.moduleContextMenu = new ModuleContextMenu(this);
     this.stickerContextMenu = new StickerContextMenu(this);
     this.stickerProperties = new StickerPropertiesPanel(this);
+    this.bottomBar = new BottomBar(this);
     this.csoundWindow = new CSoundWindow(this);
     this.designSettings = new DesignSettingsPanel(this);
 

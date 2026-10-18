@@ -528,7 +528,6 @@ export class DesignSettingsPanel {
         setCurrentTheme(new Theme(theme.settings));
         themeStore.save(theme.settings);
 
-        // ⭐ Синхронизация с grid
         if (this.system?.applyGridFromTheme) {
             this.system.applyGridFromTheme();
         }
@@ -540,6 +539,9 @@ export class DesignSettingsPanel {
         if (this.system?.forceRedraw) {
             this.system.forceRedraw();
         }
+
+        // ⭐ Оповещаем подписчиков (BottomBar и т.п.)
+        document.dispatchEvent(new CustomEvent('csmodular:theme-changed'));
 
         if (rerender) {
             this.renderContent();
