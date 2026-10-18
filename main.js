@@ -19,6 +19,11 @@ import { DesignSettingsPanel } from './src/ui/DesignSettingsPanel.js';
 import { MappingTables } from './src/csound/MappingTables.js';
 import { debounce } from './src/utils/debounce.js';
 import { initCurrentTheme, getCurrentTheme } from './src/theme/currentTheme.js';
+import { Sticker } from './src/stickers/Sticker.js';
+import { drawSticker, drawStickerSelection } from './src/stickers/StickerRenderer.js';
+import { StickerContextMenu } from './src/ui/StickerContextMenu.js';
+import { StickerPropertiesPanel } from './src/ui/StickerPropertiesPanel.js';
+
 
 // Глобальный обработчик ошибок
 window.addEventListener('error', (event) => {
@@ -103,6 +108,8 @@ class ModularSystem {
     this.contextMenu = new ContextMenu(this);
     this.jackContextMenu = new JackContextMenu(this);
     this.moduleContextMenu = new ModuleContextMenu(this);
+    this.stickerContextMenu = new StickerContextMenu(this);
+    this.stickerProperties = new StickerPropertiesPanel(this);
     this.csoundWindow = new CSoundWindow(this);
     this.designSettings = new DesignSettingsPanel(this);
 
@@ -117,6 +124,8 @@ class ModularSystem {
 
     this.patchLoader = new PatchLoader(this);
     this.selectedModule = null; // Выбранный модуль для удаления
+    this.selectedSticker = null;
+    this.stickers = [];
     window.modularSystemInstance = this;
     this.setupKeyboardListeners();
     this.setupCanvas();
@@ -131,7 +140,6 @@ class ModularSystem {
     this.parallaxCurrentY = 0;
     this.parallaxStrength = 20;   // ← сила смещения в px
     this.parallaxSmoothing = 0.08; // ← плавность (0..1)
-
 
     // === ДОБАВЛЯЕМ ДЛЯ ОТЛАДКИ ===
     this.frameCount = 0;
@@ -334,6 +342,69 @@ _renderDynamic() {
       }[state] || '';
   }
 
+  // ============================================================
+  //  STICKERS
+  // ============================================================
+
+  addSticker(data = {}) {
+      const sticker = new Sticker(data);
+      this.stickers.push(sticker);
+      this.forceRedraw();
+      return sticker;
+  }
+
+  addStickerAtPosition(worldX, worldY, data = {}) {
+      const snapped = this.grid.snapToGrid(worldX, worldY);
+      return this.addSticker({
+          ...data,
+          gridX: snapped.gridX,
+          gridY: snapped.gridY,
+      });
+  }
+
+  removeSticker(sticker) {
+      const idx = this.stickers.indexOf(sticker);
+      if (idx === -1) return;
+      this.stickers.splice(idx, 1);
+      if (this.selectedSticker === sticker) {
+          this.selectedSticker = null;
+      }
+      this.forceRedraw();
+      this.showNotification('🗑️ Sticker deleted');
+  }
+
+  selectSticker(sticker) {
+      if (this.selectedSticker && this.selectedSticker !== sticker) {
+          this.selectedSticker.isSelected = false;
+      }
+      this.selectedSticker = sticker;
+      if (sticker) sticker.isSelected = true;
+      this.forceRedraw();
+  }
+
+  deselectSticker() {
+      if (this.selectedSticker) {
+          this.selectedSticker.isSelected = false;
+          this.selectedSticker = null;
+          this.forceRedraw();
+      }
+  }
+
+  /**
+   * Hit-test: ищет стикер по world-координатам.
+   * @param {number} worldX
+   * @param {number} worldY
+   * @param {'behind'|'front'|null} zFilter — если null, ищет в обоих
+   * @returns {Sticker|null}
+   */
+  getStickerAtPosition(worldX, worldY, zFilter = null) {
+      for (let i = this.stickers.length - 1; i >= 0; i--) {
+          const s = this.stickers[i];
+          if (zFilter && s.z !== zFilter) continue;
+          if (s.hitTest(worldX, worldY)) return s;
+      }
+      return null;
+  }
 
   startMeasure(name) {
     // Защита от undefined
@@ -598,11 +669,16 @@ _renderDynamic() {
       switch (e.key) {
         case 'Delete':
         case 'Del':
-          this.deleteSelectedModule();
-          break;
+            if (this.selectedSticker) {
+                this.removeSticker(this.selectedSticker);
+            } else {
+                this.deleteSelectedModule();
+            }
+            break;
         case 'Escape':
-          this.deselectModule();
-          break;
+            this.deselectModule();
+            this.deselectSticker();
+            break;
         case 'd':
         case 'D':
         case 'в':
@@ -854,20 +930,16 @@ _renderDynamic() {
   }
 
   exportPatchToJson() {
-    console.log('=== ЭКСПОРТ ПАТЧА В JSON ===');
+      const modulesData = this.collectModulesForExport();
+      const cablesData = this.collectCablesForExport();
 
-    // Собираем данные модулей
-    const modulesData = this.collectModulesForExport();
-
-    // Собираем данные кабелей
-    const cablesData = this.collectCablesForExport();
-
-    return {
-      filename: this.currentPatchFilename || 'export.json',
-      modules: modulesData,
-      cables: cablesData,
-      textpad: '',
-    };
+      return {
+          filename: this.currentPatchFilename || 'export.json',
+          modules: modulesData,
+          cables: cablesData,
+          stickers: this.stickers.map(s => s.toJSON()),   // ⭐ NEW
+          textpad: '',
+      };
   }
 
   collectModulesForExport() {
@@ -1117,6 +1189,9 @@ _renderDynamic() {
     this.selectedModule = null;
     this.activePanel = null;
     this.currentPatchFilename = null; // Сбрасываем имя файла
+
+    this.stickers = [];
+    this.selectedSticker = null;
 
     // Очищаем layerManager
     if (this.layerManager) {
@@ -1746,6 +1821,19 @@ async loadAvailableModules(selectElement) {
               this.ctx.restore();
           }
 
+          // === STICKERS (behind) — под модулями, но над сеткой ===
+          if (this.stickers.length > 0) {
+              this.ctx.save();
+              this.ctx.translate(this.offsetX, this.offsetY);
+              this.ctx.scale(this.scale, this.scale);
+
+              const nowMs = performance.now();
+              for (const s of this.stickers) {
+                  if (s.z === 'behind') drawSticker(this.ctx, s, nowMs);
+              }
+              this.ctx.restore();
+          }
+
           // === VOICE ===
           if (
               this._voiceDirty ||
@@ -2048,10 +2136,8 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
       const ctx = this.overlayCtx;
       if (!ctx) return;
 
-      // Очищаем весь overlay-слой
       ctx.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);
 
-      // Обычные кабели — в мировых координатах
       ctx.save();
       ctx.translate(this.offsetX, this.offsetY);
       ctx.scale(this.scale, this.scale);
@@ -2062,8 +2148,26 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
 
       ctx.restore();
 
-      // Перетаскиваемый кабель — сам трансформирует координаты,
-      // поэтому вызывается ВНЕ ctx.translate/scale
+      // ⭐ FRONT-стикеры — после кабелей
+      if (this.stickers.length > 0) {
+          ctx.save();
+          ctx.translate(this.offsetX, this.offsetY);
+          ctx.scale(this.scale, this.scale);
+
+          const nowMs = performance.now();
+          for (const s of this.stickers) {
+              if (s.z === 'front') drawSticker(ctx, s, nowMs);
+          }
+
+          // выделение стикера (поверх)
+          if (this.selectedSticker) {
+              drawStickerSelection(ctx, this.selectedSticker);
+          }
+
+          ctx.restore();
+      }
+
+      // Перетаскиваемый кабель — поверх всего
       if (this.patchManager.draggingCable?.isDragging) {
           this.patchManager.drawDraggingCable(
               ctx,

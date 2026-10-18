@@ -1,6 +1,7 @@
 // src/PatchLoader.js
 import { NM2_HPOS_TO_GRIDX, PANEL_GRID_WIDTH } from './constants.js';
 import { createFileInput, triggerFileInput } from './utils/fileInput.js';
+import { Sticker } from './stickers/Sticker.js';
 
 export class PatchLoader {
     constructor(system) {
@@ -49,8 +50,6 @@ export class PatchLoader {
         // ⭐ Куда класть FX: после самого нижнего Voice + gap
         const FX_START_Y = maxVoiceY + 10;
         this._fxStartY = FX_START_Y;   // сохраняем для createModuleFromDef
-          
-        console.log(`📊 Voice max Y: ${maxVoiceY}, FX will start at: ${FX_START_Y}`);
 
         // Шаг 1: Загружаем модули
         const moduleLoadResults = [];
@@ -98,12 +97,25 @@ export class PatchLoader {
         } else {
             console.log('📭 No cables to create');
         }
-        
+
+        // ⭐ Шаг 3: Стикеры
+        if (Array.isArray(patchData.stickers) && patchData.stickers.length > 0) {
+            console.log(`\n📌 Loading ${patchData.stickers.length} stickers...`);
+            this.loadStickers(patchData.stickers);
+        }
+
         return this.moduleMap;
     }
 
+    loadStickers(stickersData) {
+        if (!Array.isArray(stickersData)) return;
+        this.system.stickers = stickersData.map(data => new Sticker(data));
+        this.system.forceRedraw();
+        console.log(`✅ Loaded ${this.system.stickers.length} stickers`);
+    }
+
+
     clearCurrentPatch() {
-    
         // Удаляем все модули из системы
         const modulesToRemove = this.system.components.filter(comp => 
             comp.constructor.name === 'Panel'
@@ -115,7 +127,13 @@ export class PatchLoader {
         
         // Очищаем кабели
         this.patchManager.clear();
-        
+
+        // ⭐ Очищаем стикеры
+        if (this.system) {
+            this.system.stickers = [];
+            this.system.selectedSticker = null;
+        }
+ 
         // Сбрасываем moduleMap
         this.moduleMap = {
             byId: {},

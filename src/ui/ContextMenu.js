@@ -662,6 +662,7 @@ export class ContextMenu {
             { text: 'Save', action: 'save-patch' },
             { text: 'Save As', action: 'save-patch-as' },
             { text: 'New', action: 'new-patch' },
+            { text: '+ Sticker', action: 'add-sticker' },      // ⭐ NEW
             { text: 'To CSD', action: 'export-csd' },
             { text: 'Editor', action: 'open-editor' },
             { text: 'About', action: 'about' }  
@@ -1555,6 +1556,30 @@ export class ContextMenu {
                     console.error('❌ csoundGen not available!');
                 }
                 break;
+
+            case 'add-sticker': {
+                // Позиция — там, где последний раз открывалось меню,
+                // иначе — в центре видимой области
+                let worldX, worldY;
+                if (this.lastOpenMouseX !== null && this.lastOpenMouseY !== null) {
+                    const rect = this.system.canvas.getBoundingClientRect();
+                    const canvasX = this.lastOpenMouseX - rect.left;
+                    const canvasY = this.lastOpenMouseY - rect.top;
+                    const world = this.system.eventManager.getWorldPosition(canvasX, canvasY);
+                    worldX = world.x;
+                    worldY = world.y;
+                } else {
+                    worldX = (window.innerWidth / 2 - this.system.offsetX) / this.system.scale;
+                    worldY = (window.innerHeight / 2 - this.system.offsetY) / this.system.scale;
+                }
+                const sticker = this.system.addStickerAtPosition(worldX, worldY, {
+                    text: 'New sticker',
+                    gridW: 8,
+                    gridH: 2,
+                });
+                if (sticker) this.system.selectSticker(sticker);
+                break;
+            }
 
             case 'open-editor': // ← НОВЫЙ КЕЙС
                 this.openModuleEditor();

@@ -27,6 +27,24 @@ export class EventManager {
     this.canvas.addEventListener('contextmenu', (e) =>
       this.handleContextMenu(e),
     );
+
+    this.canvas.addEventListener('dblclick', (e) => {
+        const rect = this.canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const worldX = (x - this.system.offsetX) / this.system.scale;
+        const worldY = (y - this.system.offsetY) / this.system.scale;
+
+        const sticker = this.system.getStickerAtPosition(worldX, worldY, 'front')
+            || this.system.getStickerAtPosition(worldX, worldY, 'behind');
+
+        if (sticker) {
+            this.system.selectSticker(sticker);
+            this.system.stickerProperties?.show(sticker);
+            e.preventDefault();
+        }
+    });
+
         // Space+drag для pan (как в Figma)
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Space' && !e.repeat && 
@@ -65,6 +83,17 @@ export class EventManager {
     // ⭐ Вычисляем мировые координаты
     const worldX = (x - this.system.offsetX) / this.system.scale;
     const worldY = (y - this.system.offsetY) / this.system.scale;
+
+    // ⭐ 1. FRONT-стикеры (они визуально над модулями)
+    const frontSticker = this.system.getStickerAtPosition(worldX, worldY, 'front');
+    if (frontSticker && !e.shiftKey && e.button === 0) {
+        this.system.deselectModule();
+        this.system.selectSticker(frontSticker);
+        const dragResult = frontSticker.startDrag(worldX, worldY, this.system);
+        if (dragResult) this.system.draggingComponent = dragResult;
+        e.preventDefault();
+        return;
+    }
 
     // 1C. Удаление кабелей (Shift+клик)
     if (e.shiftKey) {
@@ -133,6 +162,17 @@ export class EventManager {
       }
     }
 
+    // ⭐ 2. BEHIND-стикеры (клик мимо модулей, но в область подложки)
+    const behindSticker = this.system.getStickerAtPosition(worldX, worldY, 'behind');
+    if (behindSticker && !e.shiftKey && e.button === 0) {
+        this.system.deselectModule();
+        this.system.selectSticker(behindSticker);
+        const dragResult = behindSticker.startDrag(worldX, worldY, this.system);
+        if (dragResult) this.system.draggingComponent = dragResult;
+        e.preventDefault();
+        return;
+    }
+
     // === КЛИК НА ПУСТОМ МЕСТЕ ===
     if (e.button === 2 || e.ctrlKey) {
       e.preventDefault();
@@ -195,6 +235,19 @@ export class EventManager {
       }
       e.preventDefault();
       return;
+    }
+
+    // === ПЕРЕТАСКИВАНИЕ СТИКЕРА ===
+    if (
+        this.system.draggingComponent &&
+        this.system.draggingComponent.type === 'sticker-drag' &&
+        this.system.draggingComponent.sticker
+    ) {
+        if (this.system.draggingComponent.handleDrag) {
+            this.system.draggingComponent.handleDrag(worldX, worldY);
+        }
+        e.preventDefault();
+        return;
     }
 
     // === ПЕРЕТАСКИВАНИЕ ПАНЕЛИ ===
@@ -352,6 +405,20 @@ export class EventManager {
       return;
     }
 
+    // Завершение перетаскивания стикера
+    if (
+        this.system.draggingComponent &&
+        this.system.draggingComponent.type === 'sticker-drag'
+    ) {
+        if (this.system.draggingComponent.endDrag) {
+            this.system.draggingComponent.endDrag();
+        }
+        this.system.draggingComponent = null;
+        if (this.system.forceRedraw) this.system.forceRedraw();
+        e.preventDefault();
+        return;
+    }
+
     // Завершение перетаскивания панели
     if (
       this.system.draggingComponent &&
@@ -431,6 +498,15 @@ export class EventManager {
     const canvasY = screenY - rect.top;
     const worldPos = this.getWorldPosition(canvasX, canvasY);
 
+    // ⭐ Сначала — стикеры (front, потом behind)
+    const sticker = this.system.getStickerAtPosition(worldPos.x, worldPos.y, 'front')
+        || this.system.getStickerAtPosition(worldPos.x, worldPos.y, 'behind');
+    if (sticker) {
+        this.system.selectSticker(sticker);
+        this.system.stickerContextMenu?.show(sticker, screenX, screenY);
+        return 'sticker';
+    }
+
     const jack = this.getJackAtPosition(worldPos.x, worldPos.y);
     if (jack) {
       if (this.system.jackContextMenu) {
@@ -452,6 +528,7 @@ export class EventManager {
     }
     return 'main';
   }
+
 
   updateMousePosition(x, y) {
     this.lastMouseX = x;
