@@ -4,11 +4,12 @@
 
 import { getCurrentTheme } from '../theme/currentTheme.js';
 import { wrapText } from '../utils/text.js';
+import { getSvgImage } from './svgCache.js';
 
 // === Реестр рендереров ===
 const RENDERERS = {
     text: drawTextSticker,
-    // svg: drawSvgSticker,     // позже
+    svg: drawSvgSticker,     
     // qr: drawQrSticker,       // позже
     // barcode: drawBarcodeSticker, // позже
 };
@@ -149,3 +150,52 @@ function drawAlignedLine(ctx, sticker, text, baseX, yPos, innerW) {
     }
     ctx.fillText(text, px, yPos);
 }
+
+// ============================================================
+//  SVG
+// ============================================================
+
+function drawSvgSticker(ctx, sticker, nowMs) {
+    // Фон (если задан) — общий для всех типов
+    drawBg(ctx, sticker);
+
+    const { x, y, w, h, padding } = sticker;
+
+    // Картинка может быть ещё не готова — тогда просто выходим
+    const img = getSvgImage(sticker, () => {
+        // когда onload — просим перерисовать
+        const sys = window.modularSystem;
+        if (sys?.forceRedraw) sys.forceRedraw();
+    });
+
+    if (!img) return;
+
+    // Вписываем с сохранением пропорций (contain)
+    const innerW = Math.max(1, w - padding * 2);
+    const innerH = Math.max(1, h - padding * 2);
+    const ar = img.naturalWidth / img.naturalHeight;
+
+    let dw = innerW;
+    let dh = dw / ar;
+    if (dh > innerH) {
+        dh = innerH;
+        dw = dh * ar;
+    }
+
+    const dx = x + padding + (innerW - dw) / 2;
+    const dy = y + padding + (innerH - dh) / 2;
+
+    ctx.save();
+
+    // В LCD — свечение (как у текста). В classic — без.
+    const theme = getCurrentTheme();
+    if (theme.isLcd) theme.applyGlow(ctx);
+
+    ctx.drawImage(img, dx, dy, dw, dh);
+
+    if (theme.isLcd) theme.clearGlow(ctx);
+
+    ctx.restore();
+}
+
+

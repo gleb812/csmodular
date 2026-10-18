@@ -81,6 +81,26 @@ export class StickerContextMenu {
     _buildMenu(sticker) {
         const m = this.menuElement;
 
+        // === Type ===
+        m.appendChild(this._label('Type'));
+        m.appendChild(this._radioItem('Text', sticker.type === 'text', () => {
+            sticker.type = 'text';
+            this.system.forceRedraw();
+            this.show(sticker, parseInt(m.style.left), parseInt(m.style.top));
+        }));
+        m.appendChild(this._radioItem('SVG', sticker.type === 'svg', () => {
+            sticker.type = 'svg';
+            if (!sticker.svgString) {
+                // по умолчанию — простая звёздочка
+                sticker.svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <path d="M50 10 L60 40 L90 40 L65 60 L75 90 L50 70 L25 90 L35 60 L10 40 L40 40 Z"/>
+        </svg>`;
+            }
+            this.system.forceRedraw();
+            this.show(sticker, parseInt(m.style.left), parseInt(m.style.top));
+        }));
+        m.appendChild(this._separator());
+
         // === Edit ===
         m.appendChild(this._item('✏️ Edit…', () => {
             this.system.stickerProperties?.show(sticker);

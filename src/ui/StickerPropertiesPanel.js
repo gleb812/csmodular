@@ -113,6 +113,13 @@ export class StickerPropertiesPanel {
         if (!s) return;
 
         // === Type ===
+        content.appendChild(this.buildSection('Type', [
+            this.buildRadioGroup('type', 'Kind', s.type, [
+                { value: 'text', label: '📝 Text' },
+                { value: 'svg',  label: '🎨 SVG' },
+            ]),
+        ]));
+
         if (s.type === 'text') {
             content.appendChild(this.buildSection('Text', [
                 this.buildTextarea('text', 'Content', s.text),
@@ -124,6 +131,12 @@ export class StickerPropertiesPanel {
                     { value: 'right', label: 'R' },
                 ]),
                 this.buildNumber('lineHeight', 'Line Height', s.lineHeight, 0.8, 3, 0.05),
+            ]));
+        }
+
+        if (s.type === 'svg') {
+            content.appendChild(this.buildSection('SVG', [
+                this.buildSvgTextarea('svgString', 'Markup', s.svgString || ''),
             ]));
         }
 
@@ -188,6 +201,50 @@ export class StickerPropertiesPanel {
         section.appendChild(header);
         children.forEach(c => section.appendChild(c));
         return section;
+    }
+
+    buildSvgTextarea(path, label, value) {
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'margin-bottom: 10px;';
+
+        const labelEl = document.createElement('div');
+        labelEl.textContent = label;
+        labelEl.style.cssText = 'color: #aaa; font-size: 11px; margin-bottom: 4px;';
+
+        const hint = document.createElement('div');
+        hint.textContent = 'Вставь <svg>…</svg> или просто <path d="…"/>. Используй currentColor для цвета.';
+        hint.style.cssText = 'color: #555; font-size: 10px; margin-bottom: 4px; line-height: 1.4;';
+
+        const input = document.createElement('textarea');
+        input.value = value;
+        input.rows = 10;
+        input.spellcheck = false;
+        input.style.cssText = `
+            width: 100%;
+            padding: 6px 8px;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 3px;
+            color: #0af;
+            font-family: monospace;
+            font-size: 10px;
+            line-height: 1.4;
+            outline: none;
+            resize: vertical;
+            box-sizing: border-box;
+            min-height: 120px;
+            white-space: pre;
+            overflow-wrap: normal;
+            overflow-x: auto;
+        `;
+        input.oninput = () => {
+            this.setPath(path, input.value, { silent: true });
+        };
+
+        wrapper.appendChild(labelEl);
+        wrapper.appendChild(hint);
+        wrapper.appendChild(input);
+        return wrapper;
     }
 
     buildTextarea(path, label, value) {
@@ -493,9 +550,15 @@ export class StickerPropertiesPanel {
         }
         target[parts[parts.length - 1]] = value;
 
+        // ⭐ при переключении на SVG — дефолтный контент, если пусто
+        if (path === 'type' && value === 'svg' && !s.svgString) {
+            s.svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <path d="M50 10 L60 40 L90 40 L65 60 L75 90 L50 70 L25 90 L35 60 L10 40 L40 40 Z"/>
+    </svg>`;
+        }
+
         this.system.forceRedraw();
 
-        // Пере-рендер панели только для кнопок-переключателей
         if (!options.silent) this.renderContent();
     }
 

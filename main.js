@@ -23,6 +23,7 @@ import { Sticker } from './src/stickers/Sticker.js';
 import { drawSticker, drawStickerSelection } from './src/stickers/StickerRenderer.js';
 import { StickerContextMenu } from './src/ui/StickerContextMenu.js';
 import { StickerPropertiesPanel } from './src/ui/StickerPropertiesPanel.js';
+import { releaseSvg } from './src/stickers/svgCache.js';
 
 
 // Глобальный обработчик ошибок
@@ -71,6 +72,7 @@ class ModularSystem {
   constructor() {
     this._voiceDirty = true;
     this._fxDirty = true;
+    this._stickerDirty = true;
     // Проверяем, не создан ли уже экземпляр
     if (window.modularSystemInstance) {
       console.warn('⚠️ ModularSystem already exists! Reusing...');
@@ -80,6 +82,8 @@ class ModularSystem {
     this.ctx = this.canvas.getContext('2d');
     this.dynamicCanvas = document.getElementById('dynamicCanvas');
     this.dynamicCtx = this.dynamicCanvas.getContext('2d');
+    this.stickerCanvas = document.getElementById('stickerCanvas');
+    this.stickerCtx = this.stickerCanvas.getContext('2d');
     this.overlayCanvas = document.getElementById('overlayCanvas');
     this.overlayCtx = this.overlayCanvas.getContext('2d');
     this.components = [];
@@ -369,6 +373,8 @@ _renderDynamic() {
       if (this.selectedSticker === sticker) {
           this.selectedSticker = null;
       }
+
+      releaseSvg(sticker.id);
       this.forceRedraw();
       this.showNotification('🗑️ Sticker deleted');
   }
@@ -404,6 +410,13 @@ _renderDynamic() {
           if (s.hitTest(worldX, worldY)) return s;
       }
       return null;
+  }
+
+  _hasAnimatedStickers() {
+      for (const s of this.stickers) {
+          if (s.type === 'text' && s.marquee?.enabled) return true;
+      }
+      return false;
   }
 
   startMeasure(name) {
@@ -460,14 +473,13 @@ _renderDynamic() {
     this.profiler.lastLogTime = performance.now();
   }
 
-
-  // Добавь этот метод в класс ModularSystem
   forceRedraw() {
       this._forceRedraw = true;
       this._voiceDirty = true;
       this._fxDirty = true;
       this._cablesDirty = true;
-  }  
+      this._stickerDirty = true;   // ⭐ NEW
+  }
 
 
   /**
@@ -740,11 +752,20 @@ _renderDynamic() {
 
       this.overlayCanvas.style.backgroundColor = 'transparent';
       this.overlayCanvas.style.border = 'none';
-      this.overlayCanvas.style.zIndex = '3';
+      this.overlayCanvas.style.zIndex = '4';
       this.overlayCanvas.style.position = 'fixed';
       this.overlayCanvas.style.left = '0';
       this.overlayCanvas.style.top = '0';
       this.overlayCanvas.style.pointerEvents = 'none';
+
+      // stickerCanvas — между LED-слоем и кабелями
+      this.stickerCanvas.style.backgroundColor = 'transparent';
+      this.stickerCanvas.style.border = 'none';
+      this.stickerCanvas.style.zIndex = '3';
+      this.stickerCanvas.style.position = 'fixed';
+      this.stickerCanvas.style.left = '0';
+      this.stickerCanvas.style.top = '0';
+      this.stickerCanvas.style.pointerEvents = 'none';
 
       // dynamicCanvas — поверх основного
       this.dynamicCanvas.style.backgroundColor = 'transparent';
@@ -810,6 +831,15 @@ _renderDynamic() {
           this.dynamicCanvas.style.width = `${w}px`;
           this.dynamicCanvas.style.height = `${h}px`;
           this.dynamicCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      // Sticker-canvas (все стикеры)
+      if (this.stickerCanvas) {
+          this.stickerCanvas.width = w * dpr;
+          this.stickerCanvas.height = h * dpr;
+          this.stickerCanvas.style.width = `${w}px`;
+          this.stickerCanvas.style.height = `${h}px`;
+          this.stickerCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
       }
 
       // Overlay-канвас (кабели, выделение)
@@ -1183,7 +1213,8 @@ _renderDynamic() {
 
   resetEverything() {
     console.log('=== RESETTING EVERYTHING ===');
-
+    // в resetEverything()
+    import('./src/stickers/svgCache.js').then(({ releaseAll }) => releaseAll());
     // Очищаем все массивы
     this.components = [];
     this.selectedModule = null;
@@ -1798,15 +1829,25 @@ async loadAvailableModules(selectElement) {
           this._fxDirty ||
           this._cablesDirty ||
           this._forceRedraw ||
+          this._stickerDirty ||
+          this._hasAnimatedStickers() || 
           this.frameCount % 30 === 0;
 
-      if (needsRedraw) {
+      // ⭐ Рисуем "modules" (сетка + VOICE + FX) ТОЛЬКО когда реально надо
+      const modulesNeedRedraw =
+          this._voiceDirty ||
+          this._fxDirty ||
+          hasDragging ||
+          this._forceRedraw ||
+          this.frameCount % 30 === 0;
+
+      if (modulesNeedRedraw) {
           // === CLEAR ===
           if (typeof this.startMeasure === 'function') this.startMeasure('clear');
           this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
           if (typeof this.endMeasure === 'function') this.endMeasure('clear');
 
-          // === СЕТКА — один раз для всего мира, ДО модулей ===
+          // === СЕТКА ===
           if (this.showGrid && this.grid) {
               this.ctx.save();
               this.ctx.translate(this.offsetX, this.offsetY);
@@ -1821,57 +1862,45 @@ async loadAvailableModules(selectElement) {
               this.ctx.restore();
           }
 
-          // === STICKERS (behind) — под модулями, но над сеткой ===
-          if (this.stickers.length > 0) {
-              this.ctx.save();
-              this.ctx.translate(this.offsetX, this.offsetY);
-              this.ctx.scale(this.scale, this.scale);
-
-              const nowMs = performance.now();
-              for (const s of this.stickers) {
-                  if (s.z === 'behind') drawSticker(this.ctx, s, nowMs);
-              }
-              this.ctx.restore();
-          }
-
           // === VOICE ===
-          if (
-              this._voiceDirty ||
-              hasDragging ||
-              this.frameCount % 30 === 0 ||
-              this._forceRedraw
-          ) {
-              if (typeof this.startMeasure === 'function') this.startMeasure('drawVoice');
-              this.drawLayer('voice');
-              if (typeof this.endMeasure === 'function') this.endMeasure('drawVoice');
-              this._voiceDirty = false;
-          }
+          if (typeof this.startMeasure === 'function') this.startMeasure('drawVoice');
+          this.drawLayer('voice');
+          if (typeof this.endMeasure === 'function') this.endMeasure('drawVoice');
+          this._voiceDirty = false;
 
           // === FX ===
-          if (
-              this._fxDirty ||
-              hasDragging ||
-              this.frameCount % 30 === 0 ||
-              this._forceRedraw
-          ) {
-              if (typeof this.startMeasure === 'function') this.startMeasure('drawFx');
-              this.drawLayer('fx');
-              if (typeof this.endMeasure === 'function') this.endMeasure('drawFx');
-              this._fxDirty = false;
-          }
+          if (typeof this.startMeasure === 'function') this.startMeasure('drawFx');
+          this.drawLayer('fx');
+          if (typeof this.endMeasure === 'function') this.endMeasure('drawFx');
+          this._fxDirty = false;
+      }
 
-          // === OVERLAY: кабели и выделение ===
+      // ⭐ STICKERS — отдельный слой, свой dirty-флаг
+      const stickerNeedsRedraw =
+          this._stickerDirty ||
+          hasDragging ||
+          this._forceRedraw ||
+          this._hasAnimatedStickers();
+
+      if (stickerNeedsRedraw) {
+          if (typeof this.startMeasure === 'function') this.startMeasure('stickers');
+          this._renderStickers();
+          if (typeof this.endMeasure === 'function') this.endMeasure('stickers');
+          this._stickerDirty = false;
+      }
+
+      // ⭐ OVERLAY: кабели и выделение
+      const overlayNeedsRedraw =
+          this._cablesDirty ||
+          hasDragging ||
+          this._forceRedraw ||
+          modulesNeedRedraw;   // если модули перерисованы — надо перерисовать и кабели (они на одном с ними слое)
+
+      if (overlayNeedsRedraw) {
           if (this.selectedModule) {
               this.drawModuleSelections();
           }
           this._renderCables();
-
-          if (this._forceRedraw) {
-              this._forceRedraw = false;
-          }
-          if (this._wasDragging && !hasDragging) {
-              this._wasDragging = false;
-          }
           this._cablesDirty = false;
       }
 
@@ -1907,6 +1936,7 @@ async loadAvailableModules(selectElement) {
       drawFx: 0,
       drawDivider: 0,
       drawCables: 0,
+      stickers: 0, 
     };
     this.profiler.frameCount = 0;
     this.profiler.lastLogTime = now;
@@ -2132,6 +2162,38 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
     return maxVoiceY + 10;
   }
 
+
+  _renderStickers() {
+      const ctx = this.stickerCtx;
+      if (!ctx) return;
+
+      // Очищаем весь sticker-слой
+      ctx.clearRect(0, 0, this.stickerCanvas.width, this.stickerCanvas.height);
+
+      if (this.stickers.length === 0) return;
+
+      ctx.save();
+      ctx.translate(this.offsetX, this.offsetY);
+      ctx.scale(this.scale, this.scale);
+
+      const nowMs = performance.now();
+
+      // Порядок: behind → front
+      for (const s of this.stickers) {
+          if (s.z === 'behind') drawSticker(ctx, s, nowMs);
+      }
+      for (const s of this.stickers) {
+          if (s.z === 'front') drawSticker(ctx, s, nowMs);
+      }
+
+      // Выделение стикера — тоже здесь (слой поверх стикеров, но под кабелями)
+      if (this.selectedSticker) {
+          drawStickerSelection(ctx, this.selectedSticker);
+      }
+
+      ctx.restore();
+  }
+
   _renderCables() {
       const ctx = this.overlayCtx;
       if (!ctx) return;
@@ -2147,25 +2209,6 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
       });
 
       ctx.restore();
-
-      // ⭐ FRONT-стикеры — после кабелей
-      if (this.stickers.length > 0) {
-          ctx.save();
-          ctx.translate(this.offsetX, this.offsetY);
-          ctx.scale(this.scale, this.scale);
-
-          const nowMs = performance.now();
-          for (const s of this.stickers) {
-              if (s.z === 'front') drawSticker(ctx, s, nowMs);
-          }
-
-          // выделение стикера (поверх)
-          if (this.selectedSticker) {
-              drawStickerSelection(ctx, this.selectedSticker);
-          }
-
-          ctx.restore();
-      }
 
       // Перетаскиваемый кабель — поверх всего
       if (this.patchManager.draggingCable?.isDragging) {
