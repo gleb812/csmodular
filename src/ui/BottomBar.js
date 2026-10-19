@@ -88,13 +88,13 @@ export class BottomBar {
             { id: 'sep4', label: null },
 
             // --- UI panels ---
-            { id: 'design', label: 'De', title: 'Design settings', toggle: () => this.system.designSettings?.isVisible },
+            { id: 'design', label: 'De', title: 'Design settings', action: () => this.system.designSettings?.toggle(), toggle: () => !!this.system.designSettings?.isVisible },
             { id: 'stkr',   label: 'St', title: 'Add sticker',     action: () => this._addSticker() },
             { id: 'editor', label: 'Ed', title: 'Module editor',   action: () => this._openEditor() },
             { id: 'sep5', label: null },
 
             // --- Grid ---
-            { id: 'grid',   label: 'Gr', title: 'Toggle grid',     toggle: () => !!this.system.showGrid },
+            { id: 'grid',   label: 'Gr', title: 'Toggle grid',     action: () => this._toggleGrid(), toggle: () => !!this.system.showGrid },
 
             // --- SysInfo ---
             { id: 'sysinfo', label: 'i', title: 'System info',     action: () => this._toggleSysInfo() },
@@ -114,6 +114,7 @@ export class BottomBar {
         });
 
         document.body.appendChild(this.element);
+        this.makeDraggable();
     }
 
     _makeButton(cfg) {
@@ -173,6 +174,69 @@ export class BottomBar {
     //  ЛОГИКА
     // ============================================================
 
+    makeDraggable() {
+        const bar = this.element;
+
+        // ⭐ Убираем transform (сдвиг вправо на 50%)
+        // При первом drag — конвертируем в left/top
+        let isDragging = false;
+        let offsetX = 0;
+        let offsetY = 0;
+        let hasMoved = false;
+
+        const onMouseDown = (e) => {
+            // Не тащим, если кликнули по кнопке
+            if (e.target.tagName === 'BUTTON') return;
+            if (e.button !== 0) return;
+
+            isDragging = true;
+            hasMoved = false;
+
+            const rect = bar.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+
+            // Конвертация в абсолютные координаты
+            if (!hasMoved) {
+                bar.style.transform = 'none';
+                bar.style.left = `${rect.left}px`;
+                bar.style.top = `${rect.top}px`;
+                bar.style.bottom = 'auto';
+                // left: 50% больше не нужно — уже в px
+            }
+
+            bar.style.cursor = 'grabbing';
+            e.preventDefault();
+        };
+
+        const onMouseMove = (e) => {
+            if (!isDragging) return;
+            hasMoved = true;
+
+            const newX = e.clientX - offsetX;
+            const newY = e.clientY - offsetY;
+            const maxX = window.innerWidth - bar.offsetWidth;
+            const maxY = window.innerHeight - bar.offsetHeight;
+
+            bar.style.left = `${Math.max(0, Math.min(newX, maxX))}px`;
+            bar.style.top = `${Math.max(0, Math.min(newY, maxY))}px`;
+        };
+
+        const onMouseUp = () => {
+            if (!isDragging) return;
+            isDragging = false;
+            bar.style.cursor = '';
+        };
+
+        bar.addEventListener('mousedown', onMouseDown);
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+
+        // ⭐ Сохранить позицию (в localStorage) — опционально
+        // При загрузке — восстановить
+    }
+
+
     async _handleClick(cfg) {
         if (cfg.toggle) {
             // Для toggle — просто вызываем, состояние посчитаем в refreshState
@@ -223,6 +287,11 @@ export class BottomBar {
                 w.show();
             }
         }
+    }
+
+    _toggleGrid() {
+        this.system.showGrid = !this.system.showGrid;
+        this.system.forceRedraw();
     }
 
     _addSticker() {
@@ -401,21 +470,28 @@ export class BottomBar {
         }
     }
 
+
     applyTheme() {
         const theme = getCurrentTheme();
         const accent = theme.isLcd
             ? (theme.getAccentColor() || '#8fbc8f')
             : '#0af';
 
-        this.element.style.borderColor = this._rgba(accent, 0.15);
+        // ⭐ Фон — accent с очень низкой альфой
+        this.element.style.background = this._rgba(accent, 0.12);
+        this.element.style.borderColor = this._rgba(accent, 0.25);
 
         if (theme.isLcd) {
-            this.element.style.boxShadow = `0 0 20px ${this._rgba(accent, 0.15)}`;
-            this._sysInfoPopup.style.boxShadow = `0 0 20px ${this._rgba(accent, 0.15)}`;
+            this.element.style.boxShadow = `0 0 20px ${this._rgba(accent, 0.2)}`;
+            this._sysInfoPopup.style.boxShadow = `0 0 20px ${this._rgba(accent, 0.2)}`;
         } else {
-            this.element.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.4)';
-            this._sysInfoPopup.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.4)';
+            this.element.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.5)';
+            this._sysInfoPopup.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.5)';
         }
+
+        // SysInfo popup — тот же цвет фона
+        this._sysInfoPopup.style.background = this._rgba(accent, 0.12);
+        this._sysInfoPopup.style.borderColor = this._rgba(accent, 0.25);
 
         this.refreshState();
     }
