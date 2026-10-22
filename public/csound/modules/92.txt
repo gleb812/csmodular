@@ -1,14 +1,14 @@
-;@ map d FLTfrq
-;@ map d CLA000
-;@ map d BUT002
-;@ map d FLTres
-;@ map d BUT003
-;@ map d BUT002
+;@ map FLTfrq
+;@ map CLA000
+;@ map BUT002
+;@ map FLTres
+;@ map BUT003
+;@ map BUT002
 
 ;TODO: KBT, Pitch modulation..
 
-;@ ins a:In k:kModIn
-;@ outs a:Out
+;@ ins a k
+;@ outs a
 ;;@ args kkkkik,ak,a
 opcode FltClassic, 0, kkkkikkkk
   asig[] init 4

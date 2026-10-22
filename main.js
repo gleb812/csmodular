@@ -3,6 +3,7 @@ import { ModuleFactory } from './src/ModuleFactory.js';
 import { Grid } from './src/grid/Grid.js';
 import { BASE_STEP_X, BASE_STEP_Y, PANEL_GRID_WIDTH } from './src/constants.js';
 import { themeStore } from './src/theme/themeStore.js';
+import { moduleStore } from './src/api/index.js';
 import { Panel } from './src/components/Panel.js';
 import { PatchManager } from './src/PatchManager.js';
 import { PatchLoader } from './src/PatchLoader.js';
@@ -1672,18 +1673,12 @@ async loadAvailableModules(selectElement) {
         console.warn('Не удалось получить список штатных модулей:', error);
     }
     
-    // ⭐ 2. Пользовательские модули из /api/list-user-modules
+    // ⭐ 2. Пользовательские модули из moduleStore
     try {
-        const response = await fetch('/api/list-user-modules');
-        if (response.ok) {
-            const data = await response.json();
-            const userModules = data.modules || [];
-            
-            for (const moduleName of userModules) {
-                // ⭐ Помечаем пользовательские звёздочкой
-                this.addModuleToSelect(selectElement, moduleName, `★ ${moduleName}`);
-                userCount++;
-            }
+        const userModules = await moduleStore.list();
+        for (const moduleName of userModules) {
+            this.addModuleToSelect(selectElement, moduleName, `★ ${moduleName}`);
+            userCount++;
         }
     } catch (error) {
         console.warn('Не удалось получить список пользовательских модулей:', error);

@@ -21,6 +21,10 @@ export class CsoundEngine {
         this._ledChannels = new Set();     // имена каналов
         this._ledValues = {};              // name → value
         this._ledPollInterval = null;      // setInterval id
+        // ⭐ Scope-каналы
+        this._scopeTables = new Map();     // cableId -> tableNum
+        this._scopeBuffers = new Map();    // cableId -> Float64Array
+        this._scopePollInterval = null;
     }
 
     // ============================================
@@ -144,6 +148,14 @@ export class CsoundEngine {
                 this._ensureLedPolling();
             }
 
+            // ⭐ Перезапуск scope-polling
+            if (this._scopeTables.size > 0) {
+                if (this._scopePollInterval) {
+                    clearInterval(this._scopePollInterval);
+                    this._scopePollInterval = null;
+                }
+                this._ensureScopePolling();
+            }
 
             return true;
             
@@ -184,6 +196,7 @@ export class CsoundEngine {
         // Обнуляем window.csound для старого кода (Knob, Slider)
         window.csound = null;
         this.instance = null;
+        this.clearScopeChannels();
     }
 
     // ============================================
@@ -233,6 +246,15 @@ export class CsoundEngine {
                     this._ledPollInterval = null;
                 }
                 this._ensureLedPolling();
+            }
+
+            // ⭐ Перезапуск scope-polling
+            if (this._scopeTables.size > 0) {
+                if (this._scopePollInterval) {
+                    clearInterval(this._scopePollInterval);
+                    this._scopePollInterval = null;
+                }
+                this._ensureScopePolling();
             }
             
             const dt = Math.round(performance.now() - t0);
@@ -425,6 +447,52 @@ export class CsoundEngine {
         }, 50);   // 20 Hz
     }
 
+
+    // ============================================
+    // SCOPE (осциллограф)
+    // ============================================
+
+    registerScopeTable(cableId, tableNum) {
+        if (!cableId || tableNum === undefined || tableNum === null) return;
+        this._scopeTables.set(cableId, tableNum);
+        this._ensureScopePolling();
+        console.log(`[CsoundEngine] 📊 Registered scope cable ${cableId.substr(0,8)} → table ${tableNum}`);
+    }
+
+    unregisterScopeTable(cableId) {
+        if (!cableId) return;
+        this._scopeTables.delete(cableId);
+        this._scopeBuffers.delete(cableId);
+    }
+
+    getScopeBuffer(cableId) {
+        return this._scopeBuffers.get(cableId) || null;
+    }
+
+    clearScopeChannels() {
+        this._scopeTables.clear();
+        this._scopeBuffers.clear();
+    }
+
+    _ensureScopePolling() {
+        if (this._scopePollInterval) return;
+
+        this._scopePollInterval = setInterval(async () => {
+            if (this.state !== 'running' || !this.isReady()) return;
+            if (this._scopeTables.size === 0) return;
+
+            for (const [cableId, tableNum] of this._scopeTables) {
+                try {
+                    const data = await this.instance.tableCopyOut(tableNum);
+                    if (data) {
+                        this._scopeBuffers.set(cableId, data);
+                    }
+                } catch (e) {
+                    // тихо
+                }
+            }
+        }, 33);   // ~30 Hz
+    }
 
     // ============================================
     // ВНУТРЕННЕЕ

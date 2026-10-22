@@ -1,6 +1,7 @@
 // src/ui/JackContextMenu.js
 import { ColorPicker } from './ColorPicker.js';
 import { injectColorPickerStyles } from './ColorPickerStyles.js';
+import { ScopeWindow } from './ScopeWindow.js';
 export class JackContextMenu {
     constructor(system) {
         this.system = system;
@@ -113,6 +114,14 @@ export class JackContextMenu {
             ));
         }
 
+        // ⭐ Send to Scope
+        if (cableCount > 0) {
+            this.menuElement.appendChild(this.createMenuItem(
+                `📊 Send to Scope (${cableCount})`,
+                () => this.sendToScope()
+            ));
+        }
+
         // 2. СЕКЦИЯ ЦВЕТОВ
         if (cableCount > 0) {
             const colorSection = document.createElement('div');
@@ -174,6 +183,44 @@ export class JackContextMenu {
         const count = this.system.patchManager.shakeJackCables(this.currentJack, 80);
         this.system.showNotification(`🌀 Shaking ${count} cable(s)`);
     }
+
+    sendToScope() {
+        if (!this.currentJack) return;
+
+        const cables = this.system.patchManager.getCablesForJack(this.currentJack);
+        if (cables.length === 0) return;
+
+        const cable = cables[0];
+        const csoundGen = this.system.csoundGen;
+        const csoundEngine = this.system.csoundEngine;
+
+        if (!csoundGen || !csoundEngine) {
+            this.system.showNotification('❌ Csound not available');
+            return;
+        }
+
+        const tableNum = csoundGen.addScopeTable(cable);
+        if (tableNum === null) {
+            this.system.showNotification('❌ Cable has no bus yet');
+            return;
+        }
+
+        csoundEngine.registerScopeTable(cable.id, tableNum);
+
+        // Одно окно на систему
+        if (!this.system.scopeWindow) {
+            this.system.scopeWindow = new ScopeWindow(this.system);
+        }
+        this.system.scopeWindow.addChannel(cable.id, tableNum, cable);
+
+        this.system.showNotification(`📊 Scope: cable ${cable.id.substr(0, 8)} (table ${tableNum})`);
+
+        // Нужен recompile, чтобы ftgen + tablew попали в ORC
+        if (csoundEngine.state === 'running') {
+            this.system._recompileDebounced();
+        }
+    }
+
 
     createHeader() {
         const header = document.createElement('div');

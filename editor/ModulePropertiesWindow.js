@@ -101,35 +101,19 @@ export class ModulePropertiesWindow {
         
         this.windowElement.querySelector('#module-name-input').onchange = () => {
             let name = this.windowElement.querySelector('#module-name-input').value;
-            
-            // Убираем пробелы
+
             name = name.replace(/\s/g, '');
-            
-            // Если начинается с цифры - добавляем "M"
-            if (name.match(/^[0-9]/)) {
-                name = 'M' + name;
-            }
-            
-            // Оставляем только буквы, цифры и подчёркивание
+            if (name.match(/^[0-9]/)) name = 'M' + name;
             name = name.replace(/[^a-zA-Z0-9_]/g, '');
-            
+
+            if (!name) return;
+
             if (this.app.module) {
                 this.app.module.title = name;
                 this.windowElement.querySelector('#module-name-input').value = name;
 
-                // ⭐ ОБНОВЛЯЕМ КОД CSOUND МГНОВЕННО
                 if (this.app.codeViewerWindow) {
-                    // Если окно открыто - обновляем его содержимое
-                    if (this.app.codeViewerWindow.isVisible) {
-                        const newCode = this.app.codeViewerWindow.generateCsoundCode();
-                        this.app.codeViewerWindow.editor.value = newCode;
-                        this.app.codeViewerWindow.codeContent = newCode;
-                        this.app.codeViewerWindow.isDirty = false;
-                        this.app.codeViewerWindow.updateStatus('saved');
-                    } else {
-                        // Если окно закрыто - просто обновляем сохранённый код
-                        this.app.module._userCsoundCode = this.app.codeViewerWindow.generateCsoundCode();
-                    }
+                    this.app.codeViewerWindow.updateCode();
                 }
             }
         };
@@ -234,6 +218,9 @@ export class ModulePropertiesWindow {
             this.app.module.width = newWidth * 260;
             this.app.module.height = newHeight * 15;
             this.app.centerModuleInGrid();
+            if (this.app.codeViewerWindow) {
+                this.app.codeViewerWindow.updateCode();
+            }
         }
     }
 

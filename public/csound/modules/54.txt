@@ -2,11 +2,16 @@
 ;@ ins a
 ;@ outs a
 ;TODO no GC (Gain Compensation) & check RES values
-opcode FltStatic, 0, kkkkkkk ; 
-  kFreq, kRes, kType, kOn, kIn, kOut xin
+opcode FltStatic, 0, kkkkkkk 
+  kFreq, kType, kRes, kGC, kBP, kIn, kOut xin
   ain zar kIn
   kres table kRes, giFLTres
   kfreq table kFreq, giFLTfrq	
+  kfreq limit kfreq,0,sr/2
+  if kBP == 1 goto Next
+  aout = ain
+  goto run
+Next:
   ahp, alp, abp svfilter ain, kfreq, kres 
   if kType == 0 goto Lowpass
   if kType == 1 goto Bandpass
@@ -18,4 +23,5 @@ Bandpass:
   aout = abp
 run:
   zaw aout, kOut
+printk2 kfreq
 endop

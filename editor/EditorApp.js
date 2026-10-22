@@ -12,6 +12,7 @@ import { EditorUIManager } from './EditorUIManager.js';
 import { ModulePropertiesWindow } from './ModulePropertiesWindow.js';
 import { CodeViewerWindow } from './CodeViewerWindow.js';
 import { ComponentPropertiesWindow } from './ComponentPropertiesWindow.js';
+import { showNotification } from './ui/Toast.js';
 
 import { Knob } from '../src/components/Knob.js';
 import { ButtonFlat } from '../src/components/ButtonFlat.js';
@@ -83,20 +84,20 @@ export class EditorApp {
         this.snapGridSize = 5; // размер ячейки микросетки в пикселях
         this.showMicroGrid = true;
 
-        // Временный uiManager: рабочий showLoadDialog + заглушки
+        // Временный uiManager: рабочий showLoadDialog + реальный showNotification
         const self = this;
         this.uiManager = {
-            showNotification: (msg) => console.log('📢', msg),
+            showNotification,
             updateZoomInfo: () => {},
             async showLoadDialog() {
                 const { moduleStore } = await import('../src/api/index.js');
                 const modules = await moduleStore.list();
-                
+
                 if (modules.length === 0) {
-                    console.log('📭 No user modules found');
+                    showNotification('📭 No user modules found');
                     return;
                 }
-                
+
                 const name = prompt(
                     `Load module (${modules.length} available):\n${modules.join(', ')}\n\nEnter name:`
                 );
@@ -105,22 +106,20 @@ export class EditorApp {
                     alert(`Module "${name}" not found`);
                     return;
                 }
-                
-                // Логика та же, что в старом EditorUIManager.loadModule()
+
                 const data = await moduleStore.load(name);
                 if (!data) return;
-                
+
                 try {
-                    // Парсим JS
                     const match = data.code.match(/export\s+const\s+\w+\s*=\s*(\{[\s\S]*\});?\s*$/m);
                     if (!match) throw new Error('Cannot parse module code');
                     const moduleData = new Function(`return ${match[1]}`)();
-                    
+
                     self.restoreModuleFromData(moduleData, data.dsp_code);
-                    console.log(`📂 Loaded: ${name}`);
+                    showNotification(`📂 Loaded: ${name}`);
                 } catch (e) {
                     console.error('Load error:', e);
-                    alert(`Parse error: ${e.message}`);
+                    showNotification(`❌ Parse error: ${e.message}`);
                 }
             },
         };
@@ -955,13 +954,28 @@ export class EditorApp {
 
     editModuleTitle() {
         if (!this.module) return;
-        
+
         const currentTitle = this.module.title;
         const newTitle = prompt('Enter module name:', currentTitle);
-        
+
         if (newTitle !== null && newTitle.trim() !== '') {
-            this.module.title = newTitle.trim();
-            this.uiManager.showNotification(`📝 Module renamed to: ${this.module.title}`);
+            // Санитайз — как везде
+            let name = newTitle.trim().replace(/\s/g, '');
+            if (/^[0-9]/.test(name)) name = 'M' + name;
+            name = name.replace(/[^a-zA-Z0-9_]/g, '');
+            if (!name) name = 'NewModule';
+
+            this.module.title = name;
+
+            // Обновить Csound-код
+            if (this.codeViewerWindow) this.codeViewerWindow.updateCode();
+
+            // Обновить панель свойств, если открыт таб Module
+            if (this.propertiesPanel && this.propertiesPanel.activeTab === 'module') {
+                this.propertiesPanel._render();
+            }
+
+            this.uiManager.showNotification(`📝 Module renamed to: ${name}`);
         }
     }
 
@@ -1171,30 +1185,6 @@ export class EditorApp {
         
         ctx.fillStyle = '#111';
         ctx.fillRect(0, 0, this.width, this.height);
-        
-        ctx.save();
-        ctx.translate(this.offsetX, this.offsetY);
-        ctx.scale(this.zoom, this.zoom);
-        
-        // Только основная сетка
-        ctx.strokeStyle = 'rgba(100, 200, 100, 0.08)';
-        ctx.lineWidth = 1 / this.zoom;
-        
-        for (let x = 0; x <= this.width / this.zoom; x += GRID_UNITS.X) {
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, this.height / this.zoom);
-            ctx.stroke();
-        }
-        
-        for (let y = 0; y <= this.height / this.zoom; y += GRID_UNITS.Y) {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(this.width / this.zoom, y);
-            ctx.stroke();
-        }
-        
-        ctx.restore();
     }
 
     drawModuleSizeOutside() {

@@ -98,39 +98,46 @@ function _addComponent(app, type, screenX, screenY, jackType) {
     const worldX = (canvasX - app.offsetX) / app.zoom;
     const worldY = (canvasY - app.offsetY) / app.zoom;
 
+    // 1. Клик должен быть внутри модуля
+    const clickInside =
+        worldX >= app.module.x && worldX <= app.module.x + app.module.width &&
+        worldY >= app.module.y && worldY <= app.module.y + app.module.height;
+
+    if (!clickInside) {
+        app.uiManager.showNotification('❌ Click inside the module first');
+        return;
+    }
+
+    // 2. Размер компонента
     const size = _paletteSizeFor(app, type, jackType);
-    if (!size) return;
+    if (!size) {
+        app.uiManager.showNotification(`❌ Unknown component type: ${type}`);
+        return;
+    }
 
-    // Центрируем в точке клика — как обычный компонент
-    const targetX = worldX - size.width / 2;
-    const targetY = worldY - size.height / 2;
+    // 3. Позиция: центр в точке клика, зажатая в границы модуля
+    const maxX = app.module.x + app.module.width - size.width;
+    const maxY = app.module.y + app.module.height - size.height;
+    const targetX = Math.max(app.module.x, Math.min(maxX, worldX - size.width / 2));
+    const targetY = Math.max(app.module.y, Math.min(maxY, worldY - size.height / 2));
 
+    // 4. Создание
     const opts = { x: targetX, y: targetY };
     if (type === 'Input' || type === 'Output') {
         opts.jackType = jackType || 'audio';
     }
 
     const component = createComponent(type, opts);
-    if (!component) return;
+    if (!component) {
+        app.uiManager.showNotification(`❌ Could not create: ${type}`);
+        return;
+    }
 
     component.id = app._generateComponentId().toString();
     component.originalID = component.id;
     component.parameterId = parseInt(component.id);
     component.width = size.width;
     component.height = size.height;
-
-    // Проверяем, что внутри модуля
-    const inside = component.x >= app.module.x &&
-                   component.x + component.width <= app.module.x + app.module.width &&
-                   component.y >= app.module.y &&
-                   component.y + component.height <= app.module.y + app.module.height;
-
-    if (!inside) {
-        app.uiManager.showNotification('❌ Component outside module');
-        app._releaseComponentId(parseInt(component.id));
-        return;
-    }
-
     component.relX = component.x - app.module.x;
     component.relY = component.y - app.module.y;
     component.parent = app.module;
@@ -138,7 +145,14 @@ function _addComponent(app, type, screenX, screenY, jackType) {
     component._isNewDragging = false;
 
     app.components.push(component);
-    app.uiManager.showNotification(`✅ ${type} added`);
+
+    // 5. Обновить структуру кода (появится zar/zkr/zaw/zkw)
+    if (app.codeViewerWindow) {
+        app.codeViewerWindow.updateCode();
+    }
+
+    const jackLabel = (type === 'Input' || type === 'Output') ? ` (${jackType || 'audio'})` : '';
+    app.uiManager.showNotification(`✅ ${type}${jackLabel} added`);
 }
 
 function _paletteSizeFor(app, type, jackType) {
@@ -173,18 +187,18 @@ function _renameModule(app) {
     const trimmed = newName.trim();
     if (!trimmed) return;
 
-    app.module.title = trimmed;
+    let name = trimmed.replace(/\s/g, '');
+    if (/^[0-9]/.test(name)) name = 'M' + name;
+    name = name.replace(/[^a-zA-Z0-9_]/g, '') || 'NewModule';
 
-    // Обновляем код Csound, если окно открыто
-    if (app.codeViewerWindow && app.codeViewerWindow.isVisible) {
-        const newCode = app.codeViewerWindow.generateCsoundCode();
-        app.codeViewerWindow.editor.value = newCode;
-        app.codeViewerWindow.codeContent = newCode;
-        app.codeViewerWindow.isDirty = false;
-        app.codeViewerWindow.updateStatus('saved');
+    app.module.title = name;
+
+    if (app.codeViewerWindow) app.codeViewerWindow.updateCode();
+    if (app.propertiesPanel && app.propertiesPanel.activeTab === 'module') {
+        app.propertiesPanel._render();
     }
 
-    app.uiManager.showNotification(`📝 Renamed to: ${trimmed}`);
+    app.uiManager.showNotification(`📝 Renamed to: ${name}`);
 }
 
 function _changeColor(app) {

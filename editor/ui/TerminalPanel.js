@@ -65,6 +65,13 @@ const TYPE_ALIASES = {
     output: 'Output', out: 'Output',
 };
 
+const JACK_TYPE_ALIASES = {
+    ina:  { type: 'Input',  jackType: 'audio' },
+    ink:  { type: 'Input',  jackType: 'control' },
+    outa: { type: 'Output', jackType: 'audio' },
+    outk: { type: 'Output', jackType: 'control' },
+};
+
 export class TerminalPanel {
     constructor(app) {
         this.app = app;
@@ -217,11 +224,13 @@ export class TerminalPanel {
                 case 'clear': case 'cls': this.output.innerHTML = ''; return;
                 case 'ls': case 'list':   return this._cmdLs(args);
                 case 'add':               return this._cmdAdd(args);
-                case 'in':                return this._cmdAdd(['input', ...args]);
-                case 'out':               return this._cmdAdd(['output', ...args]);
+                case 'in': case 'out':
+                case 'ina': case 'ink': case 'outa': case 'outk':
+                    return this._cmdAdd([cmd, ...args]);
                 case 'del': case 'delete': case 'rm': return this._cmdDel(args);
                 case 'mv': case 'move':   return this._cmdMv(args);
                 case 'map':               return this._cmdMap(args);
+                case 'name':              return this._cmdName(args);
                 case 'align':             return this._cmdAlign(args);
                 case 'distr': case 'distribute': return this._cmdDistr(args);
                 case 'grid':              return this._cmdGrid(args);
@@ -236,6 +245,41 @@ export class TerminalPanel {
         } catch (e) {
             this._printError(e.message || String(e));
         }
+    }
+
+    _cmdName(args) {
+        if (args.length === 0) {
+            this._printError('Usage: name <newName>');
+            return;
+        }
+
+        // Склеиваем аргументы на случай, если имя с пробелом в кавычках:
+        // name "My Module" → args = ['My Module']
+        // но на всякий случай — join(' '), если пришло несколько
+        let raw = args.join(' ').trim();
+        if (!raw) {
+            this._printError('Name cannot be empty');
+            return;
+        }
+
+        // Санитайз как везде
+        let name = raw.replace(/\s/g, '');
+        if (/^[0-9]/.test(name)) name = 'M' + name;
+        name = name.replace(/[^a-zA-Z0-9_]/g, '');
+
+        if (!name) {
+            this._printError('Name contains no valid characters (use a-zA-Z0-9_)');
+            return;
+        }
+
+        this.app.module.title = name;
+
+        if (this.app.codeViewerWindow) this.app.codeViewerWindow.updateCode();
+        if (this.app.propertiesPanel && this.app.propertiesPanel.activeTab === 'module') {
+            this.app.propertiesPanel._render();
+        }
+
+        this._printOk(`Module renamed to "${name}"`);
     }
 
     _tokenize(line) {
@@ -256,12 +300,15 @@ export class TerminalPanel {
 
         this._printInfo('Commands:');
         this._print('  add <type> [x y]       add component (auto-place or at x,y)');
-        this._print('  in / out               shorthand for "add input" / "add output"');
+        this._print('  ina / ink              add audio / control input');
+        this._print('  outa / outk            add audio / control output');
+        this._print('  in / out               shorthand for ina / outa (audio)');
         this._print('  ls [type] [-l]         list components');
         this._print('  del <id|type|range>... delete (e.g. del 3, del knob, del 3 4 5, del 3..7)');
         this._print('  mv <id> <x> <y>        move (absolute)');
         this._print('  mv <id> +dx +dy        move (relative)');
         this._print('  map <id> <table>       bind mapping table (or unset)');
+        this._print('  name <newName>         rename module');
         this._print('  align <ids...> l|r|u|d align components');
         this._print('  distr <ids...> h|v     distribute evenly');
         this._print('  grid on|off|N          toggle micro-grid or set step');
@@ -275,10 +322,13 @@ export class TerminalPanel {
 
     _cmdHelpTopic(cmd) {
         const topics = {
-            add: 'add <type> [x y]\n  types: ' + Object.keys(TYPE_ALIASES).join(', '),
+            add: 'add <type> [x y]\n' +
+                 '  types: ' + Object.keys(TYPE_ALIASES).join(', ') + '\n' +
+                 '  jack types: ' + Object.keys(JACK_TYPE_ALIASES).join(', '),
             del: 'del <id> | del <type> | del <id> <id> ... | del <from>..<to>\n  examples: del 3, del knob, del 3 4 5, del 3..7',
             mv:  'mv <id> <x> <y>   — absolute position\nmv <id> +dx +dy   — relative shift',
             map: 'map <id> <table>  — bind mapping table\nmap <id>          — unbind',
+            name: 'name <newName>  — rename module\n  e.g. name MyFilter, name "Cool Synth"',
             align: 'align <ids...> <edge>\n  edges: l (left), r (right), u (up), d (down)',
             distr: 'distr <ids...> <axis>\n  axes: h (horizontal), v (vertical)',
             grid: 'grid         — show current grid\n  grid on      — enable micro-grid\n  grid off     — disable\n  grid N       — set grid step to N pixels',
@@ -325,7 +375,10 @@ export class TerminalPanel {
                 this._print(`  id=${c.id}  ${type}`);
                 this._print(`      pos (${x}, ${y})  size ${w}×${h}`);
                 if (c.mappingTable) this._print(`      mapping: ${c.mappingTable}`);
-                if (c._jackType) this._print(`      jack: ${c._jackType}`);
+                const jackType = c.type || c._jackType;
+                if (jackType && (type === 'Input' || type === 'Output')) {
+                    this._print(`      jack: ${jackType}`);
+                }
                 if (c.label) this._print(`      label: ${c.label}`);
             } else {
                 this._print(`  id=${c.id}  ${type.padEnd(12)} at (${x}, ${y})  ${w}×${h}`);
@@ -342,11 +395,24 @@ export class TerminalPanel {
         }
 
         const typeInput = args[0].toLowerCase();
-        const type = TYPE_ALIASES[typeInput];
 
-        if (!type) {
+        // ── 1. Разрешаем тип и jackType ──
+        let type, jackType = null;
+
+        if (JACK_TYPE_ALIASES[typeInput]) {
+            type = JACK_TYPE_ALIASES[typeInput].type;
+            jackType = JACK_TYPE_ALIASES[typeInput].jackType;
+        } else if (TYPE_ALIASES[typeInput]) {
+            type = TYPE_ALIASES[typeInput];
+            // Старые in/out → audio по умолчанию
+            if (type === 'Input' || type === 'Output') jackType = 'audio';
+        } else {
             this._printError(`Unknown type: ${args[0]}`);
-            this._print(`Available: ${Object.keys(TYPE_ALIASES).join(', ')}`, '#666');
+            this._print(
+                `Available: ${Object.keys(TYPE_ALIASES).join(', ')}, ` +
+                `${Object.keys(JACK_TYPE_ALIASES).join(', ')}`,
+                '#666'
+            );
             return;
         }
 
@@ -356,6 +422,7 @@ export class TerminalPanel {
             return;
         }
 
+        // ── 2. Позиция ──
         let x, y;
         if (args.length >= 3) {
             x = parseFloat(args[1]);
@@ -386,9 +453,10 @@ export class TerminalPanel {
             return;
         }
 
+        // ── 3. Создание ──
         const opts = { x: module.x + x, y: module.y + y };
         if (type === 'Input' || type === 'Output') {
-            opts.jackType = 'audio';
+            opts.jackType = jackType || 'audio';
         }
 
         const component = createComponent(type, opts);
@@ -412,7 +480,10 @@ export class TerminalPanel {
 
         if (this.app.codeViewerWindow) this.app.codeViewerWindow.updateCode();
 
-        this._printOk(`Added ${type} (id=${component.id}) at (${x}, ${y})`);
+        // ── 4. Уведомление ──
+        const jackLabel = (type === 'Input' || type === 'Output')
+            ? ` (${jackType || 'audio'})` : '';
+        this._printOk(`Added ${type}${jackLabel} (id=${component.id}) at (${x}, ${y})`);
     }
 
     // ─────────────────────────── DEL ────────────────────────────────
@@ -768,13 +839,27 @@ export class TerminalPanel {
     async _cmdSave(args) {
         let name = this.app.module.title || 'NewModule';
         name = name.replace(/\s/g, '');
-        if (name.match(/^[0-9]/)) name = 'M' + name;
+        if (/^[0-9]/.test(name)) name = 'M' + name;
         name = name.replace(/[^a-zA-Z0-9_]/g, '') || 'NewModule';
 
         // save as <name>
-        if (args[0]?.toLowerCase() === 'as' && args[1]) {
-            name = args[1].replace(/[^a-zA-Z0-9_]/g, '') || name;
+        const isSaveAs = args[0]?.toLowerCase() === 'as' && args[1];
+        if (isSaveAs) {
+            let raw = args.slice(1).join(' ').trim();
+            raw = raw.replace(/\s/g, '');
+            if (/^[0-9]/.test(raw)) raw = 'M' + raw;
+            raw = raw.replace(/[^a-zA-Z0-9_]/g, '');
+            if (!raw) {
+                this._printError('Invalid name for "save as"');
+                return;
+            }
+            name = raw;
             this.app.module.title = name;
+
+            // Обновить структуру кода под новое имя (opcode-строка)
+            if (this.app.codeViewerWindow) {
+                this.app.codeViewerWindow.updateCode();
+            }
         }
 
         // Собираем модуль
@@ -793,20 +878,23 @@ export class TerminalPanel {
             components: [],
         };
 
-        // Собираем через реестр (импортировать serializeComponents напрямую)
-        const { serializeComponents, collectParamIds, collectPorts } = await import('../ComponentRegistry.js');
+        const { serializeComponents, collectParamIds, collectPorts } =
+            await import('../ComponentRegistry.js');
         moduleData.components = serializeComponents(this.app.components);
         moduleData.params = collectParamIds(this.app.components);
         const ports = collectPorts(this.app.components);
         moduleData.inputs = ports.inputs;
         moduleData.outputs = ports.outputs;
 
-        // Генерируем JS-код (упрощённая версия generateModuleCode)
+        // JS-код
         const jsCode = this._generateJsCode(moduleData);
 
-        // DSP-код
+        // DSP-код: актуальное содержимое редактора (включая тело),
+        // а не устаревший _userCsoundCode
         let dspCode = null;
-        if (this.app.module._userCsoundCode) {
+        if (this.app.codeViewerWindow) {
+            dspCode = this.app.codeViewerWindow.getCode();
+        } else if (this.app.module._userCsoundCode) {
             dspCode = this.app.module._userCsoundCode;
         } else if (this.app.codeViewerWindow) {
             dspCode = this.app.codeViewerWindow.generateCsoundCode();
@@ -816,10 +904,12 @@ export class TerminalPanel {
             const ok = await moduleStore.save(name, jsCode, dspCode);
             if (ok) {
                 this.app.module.title = name;
-                this._printOk(`Saved "${name}"`);
+
                 if (this.app.propertiesPanel?.activeTab === 'module') {
                     this.app.propertiesPanel._render();
                 }
+
+                this._printOk(`Saved "${name}"`);
             } else {
                 this._printError(`Save failed for "${name}"`);
             }

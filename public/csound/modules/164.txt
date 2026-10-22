@@ -7,7 +7,7 @@ opcode OscDual, 0, kkkkkkkkkkkkkkkkkkkk
 ; TODO: No PhM for SAW, PWM signals aren't -64..+64, No Soft function
 ; kModLev - 0...1
 ; kMod - blue - -64..+64
-kCoarse,kFine,kKBT,kPchMod,kTuneMode,kSqLev,kPWMod,kSawLev,kSwPh,kSubLev,kON,kPW,kSPhM,kSoft,kPitchIn,kModIn,kSync,kPWIn,kPhIn,kOut xin
+kcoarse,kFine,kKBT,kPchMod,kTuneMode,kSqLev,kPWMod,kSawLev,kSwPh,kSubLev,kON,kPW,kSPhM,kSoft,kPitchIn,kModIn,kSync,kPWIn,kPhIn,kOut xin
   async zar kSync
   kMod zkr kModIn
   kPWMo zkr kPWMod

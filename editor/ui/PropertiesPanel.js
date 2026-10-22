@@ -117,24 +117,31 @@ export class PropertiesPanel {
         }
 
         // ── Module Name ──
-        this._field('Module Name', this._textInput(
+        const nameInput = this._textInput(
             module.title || 'New Module',
             (v) => {
                 let name = v.replace(/\s/g, '');
-                if (name.match(/^[0-9]/)) name = 'M' + name;
+                if (/^[0-9]/.test(name)) name = 'M' + name;
                 name = name.replace(/[^a-zA-Z0-9_]/g, '');
-                module.title = name;
+                if (!name) name = 'NewModule';
 
-                // Обновляем код Csound
-                if (this.app.codeViewerWindow && this.app.codeViewerWindow.isVisible) {
-                    const newCode = this.app.codeViewerWindow.generateCsoundCode();
-                    this.app.codeViewerWindow.editor.value = newCode;
-                    this.app.codeViewerWindow.codeContent = newCode;
-                    this.app.codeViewerWindow.isDirty = false;
-                    this.app.codeViewerWindow.updateStatus('saved');
+                module.title = name;
+                nameInput.value = name;   // показываем санитайзнутое
+
+                // Перегенерация структуры (opcode-строка обновится, тело сохранится)
+                if (this.app.codeViewerWindow) {
+                    this.app.codeViewerWindow.updateCode();
                 }
             }
-        ));
+        );
+        // Enter → blur → change
+        nameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                nameInput.blur();
+            }
+        });
+        this._field('Module Name', nameInput);
 
         // ── Height ── (width всегда 1)
         this._field('Height (grid cells)', this._numberInput(
