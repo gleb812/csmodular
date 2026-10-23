@@ -5,7 +5,8 @@
 //
 // Версия: @csound/browser 6.18.7 (через CDN unpkg)
 
-export const CSOUND_VERSION = '6.18.7';
+//export const CSOUND_VERSION = '6.18.7';
+export const CSOUND_VERSION = '7.0.0-beta33';
 export const CSOUND_CDN = `https://www.unpkg.com/@csound/browser@${CSOUND_VERSION}/dist/csound.js`;
 
 export class CsoundEngine {
@@ -107,6 +108,7 @@ export class CsoundEngine {
             // Настройка
             //console.log('[CsoundEngine] Setting options...');
             await this.instance.setOption('-odac');
+            await this.instance.setOption('-M0');
             //await this.instance.setOption('-d');
             //await this.instance.setOption('-m16');
             
@@ -219,6 +221,7 @@ export class CsoundEngine {
             await this.instance.setOption('-odac');
             await this.instance.setOption('-d');
             await this.instance.setOption('-m16');
+            await this.instance.setOption('-M0');
             
             // 3. Сгенерировать ORC
             const orc = await this.system.csoundGen.generateOrc();
@@ -357,6 +360,30 @@ export class CsoundEngine {
         await this.instance.inputMessage(`i4 0 ${duration} ${midiNote}`);
         return true;
     }
+
+    /**
+     * Переслать MIDI-сообщение в Csound.
+     * Csound читает его через midiin в instr 3 (NM2-совместимый MIDI-фильтр),
+     * который выставляет gkGate / gkNote.
+     * @param {number} status
+     * @param {number} data1
+     * @param {number} data2
+     */
+    async midiMessage(status, data1, data2) {
+        if (!this.isReady()) return false;
+        if (typeof this.instance.midiMessage !== 'function') {
+            console.warn('[CsoundEngine] midiMessage() not available on Csound instance');
+            return false;
+        }
+        try {
+            await this.instance.midiMessage(status, data1, data2);
+            return true;
+        } catch (e) {
+            console.warn('[CsoundEngine] midiMessage failed:', e);
+            return false;
+        }
+    }
+
 
     async showCurrentOrc() {
         const orc = await this.system.csoundGen.generateOrc();

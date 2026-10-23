@@ -26,6 +26,7 @@ import { StickerContextMenu } from './src/ui/StickerContextMenu.js';
 import { StickerPropertiesPanel } from './src/ui/StickerPropertiesPanel.js';
 import { releaseSvg } from './src/stickers/svgCache.js';
 import { BottomBar } from './src/ui/BottomBar.js';
+import { MidiManager } from './src/midi/MidiManager.js';
 
 
 // Глобальный обработчик ошибок
@@ -188,6 +189,8 @@ class ModularSystem {
     this.csoundGen = new CsoundGenerator();
     this.csoundGen.system = this; 
     this.csoundGen.loadUserModules();
+
+    this.midiManager = new MidiManager();
 
     // Csound Engine (управляет инстансом Csound)
     this.csoundEngine = new CsoundEngine(this);
@@ -2422,6 +2425,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     modularSystem = new ModularSystem();
     window.modularSystem = modularSystem;
+
+    // ⭐ MIDI: не автостартуем — браузер требует клик пользователя для разрешения.
+    // Запуск — через кнопку MIDI в BottomBar.
+    modularSystem.midiManager.onStateChange((state, info) => {
+        console.log(`[MIDI] state=${state}`, info);
+    });
+
+    // ⭐ MIDI → Csound (instr 3 — NM2-совместимый фильтр gkGate/gkNote)
+    modularSystem.midiManager.onMessage((evt) => {
+        const engine = modularSystem.csoundEngine;
+        if (!engine || engine.state !== 'running') return;
+        engine.midiMessage(evt.status, evt.data1, evt.data2);
+    });
 
   // Добавляем команды для дебага в консоли
   window.debugSystem = () => {

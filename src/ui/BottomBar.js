@@ -96,6 +96,12 @@ export class BottomBar {
             // --- Grid ---
             { id: 'grid',   label: 'Gr', title: 'Toggle grid',     action: () => this._toggleGrid(), toggle: () => !!this.system.showGrid },
 
+
+            { id: 'sep5b', label: null },
+
+            // --- MIDI ---
+            { id: 'midi',   label: 'MI', title: 'Enable MIDI input',  action: () => this._toggleMidi() },
+
             // --- SysInfo ---
             { id: 'sysinfo', label: 'i', title: 'System info',     action: () => this._toggleSysInfo() },
 
@@ -289,6 +295,35 @@ export class BottomBar {
         }
     }
 
+    async _toggleMidi() {
+        const midi = this.system?.midiManager;
+        if (!midi) {
+            this.system.showNotification?.('❌ MIDI manager not initialized');
+            return;
+        }
+
+        if (midi.state === 'ready') {
+            midi.dispose();
+            this.system.showNotification?.('🎹 MIDI disabled');
+            return;
+        }
+
+        const ok = await midi.init();
+        if (ok) {
+            const info = midi.getInfo();
+            const n = info.inputCount;
+            this.system.showNotification?.(
+                n > 0
+                    ? `🎹 MIDI enabled — ${n} device${n === 1 ? '' : 's'}`
+                    : '🎹 MIDI enabled — no devices found',
+            );
+        } else if (midi.state === 'denied') {
+            this.system.showNotification?.('❌ MIDI access denied');
+        } else if (midi.state === 'unsupported') {
+            this.system.showNotification?.('❌ Web MIDI not supported in this browser');
+        }
+    }
+
     _toggleGrid() {
         this.system.showGrid = !this.system.showGrid;
         this.system.forceRedraw();
@@ -403,8 +438,26 @@ export class BottomBar {
             <div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.08);">
                 ${row('Grid', gridStep + ' / snap ' + gridSnap)}
                 ${row('Csound', cs.toUpperCase(), csColor)}
+                ${row('MIDI', `${midiState.toUpperCase()} / ${midiInputs} in`, midiColor)}
+                ${row('Last MIDI', midiLastDesc, '#aaa')}
             </div>
         `;
+
+        const midi = s.midiManager;
+        const midiState = midi?.state || 'idle';
+        const midiColor = {
+            idle: '#888',
+            requesting: '#fa0',
+            ready: '#0f0',
+            denied: '#f44',
+            unsupported: '#f44',
+        }[midiState] || '#888';
+        const midiInputs = midi?.getInfo?.().inputCount ?? 0;
+        const midiLast = midi?._lastMessage;
+        const midiLastDesc = midiLast
+            ? `${midiLast.status.toString(16).padStart(2, '0')} ${midiLast.data1} ${midiLast.data2}`
+            : '—';
+
     }
 
     // ============================================================
@@ -439,6 +492,16 @@ export class BottomBar {
             active = this._sysInfoOpen;
         } else if (cfg.id === 'run') {
             active = this.system.csoundEngine?.state === 'running';
+        } else if (cfg.id === 'midi') {
+            active = this.system.midiManager?.state === 'ready';
+            // ⭐ Если MIDI включён — показываем количество устройств
+            const midi = this.system.midiManager;
+            if (midi && midi.state === 'ready') {
+                const n = midi.getInfo().inputCount;
+                btn.textContent = n > 0 ? `MI${n}` : 'MI';
+            } else {
+                btn.textContent = 'MI';
+            }
         }
 
         // Run-button: динамическая иконка и цвет
@@ -546,6 +609,26 @@ export class BottomBar {
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
+    _flashMidiLed() {
+        const btn = this._buttons.find(b => b.id === 'midi');
+        if (!btn) return;
+
+        // Сбросить старый таймер, если был
+        if (this._midiFlashTimer) clearTimeout(this._midiFlashTimer);
+
+        const theme = getCurrentTheme();
+        const accent = theme.isLcd ? (theme.getAccentColor() || '#8fbc8f') : '#0af';
+
+        btn.element.style.background = this._rgba(accent, 0.45);
+        btn.element.style.color = '#fff';
+
+        this._midiFlashTimer = setTimeout(() => {
+            this._midiFlashTimer = null;
+            this._updateButtonState(btn.element, btn);
+        }, 120);
+    }
+
+
     setupEvents() {
         // Смена темы
         document.addEventListener('csmodular:theme-changed', () => {
@@ -573,6 +656,14 @@ export class BottomBar {
                 this.refreshState();
             }
         });
+
+        // ⭐ MIDI: обновлять состояние кнопки при смене статуса
+        const midi = this.system?.midiManager;
+        if (midi) {
+            midi.onStateChange(() => this.refreshState());
+            midi.onMessage(() => this._flashMidiLed());
+        }
+
     }
 
     show()   { this.element.style.display = 'flex'; }

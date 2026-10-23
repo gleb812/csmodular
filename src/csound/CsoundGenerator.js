@@ -367,10 +367,14 @@ i3 0 [60*60*24*7]
       if gkstat != 144 goto Next
         gkGate = 1
         gkNote = gkdata1
-      Next:
+    Next:
       if gkstat!=128 goto Over
         gkGate = 0
-      Over:
+    Over:
+      if (gkdata1 != 0) && (gkdata2 == 0) then
+            gkGate = 0
+      endif 
+    ;printk2 gkGate
     endin
 
     ;---------------------------------
