@@ -385,9 +385,50 @@ export class ButtonRadio extends BaseComponent {
         this.csoundChannel = channel;
     }
     
-    // === ОЧИСТКА ===
-    
-    // destroy() {
-    //     this.clearTooltipTimeout();
-    // }
+    static getPropertySchema() {
+        return [
+            {
+                key: 'labels',
+                label: 'Labels (comma-separated)',
+                type: 'list',
+                afterChange: (comp, arr) => {
+                    comp.buttonCount = arr.length;
+                    if (comp.selectedIndex >= arr.length) comp.selectedIndex = 0;
+                    if (typeof comp.width === 'number' && typeof comp.buttonWidth === 'number') {
+                        comp.width = arr.length * comp.buttonWidth;
+                    }
+                },
+            },
+            {
+                key: 'buttonCount',
+                label: 'Button Count',
+                type: 'number',
+                min: 1,
+                max: 16,
+                step: 1,
+                afterChange: (comp, v) => {
+                    const n = Math.max(1, Math.min(16, Math.round(v)));
+                    comp.buttonCount = n;
+                    while (comp.labels.length < n) comp.labels.push(`Btn ${comp.labels.length + 1}`);
+                    if (comp.labels.length > n) comp.labels = comp.labels.slice(0, n);
+                    if (comp.selectedIndex >= n) comp.selectedIndex = 0;
+                    if (typeof comp.width === 'number' && typeof comp.buttonWidth === 'number') {
+                        comp.width = n * comp.buttonWidth;
+                    }
+                },
+            },
+            {
+                key: 'selectedIndex',
+                label: 'Default Index',
+                type: 'number',
+                min: 0,
+                max: 16,
+                step: 1,
+                afterChange: (comp, v) => {
+                    const maxIdx = (comp.buttonCount ?? 1) - 1;
+                    comp.selectedIndex = Math.max(0, Math.min(maxIdx, v));
+                },
+            },
+        ];
+    }
 }

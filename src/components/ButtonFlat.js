@@ -199,4 +199,31 @@ export class ButtonFlat extends BaseComponent {
     setCsoundChannel(channel) {
         this.csoundChannel = channel;
     }
+
+    static getPropertySchema() {
+        return [
+            {
+                key: 'positions',
+                label: 'Positions (comma-separated)',
+                type: 'list',
+                afterChange: (comp, arr) => {
+                    if (comp.currentIndex >= arr.length) comp.currentIndex = 0;
+                    comp.currentLabel = comp.positions[comp.currentIndex];
+                },
+            },
+            {
+                key: 'currentIndex',
+                label: 'Default Index',
+                type: 'number',
+                min: 0,
+                max: 16,
+                step: 1,
+                afterChange: (comp, v) => {
+                    const maxIdx = (comp.positions?.length ?? 1) - 1;
+                    comp.currentIndex = Math.max(0, Math.min(maxIdx, v));
+                    comp.currentLabel = comp.positions[comp.currentIndex];
+                },
+            },
+        ];
+    }
 }

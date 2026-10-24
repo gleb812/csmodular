@@ -736,7 +736,6 @@ export class EditorApp {
     }
 
     restoreModuleFromData(moduleData, dspCode) {
-        console.log('🔄 Restoring module from data:', moduleData);
         
         // ⭐ 1. Очищаем текущее состояние
         this.components = [];
@@ -774,22 +773,37 @@ export class EditorApp {
             }
         }
         
-        console.log(`   Restored ${this.components.length} components`);
-        
         // ⭐ 4. Центрируем модуль на экране
         this.centerModuleInGrid();
         
         // ⭐ 5. Загружаем DSP-код в CodeViewerWindow
-        if (dspCode) {
-            this.module._userCsoundCode = dspCode;
-            if (this.codeViewerWindow) {
-                this.codeViewerWindow.codeContent = dspCode;
-                if (this.codeViewerWindow.isVisible) {
-                    this.codeViewerWindow.editor.value = dspCode;
-                    this.codeViewerWindow.isDirty = false;
-                    this.codeViewerWindow.updateStatus('saved');
-                }
+        if (this.codeViewerWindow) {
+            const cv = this.codeViewerWindow;
+
+            let code;
+            if (dspCode) {
+                this.module._userCsoundCode = dspCode;
+                code = dspCode;
+            } else {
+                code = cv.generateCsoundCode();
             }
+
+            cv.codeContent = code;
+            cv.editor.value = code;
+            cv.isDirty = false;
+            cv._lastValidBody = null;
+            cv.updateStatus('saved');
+
+            // 1. Эталон (нужен для сверки в onEditorInput)
+            cv._rebuildStructure();
+
+            // 2. Кэш по фактическому editor.value (dspCode может быть длиннее эталона)
+            const fresh = cv._rebuildStructureFromCurrent();
+            if (fresh) cv._structureCache = fresh;
+
+            // 3. UI
+            cv._updateGutter();
+            cv._updateHighlight();
         }
         
         // ⭐ 6. Обновляем PropertiesWindow
@@ -938,10 +952,30 @@ export class EditorApp {
             }
             
             if (isInside) {
+                // TextEdit — встроенное редактирование
                 if (comp.constructor.name === 'TextEdit' && typeof comp.startEditing === 'function') {
                     comp.startEditing();
                     this.uiManager.showNotification('✏️ Editing text');
+                    return;
                 }
+
+                // ⭐ TextLabel — редактирование текста через prompt
+                if (comp.constructor.name === 'TextLabel') {
+                    const current = comp.text ?? '';
+                    const next = prompt('Label text:', current);
+                    if (next !== null && next !== current) {
+                        comp.text = next;
+                        if (typeof comp.updateDimensions === 'function') {
+                            comp.updateDimensions();
+                        }
+                        // ⚠️ Лейбл не идёт в Csound, updateCode() не обязателен,
+                        //    но если лейбл отображается в коде — вызываем
+                        if (this.codeViewerWindow) this.codeViewerWindow.updateCode();
+                        this.uiManager.showNotification(`📝 Label: "${next}"`);
+                    }
+                    return;
+                }
+
                 return;
             }
         }
@@ -1059,9 +1093,41 @@ export class EditorApp {
         }
     }
 
-    clearModule() {
+    // EditorApp.js
+    clearModule(opts = {}) {
         this.components = [];
         this.selectedComponent = null;
+        this._nextComponentId = 1;
+        this._availableIds = [];
+
+        if (this.module) {
+            if (opts.title !== undefined) this.module.title = opts.title;
+            if (opts.resetColor) this.module.customColor = null;
+            this.module._userCsoundCode = null;
+        }
+
+        // Пересобрать панель кода
+        if (this.codeViewerWindow) {
+            const cv = this.codeViewerWindow;
+            const code = cv.generateCsoundCode();
+
+            cv.codeContent = code;
+            cv.editor.value = code;
+            cv.isDirty = false;
+            cv._lastValidBody = null;
+            cv.updateStatus('saved');
+
+            cv._rebuildStructure();
+            const fresh = cv._rebuildStructureFromCurrent();
+            if (fresh) cv._structureCache = fresh;
+            cv._updateGutter();
+            cv._updateHighlight();
+        }
+
+        if (this.propertiesPanel?.activeTab === 'module') {
+            this.propertiesPanel._render();
+        }
+
         this.uiManager.showNotification('🆕 Module cleared');
     }
 

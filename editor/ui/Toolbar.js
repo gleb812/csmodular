@@ -103,9 +103,7 @@ export class Toolbar {
 
     _onNew() {
         if (!confirm('Clear current module?')) return;
-        this.app.clearModule();
-        this.app.module.title = 'New Module';
-        this.app.module.customColor = null;
+        this.app.clearModule({ title: 'NewModule', resetColor: true });
         this.app.uiManager.showNotification('🆕 New module');
     }
 

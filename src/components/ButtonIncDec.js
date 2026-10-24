@@ -306,5 +306,33 @@ export class ButtonIncDec extends BaseComponent {
     setCsoundChannel(channel) {
         this.csoundChannel = channel;
     }
+
+    static getPropertySchema() {
+        return [
+            {
+                key: 'items',
+                label: 'Items (comma-separated)',
+                type: 'list',
+                afterChange: (comp, arr) => {
+                    if (comp.currentIndex >= arr.length) comp.currentIndex = 0;
+                    comp.currentItem = comp.items[comp.currentIndex];
+                },
+            },
+            {
+                key: 'currentIndex',
+                label: 'Default Index',
+                type: 'number',
+                min: 0,
+                max: 16,
+                step: 1,
+                afterChange: (comp, v) => {
+                    const maxIdx = (comp.items?.length ?? 1) - 1;
+                    comp.currentIndex = Math.max(0, Math.min(maxIdx, v));
+                    comp.currentItem = comp.items[comp.currentIndex];
+                },
+            },
+        ];
+    }
+
 }
 

@@ -306,4 +306,12 @@ export class ButtonText extends BaseComponent {
     destroy() {
         this.clearTooltipTimeout();
     }
+    
+    static getPropertySchema() {
+        return [
+            { key: 'text',     label: 'Text',          type: 'text' },
+            { key: 'isActive', label: 'Default (ON)',  type: 'checkbox' },
+        ];
+    }
+
 }

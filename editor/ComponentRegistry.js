@@ -73,6 +73,7 @@ export const ComponentRegistry = {
             if (c.min !== undefined && c.min !== 0) out.min = c.min;
             if (c.max !== undefined && c.max !== 127) out.max = c.max;
             if (c.value !== undefined) out.defaultValue = c.value;
+            if (c.mappingTable) out.mappingTable = c.mappingTable;   // ⭐ NEW
             return out;
         },
 
@@ -87,6 +88,7 @@ export const ComponentRegistry = {
             );
             c.relX = d.x;
             c.relY = d.y;
+            if (d.mappingTable) c.mappingTable = d.mappingTable;   // ⭐ NEW
             return c;
         },
 
@@ -108,17 +110,21 @@ export const ComponentRegistry = {
             opts.defaultValue ?? 64
         ),
 
-        serialize: (c) => ({
-            componentType: 'Slider',
-            id: String(c.id),
-            x: Math.round(c.relX ?? 0),
-            y: Math.round(c.relY ?? 0),
-            width: c.width ?? 10,
-            height: c.height ?? 60,
-            min: c.min ?? 0,
-            max: c.max ?? 127,
-            defaultValue: c.value ?? 0,
-        }),
+        serialize: (c) => {
+            const out = {
+                componentType: 'Slider',
+                id: String(c.id),
+                x: Math.round(c.relX ?? 0),
+                y: Math.round(c.relY ?? 0),
+                width: c.width ?? 10,
+                height: c.height ?? 60,
+                min: c.min ?? 0,
+                max: c.max ?? 127,
+                defaultValue: c.value ?? 0,
+            };
+            if (c.mappingTable) out.mappingTable = c.mappingTable;   // ⭐ NEW
+            return out;
+        },
 
         deserialize: (d, ctx) => {
             const c = new Slider(
@@ -129,6 +135,7 @@ export const ComponentRegistry = {
             );
             c.relX = d.x;
             c.relY = d.y;
+            if (d.mappingTable) c.mappingTable = d.mappingTable;   // ⭐ NEW
             return c;
         },
 

@@ -14,6 +14,14 @@ export class TextLabel extends BaseComponent {
         MIDDLE: 'middle',
         BOTTOM: 'bottom'
     };
+
+    static getPropertySchema() {
+        return [
+            { key: 'text',     label: 'Text',      type: 'text' },
+            { key: 'fontSize', label: 'Font Size', type: 'number', min: 4, max: 72, step: 1 },
+            { key: 'color',    label: 'Color',     type: 'text', help: 'Hex, e.g. #ff8800' },
+        ];
+    }
     
     constructor(x, y, text, fontSize = 12, color = '#ffffff', align = 'left', baseline = 'top') {
         // Сначала создаём с нулевыми размерами
@@ -221,6 +229,9 @@ export class TextLabel extends BaseComponent {
     destroy() {
         // TextLabel не требует специальной очистки
     }
+
+
+
 }
 
 // Статические методы для быстрого создания

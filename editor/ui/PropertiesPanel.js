@@ -92,10 +92,11 @@ export class PropertiesPanel {
 
     _render() {
         // Подсветка активного таба
+        const base = 'padding: 8px 16px; cursor: pointer; font-size: 11px; border-right: 1px solid #333; user-select: none; transition: background 0.15s;';
         const active = 'color: #0af; background: #1e1e1e; font-weight: bold;';
         const inactive = 'color: #666; background: transparent;';
-        this.tabModule.style.cssText += this.activeTab === 'module' ? active : inactive;
-        this.tabComponent.style.cssText += this.activeTab === 'component' ? active : inactive;
+        this.tabModule.style.cssText = base + (this.activeTab === 'module' ? active : inactive);
+        this.tabComponent.style.cssText = base + (this.activeTab === 'component' ? active : inactive);
 
         // Перерисовка содержимого
         this.body.innerHTML = '';
@@ -257,6 +258,7 @@ export class PropertiesPanel {
             });
             inputEl.onchange = () => {
                 comp[propDef.key] = inputEl.value;
+                if (propDef.afterChange) propDef.afterChange(comp, inputEl.value);
                 this._onSchemaChange();
             };
         } else if (propDef.type === 'number') {
@@ -275,8 +277,43 @@ export class PropertiesPanel {
                 const v = parseFloat(inputEl.value);
                 if (!isNaN(v)) {
                     comp[propDef.key] = v;
+                    if (propDef.afterChange) propDef.afterChange(comp, v);
                     this._onSchemaChange();
                 }
+            };
+        } else if (propDef.type === 'text') {
+            inputEl = document.createElement('input');
+            inputEl.type = 'text';
+            inputEl.value = comp[propDef.key] ?? '';
+            inputEl.style.cssText = `
+                width: 100%; padding: 4px 8px; background: #1a1a1a;
+                border: 1px solid #444; border-radius: 3px; color: white;
+                font-size: 12px; box-sizing: border-box;
+            `;
+            inputEl.onchange = () => {
+                comp[propDef.key] = inputEl.value;
+                if (propDef.afterChange) propDef.afterChange(comp, inputEl.value);
+                this._onSchemaChange();
+            };
+        } else if (propDef.type === 'list') {
+            inputEl = document.createElement('input');
+            inputEl.type = 'text';
+            const currentArr = Array.isArray(comp[propDef.key]) ? comp[propDef.key] : [];
+            inputEl.value = currentArr.join(', ');
+            inputEl.style.cssText = `
+                width: 100%; padding: 4px 8px; background: #1a1a1a;
+                border: 1px solid #444; border-radius: 3px; color: white;
+                font-size: 12px; box-sizing: border-box; font-family: monospace;
+            `;
+            inputEl.onchange = () => {
+                const arr = inputEl.value.split(',').map(s => s.trim()).filter(s => s !== '');
+                if (arr.length === 0) {
+                    inputEl.value = currentArr.join(', ');
+                    return;
+                }
+                comp[propDef.key] = arr;
+                if (propDef.afterChange) propDef.afterChange(comp, arr);
+                this._onSchemaChange();
             };
         } else if (propDef.type === 'mapping-select') {
             inputEl = this._makeMappingField(comp, propDef);
@@ -287,6 +324,7 @@ export class PropertiesPanel {
             inputEl.style.cssText = 'width: 16px; height: 16px; cursor: pointer; accent-color: #0af;';
             inputEl.onchange = () => {
                 comp[propDef.key] = inputEl.checked;
+                if (propDef.afterChange) propDef.afterChange(comp, inputEl.checked);
                 this._onSchemaChange();
             };
         }
@@ -302,7 +340,6 @@ export class PropertiesPanel {
 
         return wrapper;
     }
-
     _makeMappingField(comp, propDef) {
         const wrapper = document.createElement('div');
         wrapper.style.cssText = 'display: flex; gap: 4px;';

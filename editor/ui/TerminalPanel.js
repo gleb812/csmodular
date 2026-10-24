@@ -20,8 +20,8 @@
 //   clear                    — очистить вывод
 //   help [cmd]               — справка
 
-import { createComponent, getTypeOf } from '../ComponentRegistry.js';
 import { moduleStore } from '../../src/api/index.js';
+import { createComponent, getTypeOf, getByCategory } from '../ComponentRegistry.js';
 
 const PALETTE_SIZE = {
     Knob: { width: 24, height: 24 },
@@ -231,10 +231,11 @@ export class TerminalPanel {
                 case 'mv': case 'move':   return this._cmdMv(args);
                 case 'map':               return this._cmdMap(args);
                 case 'name':              return this._cmdName(args);
+                case 'set':               return this._cmdSet(args);
                 case 'align':             return this._cmdAlign(args);
                 case 'distr': case 'distribute': return this._cmdDistr(args);
                 case 'grid':              return this._cmdGrid(args);
-                case 'new':               return this._cmdNew();
+                case 'new': return this._cmdNew(args);
                 case 'save':              return await this._cmdSave(args);
                 case 'load':              return await this._cmdLoad(args);
                 case 'stats':             return this._cmdStats();
@@ -247,39 +248,267 @@ export class TerminalPanel {
         }
     }
 
-    _cmdName(args) {
-        if (args.length === 0) {
-            this._printError('Usage: name <newName>');
+    _cmdSet(args) {
+        if (args.length < 3) {
+            this._printError('Usage: set <id> <property> <value>');
+            this._print('  text: set 3 text LFO', '#666');
+            this._print('  list: set 3 items Off,On,Maybe  (or: labels, positions)', '#666');
+            this._print('  count: set 3 count 4            (ButtonRadio)', '#666');
+            this._print('  default index: set 3 default 2', '#666');
+            this._print('  item at current index: set 3 item LFO  (ButtonIncDec)', '#666');
+            this._print('  other: fontSize, color, mappingTable, min, max, jackType', '#666');
             return;
         }
 
-        // Склеиваем аргументы на случай, если имя с пробелом в кавычках:
-        // name "My Module" → args = ['My Module']
-        // но на всякий случай — join(' '), если пришло несколько
-        let raw = args.join(' ').trim();
-        if (!raw) {
-            this._printError('Name cannot be empty');
+        const id = parseInt(args[0]);
+        if (isNaN(id)) {
+            this._printError(`Invalid id: ${args[0]}`);
             return;
         }
 
-        // Санитайз как везде
-        let name = raw.replace(/\s/g, '');
+        const comp = this.app.components.find(c => parseInt(c.id) === id);
+        if (!comp) {
+            this._printError(`Component id=${id} not found`);
+            return;
+        }
+
+        const propRaw = args[1].toLowerCase();
+        const rawValue = args.slice(2).join(' ');
+
+        // ── СПИСКИ (ButtonFlat / ButtonRadio / ButtonIncDec) ──
+        if (['items', 'labels', 'positions', 'list'].includes(propRaw)) {
+            const arr = rawValue.split(',').map(s => s.trim()).filter(s => s !== '');
+            if (arr.length === 0) {
+                this._printError('Empty list');
+                return;
+            }
+            const type = comp.constructor.name;
+
+            if (type === 'ButtonFlat' && Array.isArray(comp.positions)) {
+                comp.positions = arr;
+                if (comp.currentIndex >= arr.length) comp.currentIndex = 0;
+                comp.currentLabel = comp.positions[comp.currentIndex];
+            } else if (type === 'ButtonRadio' && Array.isArray(comp.labels)) {
+                comp.labels = arr;
+                comp.buttonCount = arr.length;
+                if (comp.selectedIndex >= arr.length) comp.selectedIndex = 0;
+            } else if (type === 'ButtonIncDec' && Array.isArray(comp.items)) {
+                comp.items = arr;
+                if (comp.currentIndex >= arr.length) comp.currentIndex = 0;
+                comp.currentItem = comp.items[comp.currentIndex];
+            } else {
+                // fallback: пробуем все три поля
+                let touched = false;
+                if (Array.isArray(comp.items))     { comp.items = arr; touched = true; }
+                if (Array.isArray(comp.labels))    { comp.labels = arr; touched = true; }
+                if (Array.isArray(comp.positions)) { comp.positions = arr; touched = true; }
+                if (!touched) {
+                    this._printError(`list not supported for ${type}`);
+                    return;
+                }
+            }
+
+            this._printOk(`id=${id}.list = [${arr.join(', ')}]`);
+            return;
+        }
+
+        // ── COUNT (только ButtonRadio) ──
+        if (propRaw === 'count') {
+            const n = parseInt(rawValue);
+            if (isNaN(n) || n < 1 || n > 16) {
+                this._printError('count must be 1..16');
+                return;
+            }
+            if (comp.constructor.name === 'ButtonRadio' && typeof comp.buttonCount === 'number') {
+                comp.buttonCount = n;
+                while (comp.labels.length < n) comp.labels.push(`Btn ${comp.labels.length + 1}`);
+                if (comp.labels.length > n) comp.labels = comp.labels.slice(0, n);
+                if (comp.selectedIndex >= n) comp.selectedIndex = 0;
+            } else {
+                this._printError(`count not supported for ${comp.constructor.name}`);
+                return;
+            }
+            this._printOk(`id=${id}.count = ${n}`);
+            return;
+        }
+
+        // ── DEFAULT INDEX ──
+        if (propRaw === 'default' || propRaw === 'defaultindex') {
+            const n = parseInt(rawValue);
+            if (isNaN(n) || n < 0) {
+                this._printError('default must be >= 0');
+                return;
+            }
+            const type = comp.constructor.name;
+            if (type === 'ButtonFlat' && typeof comp.currentIndex === 'number') {
+                comp.currentIndex = Math.max(0, Math.min(comp.positions.length - 1, n));
+                comp.currentLabel = comp.positions[comp.currentIndex];
+            } else if (type === 'ButtonRadio' && typeof comp.selectedIndex === 'number') {
+                comp.selectedIndex = Math.max(0, Math.min(comp.buttonCount - 1, n));
+            } else if (type === 'ButtonIncDec' && typeof comp.currentIndex === 'number') {
+                comp.currentIndex = Math.max(0, Math.min(comp.items.length - 1, n));
+                comp.currentItem = comp.items[comp.currentIndex];
+            } else if (type === 'ButtonText') {
+                comp.isActive = Boolean(n);
+            } else {
+                this._printError(`default not supported for ${type}`);
+                return;
+            }
+            this._printOk(`id=${id}.default = ${n}`);
+            return;
+        }
+
+        // ── ITEM (текущий элемент ButtonIncDec) ──
+        if (propRaw === 'item') {
+            if (comp.constructor.name === 'ButtonIncDec' && Array.isArray(comp.items)) {
+                comp.items[comp.currentIndex] = rawValue;
+                comp.currentItem = comp.items[comp.currentIndex];
+                this._printOk(`id=${id}.items[${comp.currentIndex}] = "${rawValue}"`);
+            } else {
+                this._printError(`item not supported for ${comp.constructor.name}`);
+            }
+            return;
+        }
+
+        // ── TEXT (ButtonText, TextLabel, TextEdit) ──
+        if (['text', 'label', 'value', 'content'].includes(propRaw)) {
+            const type = comp.constructor.name;
+            if (comp.text === undefined) {
+                this._printError(`text not supported for ${type}`);
+                return;
+            }
+            comp.text = rawValue;
+            if (typeof comp.updateDimensions === 'function') comp.updateDimensions();
+            if (this.app.codeViewerWindow) this.app.codeViewerWindow.updateCode();
+            this._printOk(`id=${id}.text = ${JSON.stringify(rawValue)}`);
+            return;
+        }
+
+        // ── FONT SIZE ──
+        if (['fontsize', 'size'].includes(propRaw)) {
+            const n = parseFloat(rawValue);
+            if (isNaN(n) || n < 4 || n > 72) {
+                this._printError('fontSize must be 4..72');
+                return;
+            }
+            comp.fontSize = n;
+            if (typeof comp.updateDimensions === 'function') comp.updateDimensions();
+            this._printOk(`id=${id}.fontSize = ${n}`);
+            return;
+        }
+
+        // ── COLOR ──
+        if (propRaw === 'color' || propRaw === 'colour') {
+            if (!/^#[0-9a-f]{6}$/i.test(rawValue) && !/^#[0-9a-f]{3}$/i.test(rawValue)) {
+                this._printError('color must be #rgb or #rrggbb');
+                return;
+            }
+            comp.color = rawValue;
+            this._printOk(`id=${id}.color = ${rawValue}`);
+            return;
+        }
+
+        // ── MAPPING TABLE ──
+        if (['mapping', 'table', 'mappingtable'].includes(propRaw)) {
+            comp.mappingTable = (rawValue === '' || rawValue === 'null') ? null : rawValue;
+            if (this.app.codeViewerWindow) this.app.codeViewerWindow.updateCode();
+            this._printOk(`id=${id}.mappingTable = ${comp.mappingTable ?? 'null'}`);
+            return;
+        }
+
+        // ── MIN / MAX / defaultValue ──
+        if (['min', 'max', 'defaultvalue'].includes(propRaw)) {
+            const n = parseFloat(rawValue);
+            if (isNaN(n)) {
+                this._printError(`${propRaw} must be a number`);
+                return;
+            }
+            const key = propRaw === 'defaultvalue' ? 'value' : propRaw;
+            comp[key] = n;
+            if (this.app.codeViewerWindow) this.app.codeViewerWindow.updateCode();
+            this._printOk(`id=${id}.${key} = ${n}`);
+            return;
+        }
+
+        // ── JACK TYPE ──
+        if (propRaw === 'jacktype' || propRaw === 'jack') {
+            if (rawValue !== 'audio' && rawValue !== 'control') {
+                this._printError('jackType must be "audio" or "control"');
+                return;
+            }
+            comp._jackType = rawValue;
+            comp.type = rawValue;
+            comp._isAudioJack = rawValue === 'audio';
+            if (this.app.codeViewerWindow) this.app.codeViewerWindow.updateCode();
+            this._printOk(`id=${id}.jackType = ${rawValue}`);
+            return;
+        }
+
+        this._printError(`Unknown property: ${args[1]}`);
+    }
+
+    _resolvePropAlias(propRaw) {
+        const aliases = {
+            // текст (для TextLabel, TextEdit, ButtonText)
+            text: 'text', label: 'text', value: 'text', content: 'text',
+            // размер шрифта
+            fontSize: 'fontSize', size: 'fontSize', fontsize: 'fontSize',
+            // цвет
+            color: 'color', colour: 'color',
+            // mapping
+            mapping: 'mappingTable', table: 'mappingTable', mappingTable: 'mappingTable',
+            // min/max/defaultValue
+            min: 'min', max: 'max',
+            defaultValue: 'defaultValue', default: 'defaultValue',
+            // jack type
+            jackType: 'jackType', jack: 'jackType',
+        };
+        return aliases[propRaw] || null;
+    }
+
+    _coerceValue(comp, prop, raw) {
+        // jackType — особый случай: пишется в _jackType и type
+        if (prop === 'jackType') {
+            if (raw !== 'audio' && raw !== 'control') {
+                this._printError('jackType must be "audio" or "control"');
+                return undefined;
+            }
+            comp._jackType = raw;
+            comp.type = raw;
+            comp._isAudioJack = raw === 'audio';
+            return raw;
+        }
+
+        const current = comp[prop];
+
+        // mappingTable может быть null → принимаем строку, пусто → null
+        if (prop === 'mappingTable') {
+            return raw === '' || raw === 'null' ? null : raw;
+        }
+
+        if (typeof current === 'number') {
+            const n = parseFloat(raw);
+            return isNaN(n) ? undefined : n;
+        }
+
+        if (typeof current === 'boolean') {
+            if (raw === 'true' || raw === '1') return true;
+            if (raw === 'false' || raw === '0') return false;
+            return undefined;
+        }
+
+        // строки, null, undefined — принимаем как есть
+        return raw;
+    }
+
+    _cmdNew(args = []) {
+        const rawName = args.length > 0 ? args.join(' ').trim() : '';
+        let name = rawName.replace(/\s/g, '');
         if (/^[0-9]/.test(name)) name = 'M' + name;
-        name = name.replace(/[^a-zA-Z0-9_]/g, '');
+        name = name.replace(/[^a-zA-Z0-9_]/g, '') || 'NewModule';
 
-        if (!name) {
-            this._printError('Name contains no valid characters (use a-zA-Z0-9_)');
-            return;
-        }
-
-        this.app.module.title = name;
-
-        if (this.app.codeViewerWindow) this.app.codeViewerWindow.updateCode();
-        if (this.app.propertiesPanel && this.app.propertiesPanel.activeTab === 'module') {
-            this.app.propertiesPanel._render();
-        }
-
-        this._printOk(`Module renamed to "${name}"`);
+        this.app.clearModule({ title: name, resetColor: true });
+        this._printOk(`New module created${rawName ? `: "${name}"` : ''}`);
     }
 
     _tokenize(line) {
@@ -308,7 +537,8 @@ export class TerminalPanel {
         this._print('  mv <id> <x> <y>        move (absolute)');
         this._print('  mv <id> +dx +dy        move (relative)');
         this._print('  map <id> <table>       bind mapping table (or unset)');
-        this._print('  name <newName>         rename module');
+        this._print('  new [name]             clear module (optionally set name)');
+        this._print('  set <id> <prop> <value> set property (text, items, count, default, item, fontSize, color, mappingTable, min, max, jackType)');
         this._print('  align <ids...> l|r|u|d align components');
         this._print('  distr <ids...> h|v     distribute evenly');
         this._print('  grid on|off|N          toggle micro-grid or set step');
@@ -321,6 +551,10 @@ export class TerminalPanel {
     }
 
     _cmdHelpTopic(cmd) {
+        if (cmd === 'add') {
+            this._printAddHelp();
+            return;
+        }
         const topics = {
             add: 'add <type> [x y]\n' +
                  '  types: ' + Object.keys(TYPE_ALIASES).join(', ') + '\n' +
@@ -329,8 +563,22 @@ export class TerminalPanel {
             mv:  'mv <id> <x> <y>   — absolute position\nmv <id> +dx +dy   — relative shift',
             map: 'map <id> <table>  — bind mapping table\nmap <id>          — unbind',
             name: 'name <newName>  — rename module\n  e.g. name MyFilter, name "Cool Synth"',
+            new: 'new [name]  — clear module and reset DSP code\n  new           → "NewModule"\n  new MyFilter  → "MyFilter"',
             align: 'align <ids...> <edge>\n  edges: l (left), r (right), u (up), d (down)',
             distr: 'distr <ids...> <axis>\n  axes: h (horizontal), v (vertical)',
+            set: 'set <id> <property> <value>\n' +
+                 '  examples:\n' +
+                 '    set 3 text LFO\n' +
+                 '    set 4 items Off,On,Maybe\n' +
+                 '    set 4 count 4          (ButtonRadio)\n' +
+                 '    set 4 default 2\n' +
+                 '    set 5 item LFO         (ButtonIncDec, current index)\n' +
+                 '    set 3 fontSize 14\n' +
+                 '    set 3 color #ff8800\n' +
+                 '    set 6 mappingTable LEVfrq\n' +
+                 '    set 7 min 0\n' +
+                 '    set 7 max 1000\n' +
+                 '    set 8 jackType control',
             grid: 'grid         — show current grid\n  grid on      — enable micro-grid\n  grid off     — disable\n  grid N       — set grid step to N pixels',
             save: 'save           — save (uses current module name)\n  save as <name> — save under new name',
             load: 'load <name>    — load user module by name',
@@ -375,6 +623,13 @@ export class TerminalPanel {
                 this._print(`  id=${c.id}  ${type}`);
                 this._print(`      pos (${x}, ${y})  size ${w}×${h}`);
                 if (c.mappingTable) this._print(`      mapping: ${c.mappingTable}`);
+                if (Array.isArray(c.positions)) this._print(`      positions: [${c.positions.join(', ')}]  currentIndex=${c.currentIndex}`);
+                if (Array.isArray(c.labels) && c.constructor.name === 'ButtonRadio') this._print(`      labels: [${c.labels.join(', ')}]  selectedIndex=${c.selectedIndex}`);
+                if (Array.isArray(c.items)) this._print(`      items: [${c.items.join(', ')}]  currentIndex=${c.currentIndex}`);
+                if (c.constructor.name === 'ButtonText') this._print(`      text: "${c.text}"  isActive=${c.isActive}`);
+                if (c.text !== undefined && c.text !== null && c.text !== '') {
+                    this._print(`      text: ${JSON.stringify(c.text)}`);
+                }
                 const jackType = c.type || c._jackType;
                 if (jackType && (type === 'Input' || type === 'Output')) {
                     this._print(`      jack: ${jackType}`);
@@ -390,7 +645,7 @@ export class TerminalPanel {
 
     _cmdAdd(args) {
         if (args.length === 0) {
-            this._printError('Usage: add <type> [x y]');
+            this._printAddHelp();
             return;
         }
 
@@ -404,7 +659,6 @@ export class TerminalPanel {
             jackType = JACK_TYPE_ALIASES[typeInput].jackType;
         } else if (TYPE_ALIASES[typeInput]) {
             type = TYPE_ALIASES[typeInput];
-            // Старые in/out → audio по умолчанию
             if (type === 'Input' || type === 'Output') jackType = 'audio';
         } else {
             this._printError(`Unknown type: ${args[0]}`);
@@ -422,11 +676,29 @@ export class TerminalPanel {
             return;
         }
 
-        // ── 2. Позиция ──
+        // ── 2. ⭐ Для TextLabel: второй аргумент может быть текстом (не числом) ──
+        let labelText = null;
+        let listText = null;
+        let coordStart = 1;
+
+        if (args.length >= 2) {
+            const maybeNumber = parseFloat(args[1]);
+            if (isNaN(maybeNumber)) {
+                if (type === 'TextLabel') {
+                    labelText = args[1];
+                    coordStart = 2;
+                } else if (['ButtonFlat', 'ButtonRadio', 'ButtonIncDec'].includes(type)) {
+                    listText = args[1];
+                    coordStart = 2;
+                }
+            }
+        }
+
+        // ── 3. Позиция ──
         let x, y;
-        if (args.length >= 3) {
-            x = parseFloat(args[1]);
-            y = parseFloat(args[2]);
+        if (args.length >= coordStart + 2) {
+            x = parseFloat(args[coordStart]);
+            y = parseFloat(args[coordStart + 1]);
             if (isNaN(x) || isNaN(y)) {
                 this._printError('Coordinates must be numbers');
                 return;
@@ -453,10 +725,15 @@ export class TerminalPanel {
             return;
         }
 
-        // ── 3. Создание ──
+        // ── 4. Создание ──
         const opts = { x: module.x + x, y: module.y + y };
-        if (type === 'Input' || type === 'Output') {
-            opts.jackType = jackType || 'audio';
+        if (type === 'Input' || type === 'Output') opts.jackType = jackType || 'audio';
+        if (type === 'TextLabel' && labelText !== null) opts.text = labelText;
+
+        if (listText !== null) {
+            if (type === 'ButtonFlat')         opts.text = listText;      // ⚠️ проверить в ComponentRegistry
+            else if (type === 'ButtonRadio')   opts.labels = listText;
+            else if (type === 'ButtonIncDec')  opts.items = listText;
         }
 
         const component = createComponent(type, opts);
@@ -480,10 +757,65 @@ export class TerminalPanel {
 
         if (this.app.codeViewerWindow) this.app.codeViewerWindow.updateCode();
 
-        // ── 4. Уведомление ──
+        // ── 5. Уведомление ──
         const jackLabel = (type === 'Input' || type === 'Output')
             ? ` (${jackType || 'audio'})` : '';
-        this._printOk(`Added ${type}${jackLabel} (id=${component.id}) at (${x}, ${y})`);
+        const labelInfo = (type === 'TextLabel' && labelText !== null)
+            ? ` "${labelText}"` : '';
+        this._printOk(`Added ${type}${jackLabel}${labelInfo} (id=${component.id}) at (${x}, ${y})`);
+    }
+
+
+    _printAddHelp() {
+        this._printInfo('Usage: add <type> [x y]');
+        this._print('       add label <text> [x y]   (TextLabel with text)', '#666');
+        this._print('       add ina|ink|outa|outk [x y]   (audio/control jacks)', '#666');
+        this._print('');
+
+        // Сгруппировать алиасы по типу: { Knob: ['knob', 'k'], ... }
+        const byType = {};
+        for (const [alias, type] of Object.entries(TYPE_ALIASES)) {
+            if (!byType[type]) byType[type] = [];
+            byType[type].push(alias);
+        }
+        for (const [alias, def] of Object.entries(JACK_TYPE_ALIASES)) {
+            const key = `${def.type}/${def.jackType}`;
+            if (!byType[key]) byType[key] = [];
+            byType[key].push(alias);
+        }
+
+        // Категории компонентов — из ComponentRegistry
+        const byCat = getByCategory();
+        const catTitles = {
+            controls: 'Controls',
+            display:  'Display',
+            jacks:    'Jacks',
+            graphics: 'Graphics',
+        };
+
+        for (const [catKey, catTitle] of Object.entries(catTitles)) {
+            const entries = byCat[catKey] || [];
+            if (entries.length === 0) continue;
+
+            this._print(`  ${catTitle}:`, '#0af');
+            for (const entry of entries) {
+                const type = entry.type;
+                let aliases;
+
+                if (catKey === 'jacks') {
+                    // Input/Output — отдельно audio / control
+                    const audioAlias = `${type === 'Input' ? 'in' : 'out'}a`;
+                    const controlAlias = `${type === 'Input' ? 'in' : 'out'}k`;
+                    const genericAlias = type === 'Input' ? 'in' : 'out';
+                    aliases = [audioAlias, controlAlias, genericAlias].join(', ');
+                    this._print(`    ${type.padEnd(14)} ${aliases}`, '#ccc');
+                } else {
+                    aliases = (byType[type] || []).join(', ');
+                    this._print(`    ${type.padEnd(14)} ${aliases}`, '#ccc');
+                }
+            }
+            this._print('');
+        }
     }
 
     // ─────────────────────────── DEL ────────────────────────────────
@@ -826,12 +1158,44 @@ export class TerminalPanel {
 
     // ─────────────────────────── NEW ────────────────────────────────
 
-    _cmdNew() {
+    _cmdNew(args) {
+        // ⭐ Имя: new NAME или new (пустое)
+        const rawName = args.length > 0 ? args.join(' ').trim() : '';
+        let name = rawName.replace(/\s/g, '');
+        if (/^[0-9]/.test(name)) name = 'M' + name;
+        name = name.replace(/[^a-zA-Z0-9_]/g, '') || 'NewModule';
+
+        // 1. Очистить модель
         this.app.clearModule();
-        this.app.module.title = 'New Module';
+        this.app.module.title = name;
         this.app.module.customColor = null;
-        if (this.app.codeViewerWindow) this.app.codeViewerWindow.updateCode();
-        this._printOk('New module created');
+
+        // 2. ⭐ Сбросить пользовательский DSP
+        this.app.module._userCsoundCode = null;
+
+        // 3. ⭐ Жёсткий сброс панели кода: эталон из модели + пересборка структуры
+        if (this.app.codeViewerWindow) {
+            const cv = this.app.codeViewerWindow;
+            const code = cv.generateCsoundCode();
+
+            cv.codeContent = code;
+            cv.editor.value = code;
+            cv.isDirty = false;
+            cv._lastValidBody = null;
+            cv.updateStatus('saved');
+
+            cv._rebuildStructure();
+            const fresh = cv._rebuildStructureFromCurrent();
+            if (fresh) cv._structureCache = fresh;
+            cv._updateGutter();
+            cv._updateHighlight();
+        }
+
+        if (this.app.propertiesPanel?.activeTab === 'module') {
+            this.app.propertiesPanel._render();
+        }
+
+        this._printOk(`New module created${rawName ? `: "${name}"` : ''}`);
     }
 
     // ─────────────────────────── SAVE ───────────────────────────────
@@ -984,7 +1348,6 @@ ${outputsStr}
 
             this.app.restoreModuleFromData(moduleData, data.dsp_code);
 
-            if (this.app.codeViewerWindow) this.app.codeViewerWindow.syncFromModule();
             if (this.app.propertiesPanel?.activeTab === 'module') {
                 this.app.propertiesPanel._render();
             }
