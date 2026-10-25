@@ -43,6 +43,8 @@ opcode Mix11S_a, 0, kkkkkkkkk
   Out:
   kLev table kLev, giCLA001
   Next:
+
+
   aOutL = aChainL + aInL * kLev * kOn
   aOutR = aChainR + aInR * kLev * kOn
   aOutL limit aOutL, -4, 4

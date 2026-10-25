@@ -24,4 +24,19 @@ FltStatic - взрывается выше 16кГЦ проверить
 
 как удалять юзерские модули?
 
-не работает осциллограф по синему входу
+модули которые по умолчанию синие, выходят как красные. свой цвет показывают позже
+
+
+MIXER 1-1A    OK 
+MIXER 1-1S    OK 
+MIXER 2-1A    OK
+
+
+MUX18 warning: zkr index > isizek. Returning 0.
+8Counter не грузит
+ADConv лампочки не горят
+Delay из LOGIC содержит ошибки - syntax error, unexpected NEWLINE, expecting ',' or '(' (token " eventemitter3.min.js:1:3039
+"),  line 68, columns 22,22
+Invert - работает только правый блок. сопоставить с NM2 - какое поведение при значении не равном 1
+
+ClkGen вроде щелкает, но на осциллографе ничего

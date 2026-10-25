@@ -1,6 +1,6 @@
 ;@ ins k k
 ;@ outs k k k k k k k k
-opcode Mux18, 0, kkkkkkkkkkk
+opcode Mux18, 0, kkkkkkkkkk
   kin,kc,ko1,ko2,ko3,ko4,ko5,ko6,ko7,ko8 xin
   kM1[] fillarray 1,0,0,0,0,0,0,0
   kM2[] fillarray 0,1,0,0,0,0,0,0

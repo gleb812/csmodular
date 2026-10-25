@@ -20,7 +20,6 @@ InterS:
 Over:
 kBPM /= 60
 
-
 kRst trigger krst,0.00001,0
 kOnT trigger kOn,0.5,0
 kST trigger kSource,0.5,0
@@ -35,7 +34,6 @@ a3 wrap a3, 0, kSw
 a16 table a3, 23, 1
 a96 table a2, 22, 1
 aSy table a1, 21, 1
-
 
 	zkw kOn, kClkAo
 	zkw k(a96) * kOn, k96o

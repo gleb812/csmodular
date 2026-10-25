@@ -7,16 +7,17 @@
 opcode LevAdd_k, 0, kkkk
   kLev, kPolSw, kin,kout xin
   kIn zkr kin
-
   if kPolSw != 0 goto Uni
     kLev table kLev, giLVLlev
-    goto Over
+    kgoto Over
   Uni:
     kLev table kLev, giLVLpos
-
   Over:
+  
     kLev /= 64
-    kOut limit kLev + kIn, -4, 4
+    
+    kAdd = kLev + kIn
+    kOut limit kAdd, -4, 4
     zkw kOut, kout
 endop
 
@@ -29,7 +30,7 @@ opcode LevAdd_a, 0, kkkk
 
   if kPolSw != 0 goto Uni
     kLev table kLev, giLVLlev
-    goto Over
+    kgoto Over
   Uni:
     kLev table kLev, giLVLpos
 

@@ -1253,6 +1253,13 @@ _renderDynamic() {
         this.csoundEngine.clearLedChannels();
     }
 
+    // ⭐ Очищаем осциллограф
+    if (this.scopeWindow) {
+        this.scopeWindow.channels.clear();
+        this.scopeWindow._renderChannelBar();
+        this.scopeWindow.hide();
+    }
+
     console.log('System reset complete');
     this.showNotification('🆕 New patch created');
   }

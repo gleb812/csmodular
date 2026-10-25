@@ -183,9 +183,7 @@ export class CsoundEngine {
 
     async _destroyInstance() {
         if (!this.instance) return;
-        
         try {
-            // Пробуем полное уничтожение
             if (typeof this.instance.terminateInstance === 'function') {
                 await this.instance.terminateInstance();
             } else if (typeof this.instance.reset === 'function') {
@@ -194,11 +192,10 @@ export class CsoundEngine {
         } catch (e) {
             console.warn('[CsoundEngine] Destroy error:', e);
         }
-        
-        // Обнуляем window.csound для старого кода (Knob, Slider)
         window.csound = null;
         this.instance = null;
-        this.clearScopeChannels();
+        // ⭐ Только буферы чистим, но НЕ таблицы — они "декларация" того, что должно быть в Csound
+        this._scopeBuffers.clear();
     }
 
     // ============================================
