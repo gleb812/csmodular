@@ -6,7 +6,6 @@
 - [ ] Reinit problem: adding a module that contains controllers
 - [ ] `Mix1-1A` — exp/lin selector change leads to error
 - [ ] Some DSP code still contains `d` parameter in `@map` line — should be eliminated
-- [ ] Csound code window in Editor mode behaves badly *(partially resolved — see Module Editor section)*
 - [ ] At zoom 50% and lower the working area also resizes
 
 ### P2 — UX
@@ -18,15 +17,6 @@
 
 ## 🎨 Theme / Design Settings
 
-- [x] Theme system: `classic` / `lcd` presets
-- [x] `Theme.js` — semantic methods (`getAccentColor`, `getCableWidth`, ...)
-- [x] `themeStore` (localStorage)
-- [x] `currentTheme` + `window.__theme__` for debugging
-- [x] Design Settings panel (opens with `D` or 🎨)
-- [x] All components use `getCurrentTheme()`
-- [x] LCD style: glow, transparent panels, monochrome
-- [x] Solid backgrounds + image presets
-- [x] `_isColorValue()` — distinguishes hex / rgb / url
 - [ ] Custom background upload (file input → dataURL → localStorage)
 - [ ] Custom LCD palette — save custom colors to localStorage
 - [ ] Theme presets — save multiple theme sets
@@ -39,22 +29,6 @@
 
 ## 🕸 Grid system
 
-- [x] `Grid` class (`src/grid/Grid.js`) — single source of truth: step, snap, crosses
-- [x] Constants: `PANEL_WIDTH`, `BASE_STEP_X`, `BASE_STEP_Y`, `PANEL_GRID_WIDTH`, `NM2_HPOS_TO_GRIDX`
-- [x] Base cell 20×15 px, panel always 13 cells wide (= 260 px)
-- [x] `gridX/gridY` — integers in base cells
-- [x] Multipliers `multX/multY` in theme (`settings.grid`)
-- [x] `grid.stepX/stepY` = `BASE_STEP_X/Y * multX/multY`
-- [x] Snap: `grid.snapToGrid(worldX, worldY)` → multiples of `multX/multY` (if snap on)
-- [x] Cross rendering: `Grid.draw(ctx, viewport)` — crosses, style from `theme.getGridStyle()`
-- [x] `size` in `settings.grid` — cross arm length
-- [x] Design Settings → Grid section: `Step X ×`, `Step Y ×`, `Cross Size`, `Snap to grid`
-- [x] Persist `multX/multY/snap/size` in `themeStore`
-- [x] `findFreeSpace` accepts `stepX/stepY` — searches only at multiples
-- [x] `addNewModuleAtPosition` snaps position to multiples before collision check
-- [x] Changing multipliers does not move existing modules
-- [x] `Panel.handlePanelDrag` rounds `targetGridX/Y` to multiples of `multX/multY` (handles modules placed before multipliers change)
-- [x] `ContextMenu.handleModuleSelect` — snaps via `system.grid.snapToGrid`
 - [ ] HiDPI: fix `dpr > 1` drag bug (modules don't drag on macOS Retina). Currently `resizeCanvasToWindow` hardcodes `dpr = 1`
 - [ ] Auto-align on drag (first drag after multipliers change) — verify that modules placed at non-multiple positions are aligned cleanly
 - [ ] Grid visual styles: minor / major crosses (like graphics editors), optional
@@ -67,21 +41,6 @@
 
 ## 🌍 Infinite world / Layers
 
-- [x] Canvas = window, infinite world
-- [x] Pan: `Space + drag` / middle mouse
-- [x] Zoom: `Ctrl + wheel` (around cursor)
-- [x] Scroll: `wheel` / `Shift + wheel`
-- [x] `LayerManager` without physical bounds
-- [x] `getLayerAtPoint` → always `'voice'`
-- [x] Layer attribute on module: `'voice'` / `'fx'`
-- [x] Auto-layout FX: `_getFxFloorY()` — new FX below voice
-- [x] Shift FX on load: `_fxStartY` in `PatchLoader`
-- [x] setLayer via `ModuleContextMenu` (with confirmation, cable cleanup)
-- [x] `removeModuleFromLayer` — searches all layers
-- [x] FX stripe on the left side of the module
-- [x] Removed dead code from `LayerManager` (`updateLayerSizes`, `drawLayerGrid`, `updateGridCache`, `divider`, `backgroundCache`)
-- [x] Removed dead `updateCanvasSize` from `main.js`
-- [ ] Remove `fetch('/api/list-user-modules')` from `loadAvailableModules` in `main.js` (use `moduleStore`)
 - [ ] Verify: switching layer on a module with cables — all cables removed
 - [ ] Verify: loading a large patch (20+ modules) — FX auto-layout works
 - [ ] Optional: physical divider for new FX (UX decision)
@@ -130,6 +89,16 @@
 - [ ] MIDI input (Web MIDI API + indicator)
 - [ ] Custom UDOs for `debug` signals
 
+### UDO loading
+
+- [x] All UDO loading goes through `CsoundGenerator._loadUdoByPath()`:
+  - `user/*` → `moduleStore` (web: localStorage, Tauri: fs)
+  - built-in → `fetch` from `public/csound/modules/` with HTML-fallback detection
+  - protects against Vite SPA-fallback (`index.html` with status 200 for missing files)
+- [ ] `led_peak` UDO variant with `abs()` — for a "positive period" LED indicator
+  (currently `led_rms` uses `portk kin, 0.1` without `abs`, so LFO LEDs
+  follow both half-waves)
+
 ---
 
 ## 🧩 Components
@@ -142,11 +111,15 @@
 
 ### Interactive components
 
-- [ ] Clean up `ButtonRadio`, `ButtonIncDec`, `TextField`, `TextEdit`
-- [ ] Full `ComponentPropertiesWindow` for all types
+- [x] `getPropertySchema()` for `TextLabel`, `ButtonFlat`, `ButtonRadio`,
+  `ButtonIncDec`, `ButtonText`
+- [x] `mappingTable` serialize/deserialize for `Knob` and `Slider`
+- [ ] Full `ComponentPropertiesWindow` for all types (currently mapped via schema)
 - [ ] LED threshold — verify save / load
 - [ ] `TextField` — not a parameter (display only)
 - [ ] `ComponentPropertiesWindow` — open on click (currently only via button)
+- [ ] `ButtonFlat` / `ButtonIncDec` — reposition and width recalculation after
+  changing `items` / `positions` via Properties (currently width fixed)
 
 ---
 
@@ -165,35 +138,20 @@
 
 ## 📐 Module Editor
 
-### Done
-
-- [x] Separate HTML entry: `editor.html` → `editor/editor.js`
-- [x] Fixed dock layout (`DockLayout.js`) with split panes
-- [x] Layout presets: `Default`, `Code`, `Canvas`
-- [x] Layout persists in localStorage (`csmodular:editor-layout`)
-- [x] Toolbar (`Toolbar.js`): New / Load / Save + layout presets
-- [x] ComponentRegistry — single source of truth for components
-- [x] Context menu on canvas / on component (`ContextMenu.js` + `ModuleContextMenu.js`)
-- [x] Properties panel with `Module` / `Component` tabs (`PropertiesPanel.js`)
-- [x] Module tab: name, height, color (preset buttons + hex input)
-- [x] Component tab: schema-driven fields from `getPropertySchema()`
-- [x] Csound Code panel with syntax highlight, line numbers, font controls
-- [x] Terminal panel (`TerminalPanel.js`) — command DSL:
-  - `add` / `in` / `out`, `ls`, `del`, `mv`, `map`, `align`, `distr`, `grid`, `new`, `save`, `load`, `stats`, `help`, `clear`
-- [x] Web `moduleStore` via localStorage — save / load works in browser
-- [x] Tauri `moduleStore` — save / load writes to `Documents/CsModular/`
-
 ### In progress / near term
 
 - [ ] Remove `Change Color` from context menu (color is in Properties now)
 - [ ] Terminal: autocomplete on Tab
 - [ ] Terminal: `history` command, `!!` repeat, `!N` repeat by index
-- [ ] Terminal: `add in c` / `add out c` for control jacks
 - [ ] Terminal: unify `_cmdSave` JS generation with `ModulePropertiesWindow.generateModuleCode`
 - [ ] Terminal: `snapshot` — save / restore module state in session
 - [ ] Terminal: `export json` / `export dsp` / `export csd`
 - [ ] Terminal: richer output coloring (`id=3` → clickable to select component)
 - [ ] Terminal: `find <pattern>`, `props <id>`, `id free`
+- [ ] `PropertiesPanel._render()` — replace `style.cssText +=` on tabs with
+  `=` and base + active/inactive suffix (currently accumulates over time)
+- [ ] `TerminalPanel._cmdSet` for `mappingTable` calls `updateCode()`, but
+  `PropertiesPanel` (mapping-select) does **not** — unify
 
 ### Later
 
@@ -201,6 +159,7 @@
   - Proper undo/redo, search, autocomplete
   - Csound mode via `defineMode`
   - Bundle via npm, not CDN (ES module compatibility)
+  - Protected ranges as `readOnly` marks
 - [ ] Legacy cleanup: fully remove `ModulePropertiesWindow` / `ComponentPropertiesWindow` once `PropertiesPanel` covers all features
   - `ModulePropertiesWindow.saveModule()` — replace with a `saveService`
   - `ComponentPropertiesWindow._showMappingBrowser()` — move to `PropertiesPanel`
@@ -216,13 +175,14 @@
 
 ### Known issues in Editor
 
-- [ ] Terminal always uses `audio` jack type for Input / Output (control jacks only via UI)
-- [ ] Terminal output doesn't support links / click-to-select yet
 - [ ] Code Viewer highlight not virtualized — may lag on very large code
 - [ ] Code Viewer — undo/redo is browser-default (single textarea), not per-code
 - [ ] `DockLayout` — no collapse, no tabs, no drag-reorder yet
 - [ ] Terminal `_cmdSave` duplicates logic from `PropertiesPanel` — should be one service
 - [ ] Editor keyboard shortcuts must skip when focus is in `<input>` / `<textarea>` — already fixed in `EditorApp`, but verify no other handlers
+- [ ] Old saved modules do not contain `mappingTable` on `Knob` / `Slider`
+  (from pre-fix era) — re-assign and re-save; otherwise LFO runs too fast
+  and oscilloscope breaks
 
 ---
 
@@ -238,9 +198,11 @@
 - [ ] `Grid.snapToGrid` (snap on/off, multX/multY)
 - [ ] `CsoundGenerator.formatModuleLine`
 - [ ] `CsoundGenerator.addModule` / `removeModule`
+- [ ] `CsoundGenerator._loadUdoByPath` (user vs built-in, HTML fallback)
 - [ ] `Theme` methods (`getCableWidth`, `getGridStyle`, `_isColorValue`)
 - [ ] `removeModuleFromLayer` (multi-layer search)
 - [ ] `ComponentRegistry` — round-trip serialize / deserialize for each type
+  (including `mappingTable` for `Knob` / `Slider`)
 
 ### Documentation
 
@@ -248,7 +210,6 @@
 - [ ] `docs/MODULE_FORMAT.md` — module structure (params, inputs, outputs, components)
 - [ ] `docs/DATA_FLOW.md` — pch2 → JSON → JS → ORC → Csound
 - [ ] `docs/THEME.md` — how to add a component to the theme
-- [ ] `docs/EDITOR.md` — editor architecture, dock layout, terminal commands
 - [ ] `docs/GRID.md` — grid system (steps, multipliers, snap, crosses)
 - [ ] `docs/CONTRIBUTING.md`
 
@@ -272,7 +233,8 @@
 - [ ] Auto-generate `typeID` for user modules (starting from 201, unique)
 - [ ] Improve module parsing in `ModuleFactory._parseModuleDefinition` (regex → proper parser?)
 - [ ] Export module as single `.zip` (JS + DSP + icon)
-- [ ] `_nextComponentId` — reset on `Load Module` in the editor
+- [x] `_nextComponentId` — reset on `Load Module` in the editor (`restoreModuleFromData`)
+- [ ] `_availableIds` — also reset on `Load Module` (currently reset on `New` only)
 
 ---
 
@@ -281,13 +243,16 @@
 - [ ] Artifact: cable over LED is erased on LED redraw (fixed via overlayCanvas)
 - [ ] `CsoundEngine._ledValues` not cleared on `stop()` — may show stale values 1–2 frames
 - [ ] Fast LED toggling looks uneven due to `setInterval(50ms)`
+- [ ] `led_rms` shows signed value (no `abs`) — for LFO the LED follows both half-waves. Intentional for now, `led_peak` variant in TODO
 - [ ] `ComponentPropertiesWindow` doesn't open on click (only via button)
 - [ ] `PATCH_LOAD`: on error — may leave partially loaded patch
 - [ ] `setLayer` — module may lose `customColor` on layer switch (verify)
 - [ ] FX stripe may overlap content on modules with `customColor` (verify)
 - [ ] `getLayerAtPoint` always returns `'voice'` — old code may depend on `y`
-- [ ] `loadAvailableModules` still uses `fetch('/api/...')` — will fail in Tauri
 - [ ] HiDPI (`dpr > 1`) — modules don't drag correctly on macOS Retina and Windows 125–150% scaling. `resizeCanvasToWindow` currently hardcodes `dpr = 1` as a workaround. Investigate coordinate conversion between CSS px and physical px.
+- [ ] **HTML leaked into ORC** for user modules when `fetch('/csound/modules/user/...')` returned Vite `index.html` (status 200). Fixed via `_loadUdoByPath` + HTML detection. If it happens again, check console for `⚠️ Got HTML instead of UDO for …`
+- [ ] **Old saved modules without `mappingTable`** — after loading, LFO runs too fast (knob bypasses mapping), oscilloscope is broken. Re-assign `set <id> mappingTable <name>` and re-save.
+- [ ] **DSP body lost on module load** — fixed by removing `syncFromModule()` from `TerminalPanel._cmdLoad` and rebuilding structure in `restoreModuleFromData`. If it happens again, check that `_cmdLoad` / `Toolbar._onLoad` do **not** call `syncFromModule()`.
 
 ---
 
@@ -304,7 +269,8 @@
 - `params` in a module = opcode argument order. Must match `xin` in UDO. Not sorted by id — order in `components` array.
 - `formatModuleLine` builds: `<params>` + `<mode>` + `<inputs>` + `<outputs>`. Order is fixed.
 - All user UDOs — in `csound/modules/user/`. Built-in — in `csound/modules/`.
-- Includes are loaded lazily via `CsoundGenerator.includes` (Set of paths)
+- Includes are loaded lazily via `CsoundGenerator.includes` (Set of paths).
+- **UDO loading goes through `CsoundGenerator._loadUdoByPath()`** — never raw `fetch` for `user/*`.
 - Do not use top-level `await import(...)` in `src/api/index.js` — blocks the whole UI init
 - `window.__theme__` available in console for theme debugging (`get`, `set`, `init`)
 - `removeModuleFromLayer` searches in all layers — protects from phantoms
@@ -314,4 +280,12 @@
 - Keyboard shortcuts rule — global key handlers must skip when `e.target` is `<input>`, `<textarea>`, or `contentEditable`. Otherwise typing `0` in editor triggers `resetZoom()`.
 - `ComponentRegistry` — single source of truth for component creation / serialization / Csound ports. Adding a new component type = one entry in `editor/ComponentRegistry.js`.
 - Grid step = `BASE_STEP_X/Y * multX/multY`. `gridX/gridY` — integers in base cells (20×15). Changing `multX/multY` does not move existing modules. All placement / `findFreeSpace` should use `stepX/stepY = multX/multY` (if snap) or `1/1`.
-
+- **Protected code structure** in editor Code Viewer:
+  - Header (🔒) — `;@ map`, `opcode`, `xin`, mapping lines
+  - Body (editable) — user DSP
+  - Footer (🔒) — `zar`/`zkr`/`init`, `zaw`/`zkw`, `endop`
+  - Structural keywords (`zar`, `zkr`, `zaw`, `zkw`, `xin`, `opcode`, `endop`) forbidden in body
+  - `updateCode()` preserves body; `syncFromModule()` resets it
+  - `_structureCache` rebuilt from `editor.value` on each `input` — index drift safe
+- **`mappingTable` on `Knob` / `Slider`** is serialized and deserialized. Any new component with mapping support must update both `serialize` and `deserialize` in `ComponentRegistry.js`.
+- **`load` must not call `syncFromModule()`** — it wipes the loaded DSP body. `restoreModuleFromData` already rebuilds the structure correctly.

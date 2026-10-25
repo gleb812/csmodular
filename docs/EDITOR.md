@@ -6,7 +6,7 @@ design custom modules visually. It runs in a browser tab (web) or in its own
 native window (Tauri).
 
 This document describes the editor's architecture, panel layout, component
-registry, terminal DSL, and code generation.
+registry, terminal DSL, code generation, and the protected code structure.
 
 ---
 
@@ -38,8 +38,8 @@ and their sizes persist in `localStorage`.
 |-------|---------|
 | **Canvas** | Visual module layout. Drag components, resize module, right-click for context menu. |
 | **Properties** | Two tabs: **Module** (name, height, color) and **Component** (schema-driven). |
-| **Csound Code** | Live-generated `opcode` code, syntax-highlighted, editable. |
-| **Terminal** | Command DSL for fast module editing (add, del, mv, align, ...). |
+| **Csound Code** | Live-generated `opcode` code with protected structure, syntax-highlighted. |
+| **Terminal** | Command DSL for fast module editing (add, del, mv, align, set, ...). |
 
 ### Layout presets
 
@@ -62,7 +62,7 @@ editor/
 ├── EditorApp.js                   # Main controller (canvas, events, animation)
 ├── EditorPanel.js                 # The module panel on canvas
 ├── ComponentRegistry.js           # Single source of truth for components
-├── CodeViewerWindow.js            # Csound code editor
+├── CodeViewerWindow.js            # Csound code editor (protected structure)
 ├── ModulePropertiesWindow.js      # Headless (legacy) — save API
 ├── ComponentPropertiesWindow.js   # Headless (legacy) — mapping browser
 └── ui/
@@ -70,6 +70,7 @@ editor/
     ├── Toolbar.js                 # New / Load / Save + layout presets
     ├── PropertiesPanel.js         # Module / Component tabs
     ├── TerminalPanel.js           # Command terminal
+    ├── Toast.js                   # Notifications (replaces uiManager stub)
     ├── ContextMenu.js             # Generic context menu (with submenus)
     └── ModuleContextMenu.js       # Editor-specific menu builder
 ```
@@ -206,6 +207,12 @@ The format matches `src/ModuleFactory.js` — the runtime module loader:
   `components[]`** (do NOT sort)
 - `inputs[]` / `outputs[]` — IDs of jack components, in order
 
+**`mappingTable` is serialized and deserialized for `Knob` and `Slider`.**
+If you add another parametric component with mapping support, add it to both
+`serialize` and `deserialize` — otherwise round-trip load/save loses it.
+Old saved modules (pre-fix) do not contain `mappingTable` — re-assign and
+re-save.
+
 ### Known runtime quirks (preserved in registry)
 
 Some runtime behaviours differ from the editor; the registry keeps the
@@ -222,7 +229,7 @@ editor's correct behaviour without mimicking runtime bugs:
 1. Add one entry to `ComponentRegistry.js`.
 2. Done. It appears in:
    - Context menu (auto from `getByCategory()`)
-   - Terminal aliases (add to `TYPE_ALIASES` in `TerminalPanel.js`)
+   - Terminal aliases (add to `TYPE_ALIASES` / `JACK_TYPE_ALIASES` in `TerminalPanel.js`)
    - Serialization / deserialization
    - Csound port detection
    - `params[]` collection
@@ -236,7 +243,8 @@ No other file needs editing.
 ### Adding components
 
 **Right-click on canvas** → context menu → **Add Component** → submenu by
-category. The component is placed at the click point (centred).
+category. The component is placed at the click point (centred) and clamped
+to module bounds.
 
 For **jacks** (`Input` / `Output`), two entries are shown per type:
 `Input (audio)` and `Input (control)`. All other components appear once.
@@ -251,6 +259,19 @@ For **jacks** (`Input` / `Output`), two entries are shown per type:
 ### Context menu on component
 
 **Right-click** on a component → `Properties` / `Delete`.
+
+### Renaming module
+
+Three paths, all now call `codeViewerWindow.updateCode()` and re-render
+Properties if the Module tab is active:
+
+- **Double-click on module** (canvas) → `prompt()`
+- **Right-click → Rename Module** (context menu)
+- **Properties → Module tab → Name field** (Enter or blur)
+- **Terminal → `name <newName>`**
+
+Sanitization: strip spaces, prefix `M` if starting with digit, remove
+non-`[a-zA-Z0-9_]`. Empty result → `NewModule`.
 
 ### Resizing module
 
@@ -286,7 +307,9 @@ if (isEditable) return;
 
 ### Module tab
 
-- **Name** — text field, sanitized to Csound-safe identifier
+- **Name** — text field, sanitized to Csound-safe identifier. Enter triggers
+  `blur` → `change`. On change: `module.title` updated, `codeViewerWindow.updateCode()`
+  called (regenerates the `opcode` line, body preserved).
 - **Height** — grid cells (1..20)
 - **Panel Color** — 12 preset buttons + `↺ Default` + hex input
 
@@ -300,8 +323,24 @@ Supported field types:
 | `select` | dropdown |
 | `number` | numeric input (min/max/step) |
 | `text` | free text |
-| `mapping-select` | custom field with `🔍` browser button |
+| `list` | comma-separated input → array |
 | `checkbox` | toggle |
+| `mapping-select` | custom field with `🔍` browser button |
+
+Each field supports an optional `afterChange(comp, value)` callback
+(clamp indices, rebuild labels, update `width` for `ButtonRadio`, etc.).
+
+**Current schemas:**
+
+| Component | Fields |
+|---|---|
+| `Knob` | `mappingTable` (`mapping-select`) |
+| `Slider` | `mappingTable` (`mapping-select`) |
+| `TextLabel` | `text`, `fontSize` (`number`), `color` (`text`) |
+| `ButtonFlat` | `positions` (`list`), `currentIndex` (`number`) |
+| `ButtonRadio` | `labels` (`list`), `buttonCount` (`number`), `selectedIndex` (`number`) |
+| `ButtonIncDec` | `items` (`list`), `currentIndex` (`number`) |
+| `ButtonText` | `text`, `isActive` (`checkbox`) |
 
 **Example** — `Knob.getPropertySchema()` returns:
 
@@ -337,21 +376,67 @@ of the two reasons `ComponentPropertiesWindow` still exists.
 
 ```
 ┌──────────────────────────────────────────────────────┐
-│ 🎵 Csound Code   [A][A] 12px ● Saved ⟳ 📋 # 🎨       │
+│ 🎵 Csound Code   [A][A] 12px ● Saved ⟳ 📋 # 🎨    🔒 │
 ├──────────────────────────────────────────────────────┤
-│  1 │ ;@ map LEVfrq                                   │
-│  2 │ opcode MyMod, 0, kkkk                           │
-│  3 │ kKnob1, kKnob2, kIn1, kOut1 xin                 │
-│  ...                                                 │
+│  1 │ ;@ map LEVfrq                                   │ 🔒
+│  2 │ opcode MyMod, 0, kkkk                           │ 🔒
+│  3 │ kKnob1, kKnob2, kIn1, kOut1 xin                 │ 🔒
+│  4 │                                                 │
+│  5 │ aIn1 zar kIn1                                   │ 🔒
+│  6 │ aOut1 init 0                                    │ 🔒
+│  7 │                                                 │
+│  8 │ ; --- module body ---                           │
+│  9 │ ; Add your DSP code here                        │
+│ 10 │                                                 │
+│ 11 │ zaw aOut1, kOut1                                │ 🔒
+│ 12 │ endop                                           │ 🔒
 └──────────────────────────────────────────────────────┘
 ```
 
 - **Line numbers** — checkbox `#` on the right of the header
 - **Syntax highlight** — checkbox 🎨
 - **Font size** — `[A]` smaller / `[A]` larger
-- **Status** — `● Saved` / `● Modified` / `⚠ Error`
-- **⟳** — resync from module (discard edits)
+- **Status** — `● Saved` / `● Modified` / `🔒 protected` / `🚫 forbidden`
+- **⟳** — resync from module (reset structure **and** body to model)
 - **📋** — copy to clipboard
+- **Right gutter** — 🔒 for protected lines, synced scroll
+
+### Protected code structure
+
+The code is split into three zones by `generateCsoundCode()`:
+
+- **Header (🔒 protected)** — `;@ map`, `opcode`, `xin`, mapping table lines
+- **Body (editable)** — user DSP code, between input-jack block and output-jack block
+- **Footer (🔒 protected)** — `zar` / `zkr` / `init` lines, `zaw` / `zkw` lines, `endop`
+
+**Rules:**
+
+- Protected lines are **regenerated from the module model** on any change:
+  add/remove component, rename module, mapping change. The body is preserved.
+- The cursor cannot enter protected lines (`_clampCursorToEditable` on
+  `selectionchange` / `click` / `keyup` / `select`). `beforeinput` blocks
+  destructive edits that would touch the boundaries.
+- **Enter in the body** inserts new lines; the footer shifts down.
+  **Backspace at the start of the body** stops at the upper boundary.
+- Structural keywords (`zar`, `zkr`, `zaw`, `zkw`, `xin`, `opcode`, `endop`)
+  are **forbidden inside the body**:
+  - `beforeinput` blocks `insertText` / `insertFromPaste` / `insertFromDrop`
+    when the resulting body would contain one of these tokens (not just the
+    inserted text — the hypothetical body is checked).
+  - `onEditorInput` checks again as a fallback, reverts the body to
+    `_lastValidBody`.
+  - Leftover keywords (e.g. from older modules) are highlighted with a red
+    background in the body.
+- `_structureCache` holds `bodyStart`, `bodyEnd`, `protectedLineIndices`,
+  `bodyStartLine`, `bodyEndLine`. `onEditorInput` **always** rebuilds it from
+  the current `editor.value` via `_rebuildStructureFromCurrent()` before
+  comparing — index shifts after body edits do not corrupt the model.
+- `updateCode()` (called on component/mapping/model changes) replaces only
+  protected ranges with the reference, keeps the body from the current
+  `editor.value`. Cursor position is preserved relative to the new
+  `bodyStart`.
+- `syncFromModule()` (⟳) **resets everything** to the model — body becomes
+  the `; Add your DSP code here` placeholder. Used to discard user edits.
 
 ### Syntax highlight method
 
@@ -375,6 +460,8 @@ textarea (higher z-index).
 | numbers | yellow |
 | strings `"..."` | light blue |
 | variables `kFoo`, `aFoo`, `giFoo`, ... | lavender |
+| protected line (whole line) | `#7a8a9a` (muted) |
+| forbidden keyword in body | red background |
 
 **Important**: highlight is a single regex pass with alternatives. Do NOT
 chain `.replace()` calls — the second replace would match inside the HTML
@@ -434,8 +521,9 @@ numbering).
 
 ### Dirty state
 
-If `isDirty` — automatic updates (from `updateCode()`) are **skipped**.
-Only `syncFromModule()` (⟳ button) overwrites user edits.
+`isDirty` now only tracks **body edits** — `updateCode()` is **not** skipped
+when dirty; it always replaces protected ranges and preserves the body.
+`⟳` (`syncFromModule`) resets everything, including the body.
 
 ---
 
@@ -447,25 +535,45 @@ Only `syncFromModule()` (⟳ button) overwrites user edits.
 
 | Command | Description |
 |---|---|
-| `add <type> [x y]` | Add component (auto-place or at x,y) |
-| `in` / `out` | Shorthand for `add input` / `add output` |
-| `ls [type] [-l]` | List components (optionally verbose) |
+| `add <type> [x y]` | Add component. Without args — prints full list by category |
+| `add label <text> [x y]` | Add `TextLabel` with text |
+| `add <buttonflat\|radio\|incdec> <a,b,c> [x y]` | Multi-position button with labels |
+| `ina` / `ink` / `outa` / `outk` [x y] | Add audio/control Input or Output |
+| `in` / `out` | Shorthand for `ina` / `outa` (audio) |
+| `ls [type] [-l]` | List components (verbose shows `text`, `items`/`labels`/`positions`, `mappingTable`, `jackType`) |
 | `del <id\|type\|range>...` | Delete (see examples below) |
 | `mv <id> <x> <y>` | Move (absolute) |
 | `mv <id> +dx +dy` | Move (relative) |
-| `map <id> <table>` | Bind mapping table |
+| `set <id> <prop> <value>` | Set component property (see below) |
+| `map <id> <table>` | Bind mapping table — shorthand for `set <id> mappingTable <table>` |
 | `map <id>` | Unbind mapping table |
 | `align <ids...> l\|r\|u\|d` | Align left / right / up / down |
 | `distr <ids...> h\|v` | Distribute evenly, horizontal / vertical |
 | `grid` | Show current grid state |
 | `grid on\|off` | Toggle micro-grid |
 | `grid <N>` | Set step to N pixels |
-| `new` | Clear module |
+| `new [name]` | Clear module (optionally set name) and reset DSP code |
+| `name <newName>` | Rename module (same as `new` name argument, but without clearing) |
 | `save [as <name>]` | Save module |
 | `load [<name>]` | Load (no arg — list available) |
 | `stats` | Module statistics |
 | `clear` | Clear output |
 | `help [cmd]` | Help |
+
+### `set` supported properties
+
+| Property | Applies to | Notes |
+|---|---|---|
+| `text` (aliases `label`, `value`, `content`) | `TextLabel`, `ButtonText`, `TextEdit` | Free text |
+| `items` / `labels` / `positions` (alias `list`) | `ButtonIncDec` / `ButtonRadio` / `ButtonFlat` | Comma-separated |
+| `count` | `ButtonRadio` | 1..16, rebuilds labels and `width` |
+| `default` | `ButtonFlat`, `ButtonRadio`, `ButtonIncDec` (index), `ButtonText` (bool) | Default index / state |
+| `item` | `ButtonIncDec` | Replaces current item |
+| `fontSize` (alias `size`) | `TextLabel` | 4..72 |
+| `color` (alias `colour`) | `TextLabel`, `ButtonText` | `#rgb` / `#rrggbb` |
+| `mappingTable` (aliases `mapping`, `table`) | `Knob`, `Slider` | Empty / `null` unsets |
+| `min` / `max` / `defaultValue` | `Knob`, `Slider` | Numeric |
+| `jackType` (alias `jack`) | `Input`, `Output` | `audio` / `control` |
 
 ### Type aliases
 
@@ -486,8 +594,12 @@ svg                   → SVG
 line                  → Line
 graph                 → Graph
 vu                    → MiniVU
-input, in             → Input
-output, out           → Output
+input, in             → Input (audio)
+output, out           → Output (audio)
+ina                   → Input (audio)
+ink                   → Input (control)
+outa                  → Output (audio)
+outk                  → Output (control)
 ```
 
 ### `del` examples
@@ -536,6 +648,9 @@ del knob button       delete all Knobs and Buttons
 
 Then calls `app.restoreModuleFromData(moduleData, dsp_code)`.
 
+⚠️ **`load` must not call `syncFromModule()`** after `restoreModuleFromData`
+— that would wipe the loaded DSP body and reset it to the placeholder.
+
 ---
 
 ## Module save / load
@@ -569,7 +684,7 @@ export const NameModule = {
 
 `dspCode` is either:
 - `app.module._userCsoundCode` (if the user edited the code), or
-- `app.codeViewerWindow.generateCsoundCode()` (fresh)
+- `app.codeViewerWindow.getCode()` (live content of the editor)
 
 ### Load
 
@@ -584,8 +699,15 @@ Both parse JS with the regex above and call
 1. Clears `components[]`, resets `_nextComponentId`
 2. Resizes module from `gridHeight`
 3. Deserializes all components via `ComponentRegistry.deserializeComponents`
+   (includes `mappingTable` for `Knob` / `Slider`)
 4. Centers module on canvas
-5. Loads DSP into `app.module._userCsoundCode` and Code Viewer
+5. Loads DSP into `app.module._userCsoundCode` and Code Viewer:
+   - `cv.editor.value = dspCode`
+   - `cv._lastValidBody = null`
+   - `cv._rebuildStructure()` (reference from model)
+   - `cv._rebuildStructureFromCurrent()` (cache from actual `editor.value`)
+   - `cv._updateGutter()` / `cv._updateHighlight()`
+   - **Not** `syncFromModule()` — it would wipe the loaded body
 
 ### Storage backends
 
@@ -598,6 +720,16 @@ Both parse JS with the regex above and call
 
 The `moduleStore` singleton (`src/api/index.js`) picks the backend lazily
 via `isTauri()` check.
+
+### Round-trip guarantees
+
+Load → Save → Load preserves:
+
+- `mappingTable` on `Knob` / `Slider`
+- Multi-position labels on `ButtonFlat` / `ButtonRadio` / `ButtonIncDec`
+- Default index/state on all button-like components
+- `TextLabel` text, font size, color
+- The DSP body (protected structure is rebuilt around it)
 
 ---
 
@@ -656,6 +788,25 @@ The canvas is good for spatial editing, but:
 The terminal gives a **scriptable interface** without forcing a heavy
 form UI on everyone.
 
+### Why protected structure in Code Viewer?
+
+Because the `opcode` / `xin` / `zar` / `zaw` / `endop` lines are
+**determined by the module model** (which components exist, their order,
+their jack types). Letting the user edit them by hand leads to silent
+breakage:
+
+- Removing a `zaw` line leaves an output permanently dead.
+- Adding a manual `zaw` to a different bus confuses `CsoundGenerator`.
+- Reordering `xin` desyncs `params[]` from the runtime.
+
+The editor regenerates these lines from the model and locks them. The user
+only owns the **body** — the DSP code between the input-jack block and the
+output-jack block. This is where all creative work happens.
+
+Structural keywords are forbidden in the body for the same reason: writing
+`zaw` by hand would duplicate the auto-generated one (or target a
+different bus), and there is no way to detect intent reliably.
+
 ### Why no CodeMirror yet?
 
 CodeMirror would be a step up (proper undo, search, autocomplete,
@@ -666,7 +817,8 @@ folding). But:
 - Current overlay approach works for typical module sizes
 
 **Plan**: switch to CodeMirror 5 when code complexity justifies it
-(modules > 100 lines, or when search/replace is requested).
+(modules > 100 lines, or when search/replace is requested). Protected
+ranges would map to `readOnly` marks.
 
 ---
 
@@ -688,7 +840,8 @@ folding). But:
    in `_highlightCsound()`.
 
 6. **`TerminalPanel` should use `ComponentRegistry` for component lookup.**
-   `TYPE_ALIASES` is the only place where lowercase names → `ClassName`.
+   `TYPE_ALIASES` and `JACK_TYPE_ALIASES` are the only places where
+   lowercase names → `ClassName` / `{ type, jackType }`.
 
 7. **`DockLayout` is the only place where panel positioning lives.** Panels
    must not manipulate their own top/left/width/height.
@@ -699,33 +852,63 @@ folding). But:
    - If the panel needs to persist size — handled by `DockLayout` sizes,
      not the panel itself.
 
+9. **`updateCode()` must preserve the body.** When the model changes, only
+   protected ranges are replaced; the body from `editor.value` is kept.
+   Never call `syncFromModule()` from `updateCode()`.
+
+10. **`syncFromModule()` resets everything.** Only call it from the user's
+    explicit action (⟳ button) or from the `New` flow (via `clearModule`).
+    Never call it after `restoreModuleFromData()`.
+
+11. **`mappingTable` on `Knob` / `Slider` must be in both `serialize` and
+    `deserialize`.** Otherwise round-trip load/save loses it — the module
+    silently sounds wrong (LFO too fast, oscilloscope broken). Same applies
+    to any future parametric component with mapping.
+
+12. **`save` uses `getCode()` (live editor content), not
+    `_userCsoundCode`.** Auto-save interval (60s) may not have fired yet,
+    and the user's body edits must be persisted.
+
+13. **`_cmdNew` / `Toolbar._onNew` must reset `_userCsoundCode` and rebuild
+    the code panel** (via `clearModule({ title, resetColor })`). Otherwise
+    the old DSP body leaks into the "new" module.
+
 ---
 
 ## Known issues
 
 - `TerminalPanel._cmdSave` duplicates `ModulePropertiesWindow.generateModuleCode`
-- `TerminalPanel` always uses `audio` jack type for `Input` / `Output`
 - `ModulePropertiesWindow` and `ComponentPropertiesWindow` are headless
   — should be deleted once `PropertiesPanel` covers all cases
 - Code Viewer has no proper undo/redo (browser-default for `<textarea>`)
 - `DockLayout` has no collapse, no tabs (only Properties has tabs)
 - Code Viewer does not virtualize highlight — may lag on very large code
-- `add in c` / `add out c` not supported yet (control jacks only via context menu)
 - Terminal has no autocomplete
+- `PropertiesPanel._render()` uses `style.cssText +=` on tabs — should be
+  `=` with a base + active/inactive suffix (currently accumulates over time)
+- `TerminalPanel._cmdSet` for `mappingTable` calls `updateCode()`, but
+  `PropertiesPanel` (mapping-select) does **not** — unify
+- Module Editor context menu still has `Change Color` — should be removed
+  (color lives in Properties)
+- Old saved modules do not contain `mappingTable` on `Knob` / `Slider` —
+  re-assign and re-save if LFO / oscilloscope behave wrong
 
 ## Roadmap
 
 Short-term:
 - Remove `Change Color` from context menu
 - Terminal: autocomplete, `!!`, `history`
-- Terminal: `add in c` / `out c` for control jacks
 - Unify save service (one place, used by Toolbar / Terminal / Properties)
+- Fix `PropertiesPanel._render()` `cssText +=` accumulation
+- `TerminalPanel._cmdSet(mappingTable)` → also call `updateCode()` from
+  `PropertiesPanel` mapping-select
 
 Mid-term:
-- CodeMirror 5 or 6 in Code Viewer
+- CodeMirror 5 or 6 in Code Viewer (with protected ranges as `readOnly` marks)
 - Collapse panels in `DockLayout`
 - Editor undo/redo (separate from main app)
 - Snapshot / restore in terminal
+- `led_peak` UDO variant with `abs()` for a "positive period" LED indicator
 
 Long-term:
 - Component grouping (visual)

@@ -1,3 +1,4 @@
+
 # CsModular
 
 A web-based modular synthesizer built with Csound and vanilla JavaScript + Canvas.
@@ -19,6 +20,7 @@ This project is a next level of the *pch2csd* project: https://github.com/gleb81
 - Design Settings panel (press `D`) — live theme editing, color pickers, glow, line weight, cable widths, background, grid
 - Custom backgrounds — solid colors or images, with parallax effect
 - Module Editor — built-in IDE-style editor with dock panels and command terminal
+- Protected code structure — `opcode` / `xin` / `zar` / `zkr` / `init` / `zaw` / `zkw` / `endop` are locked (🔒) and regenerated from the module model; the user only edits the DSP body
 - User modules stored as plain files (in Tauri) — easy to back up, share, version
 
 ## Architecture
@@ -30,6 +32,10 @@ This project is a next level of the *pch2csd* project: https://github.com/gleb81
   - Web: localStorage (`moduleStore.web.js`)
   - Desktop: filesystem via `@tauri-apps/plugin-fs` (`moduleStore.tauri.js`)
   - Abstraction: `src/api/index.js` — lazy `moduleStore` singleton
+- UDO loading:
+  - User modules (`user/<Name>.txt`) — via `moduleStore` (web: localStorage, Tauri: fs)
+  - Built-in modules (`<id>.txt`, `led_rms.txt`) — via `fetch` from `public/csound/modules/`, with HTML-fallback detection
+  - Single entry point: `CsoundGenerator._loadUdoByPath()`
 - Theme system: `src/theme/` (`Theme.js`, `themeStore.js`, `currentTheme.js`, `defaults.js`)
 - Grid system: `src/grid/Grid.js`
 - Csound code: UDO files in `public/csound/modules/*.txt`
@@ -115,7 +121,7 @@ Output:
 | `0` | Reset zoom (only when canvas has focus) |
 | `Escape` | Cancel current drag |
 | `Delete` | Delete selected component |
-| `Right click` on canvas | Context menu (add / rename module) |
+| `Right click` on canvas | Context menu (add / rename) |
 | `Right click` on component | Context menu (properties / delete) |
 | `Ctrl + S` (in code editor) | Save Csound code |
 | `↑` / `↓` (in terminal) | Command history |
@@ -142,7 +148,7 @@ Output:
 │   ├── EditorApp.js         # main editor controller
 │   ├── EditorPanel.js       # module panel (canvas)
 │   ├── ComponentRegistry.js # unified component registry (create / serialize / deserialize)
-│   ├── CodeViewerWindow.js  # Csound code editor (with syntax highlight)
+│   ├── CodeViewerWindow.js  # Csound code editor (protected structure + syntax highlight)
 │   ├── ModulePropertiesWindow.js    # headless (legacy, used for save API)
 │   ├── ComponentPropertiesWindow.js # headless (legacy, used for mapping browser)
 │   └── ui/
@@ -150,6 +156,7 @@ Output:
 │       ├── Toolbar.js           # New / Load / Save + layout presets
 │       ├── PropertiesPanel.js   # Module / Component tabs
 │       ├── TerminalPanel.js     # command terminal
+│       ├── Toast.js             # notifications
 │       ├── ContextMenu.js       # generic context menu
 │       └── ModuleContextMenu.js # editor-specific menu builder
 ├── public/              # Static assets (csound/, tables/, backgrounds/)
@@ -247,8 +254,29 @@ The editor uses a fixed dock layout with resizable splitters and presets
 - Properties — two tabs: `Module` (name, height, color) and `Component`
   (schema-driven fields from `getPropertySchema()`)
 - Csound Code — live-generated `opcode` code with syntax highlighting,
-  line numbers, font size controls
+  line numbers, font size controls, **protected structure** (see below)
 - Terminal — command language for the module (see below)
+
+### Protected Csound code structure
+
+The Csound Code panel is split into three zones by the generator:
+
+- **Header (🔒 protected)** — `;@ map`, `opcode`, `xin`, mapping table lines
+- **Body (editable)** — your DSP code, between the input-jack block and the output-jack block
+- **Footer (🔒 protected)** — `zar/zkr/init` and `zaw/zkw` lines, `endop`
+
+What you can and can't do:
+
+- The protected lines are **regenerated from the module model** whenever you
+  add/remove components, rename the module, or change mappings.
+- The cursor cannot enter protected lines. Backspace at the start of the body
+  stops at the upper boundary; Enter at the end of the body inserts new lines
+  (the footer shifts down).
+- Structural keywords (`zar`, `zkr`, `zaw`, `zkw`, `xin`, `opcode`, `endop`)
+  are **forbidden inside the body** — the editor blocks input and highlights
+  any leftovers in red.
+- Clicking `⟳` (Sync) regenerates the whole code from the model — the body
+  is reset to the placeholder.
 
 ### Adding components
 
@@ -260,31 +288,81 @@ truth describing how each component is created, serialized, deserialized,
 and what Csound ports it has. Adding a new component type = adding one
 entry to the registry.
 
+### Editable component properties
+
+Component fields are declared via `static getPropertySchema()` in the
+component class and rendered by `PropertiesPanel`. Supported field types:
+
+| Type | UI | Example |
+|---|---|---|
+| `text` | text input | `TextLabel.text`, `ButtonText.text` |
+| `number` | numeric input (min/max/step) | `Knob.min`, `ButtonRadio.buttonCount` |
+| `list` | comma-separated input → array | `ButtonFlat.positions`, `ButtonIncDec.items` |
+| `checkbox` | toggle | `ButtonText.isActive` |
+| `select` | dropdown (`options` / `optionsFrom`) | `TextField.format` |
+| `mapping-select` | custom field + 🔍 table browser | `Knob.mappingTable` |
+
+Schemas can define an `afterChange(comp, value)` callback to run
+post-update logic (clamp indices, rebuild labels, update `width` for
+`ButtonRadio` after changing `buttonCount`, etc.).
+
+Currently editable:
+
+- **Knob** — `mappingTable`
+- **Slider** — `mappingTable`
+- **TextLabel** — `text`, `fontSize`, `color`
+- **ButtonFlat** — `positions`, `currentIndex`
+- **ButtonRadio** — `labels`, `buttonCount`, `selectedIndex`
+- **ButtonIncDec** — `items`, `currentIndex`
+- **ButtonText** — `text`, `isActive`
+
+`mappingTable` is only supported on `Knob` and `Slider` for now.
+
 ### Terminal commands
 
 The terminal supports a small DSL for fast module editing:
 
 | Command | Description |
 |---|---|
-| `add <type> [x y]` | Add component (auto-place or at x,y) |
-| `in` / `out` | Shorthand for `add input` / `add output` |
-| `ls [type] [-l]` | List components |
+| `add <type> [x y]` | Add component (auto-place or at x,y). Without args, prints the full list by category |
+| `add label <text> [x y]` | Add `TextLabel` with text |
+| `add <buttonflat\|radio\|incdec> <a,b,c> [x y]` | Add multi-position button with labels |
+| `ina` / `ink` / `outa` / `outk` [x y] | Add audio/control Input or Output |
+| `in` / `out` | Shorthand for `ina` / `outa` (audio) |
+| `ls [type] [-l]` | List components (verbose shows `text`, `items`/`labels`/`positions`, `mappingTable`, `jackType`) |
 | `del <id\|type\|range>...` | Delete (e.g. `del 3`, `del knob`, `del 3 4 5`, `del 3..7`) |
 | `mv <id> <x> <y>` | Move (absolute) |
 | `mv <id> +dx +dy` | Move (relative) |
-| `map <id> <table>` | Bind mapping table (or unset) |
+| `set <id> <prop> <value>` | Set component property (see below) |
+| `map <id> <table>` | Bind mapping table (or unset) — shorthand for `set <id> mappingTable <table>` |
 | `align <ids...> l\|r\|u\|d` | Align components |
 | `distr <ids...> h\|v` | Distribute evenly |
 | `grid on\|off\|N` | Toggle micro-grid or set step |
-| `new` | Clear module |
+| `new [name]` | Clear module (optionally set name) and reset DSP code |
 | `save [as <name>]` | Save module |
 | `load <name>` | Load module |
 | `stats` | Module statistics |
 | `help [cmd]` | Help |
 
+#### `set <id> <prop> <value>` — supported properties
+
+| Property | Applies to | Notes |
+|---|---|---|
+| `text` (aliases: `label`, `value`, `content`) | `TextLabel`, `ButtonText`, `TextEdit` | Free text |
+| `items` / `labels` / `positions` (alias: `list`) | `ButtonIncDec` / `ButtonRadio` / `ButtonFlat` | Comma-separated |
+| `count` | `ButtonRadio` | 1..16, rebuilds labels and `width` |
+| `default` | `ButtonFlat`, `ButtonRadio`, `ButtonIncDec` (index), `ButtonText` (bool) | Default index / state |
+| `item` | `ButtonIncDec` | Replaces current item |
+| `fontSize` (alias: `size`) | `TextLabel` | 4..72 |
+| `color` (alias: `colour`) | `TextLabel`, `ButtonText` | `#rgb` / `#rrggbb` |
+| `mappingTable` (aliases: `mapping`, `table`) | `Knob`, `Slider` | Empty / `null` unsets |
+| `min` / `max` / `defaultValue` | `Knob`, `Slider` | Numeric |
+| `jackType` (alias: `jack`) | `Input`, `Output` | `audio` / `control` |
+
 Component types (aliases): `knob`, `slider`, `button` (or `btn`), `radio`,
 `incdec`, `toggle`, `label`, `field`, `edit`, `led`, `level`, `select`,
-`svg`, `line`, `graph`, `vu`, `input` (or `in`), `output` (or `out`).
+`svg`, `line`, `graph`, `vu`, `input` (or `in`), `output` (or `out`),
+plus jack-qualified `ina` / `ink` / `outa` / `outk`.
 
 ### Saving & loading
 
@@ -295,7 +373,16 @@ Component types (aliases): `knob`, `slider`, `button` (or `btn`), `radio`,
   `~/Documents/CsModular/csound/modules/user/<name>.txt`
 
 Both JS and DSP code are stored. Round-trip load/save preserves the module
-as designed.
+as designed, including:
+
+- `mappingTable` on `Knob` and `Slider`
+- Multi-position labels on `ButtonFlat` / `ButtonRadio` / `ButtonIncDec`
+- Default index/state on all button-like components
+- `TextLabel` text, font size, color
+
+Loading a module restores the DSP body and rebuilds the protected structure
+around it (`restoreModuleFromData` → `_rebuildStructure()` +
+`_rebuildStructureFromCurrent()`).
 
 ## Development
 
@@ -339,6 +426,27 @@ User modules not visible in browser:
 - Web `moduleStore` uses `localStorage`
 - Check DevTools → Application → Local Storage → `csmodular:user_modules`
 - To reset: `localStorage.removeItem('csmodular:user_modules')`
+
+**HTML inside Csound ORC** (`<!DOCTYPE html>` after `endop`):
+- Cause: `fetch('/csound/modules/<path>')` returns Vite SPA-fallback `index.html`
+  for missing files, and the response status is 200 (so `response.ok === true`)
+- Fixed: all UDO loading goes through `CsoundGenerator._loadUdoByPath()`, which
+  routes `user/*` through `moduleStore` and detects HTML for built-in paths
+- If it happens again, check the console for `⚠️ Got HTML instead of UDO for …`
+
+**LED / oscilloscope behave erratically after loading a module**:
+- Cause: `mappingTable` on `Knob`/`Slider` was not serialized, so the saved
+  module lost it. The knob then went straight into the opcode (0..127) instead
+  of through the mapping table → LFO frequency much higher than intended
+- Fixed: `mappingTable` is now saved and restored
+- If you have an old saved module: load it, re-assign `mappingTable` on the
+  relevant knob (`set <id> mappingTable <name>`), and re-save
+
+**Loading a module resets the DSP body**:
+- Cause: `syncFromModule()` was called after `restoreModuleFromData()` and
+  overwrote `editor.value` with the model template
+- Fixed: `TerminalPanel._cmdLoad` and `Toolbar._onLoad` no longer call
+  `syncFromModule()` after loading
 
 Can't type `0` in editor inputs:
 - Fixed: keyboard shortcuts now skip when focus is in an `<input>` or `<textarea>`

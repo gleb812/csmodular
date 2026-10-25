@@ -211,13 +211,14 @@ Resizable splitters + presets (`Default`, `Code`, `Canvas`). Sizes persist in
 | `EditorApp` | `editor/EditorApp.js` | Main editor controller |
 | `EditorPanel` | `editor/EditorPanel.js` | Module "panel" on canvas (title, size, color) |
 | `ComponentRegistry` | `editor/ComponentRegistry.js` | **Single source of truth** for all components |
-| `CodeViewerWindow` | `editor/CodeViewerWindow.js` | Csound code editor with syntax highlight |
+| `CodeViewerWindow` | `editor/CodeViewerWindow.js` | Csound code editor (protected structure + syntax highlight) |
 | `ModulePropertiesWindow` | `editor/ModulePropertiesWindow.js` | **Headless** (legacy) — provides `saveModule()` / `collectModuleData()` API |
 | `ComponentPropertiesWindow` | `editor/ComponentPropertiesWindow.js` | **Headless** (legacy) — provides `_showMappingBrowser()` |
 | `DockLayout` | `editor/ui/DockLayout.js` | Split-pane container with presets |
 | `Toolbar` | `editor/ui/Toolbar.js` | New / Load / Save + layout presets |
 | `PropertiesPanel` | `editor/ui/PropertiesPanel.js` | Module / Component tabs |
 | `TerminalPanel` | `editor/ui/TerminalPanel.js` | Command terminal |
+| `Toast` | `editor/ui/Toast.js` | Notifications (replaces `uiManager.showNotification` stub) |
 | `ContextMenu` | `editor/ui/ContextMenu.js` | Generic context menu (with submenus) |
 | `ModuleContextMenu` | `editor/ui/ModuleContextMenu.js` | Editor-specific menu builder |
 
@@ -249,6 +250,10 @@ Used by:
 
 **Adding a new component type = adding one entry to the registry.**
 
+⚠️ **`mappingTable` on `Knob` and `Slider`** is part of `serialize` / `deserialize`.
+If you add another parametric component with mapping support, add it to both sides.
+Old saved modules (pre-fix) do not contain `mappingTable` — re-assign and re-save.
+
 Helpers exported:
 - `serializeComponents(components)` → array of data
 - `deserializeComponents(dataArray, ctx)` → array of instances
@@ -264,6 +269,26 @@ Helpers exported:
 - **Module** — name, height (grid cells), color (preset buttons + hex input)
 - **Component** — schema-driven fields from `static getPropertySchema()`
 
+Schema field types supported by `PropertiesPanel._createSchemaField`:
+
+- `text` — text input
+- `number` — numeric input (min/max/step)
+- `list` — comma-separated input → array
+- `checkbox` — toggle
+- `select` — dropdown (`options` / `optionsFrom`)
+- `mapping-select` — custom field + 🔍 mapping browser
+
+Each field supports an optional `afterChange(comp, value)` callback (clamp indices, rebuild labels, update `width` for `ButtonRadio`, etc.).
+
+Current schemas:
+
+- `Knob`, `Slider` — `mappingTable`
+- `TextLabel` — `text`, `fontSize`, `color`
+- `ButtonFlat` — `positions`, `currentIndex`
+- `ButtonRadio` — `labels`, `buttonCount`, `selectedIndex`
+- `ButtonIncDec` — `items`, `currentIndex`
+- `ButtonText` — `text`, `isActive`
+
 Clicking a component in canvas switches the tab to Component. Clicking empty canvas
 keeps the tab, shows "No component selected".
 
@@ -273,21 +298,40 @@ Persistent at right-bottom. Commands:
 
 | Command | Description |
 |---|---|
-| `add <type> [x y]` | Add component |
-| `in` / `out` | Shorthand for `add input` / `add output` |
-| `ls [type] [-l]` | List components |
+| `add <type> [x y]` | Add component. Without args — prints full list by category |
+| `add label <text> [x y]` | Add `TextLabel` with text |
+| `add <buttonflat\|radio\|incdec> <a,b,c> [x y]` | Multi-position button with labels |
+| `ina` / `ink` / `outa` / `outk` [x y] | Add audio/control Input or Output |
+| `in` / `out` | Shorthand for `ina` / `outa` (audio) |
+| `ls [type] [-l]` | List components (verbose shows `text`, `items`/`labels`/`positions`, `mappingTable`, `jackType`) |
 | `del <id\|type\|range>...` | Delete (`del 3`, `del knob`, `del 3 4 5`, `del 3..7`) |
 | `mv <id> <x> <y>` | Move (absolute) |
 | `mv <id> +dx +dy` | Move (relative) |
-| `map <id> <table>` | Bind mapping table (or unset) |
+| `set <id> <prop> <value>` | Set component property (see below) |
+| `map <id> <table>` | Bind mapping table — shorthand for `set <id> mappingTable <table>` |
 | `align <ids...> l\|r\|u\|d` | Align |
 | `distr <ids...> h\|v` | Distribute evenly |
 | `grid on\|off\|N` | Grid toggle / step |
-| `new` | Clear module |
+| `new [name]` | Clear module (optionally set name), reset DSP code |
 | `save [as <name>]` | Save |
 | `load <name>` | Load |
 | `stats` | Statistics |
 | `help [cmd]` | Help |
+
+**`set` supported properties:**
+
+| Property | Applies to | Notes |
+|---|---|---|
+| `text` (aliases `label`, `value`, `content`) | `TextLabel`, `ButtonText`, `TextEdit` | Free text |
+| `items` / `labels` / `positions` (alias `list`) | `ButtonIncDec` / `ButtonRadio` / `ButtonFlat` | Comma-separated |
+| `count` | `ButtonRadio` | 1..16, rebuilds labels and `width` |
+| `default` | `ButtonFlat`, `ButtonRadio`, `ButtonIncDec` (index), `ButtonText` (bool) | Default index/state |
+| `item` | `ButtonIncDec` | Replaces current item |
+| `fontSize` (alias `size`) | `TextLabel` | 4..72 |
+| `color` (alias `colour`) | `TextLabel`, `ButtonText` | `#rgb` / `#rrggbb` |
+| `mappingTable` (aliases `mapping`, `table`) | `Knob`, `Slider` | Empty/`null` unsets |
+| `min` / `max` / `defaultValue` | `Knob`, `Slider` | Numeric |
+| `jackType` (alias `jack`) | `Input`, `Output` | `audio` / `control` |
 
 Command history via `↑` / `↓`. All commands go through `ComponentRegistry`.
 
@@ -306,6 +350,24 @@ Command history via `↑` / `↓`. All commands go through `ComponentRegistry`.
 - **Line numbers** in `#code-gutter`, synced via `_syncScroll()`
 - Font size controls `[A] [A]` — affects textarea, gutter, highlight layer
 - `Ctrl+S` — save code, `⟳` — resync from module, `📋` — copy
+
+### Protected code structure
+
+The Code panel splits into three zones:
+
+- **Header (🔒)** — `;@ map`, `opcode`, `xin`, mapping lines
+- **Body (editable)** — user DSP code
+- **Footer (🔒)** — `zar`/`zkr`/`init`, `zaw`/`zkw`, `endop`
+
+Rules:
+
+- Protected lines are **regenerated** from the module model (add/remove component, rename, mapping change).
+- The cursor cannot enter protected lines (`_clampCursorToEditable`). Backspace at the start of the body stops at the upper boundary; Enter at the end of the body inserts new lines (footer shifts down).
+- Structural keywords (`zar`, `zkr`, `zaw`, `zkw`, `xin`, `opcode`, `endop`) are **forbidden inside the body** — blocked by `beforeinput`, checked again in `onEditorInput`, highlighted red if leftovers exist.
+- `_structureCache` (from `_buildReferenceStructure` / `_rebuildStructureFromCurrent`) holds `bodyStart`, `bodyEnd`, `protectedLineIndices`. `onEditorInput` **always** rebuilds the cache from the current `editor.value` before comparing — index shifts after body edits do not corrupt the model.
+- `⟳` (Sync) regenerates everything from the model — the body is reset to the placeholder.
+- Right gutter shows 🔒 for protected lines (synced scroll).
+- Loading a module (`restoreModuleFromData`) calls `_rebuildStructure()` + `_rebuildStructureFromCurrent()` + `_updateGutter()` + `_updateHighlight()` — **not** `syncFromModule()` (which would wipe the DSP body).
 
 ### Editor keyboard shortcuts
 
@@ -400,6 +462,27 @@ Via `DesignSettingsPanel` (section **Grid**) or `system.setGridMultipliers(multX
 6. Standard `instr 3`, `instr 4` (MIDI, offline)
 
 Then `CsoundEngine.init()` → `compileOrc` + `readScore` + `start`.
+
+### UDO loading — `_loadUdoByPath`
+
+All UDO content is loaded through a single method:
+
+```js
+CsoundGenerator._loadUdoByPath(udoPath)
+```
+
+Rules:
+
+- `user/<Name>.txt` → `moduleStore.load(name).dsp_code` (localStorage / fs)
+- `<id>.txt`, `led_rms.txt` → `fetch('/csound/modules/<path>')` with **HTML-fallback detection** (`<!DOCTYPE` / `<html` in the first 200 chars → treated as missing)
+
+Used by:
+- `generateOrc()` — UDO section
+- `_collectMappingFtgens()` — `;@ map` extraction
+- `_loadVariantsForModules()` — `;@ ins` / `;@ outs` parsing
+- `loadUdoContent()` / `loadAllUdoContents()` — legacy helpers
+
+**Never** use raw `fetch('/csound/modules/user/...')` — Vite SPA-fallback returns `index.html` with status 200, HTML leaks into ORC.
 
 ### Recompile (hot reload)
 
@@ -561,20 +644,26 @@ Patcher `scripts/patch_params.py` regenerates `params` for all NM2 modules:
 18. **`gridX/gridY` are integers in base cells (20×15).** `multX/multY` only affect snap and rendering, not storage.
 19. **Changing `multX/multY` does not move existing modules.** Only the next drag uses the new step.
 20. **When creating modules / finding free space, always use `findFreeSpace(..., stepX, stepY)` with `multX/multY` (if snap) or `1/1`.**
+21. **UDO loading always via `CsoundGenerator._loadUdoByPath()`** — never raw `fetch` for `user/*`. Vite SPA-fallback returns `index.html` with status 200 for missing files.
+22. **`mappingTable` must be serialized and deserialized** for any component that supports it (`Knob`, `Slider`). Otherwise round-trip load/save loses the mapping (silent bug — LFO becomes too fast, oscilloscope breaks).
+23. **`syncFromModule()` must not be called after `restoreModuleFromData()`** — it wipes the loaded DSP body. `restoreModuleFromData` already rebuilds the code panel.
+24. **`mappingTable` is only for `Knob` and `Slider`** (for now). Do not add mapping fields to other components without updating `serialize` / `deserialize`.
 
 ## Known issues (short)
 
 - Variant switching not yet wired to UI (parsing done, switching not)
-- `CsoundEngine._ledValues` not cleared on `stop()`
+- `CsoundEngine._ledValues` not cleared on `stop()` — cosmetic, keeps last values
+- `led_rms` shows signed value (`portk kin, 0.1` without `abs`) — for LFO the LED follows both half-waves. Intentional for now, see `public/csound/modules/led_rms.txt`
 - `ModulePropertiesWindow` / `ComponentPropertiesWindow` are **headless** in editor — they exist only for `saveModule()` and `_showMappingBrowser()`. Will be fully replaced by `PropertiesPanel` eventually
 - `TerminalPanel._cmdSave` duplicates JS code generation from `ModulePropertiesWindow.generateModuleCode` — should be unified
-- `add` in terminal always uses `audio` jack type for Input/Output — control jacks only via UI
-- `loadAvailableModules` in `main.js` still uses `fetch('/api/list-user-modules')` (legacy)
 - Module Editor context menu still has `Change Color` — should be removed (color lives in Properties)
 - Terminal has no autocomplete
 - Code Viewer line numbers / highlight not yet virtualized (fine for typical module sizes, may lag on very large code)
 - **HiDPI (dpr > 1) is temporarily disabled** — `resizeCanvasToWindow()` uses `dpr = 1`. Modules don't drag correctly on macOS Retina when dpr > 1. To be investigated. On Windows with 125–150% scaling the same issue may appear.
 - **`Panel.startDrag` / `handlePanelDrag`** may need to align a module to the grid on the first drag if `multX/multY` changed after the module was placed at a non-multiple position. Current behaviour: rounds `targetGridX/Y` in `handlePanelDrag`.
+- **`mappingTable` was not serialized for old user modules.** If an old saved module shows a too-fast LFO / broken oscilloscope — the mapping was lost. Re-assign `set <id> mappingTable <name>` and re-save.
+- **HTML can leak into ORC** if a `fetch('/csound/modules/user/...')` slips through (Vite `index.html` with status 200). Fixed via `_loadUdoByPath` — if it happens again, check console for `⚠️ Got HTML instead of UDO for …`.
+- **`PropertiesPanel._render()` uses `style.cssText +=`** on tabs — accumulates over time. Should be `=` with a base + active/inactive suffix.
 
 ## TODO (short)
 
@@ -585,19 +674,21 @@ Patcher `scripts/patch_params.py` regenerates `params` for all NM2 modules:
 - Replace `getControlChannel` with `channelPtr` in `CsoundEngine`
 - Custom background upload (image file input)
 - Cable visual width per type (already partially done)
-- Fix `loadAvailableModules` to use `moduleStore`
 - **HiDPI**: fix dpr > 1 drag bug (macOS Retina, Windows scaling)
 
 **Module Editor:**
 - Remove `Change Color` from context menu
-- Terminal: autocomplete, `history`, `!!` repeat, `add in c` / `out c` for control jacks
+- Terminal: autocomplete, `history`, `!!` repeat
 - Terminal: unify JS code generation with `ModulePropertiesWindow`
+- Terminal `_cmdSet` for `mappingTable` calls `updateCode()` — but `PropertiesPanel` (mapping-select) does **not**. Unify.
 - Remove legacy `ModulePropertiesWindow` / `ComponentPropertiesWindow` once `PropertiesPanel` is full
 - CodeMirror (5 or 6) instead of textarea + overlay — proper undo, search, autocomplete
 - `DockLayout`: collapsible panels, tabs in properties for multiple components
 - Component grouping / align/distribute UI (already in terminal, not in UI)
 - `preview` command — send generated UDO to main app for live playback
 - Snapshot / undo-redo in editor
+- Fix `PropertiesPanel._render()` `cssText +=` accumulation
+- `led_rms` variant `led_peak` with `abs()` for "positive period" indicator
 
 **Shared:**
 - Web `moduleStore` — IndexedDB instead of `localStorage` (for larger modules / no quota issues)
