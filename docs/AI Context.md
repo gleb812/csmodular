@@ -1,5 +1,4 @@
 
-```markdown
 # AI Context — CsModular
 
 This document is a short description of the system for the AI assistant.
@@ -620,4 +619,3 @@ Style:
 - No "let's try" — concrete edits
 - Show diff or full methods
 - Do not change things not asked about
-```
