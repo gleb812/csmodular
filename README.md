@@ -1,4 +1,3 @@
-```markdown
 # CsModular
 
 A web-based modular synthesizer built with Csound and vanilla JavaScript + Canvas.
@@ -377,4 +376,3 @@ MIT License — see the [LICENSE](LICENSE) file for details.
 ## Author
 
 Gleb Rogozinski — [GitHub](https://github.com/gleb812)
-```
