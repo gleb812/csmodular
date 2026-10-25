@@ -1,4 +1,4 @@
-```markdown
+
 # TODO — CsModular
 
 ## Current tasks
@@ -314,4 +314,4 @@
 - Keyboard shortcuts rule — global key handlers must skip when `e.target` is `<input>`, `<textarea>`, or `contentEditable`. Otherwise typing `0` in editor triggers `resetZoom()`.
 - `ComponentRegistry` — single source of truth for component creation / serialization / Csound ports. Adding a new component type = one entry in `editor/ComponentRegistry.js`.
 - Grid step = `BASE_STEP_X/Y * multX/multY`. `gridX/gridY` — integers in base cells (20×15). Changing `multX/multY` does not move existing modules. All placement / `findFreeSpace` should use `stepX/stepY = multX/multY` (if snap) or `1/1`.
-```
+
