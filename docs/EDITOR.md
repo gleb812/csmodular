@@ -1,5 +1,4 @@
 
-````markdown
 # Module Editor
 
 The **Module Editor** is a separate HTML entry point (`editor.html`) used to
@@ -733,4 +732,3 @@ Long-term:
 - Live preview (`preview` command — send UDO to main app)
 - Macro recording in terminal
 - Multi-select in Properties (edit N components at once)
-````
