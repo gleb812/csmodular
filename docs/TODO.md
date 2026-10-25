@@ -86,7 +86,12 @@
 - [ ] Variant switching: `k` ↔ `a` opcode based on input cable types (NM2-style)
 - [ ] Jack recoloring on variant switch
 - [ ] Record Csound output to WAV
-- [ ] MIDI input (Web MIDI API + indicator)
+- [x] MIDI input (Web MIDI API + `MI` indicator + flash on message)
+- [ ] MIDI: fix `recompile()` → MIDI dead (see Known issues)
+- [ ] MIDI: velocity support (currently ignored, NM2 compat)
+- [ ] MIDI: polyphonic voice allocation (currently `gkGate` / `gkNote` are global)
+- [ ] MIDI: Tauri/macOS path (WKWebView has no Web MIDI — plugin or Rust-side)
+- [ ] OSC (after MIDI stabilises)
 - [ ] Custom UDOs for `debug` signals
 
 ### UDO loading
@@ -100,6 +105,59 @@
   follow both half-waves)
 
 ---
+
+## 🎹 MIDI
+
+### Done
+
+- [x] `MidiManager` (`src/midi/MidiManager.js`) — Web MIDI API receiver
+  - `requestMIDIAccess()` on user click
+  - device connect/disconnect via `onstatechange`
+  - message parsing → `{ status, data1, data2 }`
+  - history (last 50 messages)
+  - states: `idle` / `requesting` / `ready` / `denied` / `unsupported`
+- [x] `CsoundEngine.midiMessage(status, data1, data2)` — forwards to `instance.midiMessage()`
+- [x] `main.js` wiring: `MidiManager.onMessage → CsoundEngine.midiMessage()` (guarded by `state === 'running'`)
+- [x] BottomBar `MI` button — enable / disable, flashes on incoming message
+- [x] SysInfo popup — MIDI state, input count, last message
+- [x] Csound `instr 3` (NM2-compatible MIDI filter) → `gkGate` / `gkNote`
+- [x] Tested on Linux + Firefox + Tapco Link.MIDI 4x4 (ALSA sequencer)
+
+### Bugs
+
+- [ ] **MIDI dies after `CsoundEngine.recompile()`** — `@csound/browser` 6.18.7
+  does not recreate internal IPC message ports after `reset()`.
+  Symptoms:
+  - after recompile — MIDI silently stops reaching Csound (no error)
+  - on next `stop()` → `init()` — throws
+    `TypeError: can't access property "csoundMainRtMidiPort", this.ipcMessagePorts is undefined`
+  - **not caused by project code** — upstream bug
+  - **workaround**: restart Csound (`■` → `▶`) after recompile; MIDI comes back
+  - **candidate fix**: try `@csound/browser` 7.0.0-beta* or 6.18.5
+- [ ] MIDI input lost if `midiMessage()` is called immediately after recompile —
+  same root cause; guard with a short delay / readiness check if needed
+
+### Not implemented (next steps)
+
+- [ ] Velocity support (`gkVelocity` or similar — currently ignored, NM2 compat)
+- [ ] Polyphonic voice allocation — `gkGate` / `gkNote` are **global**; need
+  per-voice state in `instr 1`
+- [ ] MIDI learn — map CC to knobs / sliders
+- [ ] MIDI channel filter — separate instruments per channel
+- [ ] Clock / transport (Start / Stop / Continue / Clock)
+- [ ] Device selection UI — pick one input out of many
+- [ ] Tauri/macOS — WKWebView does not expose Web MIDI; needs plugin or
+  Rust-side MIDI (`midir` crate)
+- [ ] OSC — after MIDI is stable
+
+### Testing
+
+- [ ] Chrome / Edge (Web MIDI works out of the box)
+- [ ] Firefox on Linux (tested — OK via ALSA sequencer)
+- [ ] Firefox on Windows / macOS
+- [ ] Tauri on Windows (WebView2 — should work)
+- [ ] Tauri on Linux (WebKitGTK — check distro)
+- [ ] Tauri on macOS (WKWebView — expected to fail, needs plugin)
 
 ## 🧩 Components
 
@@ -289,3 +347,12 @@
   - `_structureCache` rebuilt from `editor.value` on each `input` — index drift safe
 - **`mappingTable` on `Knob` / `Slider`** is serialized and deserialized. Any new component with mapping support must update both `serialize` and `deserialize` in `ComponentRegistry.js`.
 - **`load` must not call `syncFromModule()`** — it wipes the loaded DSP body. `restoreModuleFromData` already rebuilds the structure correctly.
+- **MIDI chain**: `MidiManager.onMessage` → `CsoundEngine.midiMessage()` →
+  Csound `instr 3` (`midiin`) → `gkGate` / `gkNote`. `MidiManager` never
+  touches Csound directly — always via `CsoundEngine`.
+- **MIDI enabled only by user click** (`MI` in BottomBar) — browsers require
+  a user gesture for `requestMIDIAccess()`. Never auto-init on page load.
+- **`instr 3`** — NM2-compatible MIDI filter. Velocity is **ignored** by
+  design (`gkGate` / `gkNote` only). Other messages (CC, pitch bend) pass
+  through `midiin` and are available via `gkstat` / `gkchan` / `gkdata1` /
+  `gkdata2`.

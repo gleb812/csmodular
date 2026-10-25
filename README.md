@@ -9,6 +9,7 @@ This project is a next level of the *pch2csd* project: https://github.com/gleb81
 
 - Modular architecture with interchangeable audio modules
 - Real-time Csound synthesis engine (via `@csound/browser`)
+- MIDI input via Web MIDI API — browser → `MidiManager` → Csound (`instr 3` NM2-compatible gate/note filter)
 - Web-based UI with Canvas rendering
 - Runs as a web app (browser) or desktop app (Tauri: Windows / Linux / macOS)
 - Infinite workspace with pan, zoom and scroll
@@ -26,7 +27,8 @@ This project is a next level of the *pch2csd* project: https://github.com/gleb81
 ## Architecture
 
 - Frontend: vanilla JS (ES modules), Vite
-- Audio: `@csound/browser` 6.18.7
+- Audio: `@csound/browser` 7.0.0-beta33
+- MIDI: Web MIDI API → `src/midi/MidiManager.js` → `CsoundEngine.midiMessage()` → Csound `instr 3`
 - Desktop shell: Tauri 2.x (Rust)
 - Storage:
   - Web: localStorage (`moduleStore.web.js`)
@@ -137,6 +139,7 @@ Output:
 │   │   ├── moduleStore.tauri.js
 │   │   └── moduleStore.web.js
 │   ├── csound/          # CsoundEngine, CsoundGenerator, MappingTables
+│   ├── midi/ # MidiManager — Web MIDI API receiver
 │   ├── components/      # UI components (Knob, Slider, Input, Output, ...)
 │   ├── grid/            # Grid system (step, snap, crosses)
 │   ├── managers/        # EventManager, LayerManager, UIManager
@@ -203,6 +206,67 @@ The world is infinite, with a configurable grid:
 - Snap to grid can be toggled on/off
 - Changing multipliers does not move existing modules — only the next drag uses the new step
 - Grid settings persist in localStorage as part of the theme (`settings.grid`)
+
+## MIDI
+
+MIDI input is received in the browser via the **Web MIDI API** and forwarded
+to Csound through `CsoundEngine.midiMessage()`. On the Csound side,
+`instr 3` acts as an NM2-compatible MIDI filter: it reads `midiin`, and
+exposes `gkGate` / `gkNote` for the rest of the patch.
+
+### Signal chain
+
+```
+MIDI device → Web MIDI API (browser)
+            → MidiManager.onMessage (src/midi/MidiManager.js)
+            → CsoundEngine.midiMessage(status, data1, data2)
+            → Csound `instr 3` (midiin)
+            → gkGate / gkNote
+```
+
+### Enabling MIDI
+
+1. Click the **`MI`** button in the bottom bar.
+2. Grant the browser permission when prompted.
+3. The button lights up and flashes on every incoming MIDI message.
+
+### Requirements
+
+- **Secure context** — `https://` or `http://localhost`
+- **Browser support** — Chrome / Edge / Firefox (Web MIDI is not available in Safari on all platforms)
+- **Linux** — Chrome/Firefox receive MIDI through **ALSA sequencer**; the device must be visible in `aconnect -i -o`
+- **Tauri** — Web MIDI support depends on the platform WebView (WebView2 on Windows, WKWebView on macOS). On macOS, Web MIDI is not exposed by WKWebView out of the box and may require a plugin or Rust-side MIDI.
+
+### What's implemented
+
+- Note On / Note Off (`0x90` / `0x80`) → `gkGate`, `gkNote` (velocity is currently ignored — NM2 compatibility)
+- Any other MIDI message is forwarded to Csound as-is (CC, pitch bend, etc. — available for future use)
+- Last 50 messages are stored in `MidiManager.history` (for debugging)
+- MIDI status is shown in the SysInfo popup (`i` button)
+
+### Known issue: MIDI stops working after recompile
+
+After `recompile()` (`reset` + `compileOrc`), MIDI events stop reaching
+Csound, and a subsequent `stop()` → `init()` may throw:
+
+```
+TypeError: can't access property "csoundMainRtMidiPort",
+this.ipcMessagePorts is undefined
+```
+
+This is an internal `@csound/browser` issue (IPC message ports are not
+recreated after `reset()`). It is **not** caused by the project code.
+Workarounds under investigation:
+
+- try a different `@csound/browser` version (`7.0.0-beta*` or older `6.18.5`)
+- avoid `reset()` + `compileOrc` in favour of a full restart (slower — rejected for now)
+- re-initialize MIDI ports after recompile, if the API allows it
+
+### Debugging
+
+- Browser console: `[MidiManager]` logs for access state, device connect/disconnect
+- `CsoundEngine.midiMessage()` returns `false` and logs a warning if the Csound instance does not expose `midiMessage()`
+- In Csound, `printk` inside `instr 3` shows the raw MIDI status (temporary debug aid)
 
 ## Themes
 
@@ -461,6 +525,18 @@ Grid settings reset:
 Modules don't drag correctly on macOS Retina (dpr > 1):
 - Known issue. `resizeCanvasToWindow` temporarily uses `dpr = 1` as a workaround.
 - See TODO.md → Grid system → HiDPI.
+
+**MIDI not received in browser**:
+- Check the console for `[MidiManager]` messages
+- Ensure the page is served from `localhost` or `https://`
+- On Linux: verify the device is visible in `aconnect -i -o` (ALSA sequencer);
+  Chrome/Firefox receive MIDI through ALSA
+- On Firefox: Web MIDI may require `dom.webmidi.enabled` in `about:config`
+  (usually enabled by default in recent versions)
+- Check that no other process (DAW, `aseqdump`) has exclusive access to the port
+
+**MIDI works before recompile but not after**:
+- Known `@csound/browser` issue — see the **MIDI** section → *Known issue*
 
 ## Contributing
 

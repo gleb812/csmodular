@@ -17,7 +17,8 @@ Two entry points:
 ## Stack
 
 - **Frontend**: vanilla JS (ES modules), Vite
-- **Audio**: `@csound/browser` 6.18.7
+- **Audio**: `@csound/browser` 7.0.0-beta31
+- **MIDI**: Web MIDI API → `src/midi/MidiManager.js` → `CsoundEngine.midiMessage()` → Csound `instr 3`
 - **Desktop shell**: Tauri 2.x (Rust)
 - **Storage**:
   - `src/api/index.js` — lazy `moduleStore` singleton
@@ -156,6 +157,108 @@ The world is **infinite**. Grid is managed by a single `Grid` class (`src/grid/G
 
 **Legacy removed:** `LayerManager.drawLayerGrid`, `updateGridCache`, `getGridCache`, `backgroundCache`, `divider`, `main.js.updateCanvasSize`, `this.divider`, cell highlight under cursor.
 
+## MIDI
+
+MIDI input is received in the browser via the **Web MIDI API** and forwarded
+to Csound through `CsoundEngine.midiMessage()`. On the Csound side,
+`instr 3` acts as an **NM2-compatible MIDI filter**: it reads `midiin` and
+exposes `gkGate` / `gkNote` for the rest of the patch.
+
+### Signal chain
+
+```
+MIDI device → Web MIDI API (browser)
+            → MidiManager.onMessage (src/midi/MidiManager.js)
+            → CsoundEngine.midiMessage(status, data1, data2)
+            → Csound `instr 3` (midiin)
+            → gkGate / gkNote
+```
+
+### `MidiManager` (`src/midi/MidiManager.js`)
+
+- `init(opts)` — `navigator.requestMIDIAccess()`; must be called from a click
+  handler (browser permission). Returns `true` on success.
+- `dispose()` — detach all inputs, drop access.
+- `onStateChange(cb)` / `onMessage(cb)` — subscriptions.
+- `getInfo()` → `{ state, inputCount, inputNames, lastMessage, lastMessageTime }`.
+- `getHistory()` / `clearHistory()` — last `MAX_HISTORY = 50` messages.
+- Internal states: `'idle' | 'requesting' | 'ready' | 'denied' | 'unsupported'`.
+- `_onMidiMessage` parses `event.data` into `{ status, data1, data2 }` and
+  emits an event to subscribers. **Does not talk to Csound directly** —
+  `main.js` wires `onMessage → CsoundEngine.midiMessage()`.
+
+### `CsoundEngine.midiMessage(status, data1, data2)`
+
+- Forwards to `this.instance.midiMessage(...)` (`@csound/browser` 6.18.7).
+- Returns `false` if the instance is not ready or the method is missing.
+- `main.js` guards with `engine.state === 'running'` before calling.
+
+### Csound side — `instr 3`
+
+Already present in `CsoundGenerator` (standard block, not per-module):
+
+```csound
+instr 3
+  gkstat, gkchan, gkdata1, gkdata2 midiin
+  if gkstat != 144 goto Next
+    gkGate = 1
+    gkNote = gkdata1
+  Next:
+  if gkstat!=128 goto Over
+    gkGate = 0
+  Over:
+endin
+```
+
+- `0x90` (Note On) → `gkGate = 1`, `gkNote = data1`
+- `0x80` (Note Off) → `gkGate = 0`
+- **Velocity is ignored** — NM2 compatibility, `gkGate`/`gkNote` are the only
+  exposed signals for now.
+- Other messages (CC, pitch bend, …) pass through `midiin` and are available
+  via `gkstat` / `gkchan` / `gkdata1` / `gkdata2` if needed later.
+
+### Enabling MIDI
+
+1. Click the **`MI`** button in the bottom bar.
+2. Grant the browser permission.
+3. The button lights up and **flashes on every incoming MIDI message**.
+4. State is shown in the SysInfo popup (`i` button).
+
+### Requirements
+
+- **Secure context** — `https://` or `http://localhost`
+- **Browser** — Chrome / Edge / Firefox. Safari support is limited.
+- **Linux** — Chrome/Firefox receive MIDI via **ALSA sequencer**; the device
+  must be visible in `aconnect -i -o`. Typical checks:
+  `lsusb` → `amidi -l` → `aconnect -i -o` → `aseqdump -p <client:port>`.
+- **Tauri** — depends on the platform WebView:
+  - Windows (WebView2) — Web MIDI is available
+  - Linux (WebKitGTK) — varies by distro/version
+  - macOS (WKWebView) — Web MIDI is **not exposed by default**, may need a
+    plugin or Rust-side MIDI (not implemented yet)
+
+### Known issue: MIDI stops working after recompile
+
+After `CsoundEngine.recompile()` (`reset` + `compileOrc`), MIDI events stop
+reaching Csound. A subsequent `stop()` → `init()` may throw:
+
+```
+TypeError: can't access property "csoundMainRtMidiPort",
+this.ipcMessagePorts is undefined
+```
+
+Cause: `@csound/browser` does not recreate its internal IPC message ports
+after `reset()`. **Not** caused by the project code.
+
+Workarounds under investigation:
+- try a different `@csound/browser` version (`7.0.0-beta*` or older `6.18.5`)
+- avoid `reset()` + `compileOrc` in favour of a full restart (slower — rejected)
+- re-init MIDI ports after recompile, if the API allows it
+
+Until fixed: **after each recompile, MIDI input is dead**. Restart Csound
+(`■` → `▶`) to restore it (this may trigger the `ipcMessagePorts` error once,
+then recover).
+
 ## Main classes (main app)
 
 | Class | File | Role |
@@ -176,6 +279,7 @@ The world is **infinite**. Grid is managed by a single `Grid` class (`src/grid/G
 | `Cable` | `src/Cable.js` | `fromJack.type` is the source of truth for cable type |
 | `moduleStore` | `src/api/index.js` | User module storage (lazy singleton) |
 | `Theme`, `themeStore`, `currentTheme` | `src/theme/*.js` | Theme system: classic / LCD presets |
+| `MidiManager` | `src/midi/MidiManager.js` | Web MIDI API receiver (devices, messages, history) |
 
 ## Module Editor
 
@@ -459,7 +563,8 @@ Via `DesignSettingsPanel` (section **Grid**) or `system.setGridMultipliers(multX
 3. UDO section (from `includes`)
 4. `instr 1` (voice) — module calls + converters + `led_rms`
 5. `instr 2` (fx) — same
-6. Standard `instr 3`, `instr 4` (MIDI, offline)
+6. Standard `instr 3` (NM2-compatible MIDI filter → `gkGate` / `gkNote`),
+   `instr 4` (offline rendering)
 
 Then `CsoundEngine.init()` → `compileOrc` + `readScore` + `start`.
 
@@ -648,6 +753,11 @@ Patcher `scripts/patch_params.py` regenerates `params` for all NM2 modules:
 22. **`mappingTable` must be serialized and deserialized** for any component that supports it (`Knob`, `Slider`). Otherwise round-trip load/save loses the mapping (silent bug — LFO becomes too fast, oscilloscope breaks).
 23. **`syncFromModule()` must not be called after `restoreModuleFromData()`** — it wipes the loaded DSP body. `restoreModuleFromData` already rebuilds the code panel.
 24. **`mappingTable` is only for `Knob` and `Slider`** (for now). Do not add mapping fields to other components without updating `serialize` / `deserialize`.
+25. **MIDI never touches Csound directly from `MidiManager`** — always via
+    `CsoundEngine.midiMessage()`. `main.js` wires `onMessage → midiMessage`
+    with a `engine.state === 'running'` guard.
+26. **MIDI is enabled by user click** (`MI` in BottomBar) — never auto-init
+    on page load. Browsers require a user gesture for `requestMIDIAccess()`.
 
 ## Known issues (short)
 
@@ -664,6 +774,11 @@ Patcher `scripts/patch_params.py` regenerates `params` for all NM2 modules:
 - **`mappingTable` was not serialized for old user modules.** If an old saved module shows a too-fast LFO / broken oscilloscope — the mapping was lost. Re-assign `set <id> mappingTable <name>` and re-save.
 - **HTML can leak into ORC** if a `fetch('/csound/modules/user/...')` slips through (Vite `index.html` with status 200). Fixed via `_loadUdoByPath` — if it happens again, check console for `⚠️ Got HTML instead of UDO for …`.
 - **`PropertiesPanel._render()` uses `style.cssText +=`** on tabs — accumulates over time. Should be `=` with a base + active/inactive suffix.
+- **MIDI dies after `recompile()`** — `@csound/browser` 6.18.7 does not
+  recreate IPC message ports after `reset()`. `midiMessage()` either does
+  nothing (silent) or throws `ipcMessagePorts is undefined` on next
+  `stop()`/`init()`. Workaround: restart Csound. Fix: switch
+  `@csound/browser` version (7.0.0-beta* / 6.18.5)
 
 ## TODO (short)
 
@@ -675,6 +790,10 @@ Patcher `scripts/patch_params.py` regenerates `params` for all NM2 modules:
 - Custom background upload (image file input)
 - Cable visual width per type (already partially done)
 - **HiDPI**: fix dpr > 1 drag bug (macOS Retina, Windows scaling)
+- **MIDI**: velocity support (currently ignored, NM2 compat)
+- **MIDI**: polyphonic voice allocation (currently `gkGate`/`gkNote` are global)
+- **MIDI**: Tauri/macOS path (WKWebView has no Web MIDI — plugin or Rust-side)
+- **MIDI**: OSC (next step after MIDI stabilises)
 
 **Module Editor:**
 - Remove `Change Color` from context menu
