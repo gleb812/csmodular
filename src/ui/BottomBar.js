@@ -14,7 +14,7 @@
 //   [?]                           │  about
 
 import { getCurrentTheme } from '../theme/currentTheme.js';
-
+import { IndicatorLamp } from './IndicatorLamp.js';
 export class BottomBar {
     constructor(system) {
         this.system = system;
@@ -23,7 +23,10 @@ export class BottomBar {
         this._sysInfoOpen = false;
         this._sysInfoPopup = null;
         this._tickInterval = null;
-
+        this._midiInLamp  = null;
+        this._midiOutLamp = null;
+        this._oscLamp     = null;
+        this._oscSettings = null;
         this.createBar();
         this.createSysInfoPopup();
         this.setupEvents();
@@ -99,9 +102,13 @@ export class BottomBar {
 
             { id: 'sep5b', label: null },
 
-            // --- MIDI ---
-            { id: 'midi',   label: 'MI', title: 'Enable MIDI input',  action: () => this._toggleMidi() },
-
+            // --- MIDI / OSC ---
+            { id: 'midi', label: 'MI', title: 'Enable MIDI input', action: () => this._toggleMidi() },
+            { id: 'lamp-midi-in',  label: null, special: 'lamp', lamp: 'midiIn'  },
+            { id: 'lamp-midi-out', label: null, special: 'lamp', lamp: 'midiOut' },
+            { id: 'osc',  label: 'OSC', title: 'OSC settings / status', action: () => this._toggleOscSettings(), toggle: () => !!this._oscSettings?.isVisible },
+            { id: 'lamp-osc', label: null, special: 'lamp', lamp: 'osc' },
+            
             // --- SysInfo ---
             { id: 'sysinfo', label: 'i', title: 'System info',     action: () => this._toggleSysInfo() },
 
@@ -112,6 +119,12 @@ export class BottomBar {
         buttons.forEach(b => {
             if (b.id.startsWith('sep')) {
                 this.element.appendChild(this._makeSeparator());
+            } else if (b.special === 'lamp') {
+                const lamp = this._makeLamp(b.lamp);
+                this.element.appendChild(lamp.element);
+                if (b.lamp === 'midiIn')  this._midiInLamp  = lamp;
+                if (b.lamp === 'midiOut') this._midiOutLamp = lamp;
+                if (b.lamp === 'osc')     this._oscLamp     = lamp;
             } else {
                 const btn = this._makeButton(b);
                 this.element.appendChild(btn);
@@ -121,6 +134,16 @@ export class BottomBar {
 
         document.body.appendChild(this.element);
         this.makeDraggable();
+    }
+
+    _makeLamp(kind) {
+        const map = {
+            midiIn:  { label: 'IN',  color: '#3f3', title: 'MIDI input activity' },
+            midiOut: { label: 'OUT', color: '#3cf', title: 'MIDI output activity' },
+            osc:     { label: 'OSC', color: '#fc3', title: 'OSC bridge activity' },
+        };
+        const cfg = map[kind] || { label: '', color: '#888', title: '' };
+        return new IndicatorLamp(cfg);
     }
 
     _makeButton(cfg) {
@@ -295,6 +318,14 @@ export class BottomBar {
         }
     }
 
+    _toggleOscSettings() {
+        if (!this._oscSettings) {
+            console.warn('[BottomBar] OscSettingsPanel not attached');
+            return;
+        }
+        this._oscSettings.toggle();
+    }
+
     async _toggleMidi() {
         const midi = this.system?.midiManager;
         if (!midi) {
@@ -440,6 +471,8 @@ export class BottomBar {
                 ${row('Csound', cs.toUpperCase(), csColor)}
                 ${row('MIDI', `${midiState.toUpperCase()} / ${midiInputs} in`, midiColor)}
                 ${row('Last MIDI', midiLastDesc, '#aaa')}
+                ${row('OSC', oscState.toUpperCase(), oscColor)}
+                ${row('Last OSC', oscDesc, '#aaa')}
             </div>
         `;
 
@@ -457,6 +490,11 @@ export class BottomBar {
         const midiLastDesc = midiLast
             ? `${midiLast.status.toString(16).padStart(2, '0')} ${midiLast.data1} ${midiLast.data2}`
             : '—';
+        const osc = s.oscManager;
+        const oscState = osc?.state || 'idle';
+        const oscColor = { idle: '#888', connecting: '#fa0', ready: '#0f0', error: '#f44' }[oscState] || '#888';
+        const oscLast  = osc?._lastMessage;
+        const oscDesc  = oscLast ? `${oscLast.address} (${oscLast.args.length})` : '—';
 
     }
 
@@ -579,6 +617,11 @@ export class BottomBar {
         // Run-кнопка — состояние Csound могло измениться извне
         const runBtn = this._buttons.find(b => b.id === 'run');
         if (runBtn) this._updateButtonState(runBtn.element, runBtn);
+
+        if (this._midiInLamp)  this._midiInLamp.draw();
+        if (this._midiOutLamp) this._midiOutLamp.draw();
+        if (this._oscLamp)     this._oscLamp.draw();
+
     }
 
     // ============================================================
@@ -657,13 +700,32 @@ export class BottomBar {
             }
         });
 
-        // ⭐ MIDI: обновлять состояние кнопки при смене статуса
+        // ============================================================
+        //  MIDI + OSC — подписки на лампочки и состояние
+        // ============================================================
+
         const midi = this.system?.midiManager;
         if (midi) {
             midi.onStateChange(() => this.refreshState());
-            midi.onMessage(() => this._flashMidiLed());
+            midi.onMessage(() => {
+                this._midiInLamp?.blink();
+                this._flashMidiLed();
+            });
+            if (typeof midi.onSend === 'function') {
+                midi.onSend(() => this._midiOutLamp?.blink());
+            }
         }
 
+        const osc = this.system?.oscManager;
+        if (osc) {
+            osc.onMessage(() => this._oscLamp?.blink());
+            osc.onStateChange((s) => {
+                if (!this._oscLamp) return;
+                this._oscLamp.setState(
+                    s === 'ready' ? 'ok' : s === 'error' ? 'error' : 'idle',
+                );
+            });
+        }
     }
 
     show()   { this.element.style.display = 'flex'; }

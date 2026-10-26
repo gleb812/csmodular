@@ -134,7 +134,8 @@
                 "y": 10,
                 "width": 6,
                 "height": 15,
-                "orientation": "vertical"
+                "orientation": "vertical",
+                "sourceComponentId": "2" 
         },
         {
                 "componentType": "MiniVU",
@@ -143,7 +144,8 @@
                 "y": 10,
                 "width": 6,
                 "height": 15,
-                "orientation": "vertical"
+                "orientation": "vertical",
+                "sourceComponentId": "1" 
         }
 ]
     };

@@ -27,6 +27,8 @@ import { StickerPropertiesPanel } from './src/ui/StickerPropertiesPanel.js';
 import { releaseSvg } from './src/stickers/svgCache.js';
 import { BottomBar } from './src/ui/BottomBar.js';
 import { MidiManager } from './src/midi/MidiManager.js';
+import { OscManager } from './src/midi/OscManager.js';
+import { OscSettingsPanel } from './src/ui/OscSettingsPanel.js';
 
 
 // Глобальный обработчик ошибок
@@ -1324,13 +1326,20 @@ _renderDynamic() {
   async removeModule(module) {
       if (!module) return;
 
-      // ⭐ 0. Снимаем регистрацию LED-каналов (ДО удаления из components)
       if (this.csoundEngine && module.components) {
           const leds = module.components.filter(c => c.constructor.name === 'LED');
           leds.forEach(led => {
               if (led.sourceChannel) {
                   this.csoundEngine.unregisterLedChannel(led.sourceChannel);
                   console.log(`💡 Unregistered LED channel: ${led.sourceChannel}`);
+              }
+          });
+
+          const mvus = module.components.filter(c => c.constructor.name === 'MiniVU');
+          mvus.forEach(mvu => {
+              if (mvu.sourceChannel) {
+                  this.csoundEngine.unregisterLedChannel(mvu.sourceChannel);
+                  console.log(`📊 Unregistered MiniVU channel: ${mvu.sourceChannel}`);
               }
           });
       }
@@ -2126,13 +2135,23 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
               const leds = newModule.components.filter(c => c.constructor.name === 'LED');
               leds.forEach(led => {
                   if (led.sourceComponentId === null || led.sourceComponentId === undefined) return;
-                  
                   const channelName = `led_${moduleType}_${newModule.jsonId}_${led.id}`;
                   led.sourceChannel = channelName;
                   this.csoundEngine.registerLedChannel(channelName);
                   console.log(`💡 Registered LED channel: ${channelName}`);
               });
+
+              // ⭐ Регистрируем MiniVU-каналы
+              const mvus = newModule.components.filter(c => c.constructor.name === 'MiniVU');
+              mvus.forEach(mvu => {
+                  if (mvu.sourceComponentId === null || mvu.sourceComponentId === undefined) return;
+                  const channelName = `mvu_${moduleType}_${newModule.jsonId}_${mvu.id}`;
+                  mvu.sourceChannel = channelName;
+                  this.csoundEngine.registerLedChannel(channelName);
+                  console.log(`📊 Registered MiniVU channel: ${channelName}`);
+              });
           }
+
 
           this.sortComponentsByZIndex();
           this.showNotification(
@@ -2444,6 +2463,69 @@ document.addEventListener('DOMContentLoaded', async () => {
         const engine = modularSystem.csoundEngine;
         if (!engine || engine.state !== 'running') return;
         engine.midiMessage(evt.status, evt.data1, evt.data2);
+    });
+
+    // ⭐ OSC + CSP-bridge
+    modularSystem.oscManager = new OscManager();
+    modularSystem.oscSettings = new OscSettingsPanel(modularSystem);
+    modularSystem.bottomBar._oscSettings = modularSystem.oscSettings;
+
+    // Автоподключение, если пользователь не отключал
+    const oscCfg = (() => {
+        try { return JSON.parse(localStorage.getItem('csmodular:osc') || 'null'); }
+        catch { return null; }
+    })();
+    if (oscCfg === null || oscCfg.autoConnect !== false) {
+        const url = oscCfg?.url || 'ws://127.0.0.1:8765/ws';
+        modularSystem.oscManager.connect(url).catch(() => {});
+    }
+
+    // ⭐ Управляющие команды /csp/... → UI
+    modularSystem.oscManager.onControl((msg) => {
+        try {
+            switch (msg.cmd) {
+                case 'main.reset':
+                    modularSystem.resetEverything();
+                    break;
+                case 'main.new':
+                    modularSystem.resetEverything();
+                    break;
+                case 'main.save':
+                    modularSystem.savePatch(msg.args?.filename);
+                    break;
+                case 'main.load':
+                    modularSystem.loadJsonPatch();
+                    break;
+                case 'main.csound.start':
+                    modularSystem.csoundEngine?.init?.();
+                    break;
+                case 'main.csound.stop':
+                    modularSystem.csoundEngine?.stop?.();
+                    break;
+                case 'module.add':
+                    if (msg.args?.type) {
+                        modularSystem.addNewModule(msg.args.type, msg.args.layer || 'voice');
+                    }
+                    break;
+                case 'module.remove': {
+                    const p = modularSystem.components.find(c => c.jsonId === msg.args?.id);
+                    if (p) modularSystem.removeModule(p);
+                    break;
+                }
+                case 'midi.send':
+                    modularSystem.midiManager?.send(
+                        msg.args.status | 0, msg.args.data1 | 0, msg.args.data2 | 0,
+                    );
+                    break;
+                case 'osc.send':
+                    modularSystem.oscManager.send(msg.args.address, msg.args.args || []);
+                    break;
+                default:
+                    console.log('[csp-cmd] unknown:', msg.cmd);
+            }
+        } catch (e) {
+            console.error('[csp-cmd] handler error:', e);
+        }
     });
 
   // Добавляем команды для дебага в консоли

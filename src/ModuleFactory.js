@@ -353,6 +353,9 @@ export class ModuleFactory {
                         compDef.width || 6,
                         compDef.height || 15
                     );
+                    if (compDef.sourceComponentId !== null && compDef.sourceComponentId !== undefined) {
+                        component.sourceComponentId = compDef.sourceComponentId;
+                    }
                     break;
                     
                 case 'TextLabel':

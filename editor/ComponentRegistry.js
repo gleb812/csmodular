@@ -818,14 +818,20 @@ export const ComponentRegistry = {
             opts.width ?? 40, opts.height ?? 24
         ),
 
-        serialize: (c) => ({
-            componentType: 'MiniVU',
-            id: String(c.id),
-            x: Math.round(c.relX ?? 0),
-            y: Math.round(c.relY ?? 0),
-            width: c.width ?? 40,
-            height: c.height ?? 24,
-        }),
+        serialize: (c) => {
+            const out = {
+                componentType: 'MiniVU',
+                id: String(c.id),
+                x: Math.round(c.relX ?? 0),
+                y: Math.round(c.relY ?? 0),
+                width: c.width ?? 40,
+                height: c.height ?? 24,
+            };
+            if (c.sourceComponentId !== null && c.sourceComponentId !== undefined) {
+                out.sourceComponentId = String(c.sourceComponentId);
+            }
+            return out;
+        },
 
         deserialize: (d, ctx) => {
             const c = new MiniVU(
@@ -834,6 +840,9 @@ export const ComponentRegistry = {
             );
             c.relX = d.x;
             c.relY = d.y;
+            if (d.sourceComponentId !== undefined && d.sourceComponentId !== null) {
+                c.sourceComponentId = d.sourceComponentId;
+            }
             return c;
         },
 

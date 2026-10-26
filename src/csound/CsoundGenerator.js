@@ -26,6 +26,7 @@ export class CsoundGenerator {
         // Шаблон Csound (будет обновляться динамически)
         this.userModules = {};        
         this.includes.add('led_rms.txt');
+        this.includes.add('mVU_rms.txt');  
         this._userModulesLoaded = false;
         // ⭐ Scope tables
         this._scopeTables = new Map();      // cableId -> { tableNum, bus, isAudio }
@@ -1105,8 +1106,6 @@ i3 0 [60*60*24*7]
     }
     
     formatModuleLine(module) {
-        //console.log('🎯 formatModuleLine called with:', module);
-        
         const {
             instanceName,
             instanceId,
@@ -1119,192 +1118,241 @@ i3 0 [60*60*24*7]
             typeId,
             numericTypeId
         } = module;
-        
+
         const panel = this.getPanelById(instanceId);
         const moduleDef = this.system?.moduleFactory?.moduleRegistry?.[typeId];
-        
+
         // ⭐ Имя модуля (opcode)
         let moduleName = typeId;
         if (moduleDef && moduleDef.type) {
             moduleName = moduleDef.type;
         }
-
         if (moduleDef?.variants?.length > 1) {
             const suffix = module._activeVariant || moduleDef.defaultSuffix || 'k';
             moduleName = `${moduleDef.type}_${suffix}`;
         }
-        
-        //console.log(`  📛 Module name: ${moduleName} (typeID: ${numericTypeId})`);
-        
-        // ⭐ ID входов/выходов из определения модуля
+
         const inputIds = moduleDef?.inputs || [];
         const outputIds = moduleDef?.outputs || [];
-        
-        //console.log(`  📊 Input IDs:`, inputIds);
-        //console.log(`  📊 Output IDs:`, outputIds);
-        
+
+        // ⭐ 1. inletBuses (как раньше) — шины, которые читает opcode модуля
         const inletBuses = inputIds.map(id => {
             const cable = this._findCableForPort(instanceId, id, 'input');
-            if (!cable) return 1;
-            
+            if (!cable) return 1; // fallback: служебная шина (как было)
+
             const sourceBus = this._cableBusMap[cable.id];
             if (sourceBus === undefined) return 1;
-            
-            // ⭐ Если есть конвертер — используем его выходной bus
+
             const convKey = `${cable.id}_${id}`;
             const conv = this._converterBuses[convKey];
-            if (conv) {
-                return conv.bus;
-            }
-            
+            if (conv) return conv.bus;
+
             return sourceBus;
         });
-        
-        // ⭐ Для каждого ID выхода — ищем кабели
+
+        // ⭐ 2. outletBuses (как раньше, но с tap-шинами для индикаторов на Output)
+        //    Сначала собираем tap-потребности, потом досоздаём шины.
         const outletBuses = outputIds.map(id => {
             const cables = this._findCablesForOutput(instanceId, id);
             if (cables.length > 0) {
                 const busNumber = this._cableBusMap[cables[0].id];
-                if (busNumber !== undefined) {
-                    //console.log(`  🔗 Output id=${id} → bus ${busNumber} (${cables.length} cables)`);
-                    return busNumber;
-                }
+                if (busNumber !== undefined) return busNumber;
             }
-            //console.log(`  🔗 Output id=${id} → 0 (ground)`);
             return 0;
         });
-        
-        //console.log(`  📊 Inlet buses:`, inletBuses);
-        //console.log(`  📊 Outlet buses:`, outletBuses);
-        
-        // ⭐ Параметры из moduleDef.params (в порядке opcode)
+
+        // ⭐ 3. Индикаторы: LED и MiniVU
+        const leds = (panel?.components || []).filter(c => c.constructor.name === 'LED');
+        const mvus = (panel?.components || []).filter(c => c.constructor.name === 'MiniVU');
+
+        // Карта tap-точек: ключ = `${dir}:${componentId}` → { bus, type, a2kBus }
+        // dir = 'output' | 'input'
+        const taps = new Map();
+
+        // 3a. Обрабатываем Output-индикаторы: гарантируем tap-шину
+        const handleOutputTap = (srcComp, srcIndex) => {
+            const key = `output:${srcComp.id}`;
+            if (taps.has(key)) return taps.get(key);
+
+            const outType = this._normalizeJackType(srcComp);
+            let bus = outletBuses[srcIndex];
+
+            if (!bus || bus === 0) {
+                // Нет кабеля — выделяем tap-шину того же типа, что Output
+                const busType = (outType === 'audio') ? 'audio' : 'control';
+                bus = this._allocateBus(busType);
+                outletBuses[srcIndex] = bus; // opcode теперь пишет в неё
+            }
+
+            const tap = { bus, type: outType, a2kBus: null };
+            taps.set(key, tap);
+            return tap;
+        };
+
+        // 3b. Обрабатываем Input-индикаторы: берём inletBuses[srcIndex]
+        //     Если кабеля нет (inletBuses = 1) — индикатор не генерируем.
+        const handleInputTap = (srcComp, srcIndex) => {
+            const key = `input:${srcComp.id}`;
+            if (taps.has(key)) return taps.get(key);
+
+            // Проверяем, есть ли реальный кабель на этот вход
+            const cable = this._findCableForPort(instanceId, srcComp.id, 'input');
+            if (!cable) return null; // нет кабеля — индикатор пропускаем
+
+            const bus = inletBuses[srcIndex];
+            if (!bus || bus === 1) return null; // fallback-шина — пропускаем
+
+            const inType = this._normalizeJackType(srcComp);
+            const tap = { bus, type: inType, a2kBus: null };
+            taps.set(key, tap);
+            return tap;
+        };
+
+        // 3c. Регистрируем все tap-точки, на которые ссылаются индикаторы
+        for (const ind of [...leds, ...mvus]) {
+            const src = this._resolveIndicatorSource(panel, ind, inputIds, outputIds);
+            if (!src) continue;
+            if (src.dir === 'output') handleOutputTap(src.comp, src.index);
+            else handleInputTap(src.comp, src.index);
+        }
+
+        // 3d. Для LED на audio-tap выделяем A2K (один раз на точку)
+        for (const ind of leds) {
+            const src = this._resolveIndicatorSource(panel, ind, inputIds, outputIds);
+            if (!src) continue;
+            const key = `${src.dir}:${src.comp.id}`;
+            const tap = taps.get(key);
+            if (!tap) continue;
+            if (tap.type === 'audio' && tap.a2kBus === null) {
+                tap.a2kBus = this._allocateBus('control');
+            }
+            // control/logic → LED читает tap.bus напрямую
+        }
+
+        // ⭐ 4. chnget для параметров
         const paramIds = moduleDef?.params || [];
         const chngetLines = [];
         const paramArgs = [];
-        
+
         if (paramIds.length > 0) {
-            // User-модуль с явными params — генерируем chnget
             paramIds.forEach(compId => {
                 const comp = panel?.components.find(c => String(c.id) === String(compId));
-                
                 if (!comp) {
                     console.warn(`  ⚠️ Param id=${compId} not found in panel`);
                     paramArgs.push('0');
                     return;
                 }
-                
                 const channelName = `module_${instanceName}_${instanceId}_${compId}`;
                 const varName = `k_${instanceName}_${instanceId}_${compId}`;
-                
                 chngetLines.push(`${varName} chnget "${channelName}"`);
                 paramArgs.push(varName);
             });
         } else {
-            // Fallback: NM2-модули — используем defaultParams как значения
             const paramsToUse = parameters.length > 0 ? parameters : defaultParams;
             paramsToUse.forEach(p => paramArgs.push(String(p)));
         }
-        
-        // ⭐ Mode (пока без изменений)
+
+        // ⭐ 5. mode (как раньше)
         const modeArgs = [];
         const modeToUse = mode.length > 0 ? mode : defaultMode;
-        if (modeToUse.length > 0) {
-            modeToUse.forEach(m => modeArgs.push(String(m)));
-        }
-        
-        // ⭐ Все аргументы по порядку
+        modeToUse.forEach(m => modeArgs.push(String(m)));
+
+        // ⭐ 6. Вызов opcode
         const allArgs = [
             ...paramArgs,
             ...modeArgs,
             ...inletBuses.map(String),
             ...outletBuses.map(String),
         ];
-        
         const callLine = `${moduleName} ${allArgs.join(', ')}`;
 
-        // ⭐ ⭐ ⭐ LED-строки (для каждой лампочки в модуле)
-        const ledLines = [];
-        if (panel && moduleDef?.components) {
-            const leds = panel.components.filter(c => c.constructor.name === 'LED');
-            
-            leds.forEach(led => {
-                // ⭐ Ищем source-компонент (Input или Output)
-                if (led.sourceComponentId === null || led.sourceComponentId === undefined) {
-                    console.log(`  ⚠️ LED id=${led.id} has no sourceComponentId`);
-                    return;
-                }
-                
-                const sourceComp = panel.components.find(c => 
-                    String(c.id) === String(led.sourceComponentId)
-                );
-                
-                if (!sourceComp) {
-                    console.log(`  ⚠️ LED id=${led.id}: source id=${led.sourceComponentId} not found`);
-                    return;
-                }
-                
-                const sourceType = sourceComp.constructor.name;
-                let bus = null;
-                
-                if (sourceType === 'Input') {
-                    // LED на входе — читаем то, что приходит в Input
-                    const inputIndex = inputIds.indexOf(parseInt(sourceComp.id));
-                    if (inputIndex === -1) {
-                        console.log(`  ⚠️ LED id=${led.id}: input id=${sourceComp.id} not in moduleDef.inputs`);
-                        return;
-                    }
-                    bus = inletBuses[inputIndex];
-                } else if (sourceType === 'Output') {
-                    // LED на выходе — читаем то, что выходит из Output
-                    const outputIndex = outputIds.indexOf(parseInt(sourceComp.id));
-                    if (outputIndex === -1) {
-                        console.log(`  ⚠️ LED id=${led.id}: output id=${sourceComp.id} not in moduleDef.outputs`);
-                        return;
-                    }
-                    bus = outletBuses[outputIndex];
-                } else {
-                    console.log(`  ⚠️ LED id=${led.id}: source type ${sourceType} not supported`);
-                    return;
-                }
-                
-                if (!bus || bus === 0) {
-                    // ⭐ bus 0 = ground, LED просто не горит
-                    //console.log(`  🔗 LED id=${led.id}: bus=0 (ground), skipping`);
-                    return;
-                }
-                
-                // ⭐ Имя канала (уникальное)
-                const channelName = `led_${instanceName}_${instanceId}_${led.id}`;
-                const ledType = led.ledType || 'rms';
-                
-               // console.log(`  💡 LED id=${led.id} → ${ledType}(${bus}, "${channelName}")`);
-                
-                // ⭐ Строка вызова LED-UDO
-                ledLines.push(`led_${ledType} ${bus}, "${channelName}"`);
-            });
-        }
-
-        // ⭐ Собираем строки конвертеров для ЭТОГО модуля (перед вызовом)
+        // ⭐ 7. Конвертеры для обычных кабелей (как раньше)
         const converterLines = [];
         for (const id of inputIds) {
             const cable = this._findCableForPort(instanceId, id, 'input');
             if (!cable) continue;
-            
             const convKey = `${cable.id}_${id}`;
             const conv = this._converterBuses[convKey];
             if (!conv) continue;
-            
             converterLines.push(`${conv.type} ${conv.sourceBus}, ${conv.bus}`);
         }
 
+        // ⭐ 8. A2K для LED на Input (до callLine — сигнал уже в inletBuses)
+        const tapA2KInputLines = [];
+        for (const ind of leds) {
+            const src = this._resolveIndicatorSource(panel, ind, inputIds, outputIds);
+            if (!src || src.dir !== 'input') continue;
+            const tap = taps.get(`input:${src.comp.id}`);
+            if (!tap || tap.type !== 'audio' || tap.a2kBus === null) continue;
+            if (!tapA2KInputLines.includes(`A2K ${tap.bus}, ${tap.a2kBus}`)) {
+                tapA2KInputLines.push(`A2K ${tap.bus}, ${tap.a2kBus}`);
+            }
+        }
+
+        // ⭐ 9. A2K для LED на Output (после callLine — opcode уже записал в tap.bus)
+        const tapA2KOutputLines = [];
+        for (const ind of leds) {
+            const src = this._resolveIndicatorSource(panel, ind, inputIds, outputIds);
+            if (!src || src.dir !== 'output') continue;
+            const tap = taps.get(`output:${src.comp.id}`);
+            if (!tap || tap.type !== 'audio' || tap.a2kBus === null) continue;
+            if (!tapA2KOutputLines.includes(`A2K ${tap.bus}, ${tap.a2kBus}`)) {
+                tapA2KOutputLines.push(`A2K ${tap.bus}, ${tap.a2kBus}`);
+            }
+        }
+
+        // ⭐ 10. Строки LED
+        const ledLines = [];
+        for (const led of leds) {
+            const src = this._resolveIndicatorSource(panel, led, inputIds, outputIds);
+            if (!src) continue;
+            const tap = taps.get(`${src.dir}:${src.comp.id}`);
+            if (!tap) continue;
+
+            let bus;
+            if (tap.type === 'audio') {
+                if (tap.a2kBus === null) continue;
+                bus = tap.a2kBus;
+            } else {
+                bus = tap.bus;
+            }
+
+            const channelName = `led_${instanceName}_${instanceId}_${led.id}`;
+            const ledType = led.ledType || 'rms';
+            ledLines.push(`led_${ledType} ${bus}, "${channelName}"`);
+        }
+
+        // ⭐ 11. Строки MiniVU (только audio)
+        const mvuLines = [];
+        for (const mvu of mvus) {
+            const src = this._resolveIndicatorSource(panel, mvu, inputIds, outputIds);
+            if (!src) continue;
+            const tap = taps.get(`${src.dir}:${src.comp.id}`);
+            if (!tap) continue;
+
+            if (tap.type !== 'audio') {
+                console.warn(
+                    `[CsoundGenerator] MiniVU id=${mvu.id} (module ${instanceName}/${instanceId}) ` +
+                    `hangs on ${tap.type} ${src.dir}, MiniVU only supports audio — skipped`
+                );
+                continue;
+            }
+
+            const channelName = `mvu_${instanceName}_${instanceId}_${mvu.id}`;
+            mvuLines.push(`mVU_rms ${tap.bus}, "${channelName}"`);
+        }
+
+        // ⭐ 12. Финальная сборка
         const result = [
             ...chngetLines,
             ...converterLines,
+            ...tapA2KInputLines,
             callLine,
+            ...tapA2KOutputLines,
             ...ledLines,
+            ...mvuLines,
         ].join('\n');
 
-        //console.log('  ✅ result:', result);
         return result;
     }
 
@@ -1531,6 +1579,61 @@ i3 0 [60*60*24*7]
         const match = code.match(/outputs:\s*\[([^\]]*)\]/);
         if (!match) return null;
         return match[1].split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+    }
+
+    /**
+     * Выделить новую шину указанного типа и обновить счётчики.
+     * @param {'audio'|'control'} type
+     * @returns {number} номер шины
+     */
+    _allocateBus(type) {
+        if (type === 'audio') {
+            const bus = this._audioBusCounter++;
+            this._audioBusCount = this._audioBusCounter;
+            return bus;
+        }
+        const bus = this._controlBusCounter++;
+        this._controlBusCount = this._controlBusCounter;
+        return bus;
+    }
+
+    /**
+     * Тип Output/Input после нормализации: 'audio' | 'control' | 'logic'.
+     * 'logic' считаем control-подобным для целей индикации (LED умеет), MiniVU — нет.
+     */
+    _normalizeJackType(jack) {
+        const t = jack?.type || 'audio';
+        if (t === 'audio' || t === 'control' || t === 'logic') return t;
+        return 'audio';
+    }
+
+    /**
+     * Найти компонент-источник для индикатора (LED/MiniVU) в панели.
+     * Возвращает { comp, dir, index } или null.
+     *  - dir = 'output' → index = позиция в outputIds
+     *  - dir = 'input'  → index = позиция в inputIds
+     */
+    _resolveIndicatorSource(panel, indicator, inputIds, outputIds) {
+        if (indicator.sourceComponentId === null || indicator.sourceComponentId === undefined) {
+            return null;
+        }
+        const src = panel.components.find(
+            c => String(c.id) === String(indicator.sourceComponentId)
+        );
+        if (!src) return null;
+
+        const name = src.constructor.name;
+        if (name === 'Output') {
+            const idx = outputIds.indexOf(parseInt(src.id));
+            if (idx === -1) return null;
+            return { comp: src, dir: 'output', index: idx };
+        }
+        if (name === 'Input') {
+            const idx = inputIds.indexOf(parseInt(src.id));
+            if (idx === -1) return null;
+            return { comp: src, dir: 'input', index: idx };
+        }
+        return null; // LED/MiniVU нельзя вешать на другие компоненты
     }
 
 

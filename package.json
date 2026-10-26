@@ -1,15 +1,15 @@
 {
-  "name": "vite-project",
+  "name": "csmodular",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:all": "concurrently -n vite,bridge -c cyan,magenta \"npm:dev\" \"npm:bridge\"",
     "build": "vite build",
-    "tauri": "tauri",
     "preview": "vite preview",
-    "dev:full": "concurrently \"npm run dev\" \"npm run backend\"",
-    "backend": "cd backend && python server.py"
+    "tauri": "tauri",
+    "bridge": "node bridge/csp-bridge.js"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.12.1",

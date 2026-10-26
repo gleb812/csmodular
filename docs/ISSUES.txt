@@ -30,6 +30,9 @@ FltStatic - взрывается выше 16кГЦ проверить
 MIXER 1-1A    OK 
 MIXER 1-1S    OK 
 MIXER 2-1A    OK
+MIXER 4-1A    OK
+MIXER 4-1B    OK
+
 
 
 MUX18 warning: zkr index > isizek. Returning 0.
@@ -40,3 +43,6 @@ Delay из LOGIC содержит ошибки - syntax error, unexpected NEWLIN
 Invert - работает только правый блок. сопоставить с NM2 - какое поведение при значении не равном 1
 
 ClkGen вроде щелкает, но на осциллографе ничего
+
+надо miniVU вручную дописать к имеющимся модулям. надо в патче учесть.
+кроме того, editor не создает miniVU

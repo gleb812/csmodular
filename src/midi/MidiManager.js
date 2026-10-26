@@ -22,6 +22,9 @@ export class MidiManager {
         this._messageListeners = [];
         this._lastMessage = null;        // последнее сообщение (для UI)
         this._lastMessageTime = 0;
+        this._sendListeners = [];
+        this._midiOut = null;            // MIDIOutput | null
+        this.outputs = new Map();        // id -> MIDIOutput
     }
 
     // ---------- подписки ----------
@@ -33,6 +36,41 @@ export class MidiManager {
 
     onMessage(cb) {
         this._messageListeners.push(cb);
+    }
+
+    // --- новые методы (рядом с onMessage) ---
+
+    onSend(cb) {
+        this._sendListeners.push(cb);
+    }
+
+    /**
+     * Отправить MIDI-сообщение.
+     * Лампочка OUT мигает ВСЕГДА (даже если физического out нет).
+     * @returns {boolean} true, если сообщение ушло в реальное устройство
+     */
+    send(status, data1, data2) {
+        const evt = {
+            time: performance.now(),
+            status, data1, data2,
+            inputName: this._midiOut?.name || '(no out)',
+            raw: [status, data1, data2],
+        };
+
+        // UI-подписчики (лампочка MIDI OUT) — всегда
+        this._sendListeners.forEach(cb => {
+            try { cb(evt); } catch (e) { console.error(e); }
+        });
+
+        // Реальная отправка, если есть устройство
+        if (!this._midiOut) return false;
+        try {
+            this._midiOut.send([status, data1, data2], performance.now());
+            return true;
+        } catch (err) {
+            console.warn('[MidiManager] send failed:', err);
+            return false;
+        }
     }
 
     _setState(state) {
@@ -57,10 +95,14 @@ export class MidiManager {
     }
 
     getInfo() {
+        // --- в getInfo() добавь поля: ---
         return {
             state: this.state,
             inputCount: this.inputs.size,
             inputNames: [...this.inputs.values()].map(i => i.name || '(unnamed)'),
+            outputCount: this.outputs.size,
+            outputNames: [...this.outputs.values()].map(o => o.name || '(unnamed)'),
+            hasOutput: !!this._midiOut,
             lastMessage: this._lastMessage,
             lastMessageTime: this._lastMessageTime,
         };
@@ -112,6 +154,8 @@ export class MidiManager {
             try { input.onmidimessage = null; } catch (e) {}
         }
         this.inputs.clear();
+        this.outputs.clear();
+        this._midiOut = null;
         if (this.access) {
             try { this.access.onstatechange = null; } catch (e) {}
         }
@@ -143,27 +187,51 @@ export class MidiManager {
         });
     }
 
+    // --- замени _refreshInputs() полностью на: ---
+
     _refreshInputs() {
         if (!this.access) return;
 
-        const seen = new Set();
-
+        // ---- INPUTS ----
+        const seenIn = new Set();
         for (const input of this.access.inputs.values()) {
-            seen.add(input.id);
+            seenIn.add(input.id);
             if (this.inputs.has(input.id)) continue;
 
             console.log(`[MidiManager] 🎹 input connected: ${input.name || input.id}`);
             input.onmidimessage = (evt) => this._onMidiMessage(evt, input);
             this.inputs.set(input.id, input);
         }
-
-        // Удалить отключённые
         for (const [id, input] of this.inputs) {
-            if (!seen.has(id)) {
+            if (!seenIn.has(id)) {
                 console.log(`[MidiManager] 🔌 input disconnected: ${input.name || id}`);
                 try { input.onmidimessage = null; } catch (e) {}
                 this.inputs.delete(id);
             }
+        }
+
+        // ---- OUTPUTS ----
+        const seenOut = new Set();
+        for (const output of this.access.outputs.values()) {
+            seenOut.add(output.id);
+            if (!this.outputs.has(output.id)) {
+                console.log(`[MidiManager] 🎹 output connected: ${output.name || output.id}`);
+                this.outputs.set(output.id, output);
+            }
+        }
+        for (const [id, output] of this.outputs) {
+            if (!seenOut.has(id)) {
+                console.log(`[MidiManager] 🔌 output disconnected: ${output.name || id}`);
+                this.outputs.delete(id);
+                if (this._midiOut?.id === id) this._midiOut = null;
+            }
+        }
+
+        // Автовыбор первого out-устройства (если ещё не выбран или пропал)
+        if (!this._midiOut || !this.outputs.has(this._midiOut.id)) {
+            const first = this.outputs.values().next().value || null;
+            this._midiOut = first;
+            if (first) console.log(`[MidiManager] ↳ using output: ${first.name || first.id}`);
         }
     }
 
@@ -190,14 +258,6 @@ export class MidiManager {
 
         this._lastMessage = evt;
         this._lastMessageTime = performance.now();
-
-        // // ⭐ Лог в консоль — компактно
-        // console.log(
-        //     `🎹 MIDI [${evt.inputName}] ` +
-        //     `status=0x${status.toString(16).padStart(2, '0')} ` +
-        //     `data1=${data1} data2=${data2}`,
-        //     this._describe(status, data1, data2),
-        // );
 
         this._emitMessage(evt);
     }

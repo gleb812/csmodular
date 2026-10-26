@@ -1,0 +1,14 @@
+; miniVU indicator
+; Input: kIn  — zak-bus number (a-rate signal source)
+;        SChannel — Csound channel name for chnset
+opcode mVU_rms, 0, kS
+kIn, SChannel xin
+
+; Read control signal from zak
+ain zar kIn
+
+; RMS via envelope follower
+kRms rms ain
+; Send to channel
+chnset kRms, SChannel
+endop
