@@ -585,22 +585,28 @@ i3 0 [60*60*24*7]
                 const cable = this._findCableForPort(moduleData.instanceId, inputId, 'input');
                 if (!cable) continue;
                 
-                const sourceType = cable.fromJack?.type || 'audio';
+                // ⭐ Csound-rate источника (logic/logicAudio схлопываются в control/audio)
+                const sourceRate = this._getCableType(cable);   // 'audio' | 'control'
                 
                 const inputComp = panel.components.find(
                     c => String(c.id) === String(inputId)
                 );
-                const inputType = inputComp?.type || 'audio';
+                // ⭐ Csound-rate приёмника
+                const inputRate = (inputComp?.type === 'audio' || inputComp?.type === 'logicAudio')
+                                  ? 'audio'
+                                  : 'control';
                 
-                if (sourceType === inputType) continue;
+                // ⭐ Если rate совпадает — конвертер не нужен
+                // (logic ↔ logicAudio, control ↔ logic, audio ↔ logicAudio)
+                if (sourceRate === inputRate) continue;
                 
                 let convType;
-                if (sourceType === 'control' && inputType === 'audio') {
+                if (sourceRate === 'control' && inputRate === 'audio') {
                     convType = 'K2A';
-                } else if (sourceType === 'audio' && inputType === 'control') {
+                } else if (sourceRate === 'audio' && inputRate === 'control') {
                     convType = 'A2K';
                 } else {
-                    console.warn(`[CsoundGenerator] Unsupported conversion: ${sourceType} → ${inputType}`);
+                    console.warn(`[CsoundGenerator] Unsupported conversion: ${sourceRate} → ${inputRate}`);
                     continue;
                 }
                 
@@ -611,7 +617,7 @@ i3 0 [60*60*24*7]
                 }
                 
                 let newBus;
-                if (inputType === 'audio') {
+                if (inputRate === 'audio') {
                     newBus = this._audioBusCounter++;
                     this._audioBusCount = this._audioBusCounter;
                 } else {
@@ -627,7 +633,7 @@ i3 0 [60*60*24*7]
                 };
                 
                 found++;
-                console.log(`[CsoundGenerator] Converter: ${convType} (src: ${sourceType}-bus ${sourceBus} → dst: ${inputType}-bus ${newBus}) (module ${moduleData.instanceName}/${inputId})`);
+                console.log(`[CsoundGenerator] Converter: ${convType} (src: ${sourceRate}-bus ${sourceBus} → dst: ${inputRate}-bus ${newBus}) (module ${moduleData.instanceName}/${inputId})`);
             }
         }
         
@@ -758,37 +764,25 @@ i3 0 [60*60*24*7]
     }
     
     _getCableType(cable) {
-        // ⭐ 1. ПРИОРИТЕТ: тип источника (Output-джека). Это истина.
-        const sourceType = cable.fromJack?.type;
-        if (sourceType === 'audio' || sourceType === 'control') {
-            return sourceType;
-        }
+        // ⭐ 1. ПРИОРИТЕТ: тип источника с учётом варианта
+        const sourceType = this._resolveSourceType(cable);
+        if (sourceType === 'audio' || sourceType === 'logicAudio') return 'audio';
+        if (sourceType === 'control' || sourceType === 'logic') return 'control';
         
         // ⭐ 2. Fallback: тип приёмника
         const destType = cable.toJack?.type;
-        if (destType === 'audio' || destType === 'control') {
-            return destType;
-        }
+        if (destType === 'audio' || destType === 'logicAudio') return 'audio';
+        if (destType === 'control' || destType === 'logic') return 'control';
         
         // ⭐ 3. Совсем fallback: по цвету (старое поведение)
         const color = cable.getDisplayColor ? cable.getDisplayColor() : cable.color;
-        
-        const audioColors = ['#ef4444', '#ff0000', '#ff4444', '#ff6b6b', '#ff8800', '#ffa500', '#ff8c00'];
+        const audioColors = ['#ef4444', '#ff0000', '#ff4444', '#ff6b6b', '#ff8800', '#ffa500', '#ff8c00', '#f97316'];
         const controlColors = ['#3b82f6', '#0000ff', '#4488ff', '#fde047', '#ffff00', '#ffd93d', '#ffdd57'];
         
-        if (!color) {
-            return 'audio';
-        }
-        
+        if (!color) return 'audio';
         const colorLower = color.toLowerCase();
-        
-        for (const audioColor of audioColors) {
-            if (colorLower === audioColor.toLowerCase()) return 'audio';
-        }
-        
-        for (const controlColor of controlColors) {
-            if (colorLower === controlColor.toLowerCase()) return 'control';
-        }
+        for (const c of audioColors) if (colorLower === c.toLowerCase()) return 'audio';
+        for (const c of controlColors) if (colorLower === c.toLowerCase()) return 'control';
         
         return 'audio';
     }
@@ -923,21 +917,21 @@ i3 0 [60*60*24*7]
         }
     }
 
-    /**
-     * Определить тип источника кабеля с учётом активного варианта модуля-источника.
-     * 
-     * Если модуль-источник — с вариантами и активный = 'a' → возвращаем 'audio'.
-     * Если активный = 'k' → возвращаем 'control'.
-     * Иначе — реальный fromJack.type.
-     */
     _resolveSourceType(cable) {
         const fromJack = cable.fromJack;
         if (!fromJack) return 'audio';
         
-        const sourcePanel = fromJack.parentModule;
-        if (!sourcePanel) return fromJack.type || 'audio';
+        const t = fromJack.type || 'audio';
         
-        // Ищем moduleData источника
+        // ⭐ logic-семейство не зависит от варианта (в Csound всё control)
+        if (t === 'logic' || t === 'logicAudio') {
+            return t;
+        }
+        
+        // audio/control — смотрим на вариант модуля-источника
+        const sourcePanel = fromJack.parentModule;
+        if (!sourcePanel) return t;
+        
         const sourceModuleData = [...this.modules.values()]
             .find(m => m.instanceId === sourcePanel.jsonId);
         
@@ -945,12 +939,13 @@ i3 0 [60*60*24*7]
             const sourceDef = this.system?.moduleFactory?.moduleRegistry?.[sourceModuleData.typeId];
             if (sourceDef?.variants && sourceDef.variants.length > 1) {
                 const active = sourceModuleData._activeVariant || sourceDef.defaultSuffix || 'k';
-                return active === 'a' ? 'audio' : 'control';
+                if (t === 'audio' || t === 'control') {
+                    return active === 'a' ? 'audio' : 'control';
+                }
             }
         }
         
-        // Обычный модуль — реальный тип джека
-        return fromJack.type || 'audio';
+        return t;
     }
 
 
@@ -1597,13 +1592,10 @@ i3 0 [60*60*24*7]
         return bus;
     }
 
-    /**
-     * Тип Output/Input после нормализации: 'audio' | 'control' | 'logic'.
-     * 'logic' считаем control-подобным для целей индикации (LED умеет), MiniVU — нет.
-     */
     _normalizeJackType(jack) {
         const t = jack?.type || 'audio';
-        if (t === 'audio' || t === 'control' || t === 'logic') return t;
+        if (t === 'audio' || t === 'logicAudio') return 'audio';
+        if (t === 'control' || t === 'logic') return 'control';
         return 'audio';
     }
 

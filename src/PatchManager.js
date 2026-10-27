@@ -1,6 +1,7 @@
 // src/PatchManager.js
 import { Cable } from './Cable.js';
 import { getCurrentTheme } from './theme/currentTheme.js';
+import { CABLE_COLORS } from './constants.js';
 
 export class PatchManager {
   constructor(system) {
@@ -10,19 +11,13 @@ export class PatchManager {
     this.startJack = null;
     this.hoverJack = null;
 
-    // Цвета кабелей по типам
-    this.CABLE_COLORS = {
-      audio: '#ef4444', // Красный
-      control: '#3b82f6', // Синий
-      logic: '#fde047', // Желтый
-      other: '#ffffff', // Белый
-    };
+    // ⭐ CABLE_COLORS теперь из constants.js
+    this.CABLE_COLORS = CABLE_COLORS;
   }
 
   // === ОСНОВНЫЕ ОПЕРАЦИИ С КАБЕЛЯМИ ===
 
   addCable(fromJack, toJack) {
-      // Проверяем возможность подключения
       if (!this.canConnect(fromJack, toJack)) {
           return null;
       }
@@ -36,13 +31,13 @@ export class PatchManager {
           console.log('🔄 Swapped jacks: input → output corrected to output → input');
       }
 
-      const cableColor = this.determineCableColor(actualFrom, actualTo);
+      const cableColor = this.determineCableColor(actualFrom);
 
       const cable = new Cable(actualFrom, actualTo, cableColor);
       this.cables.push(cable);
 
-      this.updateJackConnection(actualFrom, cable, cableColor);
-      this.updateJackConnection(actualTo, cable, cableColor);
+      this.updateJackConnection(actualFrom, cable);
+      this.updateJackConnection(actualTo, cable);
 
       console.log(`✅ Cable added (color: ${cableColor}). Total: ${this.cables.length}`);
       
@@ -58,13 +53,13 @@ export class PatchManager {
           this.system._recompileDebounced();
       }
 
-      // ⭐ Пересчёт вариантов + UI-перекраска
       if (this.system?.recomputeVariantUI) {
-          this.system.recomputeVariantUI();   // асинхронный, не ждём
+          this.system.recomputeVariantUI();
       }
 
       return cable;
   }
+
 
   getCablesForJack(jack) {
     return this.cables.filter(
@@ -86,178 +81,72 @@ export class PatchManager {
   }
 
   changeCableColor(jack, colorHex, isVisual = true) {
-    const cables = this.getCablesForJack(jack);
-    //console.log(`Меняем ${isVisual ? 'визуальный' : 'функциональный'} цвет ${cables.length} кабелей на ${colorHex}`);
-
-    cables.forEach((cable) => {
-      if (isVisual) {
-        cable.setVisualColor(colorHex);
-      } else {
-        // Меняем тип (но лучше не делать это через UI)
-        cable.typeColor = colorHex;
+      if (!isVisual) {
+          console.warn('Functional cable color is determined by jack type');
+          return 0;
       }
-
-      // Обновляем цвет центров джеков
-      const otherJack = cable.fromJack === jack ? cable.toJack : cable.fromJack;
-      if (otherJack && otherJack.updateCenterColor) {
-        otherJack.updateCenterColor(cable.getDisplayColor());
+      const cables = this.getCablesForJack(jack);
+      cables.forEach(c => c.setVisualColor(colorHex));
+      if (this.system) {
+          this.system._cablesDirty = true;
+          if (this.system.forceRedraw) this.system.forceRedraw();
       }
-    });
-
-    // Обновляем цвет самого джека
-    if (jack.updateCenterColor) {
-      jack.updateCenterColor(cables[0]?.getDisplayColor() || '#ffffff');
-    }
-
-    return cables.length;
+      return cables.length;
   }
 
   resetCableColors(jack) {
-    const cables = this.getCablesForJack(jack);
-
-    cables.forEach((cable) => {
-      cable.resetVisualColor();
-
-      // Возвращаем цвет центров к typeColor
-      const otherJack = cable.fromJack === jack ? cable.toJack : cable.fromJack;
-      if (otherJack && otherJack.updateCenterColor) {
-        otherJack.updateCenterColor(cable.typeColor);
+      const cables = this.getCablesForJack(jack);
+      cables.forEach(c => c.resetVisualColor());
+      jack.updateCenterColor(jack.getEffectiveColor());
+      if (this.system) {
+          this.system._cablesDirty = true;
+          if (this.system.forceRedraw) this.system.forceRedraw();
       }
-    });
-
-    if (jack.updateCenterColor) {
-      // Возвращаем цвет джека к типу первого кабеля
-      const defaultColor =
-        cables[0]?.typeColor ||
-        this.CABLE_COLORS[jack.type] ||
-        this.CABLE_COLORS.other;
-      jack.updateCenterColor(defaultColor);
-    }
-    // ===== ДОБАВИТЬ ЭТОТ БЛОК =====
-    if (this.system) {
-      this.system._cablesDirty = true;
-    }
-    return cables.length;
+      return cables.length;
   }
 
-  determineCableColor(jack1, jack2) {
-    // Ищем выходной джек
-    let outputJack = null;
-
-    if (jack1.direction === 'output') {
-      outputJack = jack1;
-    } else if (jack2.direction === 'output') {
-      outputJack = jack2;
-    }
-
-    // Если есть выходной джек - берем его цвет
-    if (outputJack) {
-      return this.CABLE_COLORS[outputJack.type] || this.CABLE_COLORS.other;
-    }
-
-    // Оба джека - входы
-    // Проверяем, есть ли у них уже цветные подключения
-    const coloredCable = this.findColoredCable(jack1, jack2);
-    if (coloredCable) {
-      return coloredCable.color;
-    }
-
-    // Иначе белый кабель
-    return this.CABLE_COLORS.other;
+  determineCableColor(fromJack) {
+      return CABLE_COLORS[fromJack.type] || CABLE_COLORS.other;
   }
 
-  findColoredCable(jack1, jack2) {
-    // Проверяем все кабели джека 1
-    for (const cable of jack1.cables) {
-      if (cable.color !== this.CABLE_COLORS.other) {
-        return cable;
-      }
-    }
 
-    // Проверяем все кабели джека 2
-    for (const cable of jack2.cables) {
-      if (cable.color !== this.CABLE_COLORS.other) {
-        return cable;
-      }
-    }
-
-    return null;
-  }
-
-  updateJackConnection(jack, cable, color) {
-    jack.addCable(cable);
-    jack.updateCenterColor(color);
-
-    // Если это входной джек и у него несколько подключений,
-    // перекрашиваем все кабели в цвет первого цветного подключения
-    if (jack.direction === 'input' && jack.cables.length > 1) {
-      this.synchronizeInputCables(jack);
-    }
-  }
-
-  synchronizeInputCables(inputJack) {
-    // Ищем первый цветной кабель
-    let targetColor = this.CABLE_COLORS.other;
-    for (const cable of inputJack.cables) {
-      if (cable.color !== this.CABLE_COLORS.other) {
-        targetColor = cable.color;
-        break;
-      }
-    }
-
-    // Перекрашиваем все кабели и обновляем центры
-    for (const cable of inputJack.cables) {
-      if (cable.color !== targetColor) {
-        cable.color = targetColor;
-
-        // Обновляем цвет центра у второго джека
-        const otherJack =
-          cable.fromJack === inputJack ? cable.toJack : cable.fromJack;
-        if (otherJack) {
-          otherJack.updateCenterColor(targetColor);
-        }
-      }
-    }
-
-    // Обновляем цвет центра самого джека
-    inputJack.updateCenterColor(targetColor);
+  updateJackConnection(jack, cable) {
+      jack.addCable(cable);
+      // ⭐ цвет центра = тип самого джека, не цвет кабеля
+      jack.updateCenterColor(jack.getEffectiveColor());
   }
 
   removeCable(cable) {
       const index = this.cables.indexOf(cable);
       if (index > -1) {
-          // Удаляем ссылки из джеков
-          if (cable.fromJack) {
-              cable.fromJack.removeCable(cable);
-          }
-          if (cable.toJack) {
-              cable.toJack.removeCable(cable);
-          }
+          const fromJack = cable.fromJack;
+          const toJack = cable.toJack;
 
-          // Отключаем кабель
+          if (fromJack) fromJack.removeCable(cable);
+          if (toJack) toJack.removeCable(cable);
+
           cable.disconnect();
           this.cables.splice(index, 1);
+
+          // ⭐ сразу вернуть цвета джеков к их текущему типу
+          if (fromJack) fromJack.updateCenterColor(fromJack.getEffectiveColor());
+          if (toJack) toJack.updateCenterColor(toJack.getEffectiveColor());
           
           if (this.system) {
               this.system._cablesDirty = true;
-              if (this.system.forceRedraw) {
-                  this.system.forceRedraw();
-              }
+              if (this.system.forceRedraw) this.system.forceRedraw();
           }
           
-          // ⭐ Удаляем кабель из CsoundGenerator
           if (this.system && this.system.csoundGen) {
               this.system.csoundGen.removeCable(cable);
-              //this.system.csoundGen.showFullCsd();
           }
           
           if (this.system?.csoundEngine?.state === 'running') {
               this.system._recompileDebounced();
           }
 
-          // ⭐ Пересчёт вариантов + UI-перекраска
           if (this.system?.recomputeVariantUI) {
-              this.system.recomputeVariantUI();   // асинхронный, не ждём
+              this.system.recomputeVariantUI();
           }
       }
   }

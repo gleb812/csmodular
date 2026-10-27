@@ -1,7 +1,7 @@
 // main.js
 import { ModuleFactory } from './src/ModuleFactory.js';
 import { Grid } from './src/grid/Grid.js';
-import { BASE_STEP_X, BASE_STEP_Y, PANEL_GRID_WIDTH } from './src/constants.js';
+import { BASE_STEP_X, BASE_STEP_Y, PANEL_GRID_WIDTH,CABLE_COLORS } from './src/constants.js';
 import { themeStore } from './src/theme/themeStore.js';
 import { moduleStore } from './src/api/index.js';
 import { Panel } from './src/components/Panel.js';
@@ -539,9 +539,6 @@ _renderDynamic() {
       this.forceRedraw?.();
   }
 
-  /**
-   * Применить вариант к панели: обновить типы джеков и перекрасить выходные кабели.
-   */
   _applyVariantToPanel(panel, variant) {
       const moduleDef = this.moduleFactory?.moduleRegistry?.[panel.jsonName];
       if (!moduleDef) return;
@@ -549,44 +546,44 @@ _renderDynamic() {
       const inputIds = moduleDef.inputs || [];
       const outputIds = moduleDef.outputs || [];
       
-      // ⭐ Обновляем типы Input
+      // ⭐ Обновляем типы Input (из variant.ins), с учётом originalType
       for (let i = 0; i < inputIds.length; i++) {
           const id = inputIds[i];
-          const newType = this._typeFromSuffix(variant.ins[i]);
           const comp = panel.components.find(c => String(c.id) === String(id));
-          if (comp && comp.type !== newType) {
+          if (!comp) continue;
+
+          const newType = this._typeFromSuffix(variant.ins[i], comp.originalType);
+          if (comp.type !== newType) {
               comp.type = newType;
           }
+          // ⭐ перекрасить центр по типу
+          comp.updateCenterColor(comp.getEffectiveColor());
       }
       
-      // ⭐ Обновляем типы Output
+      // ⭐ Обновляем типы Output (из variant.outs)
       for (let i = 0; i < outputIds.length; i++) {
           const id = outputIds[i];
-          const newType = this._typeFromSuffix(variant.outs[i]);
           const comp = panel.components.find(c => String(c.id) === String(id));
-          if (comp && comp.type !== newType) {
+          if (!comp) continue;
+
+          const newType = this._typeFromSuffix(variant.outs[i], comp.originalType);
+          if (comp.type !== newType) {
               comp.type = newType;
           }
+          comp.updateCenterColor(comp.getEffectiveColor());
       }
       
-      // ⭐ Перекрашиваем ВЫХОДНЫЕ кабели (от этой панели)
+      // ⭐ Перекрашиваем ВЫХОДНЫЕ кабели (их цвет = тип источника)
       for (const cable of this.patchManager.cables) {
           const fromPanel = cable.fromJack?.parentModule;
           if (fromPanel !== panel) continue;
           
-          // Обновляем цвет кабеля по типу источника
           const sourceType = cable.fromJack.type;
-          const newColor = this.patchManager.CABLE_COLORS[sourceType] 
-                        || this.patchManager.CABLE_COLORS.other;
-          cable.typeColor = newColor;
-          
-          // Обновляем цвет центра приёмного джека
-          if (cable.toJack) {
-              cable.toJack.updateCenterColor(cable.getDisplayColor());
-          }
+          cable.typeColor = CABLE_COLORS[sourceType] || CABLE_COLORS.other;
+          // ⭐ НЕ трогаем cable.toJack — его цвет от его собственного типа
       }
       
-      // ⭐ Перерисовка джека-источника
+      // ⭐ Обновляем connected-флаг
       panel.components.forEach(comp => {
           if (comp.constructor.name === 'Input' || comp.constructor.name === 'Output') {
               comp.connected = comp.cables.length > 0;
@@ -594,14 +591,19 @@ _renderDynamic() {
       });
   }
 
-  /**
-   * Преобразовать суффикс варианта в тип джека.
-   * 'k' → 'control', 'a' → 'audio', всё прочее — как есть.
-   */
-  _typeFromSuffix(suffix) {
-      if (suffix === 'a') return 'audio';
-      if (suffix === 'k') return 'control';
-      return suffix || 'control';
+  _typeFromSuffix(suffix, originalType = null) {
+      const isAudioRate = (suffix === 'a');
+      
+      // logic-семейство
+      if (originalType === 'logic' || originalType === 'logicAudio') {
+          return isAudioRate ? 'logicAudio' : 'logic';
+      }
+      // audio/control-семейство
+      if (originalType === 'audio' || originalType === 'control') {
+          return isAudioRate ? 'audio' : 'control';
+      }
+      // fallback
+      return isAudioRate ? 'audio' : 'control';
   }
 
 

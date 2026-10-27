@@ -33,9 +33,16 @@ MIXER 2-1A    OK
 MIXER 4-1A    OK
 MIXER 4-1B    OK
 
+EnvD   - оба работают, но пришлось изменить порядок входов
+EnvAHD  и ручек. надо проверить почему так. надо изменить и в pch2csd тогда
+
+Division by zero - при подключении CsLFO к EnvAHD на триггерный вход
 
 
 MUX18 warning: zkr index > isizek. Returning 0.
+warning: zkr index > isizek. Returning 0.  все чаще появляется при сложных патчах. надо понять почему так
+
+
 8Counter не грузит
 ADConv лампочки не горят
 Delay из LOGIC содержит ошибки - syntax error, unexpected NEWLINE, expecting ',' or '(' (token " eventemitter3.min.js:1:3039

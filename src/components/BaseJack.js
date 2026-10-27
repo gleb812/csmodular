@@ -1,38 +1,34 @@
 // src/components/BaseJack.js
 import { BaseComponent } from './BaseComponent.js';
-
+import { CABLE_COLORS, TYPE_FAMILY, csoundRateOf } from '../constants.js';
 export class BaseJack extends BaseComponent {
     constructor(x, y, config = {}) {
-        // Вызываем конструктор BaseComponent
-        super(x, y, 12, 12); // width=12, height=12
-        
+        super(x, y, 12, 12);
+
         this.type = config.type || config.jackType || 'audio';
+        // ⭐ originalType — из JS-описания модуля, не меняется при вариантах
+        this.originalType = this.type;
+        // ⭐ bandwidth: 'static' | 'dynamic' (по умолчанию dynamic)
+        this.bandwidth = config.bandwidth || 'dynamic';
+
         this.direction = config.direction || 'input';
         this.label = config.label || '';
-        this.index = config.index; // ← СОХРАНЯЕМ INDEX
-        
+        this.index = config.index;
 
-        // Генерируем уникальный ID если нет
-        this.id = config.id || `${this.direction}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        this.id = config.id
+            ? config.id.toString()
+            : `${this.direction}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-        //this.id = config.id || `${this.direction}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        this.id = config.id ? config.id.toString() : 
-                  `${this.direction}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         this.connected = false;
         this.cables = [];
-        this.centerColor = null;  // было '#000000'
-        
+        this.centerColor = null;
+
         this._parentModule = null;
-        this.typeColors = {
-            audio: '#ef4444',
-            control: '#3b82f6',
-            logic: '#fde047',
-            other: '#94a3b8'
-        };
-        
+
+        // ⭐ Локальный typeColors убран — используем CABLE_COLORS из constants
+
         this.onClick = config.onClick || null;
         this.onConnectionChange = config.onConnectionChange || null;
-                // ОТЛАДКА: покажем конечный ID
     }
     
     // В BaseJack.js добавим
@@ -66,7 +62,29 @@ export class BaseJack extends BaseComponent {
         //console.warn('⚠️ [BaseJack] Используется устаревшее свойство .module');
         return this._parentModule;
     }
-    
+
+   /** Цвет центра джека = его текущий тип */
+    getEffectiveColor() {
+        return CABLE_COLORS[this.type] || CABLE_COLORS.other;
+    }
+
+    /** Csound rate джека: 'audio' | 'control' */
+    getCsoundRate() {
+        return csoundRateOf(this.type);
+    }
+
+    /** Может ли этот джек сменить тип на newType (учитывая bandwidth) */
+    canChangeTypeTo(newType) {
+        if (this.bandwidth !== 'dynamic') return false;
+        if (this.type === newType) return false;
+        // разрешаем только внутри семейства
+        return (TYPE_FAMILY[this.type] && TYPE_FAMILY[this.type] === TYPE_FAMILY[newType]);
+    }
+
+    updateCenterColor(color) {
+        this.centerColor = color;
+    }
+
     set module(value) {
         //console.warn('⚠️ [BaseJack] Установка устаревшего свойства .module');
         this._parentModule = value;
@@ -109,10 +127,6 @@ export class BaseJack extends BaseComponent {
         // Будет реализовано в Input/Output
     }
     
-    // Обновление цвета центра (вызывается PatchManager'ом)
-    updateCenterColor(color) {
-        this.centerColor = color;
-    }
     
     // Добавление ссылки на кабель
     addCable(cable) {

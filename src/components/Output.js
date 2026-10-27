@@ -1,6 +1,7 @@
 // src/components/Output.js
 import { BaseJack } from './BaseJack.js';
 import { getCurrentTheme } from '../theme/currentTheme.js';
+import { CABLE_COLORS } from '../constants.js'; 
 
 export class Output extends BaseJack {
     constructor(x, y, config = {}) {
@@ -37,7 +38,7 @@ export class Output extends BaseJack {
             theme.clearGlow(ctx);
         } else {
             // Classic
-            const outerColor = this.typeColors[this.type];
+            const outerColor = CABLE_COLORS[this.type] || CABLE_COLORS.other;
             ctx.fillStyle = outerColor;
             ctx.fillRect(squareX, squareY, squareSize, squareSize);
 
@@ -78,7 +79,7 @@ export class Output extends BaseJack {
         } else {
             // Classic: подключён → цвет кабеля, отключён → чёрная дырка
             ctx.fillStyle = this.connected
-                ? (this.centerColor || '#000000')
+                ? (this.centerColor || this.getEffectiveColor())   // ⭐
                 : '#000000';
             ctx.beginPath();
             ctx.arc(center.x, center.y, 2.5, 0, Math.PI * 2);

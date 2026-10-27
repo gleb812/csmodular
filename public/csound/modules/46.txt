@@ -5,7 +5,7 @@
 ;@ outs k k
 
 opcode EnvAHD_k, 0, kkkkkkkkkkkk
-	kShape,kA_,kH_,kReset,kD_,kType,kKB, kTrig_,kAMi,kin,kEnvO,kout xin
+	kA_,kD_,kH_,kKB,kShape,kReset,kType, kTrig_,kAMi,kin,kout,kEnvO xin
 
 	k1[] fillarray 1,-1, 1,-1, 2,-2
 	k2[] fillarray 0, 1,-1, 0,-1, 1
@@ -101,10 +101,10 @@ endop
 
 ;@ variant a
 ;@ ins k k a
-;@ outs k a
+;@ outs a k
 
 opcode EnvAHD_a, 0, kkkkkkkkkkkk
-	kShape,kA_,kH_,kReset,kD_,kType,kKB, kTrig_,kAMi,kin,kEnvO,kout xin
+	kA_,kD_,kH_,kKB,kShape,kReset,kType, kTrig_,kAMi,kin,kout,kEnvO xin
 
 	k1[] fillarray 1,-1, 1,-1, 2,-2
 	k2[] fillarray 0, 1,-1, 0,-1, 1
