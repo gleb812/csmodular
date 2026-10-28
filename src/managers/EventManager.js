@@ -84,6 +84,30 @@ export class EventManager {
     const worldX = (x - this.system.offsetX) / this.system.scale;
     const worldY = (y - this.system.offsetY) / this.system.scale;
 
+    // ⭐ NEW: обработать открытые меню (PartSelector и др. overlay-компоненты)
+    //    Должно идти ДО стикеров / джеков / панелей — иначе клик по пункту меню
+    //    уйдёт в панель и начнёт её drag.
+    for (const panel of this.system.components) {
+      if (!panel.components) continue;
+      for (const comp of panel.components) {
+        if (typeof comp.closeIfClickOutside !== 'function') continue;
+        if (!comp.isExpanded) continue;
+
+        // клик по пункту меню?
+        const idx = comp.getClickedMenuItemIndex?.(worldX, worldY) ?? -1;
+        if (idx >= 0) {
+          comp.selectItem(idx);
+          comp.closeMenu();
+          if (this.system.forceRedraw) this.system.forceRedraw();
+          e.preventDefault();
+          return;
+        }
+        // клик мимо меню — закрыть
+        comp.closeIfClickOutside(worldX, worldY);
+        if (this.system.forceRedraw) this.system.forceRedraw();
+      }
+    }
+
     // ⭐ 1. FRONT-стикеры (они визуально над модулями)
     const frontSticker = this.system.getStickerAtPosition(worldX, worldY, 'front');
     if (frontSticker && !e.shiftKey && e.button === 0) {

@@ -2233,13 +2233,31 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
       ctx.translate(this.offsetX, this.offsetY);
       ctx.scale(this.scale, this.scale);
 
+      // 1. Кабели
       this.patchManager.cables.forEach((cable) => {
           cable.draw(ctx);
       });
 
+      // 2. ⭐ OVERLAY-компоненты (меню PartSelector и т.п.)
+      //    Рисуются ПОВЕРХ кабелей.
+      const layers = this.layerManager.layers;
+      ['voice', 'fx'].forEach(layerName => {
+          const layer = layers[layerName];
+          if (!layer) return;
+          layer.modules.forEach(module => {
+              if (!module.components) return;
+              module.components.forEach(comp => {
+                  if (comp._isNewDragging) return;
+                  if (typeof comp.drawOverlay === 'function') {
+                      comp.drawOverlay(ctx);
+                  }
+              });
+          });
+      });
+
       ctx.restore();
 
-      // Перетаскиваемый кабель — поверх всего
+      // 3. Перетаскиваемый кабель — поверх всего
       if (this.patchManager.draggingCable?.isDragging) {
           this.patchManager.drawDraggingCable(
               ctx,

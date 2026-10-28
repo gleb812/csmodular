@@ -630,20 +630,18 @@ export const ComponentRegistry = {
         csoundPorts: () => null,
     },
 
-
     PartSelector: {
         label: 'Select',
-        category: 'display',
+        category: 'controls',
         paletteSize: { width: 70, height: 16 },
-        isParametric: false,
+        isParametric: true,
         isJack: false,
 
         create: (opts = {}) => new PartSelector(
             opts.x ?? 0, opts.y ?? 0,
             opts.width ?? 70, opts.height ?? 16,
-            opts.imageCount ?? 5,
-            opts.menuOffset ?? 0,
-            opts.menuItems ?? ['Item1', 'Item2', 'Item3', 'Item4', 'Item5']
+            opts.items ?? ['Item1', 'Item2', 'Item3', 'Item4', 'Item5'],
+            opts.selectedIndex ?? 0
         ),
 
         serialize: (c) => ({
@@ -653,18 +651,20 @@ export const ComponentRegistry = {
             y: Math.round(c.relY ?? 0),
             width: c.width ?? 70,
             height: c.height ?? 16,
-            imageCount: c.imageCount ?? 5,
-            menuOffset: c.menuOffset ?? 0,
-            menuItems: c.menuItems ?? ['Item1', 'Item2', 'Item3', 'Item4', 'Item5'],
+            items: c.items ?? [],
+            selectedIndex: c.selectedIndex ?? 0,
         }),
 
         deserialize: (d, ctx) => {
+            // ⭐ Legacy-fallback: старые модули писали menuItems/menuOffset
+            const legacyItems = d.items ?? d.menuItems ?? undefined;
+            const legacyIndex = d.selectedIndex ?? d.menuOffset ?? 0;
+
             const c = new PartSelector(
                 ctx.module.x + d.x, ctx.module.y + d.y,
                 d.width ?? 70, d.height ?? 16,
-                d.imageCount ?? 5,
-                d.menuOffset ?? 0,
-                d.menuItems ?? ['Item1', 'Item2', 'Item3', 'Item4', 'Item5']
+                legacyItems,
+                legacyIndex
             );
             c.relX = d.x;
             c.relY = d.y;
@@ -673,7 +673,6 @@ export const ComponentRegistry = {
 
         csoundPorts: () => null,
     },
-
 
     // ─────────────────────────── GRAPHICS ───────────────────────────
 

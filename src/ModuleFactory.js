@@ -38,7 +38,6 @@ export class ModuleFactory {
         this.parentSystem = null;
     }
 
-    // Проверяем, интерактивный ли компонент
     _isInteractiveComponent(componentType) {
         const interactiveTypes = [
             'Knob',
@@ -48,52 +47,52 @@ export class ModuleFactory {
             'Slider',
             'ButtonText',
             'TextEdit',
-            'Slider',
+            'PartSelector',   // ⭐ NEW
             'Toggle',
-            'Button'  // на всякий случай
+            'Button',
         ];
         return interactiveTypes.includes(componentType);
     }
 
-    // Инициализируем начальное значение в Csound
     _initializeCsoundValue(component, compDef) {
-        // Получаем начальное значение
         let initialValue = 0;
-        
+
         switch (compDef.componentType) {
             case 'Knob':
+            case 'Slider':
                 initialValue = compDef.defaultValue || 0;
                 break;
             case 'ButtonFlat':
             case 'ButtonRadio':
-                initialValue = 0; // первая кнопка
+                initialValue = 0;
+                break;
+            case 'ButtonIncDec':
+                initialValue = compDef.initialIndex || 0;
                 break;
             case 'ButtonText':
-                initialValue = compDef.initialState !== undefined ? 
-                              (compDef.initialState ? 1 : 0) : 0;
+                initialValue = compDef.initialState !== undefined
+                    ? (compDef.initialState ? 1 : 0) : 0;
                 break;
-            // Добавь другие типы по мере необходимости
+            case 'PartSelector':                                    // ⭐ NEW
+                initialValue = compDef.selectedIndex
+                    ?? compDef.menuOffset
+                    ?? 0;
+                break;
         }
-        
+
         // Сохраняем в компоненте
         component.initialCsoundValue = initialValue;
-        
+
         // Если у компонента есть метод для отправки в Csound
         if (component.updateCsoundValue) {
-            // Отправляем начальное значение
             component.updateCsoundValue(initialValue);
         } else {
-            // Создаем метод если его нет
             component.updateCsoundValue = function(value) {
                 if (this.csoundChannel && window.csound) {
                     window.csound.setControlChannel(this.csoundChannel, value)
                         .then(() => {}, () => {});
-                    
-                    //console.log(`🎛️ ${this.csoundChannel} = ${value}`);
                 }
             };
-            
-            // Вызываем для инициализации
             component.updateCsoundValue(initialValue);
         }
     }
@@ -421,64 +420,25 @@ export class ModuleFactory {
                     );
                     break;
 
-                case 'PartSelector':
-                  
-                    try {
-                        component = new PartSelector(
-                            tempX, tempY,
-                            compDef.width || 40,
-                            compDef.height || 14,
-                            compDef.imageCount || 4,
-                            compDef.menuOffset || 0,
-                            compDef.menuItems
-                        );
-                    } catch (error) {
-                        console.error('❌ Error creating PartSelector:', error);
-                        console.error('Stack:', error.stack);
-                        
-                        // Fallback: создаем простой PartSelector без menuItems
-                        component = new PartSelector(
-                            tempX, tempY,
-                            compDef.width || 40,
-                            compDef.height || 14,
-                            compDef.imageCount || 4,
-                            compDef.menuOffset || 0,
-                            null
-                        );
-                    }
+                case 'PartSelector': {
+                    // ⭐ Новый формат: items[] + selectedIndex
+                    //    Legacy: menuItems[] + menuOffset (старые модули)
+                    const items = compDef.items
+                        ?? compDef.menuItems
+                        ?? ['Item1', 'Item2', 'Item3', 'Item4', 'Item5'];
+                    const selectedIndex = compDef.selectedIndex
+                        ?? compDef.menuOffset
+                        ?? 0;
+
+                    component = new PartSelector(
+                        tempX, tempY,
+                        compDef.width || 70,
+                        compDef.height || 16,
+                        items,
+                        selectedIndex
+                    );
                     break;
-
-                    case 'Input':
-                        component = new Input(
-                            tempX, tempY,
-                            {
-                                type: compDef.jackType || 'audio',
-                                jackType: compDef.jackType || 'audio',
-                                bandwidth: compDef.bandwidth || 'dynamic',
-                                index: compDef.ConnectorIndex, 
-                                //onClick: (jack) => console.log(`Input clicked: ${jack.label}`)
-                            }
-                        );
-                        if (compDef.ConnectorIndex !== undefined) {
-                            component.ConnectorIndex = compDef.ConnectorIndex;
-                        }          
-                        break;
-
-                    case 'Output':
-                        component = new Output(
-                            tempX, tempY,
-                            {
-                                type: compDef.jackType || 'audio',
-                                jackType: compDef.jackType || 'audio',
-                                bandwidth: compDef.bandwidth || 'dynamic',
-                                index: compDef.ConnectorIndex, 
-                                //onClick: (jack) => console.log(`Output clicked: ${jack.label}`)
-                            }
-                        );
-                        if (compDef.ConnectorIndex !== undefined) {
-                            component.ConnectorIndex = compDef.ConnectorIndex;
-                        }                 
-                        break;
+                }
                     
                 default:
                     console.warn(`Unknown component type: ${compDef.componentType}`);

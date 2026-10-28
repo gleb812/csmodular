@@ -472,6 +472,14 @@ export class EditorApp {
         
         const worldX = (x - this.offsetX) / this.zoom;
         const worldY = (y - this.offsetY) / this.zoom;
+
+        // ⭐ NEW: закрыть открытые меню, если клик мимо
+        for (const comp of this.components) {
+            if (comp._isNewDragging) continue;
+            if (typeof comp.closeIfClickOutside === 'function') {
+                comp.closeIfClickOutside(worldX, worldY);
+            }
+        }
         
         if (this.isDraggingNewComponent) return;
         
@@ -1139,41 +1147,44 @@ export class EditorApp {
             return;
         }
         this.ctx.clearRect(0, 0, this.width, this.height);
-        
+
         this.drawBackground();
-        
+
         this.ctx.save();
         this.ctx.translate(this.offsetX, this.offsetY);
         this.ctx.scale(this.zoom, this.zoom);
-        
-        // 1. Рисуем модуль
+
+        // 1. Модуль
         if (this.module) {
             this.module.draw(this.ctx);
         }
-        
-        // 2. ⭐ Рисуем микросетку ПОВЕРХ модуля (но ПОД компонентами)
+
+        // 2. Микросетка поверх модуля, под компонентами
         if (this.showMicroGrid && this.module) {
             this.drawMicroGrid(this.ctx);
         }
-        
-        // 3. Рисуем компоненты (ПОВЕРХ микросетки)
+
+        // 3. Компоненты
         for (const comp of this.components) {
             const isDragging = comp._isNewDragging === true;
-            
+
             if (isDragging) {
                 this.ctx.save();
                 this.ctx.globalAlpha = 0.8;
             }
-            
+
             if (comp.relX !== undefined && comp.relY !== undefined && !isDragging) {
                 comp.x = this.module.x + comp.relX;
                 comp.y = this.module.y + comp.relY;
             }
-            
+
+            // ⭐ страховка для PartSelector.getMenuBounds()
+            comp._panelHeight = this.module.height;
+
             if (typeof comp.draw === 'function') {
                 comp.draw(this.ctx);
             }
-            
+
             if (isDragging) {
                 const color = this.dropValid ? '#00ff00' : '#ff0000';
                 this.ctx.strokeStyle = color;
@@ -1189,25 +1200,52 @@ export class EditorApp {
                 this.ctx.restore();
             }
         }
-        
-        // 4. Рисуем угол для ресайза (ПОВЕРХ всего)
+
+        // 4. Resize-угол
         if (this.module) {
             this.module.drawResizeCorner(this.ctx);
         }
-        
+
+        // 5. Selection
         if (this.selectedComponent && !this.selectedComponent._isNewDragging) {
             this.drawSelection(this.selectedComponent);
         }
-        
+
         this.ctx.restore();
-        
+
+        // ⭐ 6. OVERLAY-ПРОХОД — меню PartSelector и прочие всплывашки
+        this.drawOverlays();
+
         if (this.module) {
             this.drawModuleSizeOutside();
         }
-        
+
         this.drawZoomInfo();
-        
+
         requestAnimationFrame(() => this.animate());
+    }
+    /**
+     * Overlay-проход: всё, что должно быть ПОВЕРХ модулей.
+     * Сейчас — выпадающее меню PartSelector (и любых других компонентов
+     * с drawOverlay()).
+     */
+    drawOverlays() {
+        const ctx = this.ctx;
+
+        ctx.save();
+        // Меню рисуется в мировых координатах компонента,
+        // поэтому снова входим в мировую систему.
+        ctx.translate(this.offsetX, this.offsetY);
+        ctx.scale(this.zoom, this.zoom);
+
+        for (const comp of this.components) {
+            if (comp._isNewDragging) continue;
+            if (typeof comp.drawOverlay === 'function') {
+                comp.drawOverlay(ctx);
+            }
+        }
+
+        ctx.restore();
     }
 
     // ⭐ НОВЫЙ МЕТОД - рисует микросетку только внутри модуля

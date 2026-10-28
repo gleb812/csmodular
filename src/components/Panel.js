@@ -165,11 +165,21 @@ export class Panel {
     const DYNAMIC_TYPES = ['LED', 'MiniVU', 'Graph'];
     this.components.forEach((comp) => {
         if (DYNAMIC_TYPES.includes(comp.constructor.name)) return;
+        comp._panelHeight = this.height;
         comp.draw(ctx);
     });
 
     ctx.restore();
     this.dirty = false;
+  }
+
+
+  drawOverlays(ctx) {
+      this.components.forEach(comp => {
+          if (typeof comp.drawOverlay === 'function') {
+              comp.drawOverlay(ctx);
+          }
+      });
   }
 
   setUIOpacity(opacity) {
