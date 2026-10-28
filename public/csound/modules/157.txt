@@ -48,6 +48,7 @@ opcode LevConv_k, 0, kkkk
   	elseif (kO ==5) then
   		kout = -1+kin
   	endif
+  endif
 
   zkw kout,kOut
 endop
@@ -102,6 +103,7 @@ opcode LevConv_a, 0, kkkk
   	elseif (kO ==5) then
   		kout = -1+kin
   	endif
+  endif
 
   zaw a(kout),kOut
 endop

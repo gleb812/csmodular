@@ -26,6 +26,7 @@ import { MiniVU } from './components/MiniVU.js';
 import { PartSelector } from './components/PartSelector.js';
 
 import { BaseJack } from './components/BaseJack.js';
+import { getEffectiveRating } from './api/moduleRatingStore.js';
 
 
 
@@ -221,6 +222,7 @@ export class ModuleFactory {
         panel.moduleId = moduleId;
         panel.layer = layer;
         panel.parentSystem = this.parentSystem;
+        panel.rating = getEffectiveRating(type, definition);
 
         // ⭐ Читаем цвет из definition
         if (definition.customColor) {

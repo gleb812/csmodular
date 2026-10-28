@@ -100,49 +100,57 @@
                 "componentType": "LED",
                 "id": "24",
                 "x": 81,
-                "y": 3
+                "y": 3,
+                "sourceComponentId": "32"
         },
         {
                 "componentType": "LED",
                 "id": "27",
                 "x": 104,
-                "y": 3
+                "y": 3,
+                "sourceComponentId": "35"
         },
         {
                 "componentType": "LED",
                 "id": "26",
                 "x": 127,
-                "y": 3
+                "y": 3,
+                "sourceComponentId": "34"
         },
         {
                 "componentType": "LED",
                 "id": "29",
                 "x": 150,
-                "y": 3
+                "y": 3,
+                "sourceComponentId": "37"
         },
         {
                 "componentType": "LED",
                 "id": "28",
                 "x": 173,
-                "y": 3
+                "y": 3,
+                "sourceComponentId": "36"
         },
         {
                 "componentType": "LED",
                 "id": "31",
                 "x": 196,
-                "y": 3
+                "y": 3,
+                "sourceComponentId": "39"
         },
         {
                 "componentType": "LED",
                 "id": "30",
                 "x": 219,
-                "y": 3
+                "y": 3,
+                "sourceComponentId": "38"
         },
         {
                 "componentType": "LED",
                 "id": "33",
                 "x": 242,
-                "y": 3
+                "y": 3,
+                "sourceComponentId": "41"
         },
         {
                 "componentType": "Output",

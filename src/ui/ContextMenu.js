@@ -1,6 +1,7 @@
 // src/ui/ContextMenu.js
 import { moduleStore } from '../api/index.js';
 import { PANEL_GRID_WIDTH } from '../constants.js';
+import { ratingStore, getEffectiveRating } from '../api/moduleRatingStore.js';
 
 
 export class ContextMenu {
@@ -136,48 +137,22 @@ export class ContextMenu {
         
         // Выводим совпадения
         results.forEach(({ name, group, level }) => {
-            const moduleItem = document.createElement('div');
-            moduleItem.className = 'module-item';
-            moduleItem.style.cssText = `
-                padding: 4px 12px;
-                font-size: 11px;
-                color: #ccc;
-                cursor: pointer;
-                user-select: none;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                min-height: 24px;
-            `;
-            
-            const nameSpan = document.createElement('span');
-            nameSpan.textContent = (level === 'user' ? '★ ' : '') + name;
-            if (level === 'user') {
-                nameSpan.style.color = '#0af';
-            }
-            
+            const row = this._createModuleRow(name, level === 'user');
+
+            // group chip — перед звёздами
             const groupSpan = document.createElement('span');
             groupSpan.textContent = group;
             groupSpan.style.cssText = `
                 font-size: 9px;
                 color: #555;
                 font-style: italic;
+                margin-right: 6px;
+                flex: 0 0 auto;
             `;
-            
-            moduleItem.appendChild(nameSpan);
-            moduleItem.appendChild(groupSpan);
-            
-            moduleItem.onmouseenter = () => {
-                moduleItem.style.background = '#2a2a2a';
-            };
-            moduleItem.onmouseleave = () => {
-                moduleItem.style.background = 'transparent';
-            };
-            moduleItem.onclick = () => {
-                this.handleModuleSelect(name);
-            };
-            
-            modulesContainer.appendChild(moduleItem);
+            const stars = row.querySelector('.rating-stars');
+            row.insertBefore(groupSpan, stars);
+
+            modulesContainer.appendChild(row);
         });
     }
 
@@ -451,97 +426,159 @@ export class ContextMenu {
         return groupItem;
     }
 
-    // Обновляем showModulesForGroup чтобы показывать модули из обеих групп
     showModulesForGroup(groupName) {
         const modulesContainer = this.menuElement.querySelector('#modules-container');
         if (!modulesContainer) return;
 
-        // Ищем модули в NM2 или User
         let modules = this.nm2Modules[groupName] || this.userModules[groupName] || [];
-        
-        // Если группа не найдена, пробуем найти по всем группам
         if (modules.length === 0) {
-            // Проверяем все группы
             for (const [key, value] of Object.entries(this.nm2Modules)) {
-                if (key.toLowerCase() === groupName.toLowerCase()) {
-                    modules = value;
-                    break;
-                }
+                if (key.toLowerCase() === groupName.toLowerCase()) { modules = value; break; }
             }
             if (modules.length === 0) {
                 for (const [key, value] of Object.entries(this.userModules)) {
-                    if (key.toLowerCase() === groupName.toLowerCase()) {
-                        modules = value;
-                        break;
-                    }
+                    if (key.toLowerCase() === groupName.toLowerCase()) { modules = value; break; }
                 }
             }
         }
 
-        // Фильтруем по поиску
         let searchTerm = '';
         if (this.searchInput && this.searchInput.value) {
             searchTerm = this.searchInput.value.toLowerCase();
         }
-        
-        const filteredModules = searchTerm ? 
-            modules.filter(m => m.toLowerCase().includes(searchTerm)) : 
-            modules;
-        
+        const filtered = searchTerm
+            ? modules.filter(m => m.toLowerCase().includes(searchTerm))
+            : modules;
+
         modulesContainer.innerHTML = '';
-        
-        if (filteredModules.length === 0) {
+
+        if (filtered.length === 0) {
             const emptyMsg = document.createElement('div');
             emptyMsg.textContent = searchTerm ? 'No modules found' : 'No modules in this group';
-            emptyMsg.style.cssText = `
-                padding: 20px;
-                text-align: center;
-                color: #666;
-                font-size: 11px;
-                font-style: italic;
-            `;
+            emptyMsg.style.cssText = `padding: 20px; text-align: center; color: #666; font-size: 11px; font-style: italic;`;
             modulesContainer.appendChild(emptyMsg);
             return;
         }
-        
-        // Определяем, из какого уровня группа
+
         const isUser = !!this.userModules[groupName];
-        const levelPrefix = isUser ? '👤 ' : '📦 ';
-        
-        filteredModules.forEach(moduleName => {
-            const moduleItem = document.createElement('div');
-            moduleItem.className = 'module-item';
-            moduleItem.style.cssText = `
-                padding: 4px 12px;
-                font-size: 11px;
-                color: #ccc;
-                cursor: pointer;
-                user-select: none;
-                display: flex;
-                align-items: center;
-                min-height: 24px;
-            `;
-            
-            moduleItem.textContent = isUser ? '★ ' + moduleName : moduleName;
-            
-            moduleItem.onmouseenter = () => {
-                moduleItem.style.background = '#2a2a2a';
-            };
-            
-            moduleItem.onmouseleave = () => {
-                moduleItem.style.background = 'transparent';
-            };
-            
-            moduleItem.onclick = () => {
-                this.handleModuleSelect(moduleName);
-            };
-            
-            modulesContainer.appendChild(moduleItem);
+
+        filtered.forEach(moduleName => {
+            modulesContainer.appendChild(this._createModuleRow(moduleName, isUser));
         });
     }
 
+    _createModuleRow(moduleName, isUser = false) {
+        const item = document.createElement('div');
+        item.className = 'module-item';
+        item.style.cssText = `
+            padding: 4px 8px 4px 12px;
+            font-size: 11px;
+            color: #ccc;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            min-height: 24px;
+        `;
 
-// src/ui/ContextMenu.js - добавь метод fetchModuleData
+        const label = document.createElement('span');
+        label.textContent = isUser ? '★ ' + moduleName : moduleName;
+        label.style.cssText = 'flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+
+        const stars = this._createStars(moduleName);
+
+        item.appendChild(label);
+        item.appendChild(stars);
+
+        item.onmouseenter = () => { item.style.background = '#2a2a2a'; };
+        item.onmouseleave = () => { item.style.background = 'transparent'; };
+        item.onclick = (e) => {
+            // клик по звёздам — не должен выбирать модуль
+            if (e.target.closest('.rating-stars')) return;
+            this.handleModuleSelect(moduleName);
+        };
+
+        return item;
+    }
+
+
+    _createStars(moduleName) {
+        const wrap = document.createElement('span');
+        wrap.className = 'rating-stars';
+        wrap.dataset.module = moduleName;
+        wrap.style.cssText = `
+            display: inline-flex;
+            gap: 1px;
+            flex: 0 0 auto;
+            cursor: pointer;
+            user-select: none;
+            font-size: 12px;
+            line-height: 1;
+        `;
+
+        const current = this._getRating(moduleName);
+
+        for (let i = 1; i <= 3; i++) {
+            const star = document.createElement('span');
+            star.dataset.value = String(i);
+            star.textContent = i <= current ? '★' : '☆';
+            star.style.cssText = `color: ${i <= current ? '#ffcc44' : '#555'};`;
+
+            star.onmouseenter = () => this._previewStars(wrap, i);
+            star.onmouseleave = () => this._renderStars(wrap, this._getRating(moduleName));
+
+            star.onclick = (e) => {
+                e.stopPropagation();
+                const existing = this._getRating(moduleName);
+                // клик на N-й звезде: если уже = N → сброс в 0, иначе = N
+                const next = existing === i ? 0 : i;
+                this._setRating(moduleName, next);
+                this._renderStars(wrap, next);
+            };
+
+            wrap.appendChild(star);
+        }
+
+        return wrap;
+    }
+
+    _renderStars(wrap, value) {
+        const stars = wrap.querySelectorAll('span');
+        stars.forEach((s, idx) => {
+            const n = idx + 1;
+            s.textContent = n <= value ? '★' : '☆';
+            s.style.color = n <= value ? '#ffcc44' : '#555';
+        });
+    }
+
+    _previewStars(wrap, upto) {
+        const stars = wrap.querySelectorAll('span');
+        stars.forEach((s, idx) => {
+            const n = idx + 1;
+            s.textContent = n <= upto ? '★' : '☆';
+            s.style.color = n <= upto ? '#ffcc44' : '#555';
+        });
+    }
+
+    _getRating(moduleName) {
+        const def = this.system?.moduleFactory?.moduleRegistry?.[moduleName];
+        return getEffectiveRating(moduleName, def);
+    }
+
+    _setRating(moduleName, value) {
+        ratingStore.set(moduleName, value);
+        // Обновить runtime cache на существующем panel, если есть
+        const panels = this.system?.components || [];
+        for (const p of panels) {
+            if (p.constructor.name === 'Panel' && (p.jsonName === moduleName || p.type === moduleName)) {
+                p.rating = value;
+            }
+        }
+        // Если панель ещё не создана — ничего не делаем, при следующем createModule
+        // прочитается через getEffectiveRating
+    }
 
     // Вспомогательный метод для загрузки данных модуля
     async fetchModuleData(moduleName) {
@@ -862,70 +899,6 @@ export class ContextMenu {
                 }
             }, 10);
         }
-    }
-
-    showModulesForGroup(groupName) {
-        const modulesContainer = this.menuElement.querySelector('#modules-container');
-        if (!modulesContainer || !this.moduleGroups[groupName]) return;
-        
-        const modules = this.moduleGroups[groupName];
-        
-        // Фильтруем по поиску если есть
-        let searchTerm = '';
-        if (this.searchInput && this.searchInput.value) {
-            searchTerm = this.searchInput.value.toLowerCase();
-        }
-        const filteredModules = searchTerm ? 
-            modules.filter(m => m.toLowerCase().includes(searchTerm)) : 
-            modules;
-        
-        modulesContainer.innerHTML = '';
-        
-        if (filteredModules.length === 0) {
-            const emptyMsg = document.createElement('div');
-            emptyMsg.textContent = 'No modules found';
-            emptyMsg.style.cssText = `
-                padding: 20px;
-                text-align: center;
-                color: #666;
-                font-size: 11px;
-                font-style: italic;
-            `;
-            modulesContainer.appendChild(emptyMsg);
-            return;
-        }
-        
-        // Компактный список модулей
-        filteredModules.forEach(moduleName => {
-            const moduleItem = document.createElement('div');
-            moduleItem.className = 'module-item';
-            moduleItem.style.cssText = `
-                padding: 4px 12px;
-                font-size: 11px;
-                color: #ccc;
-                cursor: pointer;
-                user-select: none;
-                display: flex;
-                align-items: center;
-                min-height: 24px;
-            `;
-            
-            moduleItem.textContent = moduleName;
-            
-            moduleItem.onmouseenter = () => {
-                moduleItem.style.background = '#2a2a2a';
-            };
-            
-            moduleItem.onmouseleave = () => {
-                moduleItem.style.background = 'transparent';
-            };
-            
-            moduleItem.onclick = () => {
-                this.handleModuleSelect(moduleName);
-            };
-            
-            modulesContainer.appendChild(moduleItem);
-        });
     }
 
     createModuleButton(moduleName, groupName) {
