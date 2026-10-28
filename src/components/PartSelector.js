@@ -20,6 +20,7 @@ export class PartSelector extends BaseComponent {
         this.isPressed = false;
         this.isHovered = false;
         this.hoveredItemIndex = -1;
+        this.onChange = null; 
         this.onSelect = null;
 
         // Csound
@@ -110,7 +111,6 @@ export class PartSelector extends BaseComponent {
      * Здесь рисуется выпадающее меню, поверх любых модулей.
      */
     drawOverlay(ctx) {
-        console.log('[PS] drawOverlay ENTER, isExpanded=', this.isExpanded);
         if (!this.isExpanded) return;
         this._drawMenu(ctx);
     }

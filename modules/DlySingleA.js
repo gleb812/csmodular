@@ -5,13 +5,13 @@
     export const DlySingleAModule = {
         type: 'DlySingleA',
             typeID: 172,
-    mode: [0],
-    defaultParams: [64],
+//    mode: [0],
+    defaultParams: [64,0],
         displayName: 'DlySingleA',
         gridHeight: 2,
         originalName: 'DlySingleA',
         tooltip: 'Delay Static',
-    params: [3],
+    params: [3,0],
         inputs: [5],
         outputs: [6],
         components: [
@@ -29,10 +29,10 @@
                 "id": "0",
                 "x": 40,
                 "y": 13,
-                "width": 40,
+                "width": 50,
                 "height": 13,
-                "imageCount": 7,
-                "menuOffset": 0
+                "items": ["5ms", "25ms", "100ms", "500ms", "1s", "2s", "2.7s"],
+                "selectedIndex":0
         },
         {
                 "componentType": "Knob",

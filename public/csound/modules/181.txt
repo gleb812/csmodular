@@ -20,18 +20,21 @@ opcode DlyEight, 0, kkkkkkkkkkk
     kTime table kTime, giDLY2s8
   elseif kRange == 6 then
     kTime table kTime, giDLY278
+  endif
 
   kTime /= 8
+  printk2 kTime
+  aTime = a(kTime)
 
   abuf delayr 2.7
-  a1 deltapi a(kTime)
-  a2 deltapi a(kTime)*2
-  a3 deltapi a(kTime)*3
-  a4 deltapi a(kTime)*4
-  a5 deltapi a(kTime)*5
-  a6 deltapi a(kTime)*6
-  a7 deltapi a(kTime)*7
-  a8 deltapi a(kTime)*8
+  a1 deltapi aTime
+  a2 deltapi aTime*2
+  a3 deltapi aTime*3
+  a4 deltapi aTime*4
+  a5 deltapi aTime*5
+  a6 deltapi aTime*6
+  a7 deltapi aTime*7
+  a8 deltapi aTime*8
   delayw ain
 
   zaw a1, ko1

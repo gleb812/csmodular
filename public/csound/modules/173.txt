@@ -24,7 +24,8 @@ opcode DlySingleB, 0, kkkkkk
     kTime table kTime, giDLY_2s
   elseif kRange == 6 then
     kTime table kTime, giDLY2p7
-
+  endif
+  
   kR = kRangeN[kRange]
 
   aTime = a(kTime) + kR * amod * a(kModLev)

@@ -6,7 +6,7 @@ opcode DlySingleA, 0, kkkk
   kTime,kRange,kin,kout xin
 
   ain zar kin
-
+printk2 kRange
   if kRange == 0 then
     kTime table kTime, giDLY_5m
   elseif kRange == 1 then
@@ -21,6 +21,9 @@ opcode DlySingleA, 0, kkkk
     kTime table kTime, giDLY_2s
   elseif kRange == 6 then
     kTime table kTime, giDLY2p7
+  endif
+
+  kTime /= 1000
 
   abuf delayr 2.7 ; max delay time
   aout deltapi kTime

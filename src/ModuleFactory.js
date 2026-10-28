@@ -439,7 +439,37 @@ export class ModuleFactory {
                     );
                     break;
                 }
-                    
+
+                case 'Input':
+                    component = new Input(
+                        tempX, tempY,
+                        {
+                            type: compDef.jackType || 'audio',
+                            jackType: compDef.jackType || 'audio',
+                            bandwidth: compDef.bandwidth || 'dynamic',
+                            index: compDef.ConnectorIndex,
+                        }
+                    );
+                    if (compDef.ConnectorIndex !== undefined) {
+                        component.ConnectorIndex = compDef.ConnectorIndex;
+                    }
+                    break;
+
+                case 'Output':
+                    component = new Output(
+                        tempX, tempY,
+                        {
+                            type: compDef.jackType || 'audio',
+                            jackType: compDef.jackType || 'audio',
+                            bandwidth: compDef.bandwidth || 'dynamic',
+                            index: compDef.ConnectorIndex,
+                        }
+                    );
+                    if (compDef.ConnectorIndex !== undefined) {
+                        component.ConnectorIndex = compDef.ConnectorIndex;
+                    }
+                    break;
+
                 default:
                     console.warn(`Unknown component type: ${compDef.componentType}`);
                     return;

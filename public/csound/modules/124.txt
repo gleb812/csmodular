@@ -1,6 +1,8 @@
+;@ variant k default
+;@ strict 0 0 0 0 0 0 0 0 1
 ;@ ins k k k k k k k k k
 ;@ outs k
-opcode Mux81, 0, kkkkkkkkkk
+opcode Mux81_k, 0, kkkkkkkkkk
   k1,k2,k3,k4,k5,k6,k7,k8,kc,ko xin
   kCtrl zkr kc
   ki1 zkr k1
@@ -34,4 +36,43 @@ opcode Mux81, 0, kkkkkkkkkk
   endif
 
   zkw kOut, ko
+endop
+
+;@ variant a
+;@ ins a a a a a a a a k
+;@ outs a
+opcode Mux81_a, 0, kkkkkkkkkk
+  k1,k2,k3,k4,k5,k6,k7,k8,kc,ko xin
+  kCtrl zkr kc
+  ai1 zar k1
+  ai2 zar k2
+  ai3 zar k3
+  ai4 zar k4
+  ai5 zar k5
+  ai6 zar k6
+  ai7 zar k7
+  ai8 zar k8
+
+  kCtrl *= 64
+  kCtrl limit kCtrl, 0, 28
+
+  if kCtrl < 4 then
+    aOut = ai1
+  elseif kCtrl < 8 then
+    aOut = ai2
+  elseif kCtrl < 12 then
+    aOut = ai3
+  elseif kCtrl < 16 then
+    aOut = ai4
+  elseif kCtrl < 20 then
+    aOut = ai5
+  elseif kCtrl < 24 then
+    aOut = ai6
+  elseif kCtrl < 28 then
+    aOut = ai7
+  else
+    aOut = ai8
+  endif
+
+  zaw aOut, ko
 endop

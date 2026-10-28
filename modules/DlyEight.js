@@ -5,13 +5,12 @@
     export const DlyEightModule = {
         type: 'DlyEight',
             typeID: 181,
-    mode: [0],
-    defaultParams: [0],
+    defaultParams: [0,0],
         displayName: 'DlyEight',
         gridHeight: 3,
         originalName: 'DlyEight',
         tooltip: 'Delay 8 Tap',
-    params: [10],
+    params: [10,0],
         inputs: [0],
         outputs: [1, 2, 3, 4, 5, 6, 7, 8],
         components: [

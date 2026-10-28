@@ -17,6 +17,8 @@
 //   save                     — сохранить
 //   save as <name>           — сохранить под именем
 //   load <name>              — загрузить
+//   rm <name>                — удалить user-модуль
+//   lsmod [filter]           — список user-модулей
 //   clear                    — очистить вывод
 //   help [cmd]               — справка
 
@@ -227,7 +229,7 @@ export class TerminalPanel {
                 case 'in': case 'out':
                 case 'ina': case 'ink': case 'outa': case 'outk':
                     return this._cmdAdd([cmd, ...args]);
-                case 'del': case 'delete': case 'rm': return this._cmdDel(args);
+                case 'del': case 'delete':return this._cmdDel(args);
                 case 'mv': case 'move':   return this._cmdMv(args);
                 case 'map':               return this._cmdMap(args);
                 case 'name':              return this._cmdName(args);
@@ -238,6 +240,8 @@ export class TerminalPanel {
                 case 'new': return this._cmdNew(args);
                 case 'save':              return await this._cmdSave(args);
                 case 'load':              return await this._cmdLoad(args);
+                case 'rm':                return await this._cmdRm(args);       // ⭐ NEW
+                case 'lsmod':             return await this._cmdLsmod(args);    // ⭐ NEW
                 case 'stats':             return this._cmdStats();
                 default:
                     this._printError(`Unknown command: ${cmd}`);
@@ -545,6 +549,8 @@ export class TerminalPanel {
         this._print('  new                    clear module');
         this._print('  save [as <name>]       save module');
         this._print('  load <name>            load module');
+        this._print('  rm <name>              delete user module');           // ⭐ NEW
+        this._print('  lsmod [filter]         list user modules');            // ⭐ NEW
         this._print('  stats                  module statistics');
         this._print('  clear                  clear output');
         this._print('  help [cmd]             this help');
@@ -582,6 +588,12 @@ export class TerminalPanel {
             grid: 'grid         — show current grid\n  grid on      — enable micro-grid\n  grid off     — disable\n  grid N       — set grid step to N pixels',
             save: 'save           — save (uses current module name)\n  save as <name> — save under new name',
             load: 'load <name>    — load user module by name',
+            rm:   'rm <name>      — delete user module (cannot be undone)\n' +
+                  '  rm foo\n' +
+                  '  Tip: lsmod — see available user modules',
+            lsmod: 'lsmod [filter]  — list user modules\n' +
+                   '  lsmod          → all\n' +
+                   '  lsmod filt     → names containing "filt"',
         };
         if (topics[cmd]) {
             this._printInfo(`Help for "${cmd}":`);
@@ -1355,6 +1367,87 @@ ${outputsStr}
             this._printOk(`Loaded "${name}"`);
         } catch (e) {
             this._printError(`Parse error: ${e.message}`);
+        }
+    }
+
+    // ─────────────────────────── RM ────────────────────────────────
+
+    async _cmdRm(args) {
+        const name = args.join(' ').trim();
+
+        if (!name) {
+            this._printError('Usage: rm <moduleName>');
+            this._print('  Tip: lsmod — list user modules', '#666');
+            return;
+        }
+
+        try {
+            const list = await moduleStore.list();
+            if (!list.includes(name)) {
+                this._printError(`Not a user module: ${name}`);
+                if (list.length > 0) {
+                    this._print(`Available: ${list.join(', ')}`, '#666');
+                }
+                return;
+            }
+
+            // подтверждение — необратимо
+            const ok = typeof window.confirm === 'function'
+                ? window.confirm(`Delete user module "${name}"? This cannot be undone.`)
+                : true;
+            if (!ok) {
+                this._print('Cancelled', '#888');
+                return;
+            }
+
+            const removed = await moduleStore.remove(name);
+
+            if (removed) {
+                this._printOk(`Deleted: ${name}`);
+                if (this.app?.module?.title === name) {
+                    this._print(
+                        `   ⚠️ "${name}" is currently open in editor — use "new" to start fresh`,
+                        '#f90'
+                    );
+                }
+            } else {
+                this._printError(`Delete failed: ${name}`);
+            }
+        } catch (e) {
+            this._printError(`rm error: ${e.message}`);
+        }
+    }
+
+    // ─────────────────────────── LSMOD ─────────────────────────────
+
+    async _cmdLsmod(args) {
+        const filter = args.join(' ').trim().toLowerCase();
+
+        try {
+            const list = await moduleStore.list();
+
+            if (list.length === 0) {
+                this._print('📭 No user modules', '#888');
+                return;
+            }
+
+            const filtered = filter
+                ? list.filter(n => n.toLowerCase().includes(filter))
+                : list;
+
+            if (filtered.length === 0) {
+                this._print(`📭 No user modules matching "${filter}"`, '#888');
+                return;
+            }
+
+            this._printInfo(`📦 User modules (${filtered.length}):`);
+            filtered.sort();
+            filtered.forEach((name, i) => {
+                const current = this.app?.module?.title === name ? '  ← current' : '';
+                this._print(`  ${i + 1}. ${name}${current}`);
+            });
+        } catch (e) {
+            this._printError(`lsmod error: ${e.message}`);
         }
     }
 
