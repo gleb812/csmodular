@@ -2,7 +2,7 @@
 import { moduleStore } from '../api/index.js';
 import { PANEL_GRID_WIDTH } from '../constants.js';
 import { ratingStore, getEffectiveRating } from '../api/moduleRatingStore.js';
-
+import { getModuleStatus, getStatusMeta, IS_DEV } from '../api/moduleStatusStore.js';
 
 export class ContextMenu {
     constructor(system) {
@@ -28,10 +28,10 @@ export class ContextMenu {
         });
     }
 
-    // Новая структура: два уровня - NM2 и User
     initModuleStructure() {
-        // Все существующие модули (NM2) - сгруппированы по категориям
-        this.nm2Modules = {
+        // ⭐ Полный список NM2-модулей — статический хардкод.
+        //    В BUILD фильтруется по window.__STABLE_MODULES__ (manifest).
+        const ALL_NM2 = {
             'In/Out': ['In2', 'Out2', 'In4', 'Out4', 'Device', 'FxIn', 'Keyboard', 'MonoKey', 'Name', 'NoteDet', 'Status'],
             'Logic': ['8Counter', 'ADConv', 'BinCounter', 'ClkDiv', 'DAConv', 'Delay', 'FlipFlop', 'Gate', 'Invert', 'Pulse'],
             'Osc': ['DXRouter', 'Driver', 'DrumSynth', 'MetNoise', 'Noise', 'Operator', 'OscA', 'OscB', 'OscC', 'OscD', 'OscDual', 'OscMaster', 'OscNoise', 'OscPM', 'OscPerc', 'OscShpA', 'OscShpB', 'OscString', 'Resonator'],
@@ -48,27 +48,40 @@ export class ContextMenu {
             'Seq': ['SeqCtr', 'SeqEvent', 'SeqLev', 'SeqNote', 'SeqVal'],
             'Delay': ['DelayA', 'DelayB', 'DelayDual', 'DelayQuad', 'DlyClock', 'DlyEight', 'DlyShiftReg', 'DlySingleA', 'DlySingleB', 'DlyStereo'],
             'Rnd': ['RandomA', 'RandomB', 'RndClkA', 'RndClkB', 'RndPattern', 'RndTrig'],
-            'Test': ['Blue2Red', 'Red2Blue']
+            'Test': ['Blue2Red', 'Red2Blue'],
         };
 
-        // Пользовательские модули (User) - пока пусто
-        this.userModules = {
-            'My Modules': []  // Сюда будут добавляться пользовательские модули
-        };
+        // ⭐ BUILD: фильтр по manifest. DEV: window.__STABLE_MODULES__ = undefined → всё.
+        const allow = window.__STABLE_MODULES__;   // Set<string> | undefined
 
-        // Для обратной совместимости - объединяем всё в moduleGroups
-        this.moduleGroups = {
-            ...this.nm2Modules,
-            ...this.userModules
-        };
+        this.nm2Modules = {};
+        for (const [group, mods] of Object.entries(ALL_NM2)) {
+            const filtered = allow
+                ? mods.filter(name => allow.has(name))
+                : mods;
+            if (filtered.length > 0) {
+                this.nm2Modules[group] = filtered;
+            }
+        }
 
-        // Сохраняем список всех модулей для поиска
+        // Пользовательские модули — как было
+        this.userModules = { 'My Modules': [] };
+
+        // moduleGroups — объединение
+        this.moduleGroups = { ...this.nm2Modules, ...this.userModules };
+
+        // allModules — для поиска
         this.allModules = {};
         Object.entries(this.moduleGroups).forEach(([group, modules]) => {
             modules.forEach(module => {
                 this.allModules[module] = group;
             });
         });
+
+        if (allow) {
+            const total = Object.values(this.nm2Modules).reduce((n, arr) => n + arr.length, 0);
+            console.log(`[ContextMenu/build] ${total} stable module(s) visible`);
+        }
     }
 
     searchAllModules(searchTerm) {
@@ -257,7 +270,6 @@ export class ContextMenu {
         this.createHierarchicalGroupList(leftPanel);
     }
 
-    // НОВЫЙ МЕТОД: создает иерархический список с двумя уровнями
     createHierarchicalGroupList(container) {
         container.innerHTML = '';
 
@@ -365,7 +377,29 @@ export class ContextMenu {
         return header;
     }
 
-    // Переключает видимость уровня
+    _createStatusDot(moduleName) {
+        const def = this.system?.moduleFactory?.moduleRegistry?.[moduleName];
+        const status = getModuleStatus(def);
+        const meta = getStatusMeta(status);
+
+        const dot = document.createElement('span');
+        dot.className = 'status-dot';
+        dot.dataset.module = moduleName;
+        dot.dataset.status = status;
+        dot.title = `${moduleName} — ${meta.label}`;
+        dot.style.cssText = `
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: ${meta.color};
+            flex: 0 0 auto;
+            margin-left: 4px;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.3);
+        `;
+        return dot;
+    }
+
     toggleLevel(level, open) {
         const groupsContainer = this.menuElement.querySelector(`.${level}-groups`);
         if (!groupsContainer) return;
@@ -487,16 +521,21 @@ export class ContextMenu {
         label.textContent = isUser ? '★ ' + moduleName : moduleName;
         label.style.cssText = 'flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
 
-        const stars = this._createStars(moduleName);
-
         item.appendChild(label);
-        item.appendChild(stars);
+
+        if (IS_DEV) {
+            // ⚙️ DEV: цветная точка статуса, без звёзд
+            item.appendChild(this._createStatusDot(moduleName));
+        } else {
+            // 🚀 BUILD: звёзды рейтинга (как раньше)
+            item.appendChild(this._createStars(moduleName));
+        }
 
         item.onmouseenter = () => { item.style.background = '#2a2a2a'; };
         item.onmouseleave = () => { item.style.background = 'transparent'; };
         item.onclick = (e) => {
-            // клик по звёздам — не должен выбирать модуль
-            if (e.target.closest('.rating-stars')) return;
+            // в BUILD звёзды кликабельны — не выбираем модуль при клике по ним
+            if (!IS_DEV && e.target.closest('.rating-stars')) return;
             this.handleModuleSelect(moduleName);
         };
 
@@ -1353,56 +1392,72 @@ export class ContextMenu {
         }
     }
 
+    async show(mouseX = null, mouseY = null) {
+        // ⭐ в DEV — preload статусов один раз (для правильных цветов)
+        //    в BUILD — preload не нужен (точек нет, только звёзды)
+        if (IS_DEV && !this._statusesLoaded) {
+            this._statusesLoaded = true;
+            // показываем меню сразу, а preload — в фоне
+            this._showImmediate(mouseX, mouseY);
+            await this.preloadStatuses();
+            if (this.isVisible) this.updateMenuUI();
+            return;
+        }
 
-    show(mouseX = null, mouseY = null) {
-        // ⭐ Асинхронно обновляем список user-модулей
-        this.loadUserModules().then(() => {
-            this.updateUserGroupsInLeftPanel();
-        });
+        this._showImmediate(mouseX, mouseY);
+    }
+
+    async preloadStatuses() {
+        if (!IS_DEV) return;
+        const allNames = [...new Set(Object.values(this.nm2Modules).flat())];
+        let loaded = 0, failed = 0;
+        for (const name of allNames) {
+            if (this.system.moduleFactory.moduleRegistry[name]) continue;
+            try {
+                const mod = await import(/* @vite-ignore */ `/modules/${name}.js`);
+                const key = Object.keys(mod)[0];
+                if (mod[key]) {
+                    this.system.moduleFactory.registerModule(name, mod[key]);
+                    loaded++;
+                }
+            } catch (e) { failed++; }
+        }
+        console.log(`[ContextMenu/DEV] preloaded ${loaded}, failed ${failed}`);
+    }
+
+
+    _showImmediate(mouseX = null, mouseY = null) {
+        // ⭐ это твой текущий show() БЕЗ preload
         if (this.isVisible) return;
 
-        // Закрываем меню джека если открыто
         if (this.system.jackContextMenu && this.system.jackContextMenu.menuElement.style.display === 'block') {
             this.system.jackContextMenu.hide();
         }
-        //this.lastOpenMouseY = mouseY !== null ? mouseY : window.innerHeight / 2;
-        // 💾 СОХРАНЯЕМ КООРДИНАТЫ МЫШИ!
+
         this.lastOpenMouseX = mouseX;
         this.lastOpenMouseY = mouseY;
 
-
-        // Обновляем позицию (с координатами мыши или по центру)
         this.updateMenuPosition(mouseX, mouseY);
-        
-        // Показываем с анимацией
+
         this.menuElement.style.opacity = '1';
         this.menuElement.style.transform = 'scale(1)';
         this.menuElement.style.visibility = 'visible';
-        
+
         this.isVisible = true;
-        
-        // Сбрасываем поиск и выбираем первую группу
+
         if (this.searchInput) {
             this.searchInput.value = '';
-            
-            // Не фокусируем сразу - дадим анимации завершиться
-            setTimeout(() => {
-                this.searchInput.focus();
-            }, 50);
-            
-            // Выбираем первую группу
+            setTimeout(() => { this.searchInput.focus(); }, 50);
+
             const firstGroup = Object.keys(this.moduleGroups)[0];
             if (firstGroup) {
                 const leftPanel = this.menuElement.querySelector('#left-panel');
                 if (leftPanel) {
-                    // Снимаем выделение со всех групп
                     leftPanel.querySelectorAll('.group-item').forEach(item => {
                         item.style.background = 'transparent';
                         item.style.borderLeftColor = 'transparent';
                         item.style.color = '#aaa';
                     });
-                    
-                    // Выделяем первую
                     const firstItem = leftPanel.querySelector('.group-item');
                     if (firstItem) {
                         firstItem.style.background = '#2a2a2a';

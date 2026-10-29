@@ -317,6 +317,8 @@ export class PropertiesPanel {
             };
         } else if (propDef.type === 'mapping-select') {
             inputEl = this._makeMappingField(comp, propDef);
+        } else if (propDef.type === 'mapping-multi-select') {
+            inputEl = this._makeMappingMultiField(comp, propDef);
         } else if (propDef.type === 'checkbox') {
             inputEl = document.createElement('input');
             inputEl.type = 'checkbox';
@@ -340,6 +342,41 @@ export class PropertiesPanel {
 
         return wrapper;
     }
+
+    _makeMappingMultiField(comp, propDef) {
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'display: flex; gap: 4px; align-items: stretch;';
+
+        const currentArr = Array.isArray(comp[propDef.key]) ? comp[propDef.key] : [];
+        const currentText = currentArr.length > 0 ? currentArr.join(', ') : '';
+
+        const display = document.createElement('div');
+        display.style.cssText = `
+            flex: 1; padding: 4px 8px; background: #1a1a1a;
+            border: 1px solid #444; border-radius: 3px;
+            color: ${currentText ? '#0af' : '#666'};
+            font-size: 12px; font-family: monospace;
+            cursor: pointer; min-height: 18px;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        `;
+        display.textContent = currentText || '— None —';
+
+        const browseBtn = document.createElement('button');
+        browseBtn.textContent = '🔍';
+        browseBtn.style.cssText = `
+            padding: 4px 8px; background: #2a2a2a; border: 1px solid #0af;
+            color: #0af; border-radius: 3px; cursor: pointer; font-size: 12px;
+        `;
+
+        const open = () => this._showTablesMultiBrowser(comp, propDef, display);
+        display.onclick = open;
+        browseBtn.onclick = open;
+
+        wrapper.appendChild(display);
+        wrapper.appendChild(browseBtn);
+        return wrapper;
+    }
+
     _makeMappingField(comp, propDef) {
         const wrapper = document.createElement('div');
         wrapper.style.cssText = 'display: flex; gap: 4px;';
@@ -396,6 +433,28 @@ export class PropertiesPanel {
             }
             return options;
         }
+
+        // ⭐ NEW: контроллеры и переключалки (всё параметрическое, кроме TextField)
+        if (propDef.optionsFrom === 'parametricComponents') {
+            const options = [{ value: '', label: '— None —' }];
+            const PARAM_TYPES = [
+                'Knob', 'Slider',
+                'ButtonFlat', 'ButtonRadio', 'ButtonIncDec', 'ButtonText',
+                'PartSelector',
+            ];
+            for (const c of this.app.components) {
+                if (c._isNewDragging) continue;
+                const t = c.constructor.name;
+                if (!PARAM_TYPES.includes(t)) continue;
+                if (comp && c === comp) continue;   // не сам себя
+                options.push({
+                    value: String(c.id),
+                    label: `${t} #${c.id}`,
+                });
+            }
+            return options;
+        }
+
         if (propDef.options) return propDef.options;
         return [];
     }
@@ -404,6 +463,241 @@ export class PropertiesPanel {
         if (this.app.codeViewerWindow) {
             this.app.codeViewerWindow.updateCode();
         }
+    }
+
+
+    async _listTableNames() {
+        if (this._cachedTableNames) return this._cachedTableNames;
+
+        try {
+            const res = await fetch('/tables/');
+            if (!res.ok) {
+                console.warn('[PropertiesPanel] /tables/ not available');
+                this._cachedTableNames = [];
+                return [];
+            }
+            const html = await res.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const names = Array.from(doc.querySelectorAll('a'))
+                .map(a => a.getAttribute('href') || '')
+                .filter(h => h.endsWith('.json'))
+                .map(h => h.replace(/^.*\//, '').replace(/\.json$/, ''))
+                .sort();
+            this._cachedTableNames = names;
+            return names;
+        } catch (e) {
+            console.warn('[PropertiesPanel] failed to list /tables/', e);
+            this._cachedTableNames = [];
+            return [];
+        }
+    }
+
+    async _showTablesMultiBrowser(comp, propDef, displayEl) {
+        const allNames = await this._listTableNames();
+        if (allNames.length === 0) {
+            alert('No tables found in /public/tables/');
+            return;
+        }
+
+        const current = Array.isArray(comp[propDef.key]) ? comp[propDef.key].slice() : [];
+        const selected = new Set(current);
+
+        // ── Overlay ──
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            z-index: 99999; display: flex; align-items: center;
+            justify-content: center;
+        `;
+
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            background: #1e1e1e; border: 1px solid #0af; border-radius: 6px;
+            width: 420px; max-width: 90vw; max-height: 80vh;
+            display: flex; flex-direction: column; color: #ddd;
+            font-family: Arial, sans-serif;
+        `;
+
+        // Header
+        const header = document.createElement('div');
+        header.style.cssText = `
+            padding: 10px 14px; border-bottom: 1px solid #333;
+            color: #0af; font-size: 12px; font-weight: bold;
+        `;
+        header.textContent = `Select tables — ${propDef.label || propDef.key}`;
+        modal.appendChild(header);
+
+        // Search
+        const searchWrap = document.createElement('div');
+        searchWrap.style.cssText = 'padding: 8px 14px; border-bottom: 1px solid #333;';
+        const search = document.createElement('input');
+        search.type = 'text';
+        search.placeholder = 'Filter…';
+        search.style.cssText = `
+            width: 100%; padding: 4px 8px; background: #1a1a1a;
+            border: 1px solid #444; border-radius: 3px; color: white;
+            font-size: 12px; box-sizing: border-box;
+        `;
+        searchWrap.appendChild(search);
+        modal.appendChild(searchWrap);
+
+        // List
+        const list = document.createElement('div');
+        list.style.cssText = `
+            flex: 1; overflow-y: auto; padding: 6px 14px;
+            min-height: 100px; max-height: 50vh;
+        `;
+        modal.appendChild(list);
+
+        // Selected preview (order matters!)
+        const preview = document.createElement('div');
+        preview.style.cssText = `
+            padding: 6px 14px; border-top: 1px solid #333;
+            font-size: 10px; color: #888; font-family: monospace;
+            max-height: 60px; overflow-y: auto; word-break: break-all;
+        `;
+        const updatePreview = () => {
+            const ordered = this._orderBySelection(allNames, selected, current);
+            preview.textContent = ordered.length > 0
+                ? `Order: ${ordered.join(' → ')}`
+                : 'Nothing selected';
+        };
+        updatePreview();
+        modal.appendChild(preview);
+
+        // Render rows
+        const rows = new Map();
+        const renderRows = (filter = '') => {
+            list.innerHTML = '';
+            rows.clear();
+            const lower = filter.toLowerCase();
+            for (const name of allNames) {
+                if (lower && !name.toLowerCase().includes(lower)) continue;
+                const row = document.createElement('label');
+                row.style.cssText = `
+                    display: flex; align-items: center; gap: 8px;
+                    padding: 4px 6px; cursor: pointer; border-radius: 3px;
+                    font-size: 12px;
+                `;
+                row.onmouseenter = () => row.style.background = '#2a2a2a';
+                row.onmouseleave = () => row.style.background = 'transparent';
+
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.checked = selected.has(name);
+                cb.style.cssText = 'accent-color: #0af; cursor: pointer;';
+                cb.onchange = () => {
+                    if (cb.checked) selected.add(name);
+                    else selected.delete(name);
+                    updatePreview();
+                };
+
+                const lbl = document.createElement('span');
+                lbl.textContent = name;
+                lbl.style.cssText = 'font-family: monospace; color: #ccc;';
+
+                row.appendChild(cb);
+                row.appendChild(lbl);
+                list.appendChild(row);
+                rows.set(name, { row, cb });
+            }
+        };
+        renderRows();
+        search.oninput = () => renderRows(search.value);
+
+        // Footer
+        const footer = document.createElement('div');
+        footer.style.cssText = `
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 14px; border-top: 1px solid #333; gap: 8px;
+        `;
+
+        const clearBtn = document.createElement('button');
+        clearBtn.textContent = 'Clear';
+        clearBtn.style.cssText = `
+            padding: 4px 12px; background: #2a2a2a; border: 1px solid #555;
+            color: #aaa; border-radius: 3px; cursor: pointer; font-size: 11px;
+        `;
+        clearBtn.onclick = () => {
+            selected.clear();
+            for (const { cb } of rows.values()) cb.checked = false;
+            updatePreview();
+        };
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.style.cssText = `
+            padding: 4px 12px; background: #2a2a2a; border: 1px solid #555;
+            color: #aaa; border-radius: 3px; cursor: pointer; font-size: 11px;
+        `;
+        cancelBtn.onclick = () => document.body.removeChild(overlay);
+
+        const okBtn = document.createElement('button');
+        okBtn.textContent = 'OK';
+        okBtn.style.cssText = `
+            padding: 4px 16px; background: #0af; border: none;
+            color: #000; border-radius: 3px; cursor: pointer;
+            font-size: 11px; font-weight: bold;
+        `;
+        okBtn.onclick = () => {
+            const ordered = this._orderBySelection(allNames, selected, current);
+            if (ordered.length === 0) {
+                comp[propDef.key] = null;
+                displayEl.textContent = '— None —';
+                displayEl.style.color = '#666';
+            } else {
+                comp[propDef.key] = ordered;
+                displayEl.textContent = ordered.join(', ');
+                displayEl.style.color = '#0af';
+            }
+            if (propDef.afterChange) propDef.afterChange(comp, comp[propDef.key]);
+            this._onSchemaChange();
+            document.body.removeChild(overlay);
+        };
+
+        const actions = document.createElement('div');
+        actions.style.cssText = 'display: flex; gap: 8px;';
+        actions.appendChild(clearBtn);
+        actions.appendChild(cancelBtn);
+        actions.appendChild(okBtn);
+        footer.appendChild(document.createElement('div'));   // spacer
+        footer.appendChild(actions);
+        modal.appendChild(footer);
+
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        // Escape / click outside
+        const onKey = (e) => {
+            if (e.key === 'Escape') {
+                document.body.removeChild(overlay);
+                document.removeEventListener('keydown', onKey);
+            }
+        };
+        document.addEventListener('keydown', onKey);
+        overlay.onclick = (e) => {
+            if (e.target === overlay) {
+                document.body.removeChild(overlay);
+                document.removeEventListener('keydown', onKey);
+            }
+        };
+    }
+
+    _orderBySelection(allNames, selectedSet, currentOrder) {
+        // 1. Сохраняем текущий порядок для тех, кто всё ещё выбран
+        const ordered = [];
+        for (const name of currentOrder) {
+            if (selectedSet.has(name) && !ordered.includes(name)) {
+                ordered.push(name);
+            }
+        }
+        // 2. Добавляем новые в порядке allNames
+        for (const name of allNames) {
+            if (selectedSet.has(name) && !ordered.includes(name)) {
+                ordered.push(name);
+            }
+        }
+        return ordered;
     }
 
     // ─────────────────────────── COLOR SECTION ──────────────────────

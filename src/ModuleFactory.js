@@ -27,7 +27,7 @@ import { PartSelector } from './components/PartSelector.js';
 
 import { BaseJack } from './components/BaseJack.js';
 import { getEffectiveRating } from './api/moduleRatingStore.js';
-
+import { getModuleStatus } from './api/moduleStatusStore.js';
 
 
 // ModuleFactory.js
@@ -223,6 +223,7 @@ export class ModuleFactory {
         panel.layer = layer;
         panel.parentSystem = this.parentSystem;
         panel.rating = getEffectiveRating(type, definition);
+        panel.status = getModuleStatus(definition);
 
         // ⭐ Читаем цвет из definition
         if (definition.customColor) {
@@ -312,12 +313,21 @@ export class ModuleFactory {
                     );
                     break;
 
-                case 'TextEdit':
-                    component = new ButtonText(
+                case 'TextField':
+                    component = new TextField(
                         tempX, tempY,
-                        compDef.width || 40,
-                        compDef.text || 'Text',
+                        compDef.width || 20,
+                        compDef.referenceElementId || 0,
+                        compDef.format || 'number',
+                        compDef.tableName || null
                     );
+                    if (compDef.modeComponentId !== undefined && compDef.modeComponentId !== null) {
+                        component.modeComponentId = String(compDef.modeComponentId);
+                    }
+                    if (Array.isArray(compDef.tableByMode)) {
+                        component.tableByMode = compDef.tableByMode.slice();
+                    }
+                    component.parent = panel;
                     break;
                 
                 case 'SVG':
@@ -368,16 +378,12 @@ export class ModuleFactory {
                     );
                     break;
 
-                case 'TextField':
-                    component = new TextField(
+                case 'TextEdit':
+                    component = new ButtonText(
                         tempX, tempY,
-                        compDef.width || 20,
-                        compDef.referenceElementId || 0,
-                        compDef.format || 'number',
-                        compDef.tableName || null
+                        compDef.width || 40,
+                        compDef.text || 'Text',
                     );
-
-                    component.parent = panel;
                     break;
                     
                 case 'Line':

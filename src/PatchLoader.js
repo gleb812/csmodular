@@ -104,6 +104,16 @@ export class PatchLoader {
             this.loadStickers(patchData.stickers);
         }
 
+        // ⭐ Шаг 4: применить варианты ко всем модулям (перекраска джеков
+        //          без ожидания первого кабеля)
+        if (this.system.recomputeVariantUI) {
+            try {
+                await this.system.recomputeVariantUI();
+            } catch (e) {
+                console.warn('[PatchLoader] recomputeVariantUI failed:', e);
+            }
+        }
+
         return this.moduleMap;
     }
 
@@ -212,7 +222,7 @@ export class PatchLoader {
         try {
             // ⭐ Сначала пробуем загрузить из modules/user/ (пользовательский)
             try {
-                const userPath = `../modules/user/${moduleName}.js`;
+                const userPath = `./modules/user/${moduleName}.js`;
                 console.log(`   Trying user path: ${userPath}`);
                 const module = await import(/* @vite-ignore */ userPath);
                 const moduleKey = Object.keys(module)[0];
@@ -227,7 +237,7 @@ export class PatchLoader {
             }
             
             // ⭐ Пробуем загрузить из modules/ (встроенный)
-            const modulePath = `../modules/${moduleName}.js`;
+            const modulePath = `./modules/${moduleName}.js`;
             console.log(`   Trying built-in path: ${modulePath}`);
             const module = await import(/* @vite-ignore */ modulePath);
             const moduleKey = Object.keys(module)[0];

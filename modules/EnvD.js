@@ -51,7 +51,8 @@
                 "componentType": "LED",
                 "id": "2",
                 "x": 40,
-                "y": 18
+                "y": 18,
+                "sourceComponentId": "0"
         },
         {
                 "componentType": "Input",
@@ -78,7 +79,9 @@
                 "x": 81,
                 "y": 12,
                 "width": 35,
-                "referenceElementId": 6
+                "referenceElementId": 6,
+                "tableName": 'envtim',
+                "format": 'float'
         },
         {
                 "componentType": "Knob",

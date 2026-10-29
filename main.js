@@ -900,7 +900,7 @@ _renderDynamic() {
     if (!this.moduleFactory.moduleRegistry[placeholderName]) {
       try {
         // Пробуем загрузить модуль-заглушку
-        const modulePath = `./modules/${placeholderName}.js`;
+        const modulePath = `/modules/${placeholderName}.js`;
         const module = await import(/* @vite-ignore */ modulePath);
         const moduleKey = Object.keys(module)[0];
 
@@ -1558,7 +1558,7 @@ _renderDynamic() {
       console.log('Попытка загрузить список модулей из папки...');
 
       // Пробуем получить список файлов
-      const modulesDir = './modules/';
+      const modulesDir = '/modules/';
 
       // Создаем запрос к директории
       const response = await fetch(modulesDir);
@@ -1589,7 +1589,7 @@ _renderDynamic() {
 
             // Пробуем загрузить модуль для получения названия
             try {
-              const modulePath = `./modules/${filename}`;
+              const modulePath = `/modules/${filename}`;
               const module = await import(/* @vite-ignore */ modulePath);
               const moduleKey = Object.keys(module)[0];
 
@@ -1661,9 +1661,9 @@ async loadAvailableModules(selectElement) {
     let builtinCount = 0;
     let userCount = 0;
     
-    // ⭐ 1. Штатные модули из ./modules/
+    // ⭐ 1. Штатные модули из /modules/
     try {
-        const response = await fetch('./modules/');
+        const response = await fetch('/modules/');
         const text = await response.text();
         
         const parser = new DOMParser();
@@ -1676,7 +1676,7 @@ async loadAvailableModules(selectElement) {
                 const moduleName = filename.replace('.js', '');
                 
                 try {
-                    const modulePath = `./modules/${filename}`;
+                    const modulePath = `/modules/${filename}`;
                     const module = await import(/* @vite-ignore */ modulePath);
                     const moduleKey = Object.keys(module)[0];
                     if (moduleKey && module[moduleKey]) {
@@ -2020,9 +2020,9 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
             if (isUser) {
                 loaded = await this.moduleFactory.loadUserModule(moduleType);
             } else {
-                // ⭐ ВСТРОЕННЫЙ → загружаем из ./modules/
+                // ⭐ ВСТРОЕННЫЙ → загружаем из /modules/
                 try {
-                    const modulePath = `./modules/${moduleType}.js`;
+                    const modulePath = `/modules/${moduleType}.js`;
                     const module = await import(/* @vite-ignore */ modulePath);
                     const moduleKey = Object.keys(module)[0];
                     if (moduleKey && module[moduleKey]) {
@@ -2122,7 +2122,7 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
             isUser: moduleDef.isUser === true,
           });
           newModule.typeID = moduleType;
-
+          this.recomputeVariantUI();
           // Добавляем в слой
           this.layerManager.addModuleToLayer(newModule, layerName);
           this.components.push(newModule);
@@ -2469,6 +2469,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     await initCurrentTheme();
     console.log('✅ Theme initialized');
 
+    // ⭐ BUILD: читаем manifest доступных (stable) модулей
+    if (import.meta.env.PROD) {
+        try {
+            const res = await fetch('/modules/manifest.json');
+            if (res.ok) {
+                const { modules } = await res.json();
+                window.__STABLE_MODULES__ = new Set(modules);
+                console.log(`[build] ${modules.length} stable modules available`);
+            } else {
+                console.warn('[build] manifest.json not found, showing all modules');
+            }
+        } catch (e) {
+            console.warn('[build] failed to load manifest:', e);
+        }
+    }
+    
     modularSystem = new ModularSystem();
     window.modularSystem = modularSystem;
 

@@ -1,6 +1,7 @@
 // Автоматически сгенерированный модуль: CompLev
     // Исходный файл: CompLev.js
     // Версия: 208
+// в крайнем левом положении вдруг вместо -1 получается 0. КАК??
 
     export const CompLevModule = {
         type: 'CompLev',
@@ -10,6 +11,7 @@
         gridHeight: 2,
         originalName: 'CompLev',
         tooltip: 'Compare to Level',
+        status: 'passable',
     params: [1],
         inputs: [2],
         outputs: [3],
@@ -20,7 +22,9 @@
                 "x": 149,
                 "y": 8,
                 "width": 21,
-                "referenceElementId": 1
+                "referenceElementId": 1,
+                "tableName": 'lvllev',        // ← одна таблица из /public/tables/
+                "format": 'integer'
         },
         {
                 "componentType": "Knob",

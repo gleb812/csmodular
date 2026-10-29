@@ -1,6 +1,7 @@
 // Автоматически сгенерированный модуль: DlySingleA
     // Исходный файл: DlySingleA.js
     // Версия: 228
+//TODO: FIX SVG ELEMENT
 
     export const DlySingleAModule = {
         type: 'DlySingleA',
@@ -11,6 +12,7 @@
         gridHeight: 2,
         originalName: 'DlySingleA',
         tooltip: 'Delay Static',
+        status: 'stable',
     params: [3,0],
         inputs: [5],
         outputs: [6],
@@ -48,7 +50,10 @@
                 "x": 139,
                 "y": 12,
                 "width": 40,
-                "referenceElementId": 3
+                "referenceElementId": 3,
+                "modeComponentId": 0,             
+                "tableByMode": ['dly_5m','dly25m','dly100','dly500','dly_1s','dly_2s','dly2p7'],
+                "format": 'float'
         },
         {
                 "componentType": "Input",

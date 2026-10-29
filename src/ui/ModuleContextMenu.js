@@ -441,16 +441,10 @@ export class ModuleContextMenu {
   }
 
   deleteModule() {
-    if (!this.currentModule) return;
+      if (!this.currentModule) return;
 
-    if (
-      confirm(
-        `Delete module "${this.currentModule.title}"? All connected cables will be removed.`,
-      )
-    ) {
       this.system.removeModule(this.currentModule);
       this.system.showNotification(`🗑️ Module deleted`);
-    }
   }
 
   setupEventListeners() {

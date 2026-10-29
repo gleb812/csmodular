@@ -19,7 +19,7 @@ export class LED extends BaseComponent {
         
         // ⭐ Настройки отображения
         this.gain = 1.0;               // Усиление перед порогом
-        this.threshold = 0.5;         // Порог on/off
+        this.threshold = 0.025;         // Порог on/off
         
         // ⭐ Флаги
         this.isInteractive = true;     // можно выделять

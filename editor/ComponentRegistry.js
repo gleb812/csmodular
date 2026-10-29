@@ -477,16 +477,25 @@ export const ComponentRegistry = {
             opts.tableName ?? null
         ),
 
-        serialize: (c) => ({
-            componentType: 'TextField',
-            id: String(c.id),
-            x: Math.round(c.relX ?? 0),
-            y: Math.round(c.relY ?? 0),
-            width: c.width ?? 50,
-            referenceElementId: c.targetId ?? null,
-            format: c.format ?? 'number',
-            tableName: c.tableName ?? null,
-        }),
+        serialize: (c) => {
+            const out = {
+                componentType: 'TextField',
+                id: String(c.id),
+                x: Math.round(c.relX ?? 0),
+                y: Math.round(c.relY ?? 0),
+                width: c.width ?? 50,
+                referenceElementId: c.targetId ?? null,
+                format: c.format ?? 'number',
+            };
+            if (c.tableName) out.tableName = c.tableName;
+            if (c.modeComponentId !== null && c.modeComponentId !== undefined) {
+                out.modeComponentId = String(c.modeComponentId);
+            }
+            if (Array.isArray(c.tableByMode) && c.tableByMode.length > 0) {
+                out.tableByMode = c.tableByMode.slice();
+            }
+            return out;
+        },
 
         deserialize: (d, ctx) => {
             const c = new TextField(
@@ -498,6 +507,12 @@ export const ComponentRegistry = {
             );
             c.relX = d.x;
             c.relY = d.y;
+            if (d.modeComponentId !== undefined && d.modeComponentId !== null) {
+                c.modeComponentId = String(d.modeComponentId);
+            }
+            if (Array.isArray(d.tableByMode)) {
+                c.tableByMode = d.tableByMode.slice();
+            }
             return c;
         },
 

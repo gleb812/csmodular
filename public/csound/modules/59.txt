@@ -10,7 +10,7 @@ opcode CompLev_k, 0, kkk
   kVal /= 64
   kIn zkr kin
   kres init 0
-
+printk2 kVal
   if (kIn >= kVal) then
     kres = 1
     goto run

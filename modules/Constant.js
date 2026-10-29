@@ -10,6 +10,8 @@
         gridHeight: 2,
         originalName: 'Constant',
         tooltip: 'Constant Value',
+        status: 'stable',
+
     params: [2, 5],
         inputs: [],
         outputs: [1],
@@ -37,8 +39,11 @@
                 "id": "3",
                 "x": 187,
                 "y": 8,
-                "width": 28,
-                "referenceElementId": 2
+                "width": 30,
+                "referenceElementId": 2,
+                "modeComponentId": 5,             // ← ButtonFlat id=5 (BiP/Uni)
+                "tableByMode": ['lvllev', 'lvlpos'],
+                "format": 'float'
         },
         {
                 "componentType": "Line",

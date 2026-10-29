@@ -10,6 +10,7 @@
         gridHeight: 2,
         originalName: 'Noise',
         tooltip: 'Noise',
+        status: 'passable',
     params: [0, 5],
         inputs: [],
         outputs: [1],
