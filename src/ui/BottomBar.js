@@ -96,8 +96,8 @@ export class BottomBar {
             { id: 'editor', label: 'Ed', title: 'Module editor',   action: () => this._openEditor() },
             { id: 'sep5', label: null },
 
-            // --- Grid ---
-            { id: 'grid',   label: 'Gr', title: 'Toggle grid',     action: () => this._toggleGrid(), toggle: () => !!this.system.showGrid },
+            // --- Snap ---
+            { id: 'snap',   label: 'Sn', title: 'Toggle snap to grid', action: () => this._toggleSnap(), toggle: () => !!this.system.grid?.snap },
 
 
             { id: 'sep5b', label: null },
@@ -355,9 +355,12 @@ export class BottomBar {
         }
     }
 
-    _toggleGrid() {
-        this.system.showGrid = !this.system.showGrid;
-        this.system.forceRedraw();
+    _toggleSnap() {
+        const grid = this.system?.grid;
+        if (!grid) return;
+        this.system.setGridSnap?.(!grid.snap);
+        this.system.forceRedraw?.();
+        this.refreshState();
     }
 
     _addSticker() {
@@ -467,7 +470,7 @@ export class BottomBar {
             ${row('FPS', fps, fpsColor)}
             ${row('Zoom', zoom + '%')}
             <div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.08);">
-                ${row('Grid', gridStep + ' / snap ' + gridSnap)}
+                ${row('Snap', gridStep + ' / snap ' + gridSnap)}
                 ${row('Csound', cs.toUpperCase(), csColor)}
                 ${row('MIDI', `${midiState.toUpperCase()} / ${midiInputs} in`, midiColor)}
                 ${row('Last MIDI', midiLastDesc, '#aaa')}
@@ -524,7 +527,7 @@ export class BottomBar {
             active = !!this.system.designSettings?.isVisible;
         } else if (cfg.id === 'csd') {
             active = this._isCsoundWindowVisible();
-        } else if (cfg.id === 'grid') {
+        } else if (cfg.id === 'snap') {
             active = !!this.system.showGrid;
         } else if (cfg.id === 'sysinfo') {
             active = this._sysInfoOpen;

@@ -107,7 +107,6 @@ class ModularSystem {
     this.lastMouseY = null;
     this.debugCables = false;
     this.currentPatchFilename = null;
-    this.showGrid = true;   // ← НОВОЕ
     this.grid = new Grid();
     this.layerManager = new LayerManager(this.canvas);
     this.layerManager.system = this;
@@ -1865,21 +1864,6 @@ async loadAvailableModules(selectElement) {
           if (typeof this.startMeasure === 'function') this.startMeasure('clear');
           this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
           if (typeof this.endMeasure === 'function') this.endMeasure('clear');
-
-          // === СЕТКА ===
-          if (this.showGrid && this.grid) {
-              this.ctx.save();
-              this.ctx.translate(this.offsetX, this.offsetY);
-              this.ctx.scale(this.scale, this.scale);
-              this.grid.draw(this.ctx, {
-                  offsetX: this.offsetX,
-                  offsetY: this.offsetY,
-                  scale: this.scale,
-                  width: window.innerWidth,
-                  height: window.innerHeight,
-              });
-              this.ctx.restore();
-          }
 
           // === VOICE ===
           if (typeof this.startMeasure === 'function') this.startMeasure('drawVoice');

@@ -122,59 +122,7 @@ export class Grid {
      * @param {object} viewport — { offsetX, offsetY, scale, width, height }
      */
     draw(ctx, viewport) {
-        if (!this.enabled) return;
-
-        const theme = getCurrentTheme();
-        const style = theme.getGridStyle();
-        const { offsetX, offsetY, scale, width, height } = viewport;
-
-        // Видимая область в мировых координатах
-        const worldLeft   = -offsetX / scale;
-        const worldTop    = -offsetY / scale;
-        const worldRight  = (width  - offsetX) / scale;
-        const worldBottom = (height - offsetY) / scale;
-
-        // Шаг крестиков (мировые px)
-        const stepX = this.stepX;
-        const stepY = this.stepY;
-
-        // Первый/последний крестик в видимой области
-        const startX = Math.floor(worldLeft  / stepX) * stepX;
-        const endX   = Math.ceil (worldRight / stepX) * stepX;
-        const startY = Math.floor(worldTop   / stepY) * stepY;
-        const endY   = Math.ceil (worldBottom/ stepY) * stepY;
-
-        // Размер крестика — constant в экранных пикселях
-        // (рисуем внутри scale-трансформа, компенсируем размер)
-        const size = style.size / scale;       // длина луча
-        const lw   = style.lineWidth / scale;  // толщина
-
-        ctx.save();
-        ctx.strokeStyle = style.color;
-        ctx.lineWidth = lw;
-        ctx.lineCap = 'round';
-
-        if (style.glow) {
-            theme.applyGlow(ctx);
-        }
-
-        // Рисуем крестики пакетно (один path на всё — быстрее)
-        ctx.beginPath();
-        for (let wx = startX; wx <= endX; wx += stepX) {
-            for (let wy = startY; wy <= endY; wy += stepY) {
-                // Крестик: горизонтальный луч + вертикальный
-                ctx.moveTo(wx - size, wy);
-                ctx.lineTo(wx + size, wy);
-                ctx.moveTo(wx, wy - size);
-                ctx.lineTo(wx, wy + size);
-            }
-        }
-        ctx.stroke();
-
-        if (style.glow) {
-            theme.clearGlow(ctx);
-        }
-
-        ctx.restore();
+        // Visual grid removed (performance).
+        // Snap and multipliers still active via snapToGrid().
     }
 }
