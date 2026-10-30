@@ -251,8 +251,8 @@ export class Knob extends BaseComponent {
         const deltaY = this.startMouseY - y; // Обратите внимание: вверх = увеличение
         const range = this.max - this.min;
         
-        // Чувствительность: полный диапазон за ~200 пикселей
-        const pixelRange = 200;
+        // Чувствительность: полный диапазон за ~400 пикселей
+        const pixelRange = 400;
         const sensitivity = range / pixelRange * this.verticalSensitivity;
         
         let newValue = this.startValue + deltaY * sensitivity;

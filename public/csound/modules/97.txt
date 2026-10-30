@@ -1,10 +1,10 @@
 ;@ map OSCsem OSCprt
 ;@ map OSCcnt
-;@ variant a default
+;@ variant k default
 ;@ strict 0 0
-;@ ins a a
+;@ ins k k
 ;@ outs a
-opcode OscA_a, 0, kkkkkkkkkk
+opcode OscA_k, 0, kkkkkkkkkk
 kModLev,kcoarse,kFine, kWave,kON,kTuneMode,kKBT,  kModIn,kPitchIn,  kOut xin
 
 kMod zkr kModIn
@@ -19,6 +19,57 @@ KBT:
 kPitch init 64
 if kPitchIn == 0 goto Run
 kPitch zkr kPitchIn
+kPitch *= 64
+
+Run:
+if kTuneMode!=3 then
+  kCoarse table kcoarse, giOSCsem
+  kFine table kFine, giOSCcnt
+  kM_ = kPitch+kModLev*kMod+kNote+kFine*0.01
+  kMM = kM_+kCoarse
+  kMM limit kMM, 0, 127
+  kFreq = cpsmidinn(kMM)
+else
+    if kcoarse <= 32 then
+      kFreq table kcoarse, giOSCprt
+      kFine table kFine, giOSCcnt
+      kFreq *= cent(kFine)
+    else
+      kPart table kcoarse, giOSCprt
+      kFine table kFine, giOSCcnt
+      kM_ = kPitch+kModLev*kMod+kNote+kFine*0.01
+      kM_ limit kM_, 0, 127
+      kFreq = cpsmidinn(kM_)*kPart
+    endif
+endif
+
+aout oscilikt 1, kFreq, kWave+1
+zaw aout*kON, kOut
+endop
+
+;@ variant a
+;@ strict 0 0
+;@ ins a a
+;@ outs a
+opcode OscA_a, 0, kkkkkkkkkk
+kModLev,kcoarse,kFine, kWave,kON,kTuneMode,kKBT,  kModIn,kPitchIn,  kOut xin
+
+printk 1, kOut
+
+aMod zar kModIn
+kMod = k(aMod)
+
+if kKBT != 1 goto NoKBT
+  kNote = gkNote
+  goto KBT
+NoKBT:
+  kNote = 64
+KBT:
+
+kPitch init 64
+if kPitchIn == 0 goto Run
+aPitch zar kPitchIn
+kPitch = k(aPitch*64)
 Run:
 if kTuneMode!=3 then
   kCoarse table kcoarse, giOSCsem
@@ -35,23 +86,10 @@ else
       kFine table kFine, giOSCcnt
       kM_ = kPitch+kModLev*kMod+kNote+kFine*0.01
       kFreq = cpsmidinn(kM_)*kPart
-      ;kFreq = 1000
     endif
 endif
-
-;printk 1, kON
+Out:
 aout oscilikt 1, kFreq, kWave+1
 zaw aout*kON, kOut
 endop
 
-;@ variant k
-;@ strict 0 0
-;@ ins k k
-;@ outs a
-opcode OscA_k, 0, kkkkkkkkkk
-kModLev,kcoarse,kFine, kKBT,kWave,kON,kTuneMode,  kModIn,kPitchIn,  kOut xin
-
-printk 1, kOut
-aout oscil 0.5, 440
-zaw aout*kON, kOut
-endop

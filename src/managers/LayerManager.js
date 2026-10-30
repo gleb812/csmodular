@@ -1,5 +1,5 @@
 // src/managers/LayerManager.js
-import { BASE_STEP_X, BASE_STEP_Y } from '../constants.js';
+import { BASE_STEP_X, BASE_STEP_Y, MAX_SANE_DISTANCE_GRID } from '../constants.js';
 
 export class LayerManager {
   constructor(canvas) {
@@ -103,6 +103,59 @@ export class LayerManager {
 
     return true;
   }
+
+  /**
+   * Проверить, не улетел ли модуль слишком далеко от остальных.
+   * Chebyshev-расстояние между прямоугольниками (max по осям gap).
+   *
+   * @returns {{ ok: boolean, distance: number, nearest: object|null }}
+   */
+  checkSaneDistance(
+    layerName,
+    gridX,
+    gridY,
+    gridWidth = 1,
+    gridHeight = 1,
+    excludeModule = null,
+    maxDistance = MAX_SANE_DISTANCE_GRID,
+  ) {
+    const layer = this.layers[layerName];
+    if (!layer || layer.modules.length === 0) {
+      return { ok: true, distance: 0, nearest: null };
+    }
+
+    let minDist = Infinity;
+    let nearest = null;
+
+    for (const m of layer.modules) {
+      if (m === excludeModule) continue;
+
+      // gap между прямоугольниками по каждой оси (0 если пересекаются)
+      const gapX = Math.max(
+        0,
+        m.gridX - (gridX + gridWidth),
+        gridX - (m.gridX + m.gridWidth),
+      );
+      const gapY = Math.max(
+        0,
+        m.gridY - (gridY + gridHeight),
+        gridY - (m.gridY + m.gridHeight),
+      );
+      const d = Math.max(gapX, gapY); // Chebyshev
+
+      if (d < minDist) {
+        minDist = d;
+        nearest = m;
+      }
+    }
+
+    return {
+      ok: minDist <= maxDistance,
+      distance: minDist,
+      nearest,
+    };
+  }
+
 
   findFreeSpace(
     layerName,

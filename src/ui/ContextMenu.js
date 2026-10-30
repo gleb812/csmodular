@@ -3,6 +3,7 @@ import { moduleStore } from '../api/index.js';
 import { PANEL_GRID_WIDTH } from '../constants.js';
 import { ratingStore, getEffectiveRating } from '../api/moduleRatingStore.js';
 import { getModuleStatus, getStatusMeta, IS_DEV } from '../api/moduleStatusStore.js';
+import { ALL_NM2 } from '../moduleCategories.js';
 
 export class ContextMenu {
     constructor(system) {
@@ -29,27 +30,6 @@ export class ContextMenu {
     }
 
     initModuleStructure() {
-        // ⭐ Полный список NM2-модулей — статический хардкод.
-        //    В BUILD фильтруется по window.__STABLE_MODULES__ (manifest).
-        const ALL_NM2 = {
-            'In/Out': ['In2', 'Out2', 'In4', 'Out4', 'Device', 'FxIn', 'Keyboard', 'MonoKey', 'Name', 'NoteDet', 'Status'],
-            'Logic': ['8Counter', 'ADConv', 'BinCounter', 'ClkDiv', 'DAConv', 'Delay', 'FlipFlop', 'Gate', 'Invert', 'Pulse'],
-            'Osc': ['DXRouter', 'Driver', 'DrumSynth', 'MetNoise', 'Noise', 'Operator', 'OscA', 'OscB', 'OscC', 'OscD', 'OscDual', 'OscMaster', 'OscNoise', 'OscPM', 'OscPerc', 'OscShpA', 'OscShpB', 'OscString', 'Resonator'],
-            'FX': ['Compressor', 'Digitizer', 'Flanger', 'FreqShift', 'PShift', 'Phaser', 'Reverb', 'Scratch', 'StChorus'],
-            'Switch': ['Mux18', 'Mux81', 'Mux81X', 'SH', 'Sw12', 'Sw12M', 'Sw14', 'Sw18', 'Sw21', 'Sw21M', 'Sw41', 'Sw81', 'SwOnOffM', 'SwOnOffT', 'T&amp;H', 'ValSw1-2', 'ValSw2-1', 'WindSw'],
-            'Mixer': ['Fade12', 'Fade21', 'Mix11A', 'Mix11S', 'Mix21A', 'Mix21B', 'Mix41A', 'Mix41B', 'Mix41C', 'Mix41S', 'Mix81A', 'Mix81B', 'MixFader', 'MixStereo', 'Pan', 'X-Fade'],
-            'Env': ['EnvADDSR', 'EnvADR', 'EnvADSR', 'EnvAHD', 'EnvD', 'EnvH', 'EnvMulti', 'ModADSR', 'ModAHD'],
-            'Note': ['Glide', 'KeyQuant', 'LevScaler', 'NoteQuant', 'NoteScaler', 'PartQuant', 'PitchTrack', 'ZeroCnt'],
-            'LFO': ['ClkGen', 'LfoA', 'LfoB', 'LfoC', 'LfoShpA'],
-            'Shaper': ['Clip', 'Overdrive', 'Rect', 'Saturate', 'ShpExp', 'ShpStatic', 'WaveWrap'],
-            'Filter': ['Eq2Band', 'Eq3Band', 'EqPeak', 'FltClassic', 'FltComb', 'FltHP', 'FltLP', 'FltMulti', 'FltNord', 'FltPhase', 'FltStatic', 'FltVoice', 'Vocoder', 'WahWah'],
-            'Level': ['CompLev', 'CompSig', 'ConstSwM', 'ConstSwT', 'Constant', 'EnvFollow', 'LevAdd', 'LevAmp', 'LevConv', 'LevMod', 'LevMult', 'MinMax', 'ModAmt', 'NoiseGate'],
-            'MIDI': ['Automate', 'CtrlRcv', 'CtrlSend', 'NoteRcv', 'NoteSend', 'NoteZone', 'PCSend'],
-            'Seq': ['SeqCtr', 'SeqEvent', 'SeqLev', 'SeqNote', 'SeqVal'],
-            'Delay': ['DelayA', 'DelayB', 'DelayDual', 'DelayQuad', 'DlyClock', 'DlyEight', 'DlyShiftReg', 'DlySingleA', 'DlySingleB', 'DlyStereo'],
-            'Rnd': ['RandomA', 'RandomB', 'RndClkA', 'RndClkB', 'RndPattern', 'RndTrig'],
-            'Test': ['Blue2Red', 'Red2Blue'],
-        };
 
         // ⭐ BUILD: фильтр по manifest. DEV: window.__STABLE_MODULES__ = undefined → всё.
         const allow = window.__STABLE_MODULES__;   // Set<string> | undefined

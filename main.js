@@ -29,6 +29,7 @@ import { BottomBar } from './src/ui/BottomBar.js';
 import { MidiManager } from './src/midi/MidiManager.js';
 import { OscManager } from './src/midi/OscManager.js';
 import { OscSettingsPanel } from './src/ui/OscSettingsPanel.js';
+import { Minimap } from './src/ui/Minimap.js';
 
 
 // Глобальный обработчик ошибок
@@ -120,6 +121,8 @@ class ModularSystem {
     this.stickerContextMenu = new StickerContextMenu(this);
     this.stickerProperties = new StickerPropertiesPanel(this);
     this.bottomBar = new BottomBar(this);
+    this.minimap = new Minimap(this);
+    this.minimap.hide();
     this.csoundWindow = new CSoundWindow(this);
     this.designSettings = new DesignSettingsPanel(this);
 
@@ -712,6 +715,17 @@ _renderDynamic() {
             e.preventDefault();
             this.designSettings.toggle();
             break;
+        case 'm':
+        case 'M':
+        case 'ь':
+        case 'Ь':
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                return;
+            }
+            e.preventDefault();
+            this.minimap?.toggle();
+            this.bottomBar?.refreshState?.();
+            break;
       }
     });
   }
@@ -860,6 +874,9 @@ _renderDynamic() {
           this.overlayCanvas.style.height = `${h}px`;
           this.overlayCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
       }
+
+      // ⭐ Minimap: пересчитать при ресайзе (viewport-рамка изменилась)
+      this.minimap?._markDirty();
   }
 
   openContextMenuAtMousePosition() {
@@ -1910,6 +1927,11 @@ async loadAvailableModules(selectElement) {
       // === DYNAMIC (LED, MiniVU, Graph) ===
       this._renderDynamic();
 
+      // ⭐ Minimap — рисуем в экранных координатах, поверх всего
+      if (this.minimap && this.minimap.visible) {
+          this.minimap.draw();
+      }
+
       if (typeof this.endMeasure === 'function') this.endMeasure('total');
 
       if (this.frameCount % 60 === 0) {
@@ -1972,16 +1994,16 @@ async loadAvailableModules(selectElement) {
     };
   })();
 
-async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
+  async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
       console.log('🔍 addNewModuleAtPosition:', { moduleType, layerName, gridX, gridY });
       try {
-        // Проверяем слой
+        // 1. Проверяем слой
         if (!layerName || !this.layerManager.layers[layerName]) {
           console.error(`Ошибка: неверный слой ${layerName}`);
           return;
         }
 
-        // ⭐ Прилипаем к разрешённой сетке (если snap включён)
+        // 2. Snap к разрешённой сетке (multX/multY)
         if (this.grid.snap) {
             const snapped = this.grid.snapToGrid(
                 gridX * BASE_STEP_X,
@@ -1994,17 +2016,15 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
             }
         }
 
-
+        // 3. Загрузка определения модуля
         if (!this.moduleFactory.moduleRegistry[moduleType]) {
             let loaded = false;
-            
-            // ⭐ Проверяем, является ли модуль пользовательским
+
             const isUser = await this.moduleFactory.isUserModule(moduleType);
-            
+
             if (isUser) {
                 loaded = await this.moduleFactory.loadUserModule(moduleType);
             } else {
-                // ⭐ ВСТРОЕННЫЙ → загружаем из /modules/
                 try {
                     const modulePath = `/modules/${moduleType}.js`;
                     const module = await import(/* @vite-ignore */ modulePath);
@@ -2017,21 +2037,20 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
                     console.warn(`Failed to load built-in module ${moduleType}:`, error);
                 }
             }
-            
+
             if (!loaded) {
                 this.showNotification(`❌ Модуль ${moduleType} не найден`);
                 return;
             }
         }
 
-        // Получаем определение модуля
         const moduleDef = this.moduleFactory.moduleRegistry[moduleType];
         if (!moduleDef) {
           console.error(`Definition not found for ${moduleType}`);
           return;
         }
 
-        // ⭐ Auto-layout для FX: не даём модулю оказаться выше Voice-зоны
+        // 4. FX auto-layout: не выше Voice-зоны
         if (layerName === 'fx') {
             const fxFloorY = this._getFxFloorY();
             if (gridY < fxFloorY) {
@@ -2040,45 +2059,75 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
             }
         }
 
-        // Проверяем, свободно ли место
         const gridWidth = PANEL_GRID_WIDTH;
         const gridHeight = moduleDef.gridHeight || 2;
 
+        // 5. Коллизия → свободное место
         if (!this.isGridCellFree(layerName, gridX, gridY, gridWidth, gridHeight)) {
           console.log(`❌ Position (${gridX}, ${gridY}) is occupied, searching nearby...`);
-          
-        const freeSpace = this.findFreeSpace(
-            layerName,
-            gridWidth,
-            gridHeight,
-            gridX,
-            gridY,
-            this.grid.snap ? this.grid.multX : 1,
-            this.grid.snap ? this.grid.multY : 1,
-        );
-          
+
+          const freeSpace = this.findFreeSpace(
+              layerName,
+              gridWidth,
+              gridHeight,
+              gridX,
+              gridY,
+              this.grid.snap ? this.grid.multX : 1,
+              this.grid.snap ? this.grid.multY : 1,
+          );
+
           if (!freeSpace) {
             this.showNotification(
               `❌ Нет места в слое ${layerName === 'voice' ? 'VA' : 'FX'}`,
             );
             return;
           }
-          
+
           gridX = freeSpace.gridX;
           gridY = freeSpace.gridY;
-          
-          // ⭐ Повторная проверка для FX: findFreeSpace мог вернуть место выше voice
+
+          // Повторная FX-проверка: findFreeSpace мог вернуть место выше voice
           if (layerName === 'fx') {
               const fxFloorY = this._getFxFloorY();
               if (gridY < fxFloorY) {
                   gridY = fxFloorY;
               }
           }
-          
+
           console.log(`✅ Found alternative position: (${gridX}, ${gridY})`);
         }
 
-        // Создаем модуль
+        // 6. ⭐ SOFT LIMIT: не создаём модуль далеко от группы
+        const sane = this.layerManager.checkSaneDistance(
+            layerName, gridX, gridY, gridWidth, gridHeight,
+        );
+        if (!sane.ok) {
+            const near = sane.nearest;
+            this.showNotification(
+                `📏 Слишком далеко от модулей (${sane.distance}). Ищем место рядом...`,
+            );
+            const freeSpace = this.findFreeSpace(
+                layerName,
+                gridWidth,
+                gridHeight,
+                near ? near.gridX : 0,
+                near ? near.gridY : 0,
+                this.grid.snap ? this.grid.multX : 1,
+                this.grid.snap ? this.grid.multY : 1,
+            );
+            if (freeSpace) {
+                gridX = freeSpace.gridX;
+                gridY = freeSpace.gridY;
+                if (layerName === 'fx') {
+                    const fxFloorY = this._getFxFloorY();
+                    if (gridY < fxFloorY) gridY = fxFloorY;
+                }
+            }
+            // Если freeSpace не нашёлся — оставляем исходные gridX/Y:
+            // лучше создать далеко, чем не создать вовсе.
+        }
+
+        // 7. Создаём модуль
         const newModule = this.moduleFactory.createModule(
           moduleType,
           gridX,
@@ -2107,7 +2156,7 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
           });
           newModule.typeID = moduleType;
           this.recomputeVariantUI();
-          // Добавляем в слой
+
           this.layerManager.addModuleToLayer(newModule, layerName);
           this.components.push(newModule);
 
@@ -2116,7 +2165,7 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
             this.patchLoader.moduleMap.byLayer[layerName].push(newModule);
           }
 
-          // ⭐ Регистрируем LED-каналы
+          // 8. Регистрируем LED/MiniVU каналы
           if (this.csoundEngine && newModule.components) {
               const leds = newModule.components.filter(c => c.constructor.name === 'LED');
               leds.forEach(led => {
@@ -2127,7 +2176,6 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
                   console.log(`💡 Registered LED channel: ${channelName}`);
               });
 
-              // ⭐ Регистрируем MiniVU-каналы
               const mvus = newModule.components.filter(c => c.constructor.name === 'MiniVU');
               mvus.forEach(mvu => {
                   if (mvu.sourceComponentId === null || mvu.sourceComponentId === undefined) return;
@@ -2137,7 +2185,6 @@ async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
                   console.log(`📊 Registered MiniVU channel: ${channelName}`);
               });
           }
-
 
           this.sortComponentsByZIndex();
           this.showNotification(

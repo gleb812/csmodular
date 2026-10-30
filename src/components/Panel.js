@@ -4,6 +4,7 @@ import {
   PANEL_GRID_WIDTH,
   BASE_STEP_X,
   BASE_STEP_Y,
+  MAX_SANE_DISTANCE_GRID
 } from '../constants.js';
 
 export class Panel {
@@ -325,13 +326,36 @@ export class Panel {
               this,
           );
 
-          if (canMove) {
-              this.gridX = targetGridX;
-              this.gridY = targetGridY;
-              this.lastValidGridX = targetGridX;
-              this.lastValidGridY = targetGridY;
-              this.setDirty(true);
+          if (!canMove) return;
+
+          // ⭐ SOFT LIMIT: не даём улететь далеко от группы
+          const sane = systemRef.layerManager?.checkSaneDistance(
+              this.layer,
+              targetGridX,
+              targetGridY,
+              this.gridWidth,
+              this.gridHeight,
+              this,
+          );
+
+          if (sane && !sane.ok) {
+              // Throttle уведомления — не чаще 600мс
+              const now = performance.now();
+              if (!systemRef._lastSaneWarnAt || now - systemRef._lastSaneWarnAt > 600) {
+                  systemRef._lastSaneWarnAt = now;
+                  systemRef.showNotification?.(
+                      `📏 Слишком далеко от ближайшего модуля ` +
+                      `(${sane.distance} > ${MAX_SANE_DISTANCE_GRID})`,
+                  );
+              }
+              return;
           }
+
+          this.gridX = targetGridX;
+          this.gridY = targetGridY;
+          this.lastValidGridX = targetGridX;
+          this.lastValidGridY = targetGridY;
+          this.setDirty(true);
       } else {
           this.gridX = targetGridX;
           this.gridY = targetGridY;

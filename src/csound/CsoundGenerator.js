@@ -468,7 +468,7 @@ i3 0 [60*60*24*7]
             }
             
             const valuesStr = values.join(', ');
-            lines.push(`gi${name} ftgen ${tableNumber}, 0, ${values.length}, -2, 0, ${valuesStr}`);
+            lines.push(`gi${name} ftgen ${tableNumber}, 0, ${values.length}, -2, ${valuesStr}`);
             console.log(`📊 ftgen ${tableNumber} ← "${name}" (${values.length} values)`);
             tableNumber++;
         }
@@ -920,32 +920,33 @@ i3 0 [60*60*24*7]
     _resolveSourceType(cable) {
         const fromJack = cable.fromJack;
         if (!fromJack) return 'audio';
-        
+
         const t = fromJack.type || 'audio';
-        
-        // ⭐ logic-семейство не зависит от варианта (в Csound всё control)
-        if (t === 'logic' || t === 'logicAudio') {
-            return t;
-        }
-        
-        // audio/control — смотрим на вариант модуля-источника
+
+        // logic-семейство — как есть
+        if (t === 'logic' || t === 'logicAudio') return t;
+
+        // ⭐ Если джек источника уже 'audio' — доверяем цвету, не перепроверяем вариант.
+        //    Иначе audio-выход источника с default 'k' читается как 'control',
+        //    и получатель не переключается на 'a' (замкнутый круг при порядке Map).
+        if (t === 'audio') return 'audio';
+
+        // t === 'control' — проверяем, не audio ли источник по варианту
         const sourcePanel = fromJack.parentModule;
-        if (!sourcePanel) return t;
-        
+        if (!sourcePanel) return 'control';
+
         const sourceModuleData = [...this.modules.values()]
             .find(m => m.instanceId === sourcePanel.jsonId);
-        
+
         if (sourceModuleData) {
             const sourceDef = this.system?.moduleFactory?.moduleRegistry?.[sourceModuleData.typeId];
             if (sourceDef?.variants && sourceDef.variants.length > 1) {
                 const active = sourceModuleData._activeVariant || sourceDef.defaultSuffix || 'k';
-                if (t === 'audio' || t === 'control') {
-                    return active === 'a' ? 'audio' : 'control';
-                }
+                return active === 'a' ? 'audio' : 'control';
             }
         }
-        
-        return t;
+
+        return 'control';
     }
 
 

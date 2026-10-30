@@ -10,6 +10,7 @@
         gridHeight: 3,
         originalName: 'OscA',
         tooltip: 'Osc A',
+        status: 'stable',
     params: [1, 4, 5, 7, 9, 14, 12],
         inputs: [0, 3],
         outputs: [8],
@@ -73,6 +74,7 @@
                 "y": 4,
                 "buttonWidth": 18,
                 "buttonCount": 6,
+                "labels": ["sin", "tri", "saw", "s50", "s25", "s10"],
                 "orientation": "horizontal"
         },
         {
@@ -99,7 +101,10 @@
                 "x": 42,
                 "y": 14,
                 "width": 50,
-                "referenceElementId": 4
+                "referenceElementId": 4,
+                "modeComponentId": 14,            
+                "tableByMode": ['lvllev','oscfrq','oscfac','oscprt'],
+                "format": 'float'
         },
         {
                 "componentType": "TextLabel",

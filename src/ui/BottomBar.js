@@ -99,6 +99,8 @@ export class BottomBar {
             // --- Snap ---
             { id: 'snap',   label: 'Sn', title: 'Toggle snap to grid', action: () => this._toggleSnap(), toggle: () => !!this.system.grid?.snap },
 
+            // --- Minimap ---
+            { id: 'minimap', label: 'Mp', title: 'Toggle minimap (M)', action: () => this._toggleMinimap(), toggle: () => !!this.system.minimap?.visible },
 
             { id: 'sep5b', label: null },
 
@@ -134,6 +136,13 @@ export class BottomBar {
 
         document.body.appendChild(this.element);
         this.makeDraggable();
+    }
+
+    _toggleMinimap() {
+        const mm = this.system?.minimap;
+        if (!mm) return;
+        mm.toggle();
+        this.refreshState();
     }
 
     _makeLamp(kind) {
@@ -529,6 +538,8 @@ export class BottomBar {
             active = this._isCsoundWindowVisible();
         } else if (cfg.id === 'snap') {
             active = !!this.system.showGrid;
+        } else if (cfg.id === 'minimap') {
+            active = !!this.system.minimap?.visible;
         } else if (cfg.id === 'sysinfo') {
             active = this._sysInfoOpen;
         } else if (cfg.id === 'run') {
