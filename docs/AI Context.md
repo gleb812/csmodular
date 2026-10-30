@@ -14,7 +14,7 @@ Two entries:
 - **`editor.html`** — Module Editor (design custom modules)
 
 Debug tools: **Oscilloscope** (waveform viewer for cables), **LED / MiniVU**
-(per-module level indicators).
+(per-module level indicators), **Minimap** (world overview, `M` / `Mp`).
 
 ## Stack
 
@@ -42,25 +42,17 @@ Debug tools: **Oscilloscope** (waveform viewer for cables), **LED / MiniVU**
 | `dev` | yellow `#e8c547` | under development (**default**) |
 | `broken` | red `#e84a4a` | doesn't work |
 
-**DEV (`npm run dev`):**
-- Context menu shows **colored dot** per module (from `_createStatusDot`).
-- `ContextMenu.preloadStatuses()` runs **once** on first menu open — imports
-  all `modules/*.js` into `moduleRegistry` so dots are correct immediately
-  (menu opens immediately with yellow dots, then updates via `updateMenuUI`).
+**DEV (`npm run dev`):** Context menu shows colored dot per module
+(`_createStatusDot`). `preloadStatuses()` runs once on first menu open — imports
+all `modules/*.js` into `moduleRegistry` (menu opens immediately with yellow
+dots, updates via `updateMenuUI`).
 
-**BUILD (`npm run build`):**
-- `vite.config.js` → `stableModulesOnly` (plugin, `apply: 'build'`).
-  - Copies **only** `status: 'stable' | 'passable'` modules into `dist/modules/`.
-  - Writes `dist/modules/manifest.json` = `{ modules: [names] }`.
-  - **Do not include `dev` / `broken`** in the filter (currently only `stable`
-    in `if (status === 'stable')` — extend to `passable` when needed).
-- `main.js` (before `new ModularSystem()`) reads `/modules/manifest.json`
-  into `window.__STABLE_MODULES__` (a `Set`).
-- `ContextMenu.initModuleStructure()` filters `ALL_NM2` by
-  `window.__STABLE_MODULES__` (undefined in DEV → all modules).
-- **Dots are hidden** in BUILD (`IS_DEV = false`), stars shown instead
-  (legacy rating — to be removed later).
-- `preloadStatuses` is a **no-op** in BUILD (`if (!IS_DEV) return`).
+**BUILD (`npm run build`):** `vite.config.js` → `stableModulesOnly` plugin
+(`apply: 'build'`): copies only `status: 'stable'` modules into `dist/modules/`,
+writes `dist/modules/manifest.json` = `{ modules: [names] }`. `main.js` reads
+manifest → `window.__STABLE_MODULES__`. `ContextMenu.initModuleStructure()`
+filters `ALL_NM2` by it (`undefined` in DEV → all). **Dots hidden** in BUILD
+(`IS_DEV = false`), stars shown. `preloadStatuses` is a **no-op** in BUILD.
 
 ## Key entities
 
@@ -89,8 +81,12 @@ Modules + cables → JSON. Loaded via `PatchLoader`.
 ```
 
 **`params[]` order** = **`components[]` order**. `CsoundGenerator.formatModuleLine`
-reads `moduleDef.params` **directly** (not recalculated from components).
-`defaultParams`, `defaultMode` — literal initial values, used only if `params` empty.
+reads `moduleDef.params` **directly**. `defaultParams`, `defaultMode` — literal
+initial values, used only if `params` empty.
+
+**`category`** (optional, string) — мапится на цвет в minimap. Если нет —
+`getModuleCategoryColor` падает в fallback через `MODULE_GROUP_OF` (см.
+Module categories).
 
 **`layer`** — `'voice'` (default) / `'fx'`. Cables only within same layer.
 
@@ -104,7 +100,7 @@ endop
 ```
 
 **Variants:** `;@ ins` / `;@ outs` / `;@ variant` / `;@ strict`. Parsed by
-`_parseVariants()`. Picked by `_prepareVariants()` (start from default, switch
+`_parseVariants()`, picked by `_prepareVariants()` (start from default, switch
 to `a` if audio-rate cable on non-strict input, iterate ≤ 20).
 **`;@ strict[i] === 1` must match `inputs[i].bandwidth === 'static'`** in JS.
 
@@ -119,16 +115,16 @@ to `a` if audio-rate cable on non-strict input, iterate ≤ 20).
 
 `logic`/`logicAudio` — NM2 visual only, both `control` in Csound.
 `bandwidth: 'static' | 'dynamic'` (default `'dynamic'`) — corresponds to UDO
-`;@ strict 0|1` per input. `static` jack never changes type. `dynamic` may
-switch within its family only. **Jack color always = its own `type`**
-(`CABLE_COLORS[this.type]`, `BaseJack.getEffectiveColor()`).
+`;@ strict 0|1`. `static` jack never changes type. `dynamic` may switch within
+its family only. **Jack color = its own `type`** (`CABLE_COLORS[this.type]`,
+`BaseJack.getEffectiveColor()`).
 
 Helpers in `constants.js`: `CABLE_COLORS`, `TYPE_FAMILY`, `canTransition`,
 `csoundRateOf`.
 
 ### Cable
 `cable.typeColor = CABLE_COLORS[cable.fromJack.type]`. `cable.visualColor` —
-user override (`null` = use `typeColor`). **Real type** for converters =
+user override (`null` = `typeColor`). **Real type** for converters =
 `csoundRateOf(_resolveSourceType(cable))`.
 
 ### Zak space
@@ -152,19 +148,17 @@ recolors jack and outgoing cables.
 `ComponentRegistry` round-trips `referenceElementId` / `modeComponentId` /
 `tableByMode` / `tableName` / `format`.
 
-**Fields (live component):**
-
 | Field | Type | Meaning |
 |---|---|---|
-| `targetId` | string \| null | **Controller** — `Knob`/`Slider`/`Button*` ID (value 0..127) |
-| `modeComponentId` | string \| null | **Mode switch** — `Button*` ID; its index selects table |
-| `tableByMode` | string[] \| null | Table names; index = mode value (`['LVLlev','LVLpos']`) |
-| `tableName` | string \| null | Single table (used when no `tableByMode`) |
+| `targetId` | string \| null | **Controller** — `Knob`/`Slider`/`Button*` ID (0..127) |
+| `modeComponentId` | string \| null | **Mode switch** — `Button*` ID; index selects table |
+| `tableByMode` | string[] \| null | Tables; index = mode value (`['LVLlev','LVLpos']`) |
+| `tableName` | string \| null | Single table (no mode) |
 | `format` | `'number' \| 'integer'` | Display format |
 
 **Priority:** `tableByMode[mode]` → `tableName` → raw value.
 `modeValue`: `ButtonText` → `isActive ? 1 : 0`; others → `selectedIndex` /
-`currentIndex` / `value`. Clamp in `[0, tableByMode.length-1]`.
+`currentIndex` / `value`. Clamp `[0, tableByMode.length-1]`.
 Missing `modeComponent` → `tableByMode[0]` + `console.warn`.
 
 **Tables:** `_tableCache` loads `/tables/<name>.json` (flat array), HTML-fallback
@@ -173,26 +167,14 @@ detection (Vite SPA). Display: `table[clamp(round(raw), 0, len-1)]` →
 
 **Connected:** subscribes to `targetComponent.onChange` + `modeComponent.onChange`.
 
-**Schema (`static getPropertySchema`)** — key is `targetId` (live field),
-serialize uses `referenceElementId` (JSON field).
+**Schema (`static getPropertySchema`)** — key is `targetId` (live), serialize
+uses `referenceElementId` (JSON).
 
 **Editor:** `PropertiesPanel` — `optionsFrom: 'parametricComponents'` (all
-`Knob`/`Slider`/`Button*`/`PartSelector` except `TextField`), field types
-`select` (Controller, Mode switch), `mapping-multi-select` (Tables by mode —
-modal with checkboxes from `/tables/`, order = selection order via
-`_orderBySelection`), `mapping-select` (Single table), `select` (Format).
-
-**Constant (example):**
-```js
-{ componentType: 'TextField', id: '3', referenceElementId: 2,
-  modeComponentId: 5, tableByMode: ['LVLlev', 'LVLpos'], format: 'integer' }
-```
-
-**Single-table (no mode):**
-```js
-{ componentType: 'TextField', referenceElementId: 2,
-  tableName: 'dly5h8', format: 'number' }
-```
+`Knob`/`Slider`/`Button*`/`PartSelector` except `TextField`), `select`
+(Controller, Mode switch), `mapping-multi-select` (Tables by mode — modal with
+checkboxes from `/tables/`, order = selection order via `_orderBySelection`),
+`mapping-select` (Single table), `select` (Format).
 
 ## Data flow
 
@@ -204,7 +186,9 @@ modal with checkboxes from `/tables/`, order = selection order via
 4. Recompile → ORC regenerated
 
 **Snap on create:** if `snap` → `gridX/gridY` snapped to multiples of
-`multX/multY`. Collision → `findFreeSpace(..., stepX, stepY)` → snap again.
+`multX/multY`. Collision → `findFreeSpace(...)` → snap again.
+**Soft limit:** if `checkSaneDistance()` fails → `findFreeSpace` near nearest
+module + notify (see Grid system / Soft limit).
 
 ### Add cable
 1. `PatchManager.addCable(from, to)` → `Cable` (`typeColor` = source jack color)
@@ -237,7 +221,8 @@ forceRedraw + debounced recompile.
 `reset()` + `setOption('-odac')` + `compileOrc` + `readScore` + `start`.
 After: `_resyncAllControls()` pushes UI values back.
 
-### Oscilloscope
+## Oscilloscope
+
 Right-click jack → **📊 Send to Scope** → `addScopeTable(cable)` →
 `{ tableNum (≥9000), bus, isAudio }` → `_recompileDebounced()` →
 `registerScopeTable` → polls `tableCopyOut` every 33 ms → `ScopeWindow`
@@ -259,11 +244,11 @@ LED — on/off (`ledType: 'rms'` default). MiniVU — 3-zone vertical VU
 LCD theme — single accent fill (no zones).
 
 **Binding:** `sourceComponentId` → **any Input/Output of same module**.
-Missing → indicator disabled (`console.warn`).
+Missing → disabled (`console.warn`).
 
 | Indicator on | Bus source | No cable |
 |---|---|---|
-| **Output** | `outletBuses[i]` (shared with cable) | tap-bus allocated automatically; opcode writes into it |
+| **Output** | `outletBuses[i]` (shared with cable) | tap-bus allocated automatically |
 | **Input** | `inletBuses[i]` (conv.bus if converter) | skipped by design |
 
 Type normalization: `audio`/`logicAudio` → audio, `control`/`logic` → control.
@@ -287,10 +272,11 @@ in `CsoundGenerator` constructor.
 World **infinite**. `Grid` class (`src/grid/Grid.js`) as `system.grid`.
 
 Constants (`src/constants.js`): `PANEL_WIDTH = 260`, `BASE_STEP_X = 20`,
-`BASE_STEP_Y = 15`, `PANEL_GRID_WIDTH = 13`, `NM2_HPOS_TO_GRIDX = 13`.
+`BASE_STEP_Y = 15`, `PANEL_GRID_WIDTH = 13`, `NM2_HPOS_TO_GRIDX = 13`,
+`MAX_SANE_DISTANCE_GRID = 80`.
 
-**Position:** `gridX/gridY` integers in base cells. `gridWidth = 13`
-constant, `gridHeight` from def. Pixel = `gridX * 20`, `gridY * 15`.
+**Position:** `gridX/gridY` integers in base cells. `gridWidth = 13`,
+`gridHeight` from def. Pixel = `gridX * 20`, `gridY * 15`.
 
 **Multipliers** (`theme.settings.grid.multX/multY`, ≥ 1, default 1) —
 affect snap and crosses only. **Existing modules do not move.**
@@ -303,6 +289,93 @@ stepX, stepY)` — only at multiples of step.
 
 **Rendering:** `Grid.draw(ctx, viewport)` draws crosses once per frame in
 `animate()` before modules, inside `translate(offsetX, offsetY) + scale(scale)`.
+
+### Soft limit (`MAX_SANE_DISTANCE_GRID = 80`)
+
+`LayerManager.checkSaneDistance(layerName, gridX, gridY, w, h, exclude,
+maxDistance)` — Chebyshev между прямоугольниками (max по осям gap).
+Возвращает `{ ok, distance, nearest }`.
+
+- **`Panel.handlePanelDrag`** — если `!sane.ok` → блок drag, throttle
+  уведомления 600 мс (`system._lastSaneWarnAt`), модуль остаётся на
+  `lastValidGridX/Y`.
+- **`main.addNewModuleAtPosition`** — если `!sane.ok` → `findFreeSpace` рядом
+  с `sane.nearest`, при неудаче — создаёт где просят (лучше далеко, чем никак).
+- **Outliers** — модули дальше `MAX_SANE_DISTANCE_GRID` от медианы центра bbox.
+  Показываются **только** в minimap как стрелки по 8 октантам, на карте
+  **не рисуются**. См. Minimap.
+
+### Minimap (`src/ui/Minimap.js`)
+
+Figma-style карта мира, правый верхний угол, `MINIMAP_WIDTH=220`,
+`MINIMAP_HEIGHT=160`, `MINIMAP_MARGIN=16`.
+
+**Toggle:** hotkey `M` / `ь` (главный app), кнопка `Mp` в `BottomBar`
+(между `Sn` и `MI`). Скрыт по умолчанию.
+
+**Рендер:** свой `<canvas id="csmodular-minimap">`, `z-index: 13000`,
+`position: fixed`. `main.js` в `animate()` вызывает `minimap.draw()`
+каждый кадр (при `visible`).
+
+**Геометрия:**
+- `_computeWorldBounds()` — bbox модулей в радиусе `MAX_SANE_DISTANCE_GRID`
+  от медианы + padding 20%. **Viewport НЕ включается** (иначе bbox прыгает
+  при пане/зуме).
+- `_makeTransform(bounds)` — `toCanvas(gx,gy)` / `toGrid(cx,cy)`, `scale`,
+  `inner`.
+- `_getOutliers(bounds)` — модули дальше `MAX_SANE_DISTANCE_GRID` от центра.
+
+**Отрисовка:**
+1. Модули: `isOutputModule(m)` → `MINIMAP_COLORS.output` (зелёный),
+   иначе `getModuleCategoryColor(m)`. **Нет категории → серый `#64748b`.**
+2. Viewport-рамка (`_drawViewport`, клипается `inner`).
+3. Стрелки-outlier-ы по 8 октантам (`_drawOutlierArrows`), hover →
+   бейдж `×N`.
+
+**Взаимодействие:**
+- Клик по стрелке → `_jumpToModule(mods[0])` (центр viewport на модуль).
+- Клик по модулю → `_jumpToModule(module)`.
+- Иначе drag → пан мира. **`_dragScale` фиксируется в `mousedown`**,
+  дельта в пикселях minimap → пиксели мира → `offsetX/offsetY`. Без
+  пересчёта `t` в `mousemove` (иначе feedback loop: `bounds` зависит от
+  `offset`, `offset` меняется от drag'а).
+- `_onMouseUp` глобальный (drag не теряется за пределами карты).
+
+**`isOutputModule(m)`** (в `src/utils/spatial.js`) — «настоящий выход»:
+есть `Output` **и нет** `Input` (только отдаёт). `LevConv` (In+Out) → `false`,
+красится по категории. `Out2` / `Out4` / `Device` (только Out) → `true`,
+зелёные.
+
+## Module categories
+
+`src/moduleCategories.js` — **единственный источник правды** о группах
+NM2-модулей. `ALL_NM2` (17 групп: In/Out, Logic, Osc, FX, Switch, Mixer,
+Env, Note, LFO, Shaper, Filter, Level, MIDI, Seq, Delay, Rnd, Test) +
+`MODULE_GROUP_OF` (name → group). Импортируется в:
+- `ContextMenu.js` — группировка в левой панели.
+- `constants.js` — `getModuleCategoryColor`.
+
+**Не дублируй `ALL_NM2`** — добавь модуль в `moduleCategories.js`.
+
+### `getModuleCategoryColor(module)` (`src/constants.js`)
+
+Приоритет:
+1. `module.category` (явное поле в JS-описании) — если ключ есть в
+   `MODULE_CATEGORY_COLORS`.
+2. `MODULE_GROUP_OF[module.jsonName || type || title]` → `GROUP_TO_CATEGORY`
+   → `MODULE_CATEGORY_COLORS`.
+3. `module.isUser` → `custom`.
+4. Иначе → `unknown` (серый `#64748b`).
+
+`GROUP_TO_CATEGORY` — маппинг NM2-групп на цветовые ключи:
+`In/Out→io`, `Logic→logic`, `Osc→osc`, `FX→fx`, `Switch→switch`,
+`Mixer→mixer`, `Env→env`, `Note→control`, `LFO→lfo`, `Shaper→fx`,
+`Filter→filter`, `Level→dynamics`, `MIDI→midi`, `Seq→control`,
+`Delay→fx`, `Rnd→util`, `Test→unknown`.
+
+`MODULE_CATEGORY_COLORS` — палитра: `osc`, `noise`, `sample`, `lfo`, `env`,
+`filter`, `fx`, `dynamics`, `mixer`, `switch`, `logic`, `math`, `util`,
+`io`, `midi`, `control`, `custom`, `unknown`. Правится в одном месте.
 
 ## MIDI
 
@@ -318,8 +391,8 @@ ready | denied | unsupported`.
 **`instr 3`:** `0x90` → `gkGate=1, gkNote=data1`; `0x80` → `gkGate=0`.
 Velocity ignored (NM2 compat). Other messages pass through.
 
-**Enable:** click **`MI`** in BottomBar (gesture requirement). State in SysInfo
-popup (`i`).
+**Enable:** click **`MI`** in BottomBar (gesture requirement). State in
+SysInfo popup (`i`).
 
 **Requirements:** secure context; Chrome/Edge/Firefox; Linux via ALSA
 (`aconnect -i -o`); Tauri — macOS WKWebView has no Web MIDI.
@@ -332,14 +405,16 @@ Workaround: restart Csound.
 
 | Class | File | Role |
 |---|---|---|
-| `ModularSystem` | `main.js` | Coordinator (canvas, layers, animation, grid) |
+| `ModularSystem` | `main.js` | Coordinator (canvas, layers, animation, grid, minimap) |
 | `ModuleFactory` | `src/ModuleFactory.js` | Creates modules from JS descriptions |
 | `PatchManager` | `src/PatchManager.js` | Cables, jack coloring |
 | `PatchLoader` | `src/PatchLoader.js` | Load/save patches |
-| `LayerManager` | `src/managers/LayerManager.js` | Voice/fx arrays, collisions, findFreeSpace |
+| `LayerManager` | `src/managers/LayerManager.js` | Voice/fx arrays, collisions, `findFreeSpace`, `checkSaneDistance` |
 | `Grid` | `src/grid/Grid.js` | Step, snap, crosses |
 | `EventManager` | `src/managers/EventManager.js` | Mouse events, pan, zoom |
 | `UIManager` | `src/managers/UIManager.js` | Left control panel |
+| `BottomBar` | `src/ui/BottomBar.js` | Нижняя панель действий, `Mp` toggle minimap |
+| `Minimap` | `src/ui/Minimap.js` | World overview (right-top, `M`) |
 | `DesignSettingsPanel` | `src/ui/DesignSettingsPanel.js` | Theme editor (`D`) |
 | `CsoundGenerator` | `src/csound/CsoundGenerator.js` | ORC assembly |
 | `CsoundEngine` | `src/csound/CsoundEngine.js` | Csound instance, LED/scope polling |
@@ -350,6 +425,8 @@ Workaround: restart Csound.
 | `Cable` | `src/Cable.js` | `typeColor` = source jack color |
 | `moduleStore` | `src/api/index.js` | User module storage |
 | `moduleStatusStore` | `src/api/moduleStatusStore.js` | Status + colors + `IS_DEV` |
+| `moduleCategories` | `src/moduleCategories.js` | `ALL_NM2`, `MODULE_GROUP_OF` |
+| `spatial` | `src/utils/spatial.js` | `median`, `bboxNearModules`, `groupByOctant`, `isOutputModule` |
 | `Theme`, `themeStore`, `currentTheme` | `src/theme/*.js` | Classic / LCD presets |
 | `MidiManager` | `src/midi/MidiManager.js` | Web MIDI API receiver |
 
