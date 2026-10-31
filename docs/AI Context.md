@@ -6,8 +6,7 @@ Short system description for AI assistants. **Goal: 5 minutes to productive work
 ## What it is
 
 **CsModular** — modular sound synthesis on Csound. Browser + native desktop
-(Tauri). User builds a patch from modules, connects with cables, hears the
-result.
+(Tauri). User builds a patch from modules, connects with cables, hears the result.
 
 Two entries:
 - **`index.html`** — main app (patch building, playback)
@@ -415,6 +414,7 @@ Workaround: restart Csound.
 | `UIManager` | `src/managers/UIManager.js` | Left control panel |
 | `BottomBar` | `src/ui/BottomBar.js` | Нижняя панель действий, `Mp` toggle minimap |
 | `Minimap` | `src/ui/Minimap.js` | World overview (right-top, `M`) |
+| `Splash` | `src/ui/Splash.js` | Splash / About modal (session-once, no OK button) |
 | `DesignSettingsPanel` | `src/ui/DesignSettingsPanel.js` | Theme editor (`D`) |
 | `CsoundGenerator` | `src/csound/CsoundGenerator.js` | ORC assembly |
 | `CsoundEngine` | `src/csound/CsoundEngine.js` | Csound instance, LED/scope polling |
@@ -429,6 +429,8 @@ Workaround: restart Csound.
 | `spatial` | `src/utils/spatial.js` | `median`, `bboxNearModules`, `groupByOctant`, `isOutputModule` |
 | `Theme`, `themeStore`, `currentTheme` | `src/theme/*.js` | Classic / LCD presets |
 | `MidiManager` | `src/midi/MidiManager.js` | Web MIDI API receiver |
+
+
 
 ## Module Editor
 
@@ -728,6 +730,12 @@ Must match `bandwidth: 'static'` in JS (e.g. `EnvD`: `Trig`, `AM` static,
     + `_listTableNames()` (cached). Order = selection order via
     `_orderBySelection` (current first, then new in list order). Preview
     shows `Order: A → B → C`.
+56. **`Splash` is independent of `CsoundEngine`.** Show after theme +
+    `ModularSystem` init; never wait for `state === 'running'`. Session
+    marker — `sessionStorage`, not `localStorage`.
+57. **`ModuleContextMenu` header** — category label via `MODULE_GROUP_OF`,
+    not `jsonName` (avoid duplicate). Never import `ALL_NM2` directly there —
+    use `MODULE_GROUP_OF` only.
 
 ## Known issues
 

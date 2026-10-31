@@ -1,6 +1,8 @@
 // src/ui/ModuleContextMenu.js
 import { ColorPicker } from './ColorPicker.js';
 import { injectColorPickerStyles } from './ColorPickerStyles.js';
+import { MODULE_GROUP_OF } from '../moduleCategories.js';
+
 export class ModuleContextMenu {
   constructor(system) {
     this.system = system;
@@ -10,7 +12,6 @@ export class ModuleContextMenu {
     this.createMenuElement();
     this.setupEventListeners();
     this.injectStyles();
-    //injectColorPickerStyles();
     ColorPicker.injectStyles();
   }
 
@@ -19,7 +20,8 @@ export class ModuleContextMenu {
     this.menuElement.id = 'module-context-menu';
     this.menuElement.style.cssText = `
             position: fixed;
-            min-width: 200px;
+            min-width: 150px;
+            max-width: 170px;
             background: #2a2a2a;
             border: 1px solid #444;
             border-radius: 6px;
@@ -38,23 +40,14 @@ export class ModuleContextMenu {
     this.currentModule = module;
     this.updateMenuContent();
 
-    // Позиционируем
     this.menuElement.style.left = `${x}px`;
     this.menuElement.style.top = `${y}px`;
     this.menuElement.style.display = 'block';
 
-    // Проверяем размеры и видимость
-    const rect = this.menuElement.getBoundingClientRect();
-    // console.log('Menu rect:', rect);
-    // console.log(
-    //   'Menu computed style:',
-    //   window.getComputedStyle(this.menuElement),
-    // );
-
-    // Закрываем другие меню
     if (this.system.contextMenu?.hide) this.system.contextMenu.hide();
     if (this.system.jackContextMenu?.hide) this.system.jackContextMenu.hide();
   }
+
   hide() {
     if (this.menuElement) {
       this.menuElement.style.display = 'none';
@@ -62,33 +55,26 @@ export class ModuleContextMenu {
     }
   }
 
-
   updateMenuContent() {
     if (!this.currentModule) return;
 
     this.menuElement.innerHTML = '';
 
-    // Заголовок
+    // === ЗАГОЛОВОК ===
     this.menuElement.appendChild(this.createHeader());
-
-    // 1. Открыть код Csound
-    this.menuElement.appendChild(
-      this.createMenuItem('📝 Open Csound Code', () => this.openCsoundCode()),
-    );
-
 
     // === LAYER SWITCHER ===
     const layerSection = document.createElement('div');
     layerSection.style.cssText = `
-            padding: 6px 12px;
+            padding: 6px 8px;
             border-bottom: 1px solid #333;
         `;
 
     const layerTitle = document.createElement('div');
     layerTitle.style.cssText = `
             color: #aaa;
-            font-size: 11px;
-            margin-bottom: 6px;
+            font-size: 10px;
+            margin-bottom: 4px;
         `;
     layerTitle.textContent = 'Layer:';
     layerSection.appendChild(layerTitle);
@@ -107,13 +93,14 @@ export class ModuleContextMenu {
     const isVoice = currentLayer === 'voice';
     voiceBtn.style.cssText = `
             flex: 1;
-            padding: 6px 8px;
+            padding: 5px 6px;
             background: ${isVoice ? '#0a3a5a' : '#2a2a2a'};
             border: 1px solid ${isVoice ? '#0af' : '#444'};
             color: ${isVoice ? '#0af' : '#aaa'};
             border-radius: 4px;
             cursor: pointer;
-            font-size: 11px;
+            font-size: 10px;
+            letter-spacing: 0.2px;
             font-family: inherit;
             transition: all 0.15s;
         `;
@@ -138,13 +125,14 @@ export class ModuleContextMenu {
     const isFx = currentLayer === 'fx';
     fxBtn.style.cssText = `
             flex: 1;
-            padding: 6px 8px;
+            padding: 5px 6px;
             background: ${isFx ? '#3a2a0a' : '#2a2a2a'};
             border: 1px solid ${isFx ? '#f59e0b' : '#444'};
             color: ${isFx ? '#f59e0b' : '#aaa'};
             border-radius: 4px;
             cursor: pointer;
-            font-size: 11px;
+            font-size: 10px;
+            letter-spacing: 0.2px;
             font-family: inherit;
             transition: all 0.15s;
         `;
@@ -168,31 +156,28 @@ export class ModuleContextMenu {
     layerSection.appendChild(layerButtons);
     this.menuElement.appendChild(layerSection);
 
-
-
-    // 2. СЕКЦИЯ ЦВЕТОВ
+    // === PANEL COLOR ===
     const colorSection = document.createElement('div');
     colorSection.style.cssText = `
-            padding: 4px 0;
+            padding: 4px 8px;
             border-bottom: 1px solid #333;
         `;
 
     const colorTitle = document.createElement('div');
     colorTitle.style.cssText = `
-            padding: 6px 12px;
+            padding: 6px 8px;
             color: #aaa;
-            font-size: 11px;
+            font-size: 10px;
         `;
     colorTitle.textContent = 'Panel color:';
     colorSection.appendChild(colorTitle);
 
-    // ✨ СОЗДАЕМ COLOR PICKER (ТОЛЬКО ОДИН РАЗ!)
     if (!this.colorPicker) {
       this.colorPicker = new ColorPicker({
         columns: 8,
         rows: 4,
         cellSize: 14,
-        showReset: true, // ← ЭТО СОЗДАСТ resetBtn ВНУТРИ!
+        showReset: true,
         resetText: '↺ Default Gray',
         onSelect: (color) => this.changePanelColor(color),
         onReset: () => this.resetPanelColor(),
@@ -209,7 +194,7 @@ export class ModuleContextMenu {
 
     this.menuElement.appendChild(colorSection);
 
-    // 3. Удалить модуль
+    // === DELETE ===
     this.menuElement.appendChild(this.createSeparator());
     this.menuElement.appendChild(
       this.createMenuItem(
@@ -220,38 +205,71 @@ export class ModuleContextMenu {
     );
   }
 
-  // Добавляем метод getContrastColor (как в JackContextMenu)
-  getContrastColor(hexColor) {
-    if (!hexColor) return '#000';
+  // ============================================================
+  //  ЗАГОЛОВОК
+  // ============================================================
 
-    const hex = hexColor.replace('#', '');
+  createHeader() {
+    const header = document.createElement('div');
+    header.style.cssText = `
+            padding: 6px 8px;
+            background: #333;
+            color: #0af;
+            font-size: 11px;
+            border-bottom: 1px solid #444;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        `;
 
-    if (hex.length === 3) {
-      const r = parseInt(hex[0] + hex[0], 16);
-      const g = parseInt(hex[1] + hex[1], 16);
-      const b = parseInt(hex[2] + hex[2], 16);
-      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-      return brightness > 128 ? '#000000' : '#ffffff';
-    } else if (hex.length === 6) {
-      const r = parseInt(hex.substr(0, 2), 16);
-      const g = parseInt(hex.substr(2, 2), 16);
-      const b = parseInt(hex.substr(4, 2), 16);
-      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-      return brightness > 128 ? '#000000' : '#ffffff';
-    }
+    // Название модуля (слева, синим)
+    const title = document.createElement('span');
+    title.textContent = this.currentModule?.title || 'Module';
 
-    return '#000000';
+    // ⭐ Категория (справа, серым) — вместо дублирующего jsonName
+    const category = document.createElement('span');
+    category.style.cssText = `
+            font-size: 10px;
+            color: #888;
+            font-weight: normal;
+            margin-left: 6px;
+            white-space: nowrap;
+        `;
+    category.textContent = this._getModuleCategoryLabel();
+
+    header.appendChild(title);
+    header.appendChild(category);
+
+    return header;
   }
+
+  // ⭐ Группа NM2 для текущего модуля
+  _getModuleCategoryLabel() {
+    const m = this.currentModule;
+    if (!m) return '';
+
+    const name = m.jsonName || m.type || m.title;
+    const group = MODULE_GROUP_OF[name];
+    if (group) return group;
+
+    if (m.isUser) return 'User';
+    return 'Unknown';
+  }
+
+  // ============================================================
+  //  ПУНКТЫ МЕНЮ
+  // ============================================================
 
   createMenuItem(text, onClick) {
     const item = document.createElement('div');
     item.style.cssText = `
-            padding: 8px 12px;
+            padding: 6px 8px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         `;
     item.innerHTML = text;
 
@@ -276,13 +294,16 @@ export class ModuleContextMenu {
     return separator;
   }
 
+  // ============================================================
+  //  LAYER
+  // ============================================================
+
   setLayer(newLayer) {
     if (!this.currentModule) return;
-    
+
     const currentLayer = this.currentModule.layer || 'voice';
     if (currentLayer === newLayer) return;
 
-    // Проверяем кабели
     const cables = this.system.patchManager.findCablesByModule(this.currentModule.moduleId);
     if (cables.length > 0) {
       const layerNames = { voice: 'Voice', fx: 'FX' };
@@ -292,7 +313,7 @@ export class ModuleContextMenu {
         `Продолжить?`
       );
       if (!ok) return;
-      
+
       cables.forEach(cable => {
         this.system.patchManager.removeCable(cable);
       });
@@ -300,10 +321,8 @@ export class ModuleContextMenu {
 
     const module = this.currentModule;
 
-    // ⭐ Удаляем ИЗ ВСЕХ слоёв (надёжно)
     this.system.layerManager.removeModuleFromLayer(module);
-    
-    // ⭐ Удаляем из CsoundGenerator
+
     this.system.csoundGen.removeModule(
       module.jsonId,
       module.jsonName || module.type,
@@ -311,13 +330,10 @@ export class ModuleContextMenu {
       currentLayer
     );
 
-    // ⭐ Ставим новый слой
     module.layer = newLayer;
-    
-    // ⭐ Добавляем в новый слой
+
     this.system.layerManager.addModuleToLayer(module, newLayer);
-    
-    // ⭐ Добавляем в CsoundGenerator
+
     this.system.csoundGen.addModule({
       typeId: module.jsonName || module.type,
       instanceId: module.jsonId,
@@ -332,12 +348,10 @@ export class ModuleContextMenu {
       isUser: false,
     });
 
-    // Перерисовка
     this.system._voiceDirty = true;
     this.system._fxDirty = true;
     this.system._cablesDirty = true;
 
-    // Recompile
     if (this.system.csoundEngine?.state === 'running') {
       this.system._recompileDebounced();
     }
@@ -345,64 +359,41 @@ export class ModuleContextMenu {
     this.system.showNotification(`✓ ${module.title} → ${newLayer.toUpperCase()}`);
     this.hide();
   }
-  createHeader() {
-    const header = document.createElement('div');
-    header.style.cssText = `
-            padding: 8px 12px;
-            background: #333;
-            color: #0af;
-            font-size: 12px;
-            border-bottom: 1px solid #444;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        `;
 
-    // Название модуля
-    const title = document.createElement('span');
-    title.textContent = this.currentModule?.title || 'Module';
+  // ============================================================
+  //  ЦВЕТ ПАНЕЛИ
+  // ============================================================
 
-    // Тип модуля (маленьким шрифтом)
-    const type = document.createElement('span');
-    type.style.cssText = `
-            font-size: 10px;
-            color: #888;
-            font-weight: normal;
-        `;
-    type.textContent = this.currentModule?.jsonName || '';
+  getContrastColor(hexColor) {
+    if (!hexColor) return '#000';
 
-    header.appendChild(title);
-    header.appendChild(type);
+    const hex = hexColor.replace('#', '');
 
-    return header;
-  }
-
-  // Действия меню
-  openCsoundCode() {
-    if (!this.currentModule) return;
-
-    // Открываем окно с кодом
-    if (this.system.csoundWindow) {
-      this.system.csoundWindow.show(this.currentModule);
+    if (hex.length === 3) {
+      const r = parseInt(hex[0] + hex[0], 16);
+      const g = parseInt(hex[1] + hex[1], 16);
+      const b = parseInt(hex[2] + hex[2], 16);
+      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+      return brightness > 128 ? '#000000' : '#ffffff';
+    } else if (hex.length === 6) {
+      const r = parseInt(hex.substr(0, 2), 16);
+      const g = parseInt(hex.substr(2, 2), 16);
+      const b = parseInt(hex.substr(4, 2), 16);
+      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+      return brightness > 128 ? '#000000' : '#ffffff';
     }
+
+    return '#000000';
   }
-
-  // В ModuleContextMenu.js - обновленный changePanelColor()
-
-  // В ModuleContextMenu.js - исправленный changePanelColor()
 
   changePanelColor(colorHex) {
     if (!this.currentModule) return;
 
-    // 🚫 Защита от повторных вызовов
     if (this._changingColor) return;
     this._changingColor = true;
 
-    // 🎨 Устанавливаем цвет
     this.currentModule.customColor = colorHex;
 
-    // Перерисовываем
     if (this.currentModule.layer === 'voice') {
         this.system._voiceDirty = true;
     } else {
@@ -411,15 +402,11 @@ export class ModuleContextMenu {
     this.system.forceRedraw?.();
     this.system.showNotification(`🎨 Panel color changed`);
 
-    // 🚫 НЕ обновляем меню! Оно и так актуально
-
-    // Разблокируем через небольшую задержку
     setTimeout(() => {
       this._changingColor = false;
     }, 100);
   }
 
-  // В resetPanelColor() - аналогично
   resetPanelColor() {
     if (!this.currentModule) return;
 
@@ -440,12 +427,20 @@ export class ModuleContextMenu {
     }, 100);
   }
 
+  // ============================================================
+  //  DELETE
+  // ============================================================
+
   deleteModule() {
       if (!this.currentModule) return;
 
       this.system.removeModule(this.currentModule);
       this.system.showNotification(`🗑️ Module deleted`);
   }
+
+  // ============================================================
+  //  EVENTS / STYLES
+  // ============================================================
 
   setupEventListeners() {
     document.addEventListener('click', (e) => {
@@ -474,7 +469,7 @@ export class ModuleContextMenu {
             #module-context-menu div[style*="cursor: pointer"]:hover {
                 background: #3a3a3a !important;
             }
-            
+
             #module-context-menu div[style*="cursor: pointer"]:active {
                 background: #4a4a4a !important;
             }

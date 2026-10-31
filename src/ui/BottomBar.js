@@ -115,7 +115,7 @@ export class BottomBar {
             { id: 'sysinfo', label: 'i', title: 'System info',     action: () => this._toggleSysInfo() },
 
             // --- About ---
-            { id: 'about',  label: '?',  title: 'About',           action: () => this.system.contextMenu?.showAboutDialog?.() },
+            { id: 'about',  label: '?',  title: 'About',           action: () => this.system.splash?.openAbout() },
         ];
 
         buttons.forEach(b => {

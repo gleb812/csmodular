@@ -30,6 +30,7 @@ import { MidiManager } from './src/midi/MidiManager.js';
 import { OscManager } from './src/midi/OscManager.js';
 import { OscSettingsPanel } from './src/ui/OscSettingsPanel.js';
 import { Minimap } from './src/ui/Minimap.js';
+import { Splash } from './src/ui/Splash.js';   // ⭐ NEW
 
 
 // Глобальный обработчик ошибок
@@ -123,6 +124,7 @@ class ModularSystem {
     this.bottomBar = new BottomBar(this);
     this.minimap = new Minimap(this);
     this.minimap.hide();
+    this.splash = new Splash(this);  
     this.csoundWindow = new CSoundWindow(this);
     this.designSettings = new DesignSettingsPanel(this);
 
@@ -2518,6 +2520,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     modularSystem = new ModularSystem();
     window.modularSystem = modularSystem;
+
+    modularSystem.splash.maybeShowOnStartup();
 
     // ⭐ MIDI: не автостартуем — браузер требует клик пользователя для разрешения.
     // Запуск — через кнопку MIDI в BottomBar.

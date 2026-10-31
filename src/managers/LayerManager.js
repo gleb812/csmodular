@@ -108,6 +108,10 @@ export class LayerManager {
    * Проверить, не улетел ли модуль слишком далеко от остальных.
    * Chebyshev-расстояние между прямоугольниками (max по осям gap).
    *
+   * ⭐ Если других модулей нет (пустой слой ИЛИ единственный модуль —
+   *    это excludeModule), ограничение не применяется: ok=true,
+   *    distance=0, nearest=null.
+   *
    * @returns {{ ok: boolean, distance: number, nearest: object|null }}
    */
   checkSaneDistance(
@@ -147,6 +151,12 @@ export class LayerManager {
         minDist = d;
         nearest = m;
       }
+    }
+
+    // ⭐ FIX: соседей нет (пустой слой или единственный модуль — сам excludeModule).
+    //    Без этого minDist = Infinity → drag всегда блокируется.
+    if (nearest === null) {
+      return { ok: true, distance: 0, nearest: null };
     }
 
     return {

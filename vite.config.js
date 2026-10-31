@@ -3,6 +3,10 @@ import { defineConfig } from 'vite'
 import { resolve } from 'path'
 import fs from 'fs'
 import path from 'path'
+import { readFileSync } from 'fs'   // ⭐ NEW
+
+// ⭐ NEW — читаем версию из package.json для splash
+const pkg = JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf-8'))
 
 /**
  * В build-режиме:
@@ -55,7 +59,13 @@ function stableModulesOnly() {
   }
 }
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+    __APP_IS_DEV__:  JSON.stringify(mode === 'development'),
+    __APP_BUILD__:   JSON.stringify(new Date().toISOString()),
+  },
+
   plugins: [
     stableModulesOnly(),
   ],
@@ -89,4 +99,4 @@ export default defineConfig({
   },
 
   publicDir: 'public'
-})
+}))
