@@ -108,11 +108,133 @@ export class Toolbar {
     }
 
     async _onLoad() {
-        // Пока используем существующий showLoadDialog из uiManager
-        if (this.app.uiManager.showLoadDialog) {
-            await this.app.uiManager.showLoadDialog();
-        } else {
-            console.warn('[Toolbar] showLoadDialog not available');
+        const { libraryStore } = await import('../../src/api/index.js');
+
+        try {
+            const libs = await libraryStore.listLibraries();
+            const all = [];
+
+            for (const entry of libs) {
+                try {
+                    const mods = await libraryStore.listModules(entry.name);
+                    for (const m of mods) {
+                        all.push({
+                            lib: entry.name,
+                            name: m.name,
+                            displayName: m.description?.displayName || m.name,
+                            source: entry.source,
+                        });
+                    }
+                } catch (e) {
+                    console.warn(`[Toolbar] listModules(${entry.name}) failed:`, e);
+                }
+            }
+
+            if (all.length === 0) {
+                this.app.uiManager.showNotification('📭 No modules found');
+                return;
+            }
+
+            all.sort((a, b) => {
+                if (a.source !== b.source) return a.source === 'user' ? -1 : 1;
+                if (a.lib !== b.lib) return a.lib.localeCompare(b.lib);
+                return a.displayName.localeCompare(b.displayName);
+            });
+
+            const dialog = document.createElement('div');
+            dialog.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: #2a2a2a;
+                border: 1px solid #444;
+                border-radius: 8px;
+                padding: 20px;
+                z-index: 10000;
+                min-width: 320px;
+                max-width: 480px;
+                box-shadow: 0 8px 40px rgba(0, 0, 0, 0.8);
+            `;
+
+            dialog.innerHTML = `
+                <div style="color: #0af; font-weight: bold; font-size: 14px; margin-bottom: 12px;">📂 Load Module</div>
+                <div style="margin-bottom: 12px; max-height: 400px; overflow-y: auto;">
+                    ${all.map(({ lib, name, displayName, source }) => {
+                        const icon = source === 'user' ? '👤' : '📦';
+                        const label = displayName !== name
+                            ? `${displayName} <span style="color:#666;font-size:10px;">(${name})</span>`
+                            : displayName;
+                        return `<button data-lib="${lib}" data-name="${name}" style="
+                            width: 100%;
+                            padding: 8px 12px;
+                            margin-bottom: 4px;
+                            background: #1a1a1a;
+                            border: 1px solid #333;
+                            border-radius: 4px;
+                            color: #ccc;
+                            cursor: pointer;
+                            text-align: left;
+                            font-size: 12px;
+                        ">${icon} <span style="color:#0af;font-size:10px;">[${lib}]</span> ${label}</button>`;
+                    }).join('')}
+                </div>
+                <button id="close-dialog-btn" style="
+                    padding: 6px 20px;
+                    background: #333;
+                    border: 1px solid #555;
+                    border-radius: 4px;
+                    color: #aaa;
+                    cursor: pointer;
+                    font-size: 12px;
+                ">Cancel</button>
+            `;
+
+            document.body.appendChild(dialog);
+
+            dialog.querySelectorAll('[data-name]').forEach(btn => {
+                btn.onclick = async () => {
+                    const lib = btn.dataset.lib;
+                    const name = btn.dataset.name;
+                    dialog.remove();
+                    overlay.remove();
+                    await this._loadModuleFrom(lib, name);
+                };
+            });
+
+            dialog.querySelector('#close-dialog-btn').onclick = () => {
+                dialog.remove();
+                overlay.remove();
+            };
+
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed; top: 0; left: 0;
+                width: 100%; height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 9999;
+            `;
+            overlay.onclick = () => { dialog.remove(); overlay.remove(); };
+            document.body.insertBefore(overlay, dialog);
+
+        } catch (e) {
+            console.error('[Toolbar] Load error:', e);
+            this.app.uiManager.showNotification(`❌ ${e.message}`);
+        }
+    }
+
+    async _loadModuleFrom(lib, name) {
+        const { libraryStore } = await import('../../src/api/index.js');
+        try {
+            const data = await libraryStore.loadModule(lib, name);
+            if (!data) throw new Error(`Module "${lib}/${name}" not found`);
+
+            this.app.restoreModuleFromData(data.description, data.dspCode);
+            this.app._sourceLibrary = lib;
+            this.app.uiManager.showNotification(`📂 Loaded "${name}" from ${lib}`);
+        } catch (e) {
+            console.error('[Toolbar] loadModule error:', e);
+            this.app.uiManager.showNotification(`❌ ${e.message}`);
         }
     }
 

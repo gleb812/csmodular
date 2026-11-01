@@ -23,7 +23,9 @@
       "identifier": "fs:scope",
       "allow": [
         { "path": "$DOCUMENT/CsModular" },
-        { "path": "$DOCUMENT/CsModular/**" }
+        { "path": "$DOCUMENT/CsModular/**" },
+        { "path": "$RESOURCE/libraries" },
+        { "path": "$RESOURCE/libraries/**" }
       ]
     }
   ]

@@ -3,10 +3,9 @@
 
 ## Current tasks
 
-- [ ] Reinit problem: adding a module that contains controllers
-- [ ] `Mix1-1A` — exp/lin selector change leads to error
-- [ ] Some DSP code still contains `d` parameter in `@map` line — should be eliminated
-- [ ] At zoom 50% and lower the working area also resizes
+- [ ] Reinit problem: adding a module with controllers
+- [ ] At zoom <50%, working area resizes
+- [ ] Verify `libraryStore` round-trip: save → reload → ORC identical
 
 ### P2 — UX
 
@@ -49,15 +48,14 @@
 
 ## 🖥 Tauri / Desktop
 
-- [x] Tauri shell (windows, fs)
-- [x] `moduleStore` for Tauri (fs) — user modules in `Documents/CsModular/`
-- [x] Module Editor in a separate window (`WebviewWindow`)
-- [x] Capabilities for `main` and `editor` windows
-- [x] Design Settings works in Tauri
-- [x] Theme persisted in localStorage (works in Tauri)
-- [x] Web `moduleStore` (localStorage) — user modules persist in browser
-- [ ] IndexedDB for web `moduleStore` (larger modules, no quota issues)
-- [ ] Sync between web and Tauri (`.zip` import/export?)
+- [ ] Export / import library as `.zip` (web + Tauri)
+- [ ] `libraryStore.createLibrary(name)` — mkdir on Tauri, first key on web
+- [ ] Sync between web and Tauri (`.zip` import/export)
+- [ ] App icon (currently default Tauri)
+- [ ] Remove fallback download from `ModulePropertiesWindow.saveModule()`
+- [ ] Tauri events: `library-changed` → main window refreshes menu
+- [ ] CI: auto-build for Windows / Linux / macOS
+- [ ] Android / iOS targets (later)
 - [ ] App icon (currently default Tauri)
 - [ ] Remove fallback download from `ModulePropertiesWindow.saveModule()`
 - [ ] Tauri events: `module-saved` → main window refreshes list
@@ -83,23 +81,25 @@
 
 ### Features
 
-- [ ] Variant switching: `k` ↔ `a` opcode based on input cable types (NM2-style)
-- [ ] Jack recoloring on variant switch
+- [ ] Variant switching UI (jacks/cables recolor automatically already)
+- [ ] Jack recoloring on variant switch (auto — verify visual)
 - [ ] Record Csound output to WAV
-- [x] MIDI input (Web MIDI API + `MI` indicator + flash on message)
+- [x] MIDI input (Web MIDI API + `MI` indicator)
 - [ ] MIDI: fix `recompile()` → MIDI dead (see Known issues)
-- [ ] MIDI: velocity support (currently ignored, NM2 compat)
-- [ ] MIDI: polyphonic voice allocation (currently `gkGate` / `gkNote` are global)
-- [ ] MIDI: Tauri/macOS path (WKWebView has no Web MIDI — plugin or Rust-side)
+- [ ] MIDI: velocity support (currently ignored)
+- [ ] MIDI: polyphonic voice allocation
+- [ ] MIDI: Tauri/macOS path (WKWebView has no Web MIDI)
 - [ ] OSC (after MIDI stabilises)
+- [ ] MIDI: polyphonic voice allocation (currently `gkGate` / `gkNote` are global)
 - [ ] Custom UDOs for `debug` signals
 
 ### UDO loading
 
 - [x] All UDO loading goes through `CsoundGenerator._loadUdoByPath()`:
-  - `user/*` → `moduleStore` (web: localStorage, Tauri: fs)
-  - built-in → `fetch` from `public/csound/modules/` with HTML-fallback detection
-  - protects against Vite SPA-fallback (`index.html` with status 200 for missing files)
+  - `library/<lib>/<Name>.txt` → `libraryStore.loadUdo(lib, name)`
+  - legacy `user/*` → `moduleStore` (fallback; will be removed)
+  - built-in non-module UDOs → `fetch('/csound/modules/<path>')` with HTML-fallback detection
+- [x] `libraryStore.loadUdo` detects HTML via `looksLikeHtml()`
 - [ ] `led_peak` UDO variant with `abs()` — for a "positive period" LED indicator
   (currently `led_rms` uses `portk kin, 0.1` without `abs`, so LFO LEDs
   follow both half-waves)
@@ -122,6 +122,8 @@
 - [x] SysInfo popup — MIDI state, input count, last message
 - [x] Csound `instr 3` (NM2-compatible MIDI filter) → `gkGate` / `gkNote`
 - [x] Tested on Linux + Firefox + Tapco Link.MIDI 4x4 (ALSA sequencer)
+- [ ] Velocity support (`gkVelocity` — currently ignored)
+- [ ] Polyphonic voice allocation — `gkGate`/`gkNote` global; need per-voice state in `instr 1`
 
 ### Bugs
 
@@ -191,6 +193,8 @@
 - [ ] Jack context menu with active channels
 - [ ] Hotkey summary in UI (or About)
 - [ ] Minimap of the world (for large patches)
+- [ ] Library selector in ContextMenu (when multiple libraries exist)
+- [ ] `libraryStore` import/export UI (ZIP)
 
 ---
 
@@ -210,6 +214,7 @@
   `=` and base + active/inactive suffix (currently accumulates over time)
 - [ ] `TerminalPanel._cmdSet` for `mappingTable` calls `updateCode()`, but
   `PropertiesPanel` (mapping-select) does **not** — unify
+- [ ] `Save as → <library>` (default `user`)
 
 ### Later
 
@@ -256,7 +261,10 @@
 - [ ] `Grid.snapToGrid` (snap on/off, multX/multY)
 - [ ] `CsoundGenerator.formatModuleLine`
 - [ ] `CsoundGenerator.addModule` / `removeModule`
-- [ ] `CsoundGenerator._loadUdoByPath` (user vs built-in, HTML fallback)
+- [ ] `CsoundGenerator._loadUdoByPath` (library / legacy user / builtin, HTML fallback)
+- [ ] `libraryStore.loadModule` / `loadUdo` / `saveModule` / `removeModule` (web + Tauri mocks)
+- [ ] `ModuleFactory.loadModule` (collision across libraries, `library` field injected)
+- [ ] `PatchLoader.loadPatch` (v2 with `library`, v1 fallback)
 - [ ] `Theme` methods (`getCableWidth`, `getGridStyle`, `_isColorValue`)
 - [ ] `removeModuleFromLayer` (multi-layer search)
 - [ ] `ComponentRegistry` — round-trip serialize / deserialize for each type
@@ -283,6 +291,9 @@
 - [ ] `Theme.js` — split into `ThemeClassic` / `ThemeLcd` (strategy pattern)
 - [ ] Unify save service — `TerminalPanel._cmdSave`, `PropertiesPanel`, `Toolbar._onSave` all do slightly different things
 - [ ] `Theme` constructor — merge `DEFAULT_THEME` sections explicitly (currently done for `lcd`, `cables`, `background`, `grid`)
+- [ ] Delete `moduleStore.*` + `src/api/index.js` legacy `LazyModuleStore` (done in cleanup? verify)
+- [ ] Delete `ModulePropertiesWindow` / `ComponentPropertiesWindow` (headless legacy)
+- [ ] Unify save service
 
 ---
 
@@ -308,9 +319,8 @@
 - [ ] FX stripe may overlap content on modules with `customColor` (verify)
 - [ ] `getLayerAtPoint` always returns `'voice'` — old code may depend on `y`
 - [ ] HiDPI (`dpr > 1`) — modules don't drag correctly on macOS Retina and Windows 125–150% scaling. `resizeCanvasToWindow` currently hardcodes `dpr = 1` as a workaround. Investigate coordinate conversion between CSS px and physical px.
-- [ ] **HTML leaked into ORC** for user modules when `fetch('/csound/modules/user/...')` returned Vite `index.html` (status 200). Fixed via `_loadUdoByPath` + HTML detection. If it happens again, check console for `⚠️ Got HTML instead of UDO for …`
-- [ ] **Old saved modules without `mappingTable`** — after loading, LFO runs too fast (knob bypasses mapping), oscilloscope is broken. Re-assign `set <id> mappingTable <name>` and re-save.
 - [ ] **DSP body lost on module load** — fixed by removing `syncFromModule()` from `TerminalPanel._cmdLoad` and rebuilding structure in `restoreModuleFromData`. If it happens again, check that `_cmdLoad` / `Toolbar._onLoad` do **not** call `syncFromModule()`.
+- [ ] **`libraryStore.tauri.js` in dev** — `BaseDirectory.Resource` may be empty (`target/debug/` without `libraries/`); `tauri build` works, `tauri dev` needs fallback or manual copy. See `## Notes`.
 
 ---
 
@@ -322,13 +332,9 @@
 - Editor layout persist: `csmodular:editor-layout` in localStorage
 - Opening editor: browser — `window.open`, Tauri — `WebviewWindow` (see `ContextMenu.openModuleEditor`)
 - Capabilities: when adding a new window — add its label to `src-tauri/capabilities/default.json`
-- `ConnectorIndex` — not used in ORC generation, kept for NM2 import compatibility
-- `typeID = 999` for all user modules — temporary, plan to generate unique
 - `params` in a module = opcode argument order. Must match `xin` in UDO. Not sorted by id — order in `components` array.
 - `formatModuleLine` builds: `<params>` + `<mode>` + `<inputs>` + `<outputs>`. Order is fixed.
-- All user UDOs — in `csound/modules/user/`. Built-in — in `csound/modules/`.
 - Includes are loaded lazily via `CsoundGenerator.includes` (Set of paths).
-- **UDO loading goes through `CsoundGenerator._loadUdoByPath()`** — never raw `fetch` for `user/*`.
 - Do not use top-level `await import(...)` in `src/api/index.js` — blocks the whole UI init
 - `window.__theme__` available in console for theme debugging (`get`, `set`, `init`)
 - `removeModuleFromLayer` searches in all layers — protects from phantoms
@@ -352,7 +358,3 @@
   touches Csound directly — always via `CsoundEngine`.
 - **MIDI enabled only by user click** (`MI` in BottomBar) — browsers require
   a user gesture for `requestMIDIAccess()`. Never auto-init on page load.
-- **`instr 3`** — NM2-compatible MIDI filter. Velocity is **ignored** by
-  design (`gkGate` / `gkNote` only). Other messages (CC, pitch bend) pass
-  through `midiin` and are available via `gkstat` / `gkchan` / `gkdata1` /
-  `gkdata2`.

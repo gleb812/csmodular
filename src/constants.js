@@ -1,5 +1,5 @@
 // src/constants.js
-import { MODULE_GROUP_OF } from './moduleCategories.js';
+import { MODULE_GROUP_OF, isValidCategory } from './moduleCategories.js';
 export const PANEL_WIDTH = 260;
 export const BASE_STEP_X = 20;
 export const BASE_STEP_Y = 15;
@@ -122,8 +122,8 @@ export function getModuleCategoryColor(module) {
     const name = module?.jsonName || module?.type || module?.title;
     if (!name) return MODULE_CATEGORY_COLORS.unknown;
 
-    // 1. Явная категория (если когда-нибудь добавишь `category` в JS-описания)
-    if (module?.category && MODULE_CATEGORY_COLORS[module.category]) {
+    // 1. Явная категория — только если валидна (из CATEGORIES)
+    if (isValidCategory(module?.category)) {
         return MODULE_CATEGORY_COLORS[module.category];
     }
 

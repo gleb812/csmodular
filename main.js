@@ -3,7 +3,7 @@ import { ModuleFactory } from './src/ModuleFactory.js';
 import { Grid } from './src/grid/Grid.js';
 import { BASE_STEP_X, BASE_STEP_Y, PANEL_GRID_WIDTH,CABLE_COLORS } from './src/constants.js';
 import { themeStore } from './src/theme/themeStore.js';
-import { moduleStore } from './src/api/index.js';
+import { libraryStore } from './src/api/index.js';
 import { Panel } from './src/components/Panel.js';
 import { PatchManager } from './src/PatchManager.js';
 import { PatchLoader } from './src/PatchLoader.js';
@@ -194,7 +194,6 @@ class ModularSystem {
     // Csound Generator (генерирует ORC)
     this.csoundGen = new CsoundGenerator();
     this.csoundGen.system = this; 
-    this.csoundGen.loadUserModules();
 
     this.midiManager = new MidiManager();
 
@@ -1011,9 +1010,14 @@ _renderDynamic() {
 
     return panels.map((module) => {
         const parameters = this.collectModuleParameters(module);
-        
+
+        // ⭐ Библиотека модуля — из definition (проставляется ModuleFactory.loadModule)
+        const def = this.moduleFactory.moduleRegistry[module.jsonName || module.type];
+        const library = def?.library || null;
+
         return {
             name: module.jsonName || module.type || 'Unknown',
+            library,
             id: module.jsonId || this.generateJsonId(module),
             type: module.typeID || 0,
             parameters: JSON.stringify(parameters),
@@ -1531,228 +1535,6 @@ _renderDynamic() {
     this.uiManager.showNotification(message);
   }
 
-  async loadModuleList(selectElement, searchInput) {
-    try {
-      // Добавляем VCO вручную
-      this.addModuleToSelect(selectElement, 'VCO', 'VCO Oscillator');
-
-      // Пытаемся загрузить список файлов из папки modules
-      await this.loadAvailableModules(selectElement);
-    } catch (error) {
-      console.warn('Не удалось загрузить список модулей:', error);
-    }
-  }
-
-  loadInitialModules() {
-    //console.log('Загрузка начального списка модулей...');
-
-    const select = this.moduleSelectElement;
-    if (!select) {
-      //console.error('select element not found!');
-      return;
-    }
-
-    // Очищаем все опции кроме первой
-    while (select.options.length > 1) {
-      select.remove(1);
-    }
-
-    // Пытаемся загрузить модули из папки (асинхронно)
-    this.loadModulesFromFolder();
-  }
-
-  addModuleOption(value, text) {
-    const select = this.moduleSelectElement;
-    if (!select) return;
-
-    const option = document.createElement('option');
-    option.value = value;
-    option.textContent = text;
-    select.appendChild(option);
-  }
-
-  async loadModulesFromFolder() {
-    try {
-      console.log('Попытка загрузить список модулей из папки...');
-
-      // Пробуем получить список файлов
-      const modulesDir = '/modules/';
-
-      // Создаем запрос к директории
-      const response = await fetch(modulesDir);
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const htmlText = await response.text();
-
-      // Создаем временный div для парсинга
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = htmlText;
-      const links = tempDiv.querySelectorAll('a');
-      let moduleCount = 0;
-
-      for (const link of links) {
-        let filename = link.textContent || link.getAttribute('href');
-
-        // Очищаем имя файла
-        if (filename) {
-          // Убираем параметры запроса если есть
-          filename = filename.split('?')[0];
-
-          // Ищем .js файлы
-          if (filename.endsWith('.js') && !filename.includes('VCO.module')) {
-            const moduleName = filename.replace('.js', '');
-
-            // Пробуем загрузить модуль для получения названия
-            try {
-              const modulePath = `/modules/${filename}`;
-              const module = await import(/* @vite-ignore */ modulePath);
-              const moduleKey = Object.keys(module)[0];
-
-              if (moduleKey && module[moduleKey]) {
-                const displayName = module[moduleKey].displayName || moduleName;
-                this.addModuleOption(moduleName, displayName);
-              } else {
-                this.addModuleOption(moduleName, moduleName);
-              }
-            } catch (err) {
-              // Если не удалось загрузить, добавляем просто по имени
-              this.addModuleOption(moduleName, moduleName);
-            }
-
-            moduleCount++;
-          }
-        }
-      }
-
-      console.log(`Загружено модулей из папки: ${moduleCount}`);
-
-      // Если ничего не нашли, добавляем тестовые
-      if (moduleCount === 0) {
-        console.log('Папка modules пуста, добавляем тестовые модули');
-        this.addModuleOption('In2', '2 Inputs');
-        this.addModuleOption('Out2', '2 Outputs');
-        this.addModuleOption('VCF', 'VCF Filter');
-        this.addModuleOption('VCA', 'VCA Amplifier');
-        this.addModuleOption('LFO', 'Low Frequency Oscillator');
-        this.addModuleOption('ADSR', 'ADSR Envelope');
-      }
-    } catch (error) {
-      console.warn('Не удалось загрузить модули из папки:', error);
-
-      // Fallback: добавляем тестовые модули
-      this.addModuleOption('In2', '2 Inputs (fallback)');
-      this.addModuleOption('Out2', '2 Outputs (fallback)');
-      this.addModuleOption('VCF', 'VCF Filter (fallback)');
-      this.addModuleOption('VCA', 'VCA Amplifier (fallback)');
-    }
-  }
-
-  filterModuleList(searchTerm) {
-    const select = this.moduleSelectElement;
-    if (!select) return;
-
-    const searchLower = searchTerm.toLowerCase();
-
-    // Показываем/скрываем опции в зависимости от поиска
-    for (let i = 0; i < select.options.length; i++) {
-      const option = select.options[i];
-
-      if (i === 0) {
-        // Первую опцию (заглушку) всегда показываем
-        option.style.display = '';
-        continue;
-      }
-
-      const text = option.textContent.toLowerCase();
-      if (searchTerm === '' || text.includes(searchLower)) {
-        option.style.display = '';
-      } else {
-        option.style.display = 'none';
-      }
-    }
-  }
-
-async loadAvailableModules(selectElement) {
-    let builtinCount = 0;
-    let userCount = 0;
-    
-    // ⭐ 1. Штатные модули из /modules/
-    try {
-        const response = await fetch('/modules/');
-        const text = await response.text();
-        
-        const parser = new DOMParser();
-        const htmlDoc = parser.parseFromString(text, 'text/html');
-        const links = htmlDoc.querySelectorAll('a');
-        
-        for (const link of links) {
-            const filename = link.getAttribute('href');
-            if (filename && filename.endsWith('.js') && !filename.includes('.module.js')) {
-                const moduleName = filename.replace('.js', '');
-                
-                try {
-                    const modulePath = `/modules/${filename}`;
-                    const module = await import(/* @vite-ignore */ modulePath);
-                    const moduleKey = Object.keys(module)[0];
-                    if (moduleKey && module[moduleKey]) {
-                        const displayName = module[moduleKey].displayName || moduleName;
-                        this.addModuleToSelect(selectElement, moduleName, displayName);
-                        builtinCount++;
-                    }
-                } catch (e) {
-                    this.addModuleToSelect(selectElement, moduleName, moduleName);
-                    builtinCount++;
-                }
-            }
-        }
-    } catch (error) {
-        console.warn('Не удалось получить список штатных модулей:', error);
-    }
-    
-    // ⭐ 2. Пользовательские модули из moduleStore
-    try {
-        const userModules = await moduleStore.list();
-        for (const moduleName of userModules) {
-            this.addModuleToSelect(selectElement, moduleName, `★ ${moduleName}`);
-            userCount++;
-        }
-    } catch (error) {
-        console.warn('Не удалось получить список пользовательских модулей:', error);
-    }
-    
-    //console.log(`Загружено в список: ${builtinCount} штатных, ${userCount} пользовательских`);
-}
-
-  addModuleToSelect(selectElement, value, text) {
-    const option = document.createElement('option');
-    option.value = value;
-    option.textContent = text;
-    selectElement.appendChild(option);
-  }
-
-  updateModuleList(selectElement, searchTerm) {
-    const options = selectElement.querySelectorAll('option');
-    const searchLower = searchTerm.toLowerCase();
-
-    options.forEach((option) => {
-      if (option.value === '') {
-        // Пропускаем опцию по умолчанию
-        option.style.display = '';
-        return;
-      }
-
-      const text = option.textContent.toLowerCase();
-      if (searchTerm === '' || text.includes(searchLower)) {
-        option.style.display = '';
-      } else {
-        option.style.display = 'none';
-      }
-    });
-  }
-
   zoom(amount) {
     const oldScale = this.scale;
     this.scale = Math.max(0.1, Math.min(5, this.scale + amount));
@@ -1996,7 +1778,39 @@ async loadAvailableModules(selectElement) {
     };
   })();
 
-  async addNewModuleAtPosition(moduleType, layerName, gridX, gridY) {
+    /**
+     * Загрузить модуль по имени: сначала user, потом все builtin-библиотеки.
+     * Возвращает true если модуль зарегистрирован в moduleFactory.
+     */
+  async _ensureModuleLoaded(moduleType, preferredLib = null) {
+      if (this.moduleFactory.moduleRegistry[moduleType]) return true;
+
+      // 1. preferred (из ContextMenu)
+      if (preferredLib && await this.moduleFactory.loadModule(preferredLib, moduleType)) {
+          return true;
+      }
+
+      // 2. Пробуем user
+      if (await this.moduleFactory.loadModule('user', moduleType)) return true;
+      
+      // 3. Все builtin из libraryStore
+      try {
+          const libs = await libraryStore.listLibraries();
+          for (const entry of libs) {
+              if (entry.source !== 'builtin') continue;
+              if (entry.name === preferredLib) continue;  
+              if (await this.moduleFactory.loadModule(entry.name, moduleType)) {
+                  return true;
+              }
+          }
+      } catch (e) {
+          console.warn('[main] _ensureModuleLoaded: libraryStore error', e);
+      }
+        return false;
+  }
+
+
+  async addNewModuleAtPosition(moduleType, layerName, gridX, gridY, opts = {}) {
       console.log('🔍 addNewModuleAtPosition:', { moduleType, layerName, gridX, gridY });
       try {
         // 1. Проверяем слой
@@ -2018,28 +1832,9 @@ async loadAvailableModules(selectElement) {
             }
         }
 
-        // 3. Загрузка определения модуля
+        // 3. Загрузка определения модуля через libraryStore
         if (!this.moduleFactory.moduleRegistry[moduleType]) {
-            let loaded = false;
-
-            const isUser = await this.moduleFactory.isUserModule(moduleType);
-
-            if (isUser) {
-                loaded = await this.moduleFactory.loadUserModule(moduleType);
-            } else {
-                try {
-                    const modulePath = `/modules/${moduleType}.js`;
-                    const module = await import(/* @vite-ignore */ modulePath);
-                    const moduleKey = Object.keys(module)[0];
-                    if (moduleKey && module[moduleKey]) {
-                        this.moduleFactory.registerModule(moduleType, module[moduleKey]);
-                        loaded = true;
-                    }
-                } catch (error) {
-                    console.warn(`Failed to load built-in module ${moduleType}:`, error);
-                }
-            }
-
+            const loaded = await this._ensureModuleLoaded(moduleType,opts.library);
             if (!loaded) {
                 this.showNotification(`❌ Модуль ${moduleType} не найден`);
                 return;
@@ -2142,6 +1937,18 @@ async loadAvailableModules(selectElement) {
           newModule.parentSystem = this;
           newModule.jsonId = this.generateJsonId(newModule);
           newModule.jsonName = moduleType;
+
+          // ⭐ Пересоздаём csoundChannel с правильным jsonId
+          // (ModuleFactory создал канал с panel.moduleId — внутренний счётчик)
+          newModule.components.forEach(comp => {
+              if (comp.csoundChannel && comp.id !== undefined) {
+                  comp.csoundChannel =
+                      `module_${moduleType}_${newModule.jsonId}_${comp.id}`;
+                  if (comp.updateCsoundValue) {
+                      comp.updateCsoundValue(comp.getValue?.() ?? 0);
+                  }
+              }
+          });
 
           this.csoundGen.addModule({
             typeId: moduleType,
@@ -2502,19 +2309,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     await initCurrentTheme();
     console.log('✅ Theme initialized');
 
-    // ⭐ BUILD: читаем manifest доступных (stable) модулей
+    // ⭐ BUILD: читаем манифест shipped-библиотек и модулей
     if (import.meta.env.PROD) {
         try {
-            const res = await fetch('/modules/manifest.json');
-            if (res.ok) {
-                const { modules } = await res.json();
-                window.__STABLE_MODULES__ = new Set(modules);
-                console.log(`[build] ${modules.length} stable modules available`);
-            } else {
-                console.warn('[build] manifest.json not found, showing all modules');
+             // Список shipped-библиотек (для будущего Шага 3)
+            const libsRes = await fetch('/libraries/_index.json');
+            if (libsRes.ok) {
+                const { libraries } = await libsRes.json();
+                window.__SHIPPED_LIBRARIES__ = libraries;
+                console.log(`[build] libraries: ${libraries.join(', ')}`);
             }
         } catch (e) {
-            console.warn('[build] failed to load manifest:', e);
+            console.warn('[build] failed to load libraries manifest:', e);
         }
     }
     

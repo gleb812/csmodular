@@ -6,8 +6,8 @@
 // Логика — из них же (schema-based рендер для компонента,
 // form-based для модуля).
 
-import { moduleStore } from '../../src/api/index.js';
 import { ColorPicker } from '../../src/ui/ColorPicker.js';
+import { CATEGORIES, isValidCategory } from '../../src/moduleCategories.js';
 import {
     serializeComponents,
     collectParamIds,
@@ -153,6 +153,30 @@ export class PropertiesPanel {
 
         // ── Color ──
         this._field('Panel Color', this._makeColorSection(module));
+
+        // ── Category ──
+        const cat = isValidCategory(module.category) ? module.category : 'custom';
+        const catSelect = document.createElement('select');
+        catSelect.id = 'module-category-select';
+        catSelect.style.cssText = `
+            width: 100%; padding: 4px 8px; background: #1a1a1a;
+            border: 1px solid #444; border-radius: 3px; color: white;
+            font-size: 12px; box-sizing: border-box;
+        `;
+        for (const c of CATEGORIES) {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = c;
+            if (c === cat) opt.selected = true;
+            catSelect.appendChild(opt);
+        }
+        catSelect.onchange = (e) => {
+            if (this.app.module) {
+                this.app.module.category = e.target.value;
+            }
+        };
+        this._field('Category', catSelect);
+
     }
 
     _updateSize() {

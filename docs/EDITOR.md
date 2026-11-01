@@ -67,6 +67,8 @@ const app = new EditorApp(canvas);
 const toolbar = new Toolbar({ app, layout });
 layout.mount('toolbar', toolbar.element);
 
+// EditorUIManager удалён — вся логика в Toolbar / PropertiesPanel / TerminalPanel
+
 layout.mount('leftTop', canvas);
 app.setupCanvas();     // after mount, so parentElement exists
 
@@ -184,7 +186,8 @@ if (isEditable) return;
 
 ## Properties panel
 
-`editor/ui/PropertiesPanel.js` — two tabs.
+- **Panel Color** — 12 presets + `↺ Default` + hex input
+- **Category** — dropdown from `CATEGORIES` (`src/moduleCategories.js`). Default `custom`. Saved to `module.category` → used by `getModuleCategoryColor` in minimap and ContextMenu.
 
 ### Module tab
 
@@ -354,10 +357,12 @@ endop
 | `grid` / `grid on\|off` / `grid <N>` | Show / toggle / step |
 | `new [name]` | Clear + reset DSP |
 | `name <newName>` | Rename (no clear) |
-| `save [as <name>]` | Save |
-| `load [<name>]` | Load (no arg — list) |
+| `save [as <name>]` | Save to `user` library |
+| `load [<name>]` | Load (no arg — list all libraries) |
+| `load [<lib>/<name>]` | Load from a specific library |
 | `rm <name>` | Delete user module |
 | `lsmod [filter]` | List user modules |
+| `category <cat>` | Set module category (`osc`, `fx`, ...) |
 | `stats` | Statistics |
 | `clear` | Clear output |
 | `help [cmd]` | Help |
@@ -378,6 +383,7 @@ endop
 | `mappingTable` (aliases `mapping`/`table`) | `Knob`, `Slider` | Empty/null unsets |
 | `min`/`max`/`defaultValue` | `Knob`, `Slider` | Numeric |
 | `jackType` (alias `jack`) | `Input`, `Output` | `audio`/`control` |
+| `category` (alias `cat`) | module | `osc`, `filter`, `fx`, ... from `CATEGORIES`. Default `custom`. |
 
 ### Type aliases
 
@@ -440,10 +446,11 @@ export const NameModule = {
 
 ### Load
 
-- Toolbar `📂 Load` → `uiManager.showLoadDialog()`
-- Terminal `load` → list / `load <name>`
+- Toolbar `📂 Load` → in-Toolbar dialog (`Toolbar._onLoad` → `_loadModuleFrom(lib, name)`)
+- Terminal `load` → list / `load [<lib>/]<name>`
 
 Both → `restoreModuleFromData(moduleData, dspCode)`:
+- also stores `app._sourceLibrary` (for display / info)
 
 1. Clear `components[]`, reset `_nextComponentId`
 2. Resize module from `gridHeight`
@@ -459,10 +466,10 @@ Both → `restoreModuleFromData(moduleData, dspCode)`:
 
 ### Storage
 
-- **Web:** localStorage (`csmodular:user_modules`, `csmodular:user_module:<name>`)
-- **Tauri:** `~/Documents/CsModular/modules/user/<name>.js` + `~/Documents/CsModular/csound/modules/user/<name>.txt`
+- **Web:** IndexedDB (`csmodular` → store `libraries`, key `<lib>/<name>.{js,txt}`)
+- **Tauri:** `~/Documents/CsModular/libraries/<lib>/modules/<name>.{js,txt}`
 
-`moduleStore` singleton picks backend lazily via `isTauri()`.
+`libraryStore` singleton picks backend lazily via `isTauri()` (see `src/api/libraryStore.*`).
 
 ### Round-trip preserves
 
@@ -471,6 +478,8 @@ Both → `restoreModuleFromData(moduleData, dspCode)`:
 - Default index/state on button-likes
 - `TextLabel` text, fontSize, color
 - DSP body (protected structure rebuilt around it)
+- `category` on the module
+- `library` field is **not** stored in JS (it is the storage location); module JSON only carries `category`, `status`, etc.
 
 ## Keyboard shortcuts
 
@@ -502,11 +511,23 @@ Both → `restoreModuleFromData(moduleData, dspCode)`:
 12. **`save` uses `getCode()`** (live editor content), not `_userCsoundCode`.
 13. **`_cmdNew` / `Toolbar._onNew` must reset `_userCsoundCode`** and rebuild code panel (`clearModule({ title, resetColor })`). Otherwise old DSP body leaks into "new" module.
 14. **`rm` ≠ `del`** in terminal `switch` — `rm`/`remove` for user modules, `del`/`delete` for components.
+15. **Save always targets `user`** (MVP). Builtin libraries (`test-lib`, `nm2`, ...) are
+    **read-only**; the editor can load from them but not overwrite. Future: "Save As →"
+    to pick library, plus `libraryStore.createLibrary()`.
+16. **`category` is required in generated JS.** `collectModuleData` falls back to `'custom'`
+    if missing. Must be valid per `isValidCategory()` (see `src/moduleCategories.js`).
+17. **No `typeID` in generated JS.** `CsoundGenerator.addModule` builds the UDO path
+    from `definition.library`; `typeID` is dead.
 
 ## Known issues
 
-- `TerminalPanel._cmdSave` duplicates `ModulePropertiesWindow.generateModuleCode`
+- `TerminalPanel._cmdSave` / `_generateJsCode` duplicates `ModulePropertiesWindow.generateModuleCode`
+  and `Toolbar._onSave` — unify into `saveService`
 - `ModulePropertiesWindow` / `ComponentPropertiesWindow` headless — delete when `PropertiesPanel` covers all cases
+- `PropertiesPanel` category select has no visual grouping (flat list from `CATEGORIES`)
+- **Save always goes to `user`** — no UI to pick another target library yet
+- **Load dialog shows all libraries flat** — no search / filter; fine for small counts
+- **No library-level meta** — `test-lib` is a hardcoded demo; real libraries will need `meta.json` (author, version, description)
 - Code Viewer no undo/redo (browser-default for `<textarea>`)
 - `DockLayout` no collapse, no tabs (only Properties has tabs)
 - No virtualized highlight — may lag on very large code
@@ -519,11 +540,11 @@ Both → `restoreModuleFromData(moduleData, dspCode)`:
 ## Roadmap
 
 **Short:**
-- Remove `Change Color` from context menu
-- Terminal: autocomplete, `!!`, `history`
-- Unify save service (one place: Toolbar / Terminal / Properties)
-- Fix `PropertiesPanel._render()` `cssText +=`
 - `PropertiesPanel` mapping-select: call `updateCode()`
+- Category select in `PropertiesPanel` — already done; add grouping (optgroup) if `CATEGORIES` grows
+- `Save as → <library>` (dropdown, default `user`)
+- `libraryStore.createLibrary(name)` — mkdir on Tauri, IndexedDB first key on web
+- Fix `PropertiesPanel._render()` `cssText +=`
 
 **Mid:**
 - CodeMirror 5 or 6 (protected ranges as `readOnly` marks)
@@ -531,9 +552,13 @@ Both → `restoreModuleFromData(moduleData, dspCode)`:
 - Editor undo/redo (separate from main app)
 - Snapshot / restore in terminal
 - `led_peak` UDO variant with `abs()`
+- Export / Import library (ZIP, JSZip or `CompressionStream`)
+- `libraryStore` URL import (`_index.json` with `libraries: ["https://..."]`)
 
 **Long:**
 - Component grouping (visual)
 - Live preview (`preview` command → send UDO to main app)
 - Macro recording in terminal
 - Multi-select in Properties
+- Community library registry (optional server / GitHub Releases)
+- Patch format v2 with `libraries: []` field for portable sharing

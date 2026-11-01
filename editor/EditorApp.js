@@ -8,7 +8,6 @@ import {
 
 
 import { EditorPanel } from './EditorPanel.js';
-import { EditorUIManager } from './EditorUIManager.js';
 import { ModulePropertiesWindow } from './ModulePropertiesWindow.js';
 import { CodeViewerWindow } from './CodeViewerWindow.js';
 import { ComponentPropertiesWindow } from './ComponentPropertiesWindow.js';
@@ -84,45 +83,10 @@ export class EditorApp {
         this.snapGridSize = 5; // размер ячейки микросетки в пикселях
         this.showMicroGrid = true;
 
-        // Временный uiManager: рабочий showLoadDialog + реальный showNotification
-        const self = this;
-        this.uiManager = {
-            showNotification,
-            updateZoomInfo: () => {},
-            async showLoadDialog() {
-                const { moduleStore } = await import('../src/api/index.js');
-                const modules = await moduleStore.list();
+        // uiManager создаётся в editor.js (EditorUIManager)
+        // до этого — заглушка для showNotification (код в animate/setupEvents)
+        this.uiManager = { showNotification, updateZoomInfo: () => {} };
 
-                if (modules.length === 0) {
-                    showNotification('📭 No user modules found');
-                    return;
-                }
-
-                const name = prompt(
-                    `Load module (${modules.length} available):\n${modules.join(', ')}\n\nEnter name:`
-                );
-                if (!name) return;
-                if (!modules.includes(name)) {
-                    alert(`Module "${name}" not found`);
-                    return;
-                }
-
-                const data = await moduleStore.load(name);
-                if (!data) return;
-
-                try {
-                    const match = data.code.match(/export\s+const\s+\w+\s*=\s*(\{[\s\S]*\});?\s*$/m);
-                    if (!match) throw new Error('Cannot parse module code');
-                    const moduleData = new Function(`return ${match[1]}`)();
-
-                    self.restoreModuleFromData(moduleData, data.dsp_code);
-                    showNotification(`📂 Loaded: ${name}`);
-                } catch (e) {
-                    console.error('Load error:', e);
-                    showNotification(`❌ Parse error: ${e.message}`);
-                }
-            },
-        };
         this.propertiesWindow = new ModulePropertiesWindow(this);
         this.codeViewerWindow = new CodeViewerWindow(this);
         this.componentPropertiesWindow = new ComponentPropertiesWindow(this);
@@ -760,7 +724,7 @@ export class EditorApp {
         this.module.width = gridWidth * GRID_UNITS.X;
         this.module.height = gridHeight * GRID_UNITS.Y;
         this.module.title = moduleData.displayName || moduleData.type || 'Module';
-
+        this.module.category = moduleData.category || 'custom';
         // ⭐ Цвет модуля из данных
         if (moduleData.customColor) {
             this.module.customColor = moduleData.customColor;
@@ -1110,6 +1074,7 @@ export class EditorApp {
 
         if (this.module) {
             if (opts.title !== undefined) this.module.title = opts.title;
+            this.module.category = 'custom';
             if (opts.resetColor) this.module.customColor = null;
             this.module._userCsoundCode = null;
         }

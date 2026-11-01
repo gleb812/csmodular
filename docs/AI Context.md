@@ -17,17 +17,19 @@ Debug tools: **Oscilloscope** (waveform viewer for cables), **LED / MiniVU**
 
 ## Stack
 
-- **Frontend:** vanilla JS (ES modules), Vite
-- **Audio:** `@csound/browser` 7.0.0-beta33
-- **Desktop:** Tauri 2.x (Rust)
-- **Storage:** `src/api/index.js` — lazy `moduleStore` singleton
-  - Web: `localStorage` (`moduleStore.web.js`)
-  - Tauri: `@tauri-apps/plugin-fs` (`moduleStore.tauri.js`)
-    - `~/Documents/CsModular/modules/user/*.js`
-    - `~/Documents/CsModular/csound/modules/user/*.txt`
-- **UDO:** `public/csound/modules/*.txt`
+- **Storage:** `src/api/index.js`
+  - `libraryStore` — **primary** (lazy proxy) for module libraries
+    - Web: `libraryStore.web.js` — builtin via `fetch('/libraries/...')`, user via IndexedDB (`csmodular/libraries`)
+    - Tauri: `libraryStore.tauri.js` — builtin via `BaseDirectory.Resource`, user via `~/Documents/CsModular/libraries/<lib>/`
+  - `moduleStore` — **legacy**, only for old `~/Documents/CsModular/modules/user/*.js` (to be removed)
+- **Libraries:** `public/libraries/<lib>/`
+  - `_index.json` — `{ "modules": ["Name1", "Name2"] }`
+  - `modules/<Name>.js` — JS description
+  - `modules/<Name>.txt` — UDO (Csound code)
+  - `public/libraries/_index.json` — `{ "libraries": ["lib1", "lib2"] }`
+- **UDO (builtin, non-module):** `public/csound/modules/led_rms.txt`, `mVU_rms.txt`
 - **Tables:** `public/tables/*.json` (read by `TextField` and `;@ map` ftgens)
-- **Scripts:** `scripts/` (Python NM2 patchers)
+- **Scripts:** `scripts/` (Python)
 
 ## Module status (DEV / BUILD)
 
@@ -42,16 +44,21 @@ Debug tools: **Oscilloscope** (waveform viewer for cables), **LED / MiniVU**
 | `broken` | red `#e84a4a` | doesn't work |
 
 **DEV (`npm run dev`):** Context menu shows colored dot per module
-(`_createStatusDot`). `preloadStatuses()` runs once on first menu open — imports
-all `modules/*.js` into `moduleRegistry` (menu opens immediately with yellow
-dots, updates via `updateMenuUI`).
+(`_createStatusDot(description)`), status read directly from `libraryStore.listModules()`
+(no preload, no `import('/modules/...')`).
 
 **BUILD (`npm run build`):** `vite.config.js` → `stableModulesOnly` plugin
-(`apply: 'build'`): copies only `status: 'stable'` modules into `dist/modules/`,
-writes `dist/modules/manifest.json` = `{ modules: [names] }`. `main.js` reads
-manifest → `window.__STABLE_MODULES__`. `ContextMenu.initModuleStructure()`
-filters `ALL_NM2` by it (`undefined` in DEV → all). **Dots hidden** in BUILD
-(`IS_DEV = false`), stars shown. `preloadStatuses` is a **no-op** in BUILD.
+(`apply: 'build'`): copies **`public/libraries/*`** → `dist/libraries/*`,
+filters modules by `status ∈ {stable, passable}`, rewrites each
+`<lib>/_index.json` with kept module names, rewrites root
+`dist/libraries/_index.json` with non-empty libraries, writes
+`dist/libraries/manifest.json` = `{ modules: [names] }` (flat legacy list).
+
+`main.js` (PROD) reads `/libraries/manifest.json` → `window.__STABLE_MODULES__`
+(legacy, used only by old code paths — **removed in ContextMenu**), and
+`/libraries/_index.json` → `window.__SHIPPED_LIBRARIES__` (reserved for future).
+
+**Dots hidden in BUILD** (`IS_DEV = false`), stars shown.
 
 ## Key entities
 
@@ -63,8 +70,9 @@ Modules + cables → JSON. Loaded via `PatchLoader`.
 ```js
 {
     type: 'Zgen',            // Csound opcode name (safe identifier)
-    typeID: 999,             // UDO file lookup (999.txt / user/Zgen.txt)
+    library: 'test-lib',     // ⭐ injected by ModuleFactory.loadModule — source library
     displayName: 'Zgen',     // UI only — NEVER in Csound names
+    category: 'osc',         // ⭐ REQUIRED — from CATEGORIES in moduleCategories.js
     status: 'stable',        // 'stable' | 'passable' | 'dev' | 'broken' (default 'dev')
     gridHeight: 3,
     params: [1, 2],          // component IDs in xin order (components[] order)
@@ -83,11 +91,16 @@ Modules + cables → JSON. Loaded via `PatchLoader`.
 reads `moduleDef.params` **directly**. `defaultParams`, `defaultMode` — literal
 initial values, used only if `params` empty.
 
-**`category`** (optional, string) — мапится на цвет в minimap. Если нет —
-`getModuleCategoryColor` падает в fallback через `MODULE_GROUP_OF` (см.
-Module categories).
-
 **`layer`** — `'voice'` (default) / `'fx'`. Cables only within same layer.
+
+**`category`** — required, must be one of `CATEGORIES`
+(`src/moduleCategories.js`). `normalizeCategory(def)` falls back to `'custom'`
+with a warn. `getModuleCategoryColor` validates via `isValidCategory`.
+
+**`typeID`** — removed from required fields. Was used for UDO lookup
+(`999.txt` / `user/Zgen.txt`). Now `CsoundGenerator.addModule` builds
+`udoPath = 'library/<lib>/<Name>.txt'` from `definition.library`.
+`registerUserModule` / `loadUserModules` are gone.
 
 ### UDO file
 
@@ -209,12 +222,15 @@ forceRedraw + debounced recompile.
 6. `instr 3` — MIDI filter; `instr 4` — offline render
 
 ### UDO loading — `_loadUdoByPath()`
-- `user/<Name>.txt` → `moduleStore.load(name).dsp_code`
-- `<id>.txt`, `led_rms.txt`, `miniVU.txt` → `fetch('/csound/modules/<path>')`
-  with HTML-fallback detection
+- `library/<lib>/<Name>.txt` → `libraryStore.loadUdo(lib, name)`
+  (builtin: `fetch('/libraries/<lib>/modules/<Name>.txt')`; user: IndexedDB / Tauri fs)
+- `user/<Name>.txt` → `moduleStore.load(name).dsp_code` (**legacy** fallback)
+- `<id>.txt`, `led_rms.txt`, `mVU_rms.txt` → `fetch('/csound/modules/<path>')`
+  with HTML-fallback detection (builtin non-module UDOs)
 
 **Never** raw `fetch('/csound/modules/user/...')` — Vite SPA-fallback returns
-`index.html` (status 200, HTML leaks into ORC).
+`index.html` (status 200, HTML leaks into ORC). `libraryStore.loadUdo` and
+`_fetchText` both detect HTML via `looksLikeHtml()`.
 
 ### Recompile
 `reset()` + `setOption('-odac')` + `compileOrc` + `readScore` + `start`.
@@ -347,24 +363,18 @@ Figma-style карта мира, правый верхний угол, `MINIMAP_
 
 ## Module categories
 
-`src/moduleCategories.js` — **единственный источник правды** о группах
-NM2-модулей. `ALL_NM2` (17 групп: In/Out, Logic, Osc, FX, Switch, Mixer,
-Env, Note, LFO, Shaper, Filter, Level, MIDI, Seq, Delay, Rnd, Test) +
-`MODULE_GROUP_OF` (name → group). Импортируется в:
-- `ContextMenu.js` — группировка в левой панели.
-- `constants.js` — `getModuleCategoryColor`.
-
-**Не дублируй `ALL_NM2`** — добавь модуль в `moduleCategories.js`.
+`src/moduleCategories.js` — single source of truth for categories.
 
 ### `getModuleCategoryColor(module)` (`src/constants.js`)
 
 Приоритет:
-1. `module.category` (явное поле в JS-описании) — если ключ есть в
-   `MODULE_CATEGORY_COLORS`.
-2. `MODULE_GROUP_OF[module.jsonName || type || title]` → `GROUP_TO_CATEGORY`
-   → `MODULE_CATEGORY_COLORS`.
-3. `module.isUser` → `custom`.
-4. Иначе → `unknown` (серый `#64748b`).
+1. `module.category` — only if `isValidCategory(module.category)` → `MODULE_CATEGORY_COLORS[category]`
+
+2. `MODULE_GROUP_OF[module.jsonName || type || title]` → `GROUP_TO_CATEGORY → color (legacy)`
+
+3. `module.isUser` → `custom`
+
+4. else → `unknown` (#64748b)
 
 `GROUP_TO_CATEGORY` — маппинг NM2-групп на цветовые ключи:
 `In/Out→io`, `Logic→logic`, `Osc→osc`, `FX→fx`, `Switch→switch`,
@@ -405,7 +415,7 @@ Workaround: restart Csound.
 | Class | File | Role |
 |---|---|---|
 | `ModularSystem` | `main.js` | Coordinator (canvas, layers, animation, grid, minimap) |
-| `ModuleFactory` | `src/ModuleFactory.js` | Creates modules from JS descriptions |
+| `ModuleFactory` | `src/ModuleFactory.js` | `loadModule(lib, name)`, `createModule(type, ...)` |
 | `PatchManager` | `src/PatchManager.js` | Cables, jack coloring |
 | `PatchLoader` | `src/PatchLoader.js` | Load/save patches |
 | `LayerManager` | `src/managers/LayerManager.js` | Voice/fx arrays, collisions, `findFreeSpace`, `checkSaneDistance` |
@@ -423,7 +433,7 @@ Workaround: restart Csound.
 | `LED`, `MiniVU` | `src/components/*.js` | Indicators |
 | `TextField` | `src/components/TextField.js` | Numeric display with table mapping |
 | `Cable` | `src/Cable.js` | `typeColor` = source jack color |
-| `moduleStore` | `src/api/index.js` | User module storage |
+| `libraryStore` | `src/api/libraryStore.js` | Module libraries (builtin + user) |
 | `moduleStatusStore` | `src/api/moduleStatusStore.js` | Status + colors + `IS_DEV` |
 | `moduleCategories` | `src/moduleCategories.js` | `ALL_NM2`, `MODULE_GROUP_OF` |
 | `spatial` | `src/utils/spatial.js` | `median`, `bboxNearModules`, `groupByOctant`, `isOutputModule` |
@@ -564,20 +574,40 @@ Theme(settings))` → `themeStore.save` → `applyGridFromTheme` →
 `backgroundColor`, image → `backgroundImage: url(...)`. Mouse parallax
 `parallaxStrength` px, smoothed.
 
-## User module storage
+## Library storage
 
-`src/api/index.js` — lazy `moduleStore`:
-- Tauri → `moduleStore.tauri.js`
-- Web → `moduleStore.web.js`
+`src/api/index.js` — re-exports libraryStore (lazy proxy inside
+libraryStore.js). Backends:
+- Tauri → `libraryStore.tauri.js`
+- Web → `libraryStore.web.js`
 - Fallback → in-memory stub
 
 ```js
-moduleStore.list() / load(name) / save(name, code, dspCode) /
-remove(name) / isUserModule(name) / invalidateCache()
+libraryStore.listLibraries()                 // → [{ name, source: 'builtin'|'user' }]
+libraryStore.listModules(lib)                // → [{ name, description }]
+libraryStore.loadModule(lib, name)           // → { description, dspCode } | null
+libraryStore.loadUdo(lib, name)              // → string | null
+libraryStore.saveModule(lib, name, js, dsp)  // → boolean
+libraryStore.removeModule(lib, name)         // → boolean
+libraryStore.invalidateCache()
 ```
 
-**Web keys:** `csmodular:user_modules`, `csmodular:user_module:<name>`.
-**Platform:** `isTauri()` checks `__TAURI_INTERNALS__`. **No top-level await.**
+**Web storage:** IndexedDB, db `csmodular`, store `libraries`,
+key `<lib>/<Name>.js` + `<lib>/<Name>.txt`.
+**Tauri storage:** `~/Documents/CsModular/libraries/<lib>/modules/<Name>.{js,txt}`.
+**Platform:** `isTauri()` checks `__TAURI_INTERNALS__`. No top-level await.
+
+**Helpers** (shared, exported from libraryStore.js):
+
+- `parseModuleDefinition(code)` — extracts `export const XModule = {...}` → object
+
+- `looksLikeHtml(text)` — SPA fallback detection
+
+`ModuleFactory.loadModule(lib, name)` uses `libraryStore.loadModule`,
+injects `definition.library = lib` and `definition.isUser = (lib === 'user')`,
+and guards against type collisions across libraries (first loaded wins).
+`ModuleFactory.loadUserModule(name)` is a legacy alias for `loadModule('user', name)`.
+
 
 ## Tauri configuration
 
@@ -708,10 +738,11 @@ Must match `bandwidth: 'static'` in JS (e.g. `EnvD`: `Trig`, `AM` static,
     - BUILD: `preloadStatuses` is a no-op; `main.js` reads
       `/modules/manifest.json` → `window.__STABLE_MODULES__`;
       `initModuleStructure` filters `ALL_NM2` by it.
-48. **`vite.config.js` `stableModulesOnly`** must:
-    - filter `stable` (extend for `passable` when needed)
-    - write `manifest.json`
-    - **never include `dev`/`broken`**
+48. vite.config.js stableModulesOnly must:
+    - read `public/libraries/_index.json`
+    - filter modules by `status ∈ {stable, passable}`
+    - copy `<lib>/modules/*.{js,txt}` → `dist/libraries/<lib>/modules/`
+    - rewrite `<lib>/_index.json` and root `_index.json` (non-empty libs only)
 49. **In BUILD, status dots are hidden** (`IS_DEV = false`) — stars are shown
     until removed; do not add dots in BUILD.
 50. **`moduleStatusStore` is a separate file** — `getModuleStatus`,
@@ -733,9 +764,10 @@ Must match `bandwidth: 'static'` in JS (e.g. `EnvD`: `Trig`, `AM` static,
 56. **`Splash` is independent of `CsoundEngine`.** Show after theme +
     `ModularSystem` init; never wait for `state === 'running'`. Session
     marker — `sessionStorage`, not `localStorage`.
-57. **`ModuleContextMenu` header** — category label via `MODULE_GROUP_OF`,
-    not `jsonName` (avoid duplicate). Never import `ALL_NM2` directly there —
-    use `MODULE_GROUP_OF` only.
+57. **ModuleFactory.loadModule(lib, name)** — the only way to register a
+module. It sets `definition.library` and `definition.isUser.
+loadUserModule(name)` is a legacy alias. `_parseModuleDefinition` is
+removed — parsing lives in `libraryStore.parseModuleDefinition`.
 
 ## Known issues
 
@@ -749,7 +781,6 @@ Must match `bandwidth: 'static'` in JS (e.g. `EnvD`: `Trig`, `AM` static,
 - Terminal no autocomplete
 - **HiDPI (dpr > 1)** disabled (`dpr = 1` workaround)
 - **MIDI dies after recompile** — `@csound/browser` IPC bug
-- **`mappingTable` missing in old modules** — re-assign and re-save
 - **`sourceComponentId` missing in old modules** — LED/MiniVU disabled
 - **`bandwidth` missing in old modules** — defaults to `dynamic`, static
   jacks may have changed. Re-save.
@@ -761,7 +792,6 @@ Must match `bandwidth: 'static'` in JS (e.g. `EnvD`: `Trig`, `AM` static,
 - **`formatModuleLine` uses `moduleDef.params`** — not recalculated
 - **Module call order** — insertion order, not topological. Feedback may
   see 1 k-block delay.
-- **`baseJack.typeColors` removed** — use `CABLE_COLORS[this.type]`
 - **`passable` not included in BUILD filter** — extend plugin when needed
 - **Dot color in first DEV menu open** — appears yellow for a moment until
   `preloadStatuses` finishes (~1 s); expected

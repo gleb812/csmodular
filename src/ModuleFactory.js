@@ -1,4 +1,4 @@
-import { moduleStore } from './api/index.js';
+import { libraryStore } from './api/index.js';
 import { Panel } from './components/Panel.js';
 import { PANEL_GRID_WIDTH, PANEL_WIDTH, BASE_STEP_X, BASE_STEP_Y } from './constants.js';
 
@@ -35,7 +35,6 @@ export class ModuleFactory {
     constructor() {
         this.moduleRegistry = {}; // Здесь будут храниться все определения модулей
         this.nextModuleId = 1; // Для генерации уникальных ID
-        this._userModuleNames = undefined;
         this.parentSystem = null;
     }
 
@@ -98,98 +97,63 @@ export class ModuleFactory {
         }
     }
 
-    async loadUserModule(moduleName) {
+
+    // ⭐ Загрузить модуль из библиотеки (builtin или user)
+    //    lib = 'test-lib' | 'user' | ...
+    async loadModule(lib, name) {
         try {
-            //console.log(`📂 Loading user module: ${moduleName}`);
-
-            const data = await moduleStore.load(moduleName);
+            const data = await libraryStore.loadModule(lib, name);
             if (!data) {
-                console.warn(`Failed to load user module: ${moduleName}`);
+                console.warn(`[ModuleFactory] loadModule("${lib}/${name}") → not found`);
                 return false;
             }
 
-            // Парсим JS код
-            const moduleDef = this._parseModuleDefinition(data.code);
+            const moduleDef = data.description;   // уже распарсен libraryStore
             if (!moduleDef) {
-                console.warn(`Could not parse module definition for: ${moduleName}`);
+                console.warn(`[ModuleFactory] loadModule("${lib}/${name}") → parse failed`);
                 return false;
             }
 
-            // ⭐ Помечаем модуль как пользовательский
-            moduleDef.isUser = true;
+            // ⭐ Метаданные источника
+            moduleDef.library = lib;
+            moduleDef.type = moduleDef.type || name;
+            moduleDef.isUser = (lib === 'user');
 
-            // Регистрируем в фабрике
-            this.registerModule(moduleName, moduleDef);
-
-            // ⭐ Регистрируем в CsoundGenerator
-            if (this.parentSystem?.csoundGen) {
-                this.parentSystem.csoundGen.registerUserModule(moduleName, {
-                    jsCode: data.code,
-                    dspCode: data.dsp_code,
-                    displayName: moduleDef.displayName || moduleName,
-                    gridHeight: moduleDef.gridHeight || 3,
-                    inputs: moduleDef.inputs || [],
-                    outputs: moduleDef.outputs || []
-                });
+            // Коллизия: два модуля с одинаковым type из разных библиотек.
+            // Пока — первая загруженная побеждает (Шаг 3 → составной ключ lib:type).
+            if (this.moduleRegistry[moduleDef.type]) {
+                const prev = this.moduleRegistry[moduleDef.type];
+                if (prev.library !== lib) {
+                    console.warn(
+                        `[ModuleFactory] type "${moduleDef.type}" already registered ` +
+                        `from library "${prev.library}", skipping "${lib}/${name}"`
+                    );
+                    return false;
+                }
+                // Тот же lib, тот же type — перезагрузка (invalidate), ок
             }
 
-            console.log(`✅ Loaded user module: ${moduleName}`);
+            this.registerModule(moduleDef.type, moduleDef);
+            console.log(`✅ Loaded module ${lib}/${name} as "${moduleDef.type}"`);
             return true;
 
         } catch (error) {
-            console.error(`Error loading user module ${moduleName}:`, error);
+            console.error(`[ModuleFactory] loadModule("${lib}/${name}") error:`, error);
             return false;
         }
     }
 
-    _parseModuleDefinition(code) {
-        try {
-            // Ищем export const NameModule = { ... }
-            const match = code.match(/export\s+const\s+(\w+)\s*=\s*({[\s\S]*?});/);
-            if (!match) return null;
-            
-            const moduleStr = match[2];
-            const moduleDef = new Function(`return ${moduleStr}`)();
-            
-            if (!moduleDef.components || !Array.isArray(moduleDef.components)) {
-                return null;
-            }
-            
-            return moduleDef;
-        } catch (error) {
-            console.error('Error parsing module definition:', error);
-            return null;
-        }
+    // ⭐ Алиас для обратной совместимости (старые вызовы loadUserModule(name))
+    async loadUserModule(moduleName) {
+        return this.loadModule('user', moduleName);
     }
 
-
-     // ModuleFactory.js - исправленный isUserModule()
-
-    // ⭐ Проверка, является ли модуль пользовательским
-    async isUserModule(moduleName) {
-        // ⭐ Если кеш ещё не загружен — загружаем
-        if (this._userModuleNames === undefined) {
-            await this._loadUserModuleNames();
-        }
-        
-        // ⭐ Если после загрузки кеш всё ещё undefined — возвращаем false
-        if (this._userModuleNames === undefined || !Array.isArray(this._userModuleNames)) {
-            return false;
-        }
-        
-        return this._userModuleNames.includes(moduleName);
+    // ⭐ Является ли модуль пользовательским — теперь по definition.isUser
+    isUserModule(moduleName) {
+        const def = this.moduleRegistry[moduleName];
+        return def?.isUser === true;
     }
 
-    // ⭐ КЕШ СПИСКА ПОЛЬЗОВАТЕЛЬСКИХ МОДУЛЕЙ
-    async _loadUserModuleNames() {
-        try {
-            this._userModuleNames = await moduleStore.list();
-            //console.log(`📂 Loaded ${this._userModuleNames.length} user module names:`, this._userModuleNames);
-        } catch (error) {
-            console.warn('Could not load user module names:', error);
-            this._userModuleNames = [];
-        }
-    }
 
     // Регистрация нового типа модуля
     registerModule(type, definition) {

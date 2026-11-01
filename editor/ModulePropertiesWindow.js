@@ -1,6 +1,7 @@
 // editor/ModulePropertiesWindow.js
 import { ColorPicker } from '../src/ui/ColorPicker.js';
-import { moduleStore } from '../src/api/index.js';
+import { libraryStore } from '../src/api/index.js';
+import { CATEGORIES } from '../src/moduleCategories.js';
 import {
     serializeComponents,
     collectParamIds,
@@ -16,8 +17,6 @@ export class ModulePropertiesWindow {
         this.createWindow();
         this.setupEventListeners();
     }
-
-    // editor/ModulePropertiesWindow.js - добавляем drag
 
     createWindow() {
         this.windowElement = document.createElement('div');
@@ -77,7 +76,15 @@ export class ModulePropertiesWindow {
                 <label style="color: #888; font-size: 10px; display: block; margin-bottom: 3px;">Panel Color</label>
                 <div id="color-picker-container"></div>
             </div>
-            
+
+            <!-- Категория -->
+            <div style="margin-bottom: 12px;">
+                <label style="color: #888; font-size: 10px; display: block; margin-bottom: 3px;">Category</label>
+                <select id="module-category-select" style="width: 100%; padding: 4px 8px; background: #1a1a1a; border: 1px solid #444; border-radius: 3px; color: white; font-size: 12px; box-sizing: border-box;">
+                    ${CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join('')}
+                </select>
+            </div>
+
             <!-- Кнопка Save -->
             <button id="save-module-btn" style="width: 100%; padding: 8px; background: linear-gradient(to bottom, #0a5, #083); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px;">
                 💾 Save Module
@@ -124,6 +131,12 @@ export class ModulePropertiesWindow {
 
         this.windowElement.querySelector('#module-height-input').onchange = () => {
             this.updateModuleSize();
+        };
+
+        this.windowElement.querySelector('#module-category-select').onchange = () => {
+            if (this.app.module) {
+                this.app.module.category = this.windowElement.querySelector('#module-category-select').value;
+            }
         };
 
         this.windowElement.querySelector('#save-module-btn').onclick = () => {
@@ -234,7 +247,9 @@ export class ModulePropertiesWindow {
         this.windowElement.querySelector('#module-name-input').value = this.app.module.title || 'New Module';
         this.windowElement.querySelector('#module-width-input').value = this.app.module.gridWidth || 1;
         this.windowElement.querySelector('#module-height-input').value = this.app.module.gridHeight || 3;
-        
+        const cat = this.app.module.category || 'custom';
+        this.windowElement.querySelector('#module-category-select').value = cat;
+
         // Устанавливаем цвет в ColorPicker
         const currentColor = this.app.module.color || this.app.module.customColor || '#2a2a2a';
         if (this.colorPicker) {
@@ -257,12 +272,13 @@ export class ModulePropertiesWindow {
 
     async saveModuleToServer(jsCode, dspCode, name) {
         console.log('📤 Saving module:', { name, jsLength: jsCode.length, dspLength: dspCode ? dspCode.length : 0 });
-        
+
         try {
-            const ok = await moduleStore.save(name, jsCode, dspCode);
-            
+            const lib = 'user';   // ⭐ MVP: всегда user
+            const ok = await libraryStore.saveModule(lib, name, jsCode, dspCode);
+
             if (ok) {
-                this.app.uiManager.showNotification(`✅ Module "${name}" saved`);
+                this.app.uiManager.showNotification(`✅ Module "${name}" saved to ${lib}`);
                 return true;
             } else {
                 this.app.uiManager.showNotification(`❌ Could not save module "${name}"`);
@@ -343,13 +359,13 @@ export class ModulePropertiesWindow {
         const components = serializeComponents(this.app.components);
         const params = collectParamIds(this.app.components);
         const ports = collectPorts(this.app.components);
-
+        const category = this.app.module.category || 'custom';
         return {
             name: name,
             displayName: name,
+            category,
             gridHeight: module.gridHeight || 3,
             type: name,
-            typeID: null,
             defaultParams: [],
             tooltip: name,
             params: params,
@@ -386,9 +402,9 @@ export class ModulePropertiesWindow {
 
         export const ${name}Module = {
             type: '${name}',
-            typeID: ${moduleData.typeID || 999},
             defaultParams: ${JSON.stringify(moduleData.defaultParams || [])},
             displayName: '${moduleData.displayName || name}',
+            category: '${moduleData.category || 'custom'}',
             gridHeight: ${moduleData.gridHeight || 3},
             originalName: '${name}',
             tooltip: '${moduleData.tooltip || name}',

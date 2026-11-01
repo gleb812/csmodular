@@ -1,9 +1,8 @@
 // src/ui/ContextMenu.js
-import { moduleStore } from '../api/index.js';
+import { libraryStore } from '../api/index.js';
 import { PANEL_GRID_WIDTH } from '../constants.js';
 import { ratingStore, getEffectiveRating } from '../api/moduleRatingStore.js';
 import { getModuleStatus, getStatusMeta, IS_DEV } from '../api/moduleStatusStore.js';
-import { ALL_NM2 } from '../moduleCategories.js';
 
 export class ContextMenu {
     constructor(system) {
@@ -11,7 +10,6 @@ export class ContextMenu {
         this.isVisible = false;
         this.menuElement = null;
         this.searchInput = null;
-        this.moduleGroups = null;
         this.lastOpenMouseY = null;
         this._isLoaded = false;
         
@@ -22,131 +20,152 @@ export class ContextMenu {
         this.setupEventListeners();
         this.injectStyles();
 
-        this.loadUserModules().then(() => {
+        this.refreshLibraryGroups().then(() => {
             this._isLoaded = true;
-            this.updateUserGroupsInLeftPanel();
-            //console.log('✅ ContextMenu fully loaded');
-        });
+        }).catch(e => console.warn('[ContextMenu] refreshLibraryGroups failed:', e));
     }
 
     initModuleStructure() {
+        // Группы заполняются асинхронно из libraryStore (см. refreshLibraryGroups).
+        this.libraryGroups = {};    // { libName: [{name, description}, ...] }
+        this.allModules = {};       // name → libName (для поиска)
+        this._groupListEl = null;   // ссылка на контейнер левой панели
+    }
 
-        // ⭐ BUILD: фильтр по manifest. DEV: window.__STABLE_MODULES__ = undefined → всё.
-        const allow = window.__STABLE_MODULES__;   // Set<string> | undefined
+    async refreshLibraryGroups() {
+        const libraries = await libraryStore.listLibraries();
+        const groups = {};
 
-        this.nm2Modules = {};
-        for (const [group, mods] of Object.entries(ALL_NM2)) {
-            const filtered = allow
-                ? mods.filter(name => allow.has(name))
-                : mods;
-            if (filtered.length > 0) {
-                this.nm2Modules[group] = filtered;
+        for (const entry of libraries) {
+            try {
+                const mods = await libraryStore.listModules(entry.name);
+                if (mods.length > 0) {
+                    groups[entry.name] = {
+                        source: entry.source,
+                        modules: mods,
+                    };
+                    for (const m of mods) {
+                        this.allModules[m.name] = entry.name;
+                    }
+                }
+            } catch (e) {
+                console.warn(`[ContextMenu] listModules(${entry.name}) failed:`, e);
             }
         }
 
-        // Пользовательские модули — как было
-        this.userModules = { 'My Modules': [] };
+        this.libraryGroups = groups;
+        this._renderGroupList();
+    }
 
-        // moduleGroups — объединение
-        this.moduleGroups = { ...this.nm2Modules, ...this.userModules };
+    _renderGroupList() {
+        const leftPanel = this.menuElement.querySelector('#left-panel');
+        if (!leftPanel) return;
+        leftPanel.innerHTML = '';
+        this._groupListEl = leftPanel;
 
-        // allModules — для поиска
-        this.allModules = {};
-        Object.entries(this.moduleGroups).forEach(([group, modules]) => {
-            modules.forEach(module => {
-                this.allModules[module] = group;
-            });
-        });
-
-        if (allow) {
-            const total = Object.values(this.nm2Modules).reduce((n, arr) => n + arr.length, 0);
-            console.log(`[ContextMenu/build] ${total} stable module(s) visible`);
+        const libNames = Object.keys(this.libraryGroups);
+        if (libNames.length === 0) {
+            const empty = document.createElement('div');
+            empty.style.cssText = 'padding: 12px; color:#555; font-size:11px; font-style:italic;';
+            empty.textContent = 'No libraries found';
+            leftPanel.appendChild(empty);
+            this.showModulesForGroup(null);
+            return;
         }
+
+        libNames.forEach((libName, idx) => {
+            const entry = this.libraryGroups[libName];
+            const icon = entry.source === 'user' ? '👤' : '📦';
+            const item = document.createElement('div');
+            item.className = 'group-item';
+            item.dataset.group = libName;
+            item.style.cssText = `
+                padding: 5px 12px;
+                font-size: 11px;
+                color: #aaa;
+                cursor: pointer;
+                user-select: none;
+                border-left: 2px solid transparent;
+                margin: 1px 0;
+                border-radius: 0 3px 3px 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            `;
+            item.innerHTML = `<span>${icon} ${libName}</span><span style="color:#555;font-size:10px;">${entry.modules.length}</span>`;
+
+            item.onmouseenter = () => {
+                this._highlightGroup(item);
+                this.showModulesForGroup(libName);
+            };
+            item.onclick = () => this.showModulesForGroup(libName);
+
+            leftPanel.appendChild(item);
+
+            if (idx === 0) {
+                this._highlightGroup(item);
+                this.showModulesForGroup(libName);
+            }
+        });
+    }
+
+    _highlightGroup(activeItem) {
+        this.menuElement.querySelectorAll('.group-item').forEach(el => {
+            el.style.background = 'transparent';
+            el.style.borderLeftColor = 'transparent';
+            el.style.color = '#aaa';
+        });
+        activeItem.style.background = '#2a2a2a';
+        activeItem.style.borderLeftColor = '#0af';
+        activeItem.style.color = '#fff';
     }
 
     searchAllModules(searchTerm) {
         const modulesContainer = this.menuElement.querySelector('#modules-container');
         if (!modulesContainer) return;
-        
-        const searchLower = searchTerm.toLowerCase().trim();
         modulesContainer.innerHTML = '';
-        
-        if (searchLower === '') {
-            // Пустой поиск — вернуть активную группу
-            const activeGroup = this.menuElement.querySelector('.group-item[style*="border-left-color"]');
-            if (activeGroup) {
-                this.showModulesForGroup(activeGroup.dataset.group);
-            }
-            return;
-        }
-        
-        // Собираем все совпадения
-        const results = [];
-        
-        // NM2 модули
-        Object.entries(this.nm2Modules).forEach(([groupName, modules]) => {
-            modules.forEach(m => {
-                if (m.toLowerCase().includes(searchLower)) {
-                    results.push({ name: m, group: groupName, level: 'nm2' });
-                }
-            });
-        });
-        
-        // User модули
-        Object.entries(this.userModules).forEach(([groupName, modules]) => {
-            modules.forEach(m => {
-                if (m.toLowerCase().includes(searchLower)) {
-                    results.push({ name: m, group: groupName, level: 'user' });
-                }
-            });
-        });
-        
-        // Пусто — ничего не найдено
-        if (results.length === 0) {
-            const emptyMsg = document.createElement('div');
-            emptyMsg.textContent = `No modules found matching "${searchTerm}"`;
-            emptyMsg.style.cssText = `
-                padding: 20px;
-                text-align: center;
-                color: #666;
-                font-size: 11px;
-                font-style: italic;
-            `;
-            modulesContainer.appendChild(emptyMsg);
-            return;
-        }
-        
-        // Заголовок результата
-        const resultHeader = document.createElement('div');
-        resultHeader.style.cssText = `
-            padding: 6px 12px;
-            font-size: 10px;
-            color: #666;
-            border-bottom: 1px solid #333;
-            margin-bottom: 4px;
-        `;
-        resultHeader.textContent = `Found ${results.length} module(s)`;
-        modulesContainer.appendChild(resultHeader);
-        
-        // Выводим совпадения
-        results.forEach(({ name, group, level }) => {
-            const row = this._createModuleRow(name, level === 'user');
 
-            // group chip — перед звёздами
-            const groupSpan = document.createElement('span');
-            groupSpan.textContent = group;
-            groupSpan.style.cssText = `
-                font-size: 9px;
-                color: #555;
-                font-style: italic;
-                margin-right: 6px;
-                flex: 0 0 auto;
-            `;
+        const term = searchTerm.toLowerCase().trim();
+        if (!term) {
+            const active = this.menuElement.querySelector('.group-item[style*="border-left-color"]');
+            this.showModulesForGroup(active?.dataset.group || Object.keys(this.libraryGroups)[0]);
+            return;
+        }
+
+        const results = [];
+        for (const [libName, entry] of Object.entries(this.libraryGroups)) {
+            for (const m of entry.modules) {
+                const dn = (m.description?.displayName || '').toLowerCase();
+                if (m.name.toLowerCase().includes(term) || dn.includes(term)) {
+                    results.push({ module: m, library: libName });
+                }
+            }
+        }
+
+        if (results.length === 0) {
+            const msg = document.createElement('div');
+            msg.style.cssText = 'padding:20px;text-align:center;color:#666;font-size:11px;font-style:italic;';
+            msg.textContent = `No modules found matching "${searchTerm}"`;
+            modulesContainer.appendChild(msg);
+            return;
+        }
+
+        const header = document.createElement('div');
+        header.style.cssText = 'padding:6px 12px;font-size:10px;color:#666;border-bottom:1px solid #333;margin-bottom:4px;';
+        header.textContent = `Found ${results.length} module(s)`;
+        modulesContainer.appendChild(header);
+
+        for (const { module, library } of results) {
+            const row = this._createModuleRow(module, library);
+
+            const chip = document.createElement('span');
+            chip.textContent = library;
+            chip.style.cssText = 'font-size:9px;color:#555;font-style:italic;margin-right:6px;flex:0 0 auto;';
             const stars = row.querySelector('.rating-stars');
-            row.insertBefore(groupSpan, stars);
+            row.insertBefore(chip, stars);
 
             modulesContainer.appendChild(row);
-        });
+        }
     }
 
     createMenuElement() {
@@ -246,127 +265,17 @@ export class ContextMenu {
         document.body.appendChild(this.menuElement);
         this.updateMenuPosition();
         
-        // Создаем иерархический список в левой панели
-        this.createHierarchicalGroupList(leftPanel);
     }
 
-    createHierarchicalGroupList(container) {
-        container.innerHTML = '';
-
-        // === УРОВЕНЬ 1: NM2 ===
-        const nm2Header = this.createLevelHeader('📦 NM2', true);
-        container.appendChild(nm2Header);
-
-        // Подзаголовки NM2 (все группы NM2)
-        const nm2Groups = document.createElement('div');
-        nm2Groups.className = 'level-groups nm2-groups';
-        nm2Groups.style.cssText = `
-            padding-left: 8px;
-        `;
-
-        Object.keys(this.nm2Modules).forEach((groupName) => {
-            const groupItem = this.createGroupItem(groupName, 'nm2');
-            nm2Groups.appendChild(groupItem);
-        });
-
-        container.appendChild(nm2Groups);
-
-        // === РАЗДЕЛИТЕЛЬ ===
-        const divider = document.createElement('div');
-        divider.style.cssText = `
-            height: 1px;
-            background: #333;
-            margin: 8px 0;
-        `;
-        container.appendChild(divider);
-
-        // === УРОВЕНЬ 1: User ===
-        const userHeader = this.createLevelHeader('👤 User', false);
-        container.appendChild(userHeader);
-
-        // Подзаголовки User
-        const userGroups = document.createElement('div');
-        userGroups.className = 'level-groups user-groups';
-        userGroups.style.cssText = `
-            padding-left: 8px;
-        `;
-
-        Object.keys(this.userModules).forEach((groupName) => {
-            const groupItem = this.createGroupItem(groupName, 'user');
-            userGroups.appendChild(groupItem);
-        });
-
-        container.appendChild(userGroups);
-
-        // По умолчанию открываем NM2
-        this.toggleLevel('nm2', true);
-        this.toggleLevel('user', false);
-        
-        // Выбираем первую группу NM2
-        const firstNm2Group = Object.keys(this.nm2Modules)[0];
-        if (firstNm2Group) {
-            const firstItem = nm2Groups.querySelector('.group-item');
-            if (firstItem) {
-                firstItem.style.background = '#2a2a2a';
-                firstItem.style.borderLeftColor = '#0af';
-                firstItem.style.color = '#fff';
-                this.showModulesForGroup(firstNm2Group);
-            }
-        }
-    }
-
-    // Создает заголовок уровня (NM2 или User)
-    createLevelHeader(title, isOpen = true) {
-        const header = document.createElement('div');
-        header.className = 'level-header';
-        header.dataset.level = title.includes('NM2') ? 'nm2' : 'user';
-        header.style.cssText = `
-            padding: 6px 12px;
-            font-size: 12px;
-            font-weight: bold;
-            color: #0af;
-            cursor: pointer;
-            user-select: none;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #1f1f1f;
-            border-radius: 4px;
-            margin: 2px 4px;
-        `;
-
-        const arrow = document.createElement('span');
-        arrow.className = 'level-arrow';
-        arrow.textContent = isOpen ? '▼' : '▶';
-        arrow.style.cssText = `
-            font-size: 10px;
-            color: #666;
-        `;
-
-        header.innerHTML = `<span>${title}</span>`;
-        header.appendChild(arrow);
-
-        // Клик для сворачивания/разворачивания
-        header.onclick = (e) => {
-            e.stopPropagation();
-            const level = header.dataset.level;
-            const isCurrentlyOpen = arrow.textContent === '▼';
-            this.toggleLevel(level, !isCurrentlyOpen);
-        };
-
-        return header;
-    }
-
-    _createStatusDot(moduleName) {
-        const def = this.system?.moduleFactory?.moduleRegistry?.[moduleName];
-        const status = getModuleStatus(def);
+    _createStatusDot(description) {
+        const status = getModuleStatus(description);
         const meta = getStatusMeta(status);
+        const displayName = description?.displayName || description?.type || '';
 
         const dot = document.createElement('span');
         dot.className = 'status-dot';
-        dot.dataset.module = moduleName;
         dot.dataset.status = status;
-        dot.title = `${moduleName} — ${meta.label}`;
+        dot.title = `${displayName} — ${meta.label}`;
         dot.style.cssText = `
             display: inline-block;
             width: 8px;
@@ -380,110 +289,52 @@ export class ContextMenu {
         return dot;
     }
 
-    toggleLevel(level, open) {
-        const groupsContainer = this.menuElement.querySelector(`.${level}-groups`);
-        if (!groupsContainer) return;
-
-        const header = this.menuElement.querySelector(`.level-header[data-level="${level}"]`);
-        if (!header) return;
-
-        const arrow = header.querySelector('.level-arrow');
-        
-        if (open) {
-            groupsContainer.style.display = 'block';
-            if (arrow) arrow.textContent = '▼';
-        } else {
-            groupsContainer.style.display = 'none';
-            if (arrow) arrow.textContent = '▶';
-        }
-    }
-
-    // Создает элемент группы (используется для подзаголовков внутри уровней)
-    createGroupItem(groupName, level) {
-        const groupItem = document.createElement('div');
-        groupItem.className = 'group-item';
-        groupItem.dataset.group = groupName;
-        groupItem.dataset.level = level;
-        groupItem.style.cssText = `
-            padding: 4px 12px;
-            font-size: 11px;
-            color: #aaa;
-            cursor: pointer;
-            user-select: none;
-            border-left: 2px solid transparent;
-            margin: 1px 0;
-            border-radius: 0 3px 3px 0;
-        `;
-        
-        // Добавляем префикс в зависимости от уровня
-        const prefix = level === 'nm2' ? '📁 ' : '👤 ';
-        groupItem.textContent = prefix + groupName;
-        
-        groupItem.onmouseenter = () => {
-            document.querySelectorAll('.group-item').forEach(item => {
-                item.style.background = 'transparent';
-                item.style.borderLeftColor = 'transparent';
-                item.style.color = '#aaa';
-            });
-            
-            groupItem.style.background = '#2a2a2a';
-            groupItem.style.borderLeftColor = '#0af';
-            groupItem.style.color = '#fff';
-            
-            this.showModulesForGroup(groupName);
-        };
-        
-        groupItem.onclick = () => {
-            this.showModulesForGroup(groupName);
-        };
-        
-        return groupItem;
-    }
-
-    showModulesForGroup(groupName) {
+    showModulesForGroup(libName) {
         const modulesContainer = this.menuElement.querySelector('#modules-container');
         if (!modulesContainer) return;
 
-        let modules = this.nm2Modules[groupName] || this.userModules[groupName] || [];
-        if (modules.length === 0) {
-            for (const [key, value] of Object.entries(this.nm2Modules)) {
-                if (key.toLowerCase() === groupName.toLowerCase()) { modules = value; break; }
-            }
-            if (modules.length === 0) {
-                for (const [key, value] of Object.entries(this.userModules)) {
-                    if (key.toLowerCase() === groupName.toLowerCase()) { modules = value; break; }
-                }
-            }
-        }
-
-        let searchTerm = '';
-        if (this.searchInput && this.searchInput.value) {
-            searchTerm = this.searchInput.value.toLowerCase();
-        }
-        const filtered = searchTerm
-            ? modules.filter(m => m.toLowerCase().includes(searchTerm))
-            : modules;
-
         modulesContainer.innerHTML = '';
 
-        if (filtered.length === 0) {
-            const emptyMsg = document.createElement('div');
-            emptyMsg.textContent = searchTerm ? 'No modules found' : 'No modules in this group';
-            emptyMsg.style.cssText = `padding: 20px; text-align: center; color: #666; font-size: 11px; font-style: italic;`;
-            modulesContainer.appendChild(emptyMsg);
+        if (!libName) {
+            const msg = document.createElement('div');
+            msg.style.cssText = 'padding:20px;text-align:center;color:#666;font-size:11px;font-style:italic;';
+            msg.textContent = 'No library selected';
+            modulesContainer.appendChild(msg);
             return;
         }
 
-        const isUser = !!this.userModules[groupName];
+        const entry = this.libraryGroups[libName];
+        const modules = entry?.modules || [];
 
-        filtered.forEach(moduleName => {
-            modulesContainer.appendChild(this._createModuleRow(moduleName, isUser));
-        });
+        const searchTerm = (this.searchInput?.value || '').toLowerCase().trim();
+        const filtered = searchTerm
+            ? modules.filter(m =>
+                m.name.toLowerCase().includes(searchTerm) ||
+                (m.description?.displayName || '').toLowerCase().includes(searchTerm))
+            : modules;
+
+        if (filtered.length === 0) {
+            const msg = document.createElement('div');
+            msg.style.cssText = 'padding:20px;text-align:center;color:#666;font-size:11px;font-style:italic;';
+            msg.textContent = searchTerm ? 'No modules match' : 'No modules in this library';
+            modulesContainer.appendChild(msg);
+            return;
+        }
+
+        for (const m of filtered) {
+            modulesContainer.appendChild(this._createModuleRow(m, libName));
+        }
     }
 
-    _createModuleRow(moduleName, isUser = false) {
+    _createModuleRow(moduleEntry, libName) {
+        const { name, description } = moduleEntry;
+        const displayName = description?.displayName || name;
+        const isUser = this.libraryGroups[libName]?.source === 'user';
+
         const item = document.createElement('div');
         item.className = 'module-item';
+        item.dataset.moduleName = name;
+        item.dataset.library = libName;
         item.style.cssText = `
             padding: 4px 8px 4px 12px;
             font-size: 11px;
@@ -498,25 +349,23 @@ export class ContextMenu {
         `;
 
         const label = document.createElement('span');
-        label.textContent = isUser ? '★ ' + moduleName : moduleName;
+        label.textContent = isUser ? '★ ' + displayName : displayName;
+        if (displayName !== name) label.title = name;
         label.style.cssText = 'flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
-
         item.appendChild(label);
 
+        // Статус-точка (DEV) или звёзды (BUILD)
         if (IS_DEV) {
-            // ⚙️ DEV: цветная точка статуса, без звёзд
-            item.appendChild(this._createStatusDot(moduleName));
+            item.appendChild(this._createStatusDot(description));
         } else {
-            // 🚀 BUILD: звёзды рейтинга (как раньше)
-            item.appendChild(this._createStars(moduleName));
+            item.appendChild(this._createStars(name));
         }
 
         item.onmouseenter = () => { item.style.background = '#2a2a2a'; };
         item.onmouseleave = () => { item.style.background = 'transparent'; };
         item.onclick = (e) => {
-            // в BUILD звёзды кликабельны — не выбираем модуль при клике по ним
             if (!IS_DEV && e.target.closest('.rating-stars')) return;
-            this.handleModuleSelect(moduleName);
+            this.handleModuleSelect({ name, library: libName });
         };
 
         return item;
@@ -597,29 +446,6 @@ export class ContextMenu {
         }
         // Если панель ещё не создана — ничего не делаем, при следующем createModule
         // прочитается через getEffectiveRating
-    }
-
-    // Вспомогательный метод для загрузки данных модуля
-    async fetchModuleData(moduleName) {
-        try {
-            const data = await moduleStore.load(moduleName);
-            if (!data) return null;
-
-            const code = data.code || '';
-
-            // Парсим displayName из кода
-            const displayNameMatch = code.match(/displayName:\s*['"]([^'"]+)['"]/);
-            const gridHeightMatch = code.match(/gridHeight:\s*(\d+)/);
-
-            return {
-                displayName: displayNameMatch ? displayNameMatch[1] : moduleName,
-                gridHeight: gridHeightMatch ? parseInt(gridHeightMatch[1]) : 2,
-                code: code
-            };
-        } catch (error) {
-            console.warn(`Failed to fetch module data for ${moduleName}:`, error);
-            return null;
-        }
     }
 
     updateMenuPosition(mouseX = null, mouseY = null) {
@@ -721,7 +547,6 @@ export class ContextMenu {
             { text: '+ Sticker', action: 'add-sticker' },      // ⭐ NEW
             { text: 'To CSD', action: 'export-csd' },
             { text: 'Editor', action: 'open-editor' },
-            { text: 'About', action: 'about' }  
         ];
         
         const container = document.createElement('div');
@@ -766,231 +591,6 @@ export class ContextMenu {
         
         section.appendChild(container);
         return section;
-    }
-    
-    createModuleGroups() {
-        //console.log('Creating module groups...');
-        //console.log('this.moduleGroups:', this.moduleGroups);
-        //console.log('Menu element exists:', !!this.menuElement);
-        
-        if (!this.menuElement) {
-            console.error('Menu element not created yet!');
-            return;
-        }
-        
-        const container = this.menuElement.querySelector('#groups-container');
-        //console.log('Container found:', !!container);
-        
-        if (!container) {
-            console.error('Groups container not found!');
-            return;
-        }
-        
-        container.innerHTML = '';
-        
-        Object.entries(this.moduleGroups).forEach(([groupName, modules]) => {
-            const groupElement = this.createGroupElement(groupName, modules);
-            container.appendChild(groupElement);
-        });
-    }
-    
-    createGroupElement(groupName, modules) {
-        const group = document.createElement('div');
-        group.className = 'module-group';
-        group.style.cssText = `
-            margin: 8px 0;
-            border-radius: 6px;
-            overflow: hidden;
-            border: 1px solid #333;
-        `;
-        
-        // Заголовок группы
-        const header = document.createElement('div');
-        header.style.cssText = `
-            padding: 8px 12px;
-            background: #2a2a2a;
-            color: #0af;
-            font-weight: bold;
-            font-size: 12px;
-            cursor: pointer;
-            user-select: none;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        `;
-        
-        header.innerHTML = `
-            <span>${groupName}</span>
-            <span class="group-arrow">▼</span>
-        `;
-        
-        // Контейнер для модулей (изначально скрыт)
-        const modulesContainer = document.createElement('div');
-        modulesContainer.className = 'modules-container';
-        modulesContainer.style.cssText = `
-            display: none;
-            background: #252525;
-        `;
-        
-        // Добавляем модули в группу
-        modules.forEach(moduleName => {
-            const moduleButton = this.createModuleButton(moduleName, groupName);
-            modulesContainer.appendChild(moduleButton);
-        });
-        
-        // Переключение видимости при клике на заголовок
-        header.onclick = () => {
-            const isVisible = modulesContainer.style.display !== 'none';
-            modulesContainer.style.display = isVisible ? 'none' : 'block';
-            header.querySelector('.group-arrow').textContent = isVisible ? '▼' : '▲';
-        };
-        
-        // Открываем при поиске
-        this.searchInput.addEventListener('input', () => {
-            const searchTerm = this.searchInput.value.toLowerCase();
-            if (searchTerm && modules.some(m => m.toLowerCase().includes(searchTerm))) {
-                modulesContainer.style.display = 'block';
-                header.querySelector('.group-arrow').textContent = '▲';
-            }
-        });
-        
-        group.appendChild(header);
-        group.appendChild(modulesContainer);
-        
-        return group;
-    }
-
-    createGroupList(container) {
-        container.innerHTML = '';
-        
-        if (!this.moduleGroups) return;
-        
-        Object.keys(this.moduleGroups).forEach((groupName, index) => {
-            const groupItem = document.createElement('div');
-            groupItem.className = 'group-item';
-            groupItem.dataset.group = groupName;
-            groupItem.style.cssText = `
-                padding: 6px 12px;
-                font-size: 11px;
-                color: #aaa;
-                cursor: pointer;
-                user-select: none;
-                border-left: 2px solid transparent;
-            `;
-            
-            groupItem.textContent = groupName;
-            
-            // При наведении - показываем модули этой группы
-            groupItem.onmouseenter = () => {
-                // Подсветка активной группы
-                document.querySelectorAll('.group-item').forEach(item => {
-                    item.style.background = 'transparent';
-                    item.style.borderLeftColor = 'transparent';
-                    item.style.color = '#aaa';
-                });
-                
-                groupItem.style.background = '#2a2a2a';
-                groupItem.style.borderLeftColor = '#0af';
-                groupItem.style.color = '#fff';
-                
-                // Показываем модули этой группы в правой панели
-                this.showModulesForGroup(groupName);
-            };
-            
-            // При клике - выбираем группу
-            groupItem.onclick = () => {
-                this.showModulesForGroup(groupName);
-            };
-            
-            container.appendChild(groupItem);
-        });
-        
-        // Выбираем первую группу по умолчанию
-        const firstGroup = Object.keys(this.moduleGroups)[0];
-        if (firstGroup) {
-            setTimeout(() => {
-                const firstItem = container.querySelector('.group-item');
-                if (firstItem) {
-                    firstItem.style.background = '#2a2a2a';
-                    firstItem.style.borderLeftColor = '#0af';
-                    firstItem.style.color = '#fff';
-                    this.showModulesForGroup(firstGroup);
-                }
-            }, 10);
-        }
-    }
-
-    createModuleButton(moduleName, groupName) {
-        const button = document.createElement('button');
-        button.textContent = moduleName;
-        button.style.cssText = `
-            width: 100%;
-            padding: 8px 16px;
-            background: transparent;
-            border: none;
-            color: #ddd;
-            text-align: left;
-            cursor: pointer;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-bottom: 1px solid #333;
-        `;
-        
-        // Иконка для модуля (можно заменить на более подходящие)
-        const iconMap = {
-            'In/Out': '🔌',
-            'Note': '🎹',
-            'Osc': '🎵',
-            'LFO': '📈',
-            'Env': '📊',
-            'Shaper': '🔧',
-            'Filter': '🎛️',
-            'Mixer': '🎚️',
-            'Switch': '🔀',
-            'Level': '📶',
-            'Logic': '🧠',
-            'Seq': '🎲',
-            'FX': '🎛️',
-            'Delay': '⏱️'
-        };
-        
-        button.innerHTML = `${iconMap[groupName] || '📦'} ${moduleName}`;
-        
-        button.onmouseenter = () => {
-            button.style.background = '#2a2a2a';
-        };
-        button.onmouseleave = () => {
-            button.style.background = 'transparent';
-        };
-        
-        button.onclick = () => {
-            this.handleModuleSelect(moduleName);
-            this.hide();
-        };
-        
-        return button;
-    }
-
-
-    // Метод для добавления пользовательского модуля (будет использоваться позже)
-    addUserModule(moduleName, category = 'My Modules') {
-        if (!this.userModules[category]) {
-            this.userModules[category] = [];
-        }
-        
-        if (!this.userModules[category].includes(moduleName)) {
-            this.userModules[category].push(moduleName);
-            this.allModules[moduleName] = category;
-            
-            // Обновляем интерфейс
-            this.updateMenuUI();
-            
-            //console.log(`✅ User module added: ${moduleName} -> ${category}`);
-            return true;
-        }
-        return false;
     }
     
     setupEventListeners() {
@@ -1073,7 +673,7 @@ export class ContextMenu {
                     if (activeGroup) {
                         this.showModulesForGroup(activeGroup.dataset.group);
                     } else {
-                        const firstGroup = Object.keys(this.moduleGroups)[0];
+                        const firstGroup = Object.keys(this.libraryGroups || {})[0];
                         if (firstGroup) {
                             this.showModulesForGroup(firstGroup);
                         }
@@ -1202,217 +802,27 @@ export class ContextMenu {
     selectFirstModule() {
         const modulesContainer = this.menuElement.querySelector('#modules-container');
         if (!modulesContainer) return;
-        
+
         const firstModule = modulesContainer.querySelector('.module-item');
         if (firstModule) {
-            const moduleName = firstModule.textContent;
-            this.handleModuleSelect(moduleName);
+            this.handleModuleSelect({
+                name: firstModule.dataset.moduleName,
+                library: firstModule.dataset.library,
+            });
             this.hide();
         }
     }
     
-    updateUserGroupsInLeftPanel() {
-        const leftPanel = this.menuElement.querySelector('#left-panel');
-        if (!leftPanel) {
-            console.warn('⚠️ Left panel not found');
-            return;
-        }
-
-        let userCont = leftPanel.querySelector('.user-groups');
-        
-        if (!userCont) {
-            const divider = leftPanel.querySelector('div[style*="height: 1px;"]');
-            userCont = document.createElement('div');
-            userCont.className = 'level-groups user-groups';
-            userCont.style.cssText = 'padding-left: 8px; display: block;';
-            if (divider) {
-                divider.parentNode.insertBefore(userCont, divider.nextSibling);
-            } else {
-                leftPanel.appendChild(userCont);
-            }
-        }
-        
-        userCont.innerHTML = '';
-        
-        // Берём модули
-        const modules = this.userModules?.['My Modules'] || [];
-        const realModules = modules.filter(m => 
-            m !== '(No user modules)' && 
-            m !== '(Error loading)' && 
-            m !== 'Loading...'
-        );
-        
-        if (realModules.length === 0) {
-            const emptyItem = document.createElement('div');
-            emptyItem.className = 'group-item';
-            emptyItem.dataset.group = 'My Modules';
-            emptyItem.dataset.level = 'user';
-            emptyItem.style.cssText = `
-                padding: 4px 12px;
-                font-size: 11px;
-                color: #555;
-                cursor: default;
-                user-select: none;
-                border-left: 2px solid transparent;
-                margin: 1px 0;
-                border-radius: 0 3px 3px 0;
-                font-style: italic;
-            `;
-            emptyItem.textContent = '👤 No user modules available';
-            userCont.appendChild(emptyItem);
-            return;
-        }
-        
-        // Заголовок
-        const groupHeader = document.createElement('div');
-        groupHeader.className = 'group-item';
-        groupHeader.dataset.group = 'My Modules';
-        groupHeader.dataset.level = 'user';
-        groupHeader.style.cssText = `
-            padding: 4px 12px;
-            font-size: 11px;
-            color: #0af;
-            cursor: pointer;
-            user-select: none;
-            border-left: 2px solid #0af;
-            margin: 1px 0;
-            border-radius: 0 3px 3px 0;
-            background: #2a2a2a;
-        `;
-        groupHeader.textContent = `👤 My Modules (${realModules.length})`;
-        userCont.appendChild(groupHeader);
-        
-        // Модули
-        const menu = this;
-        realModules.forEach(moduleName => {
-            const moduleItem = document.createElement('div');
-            moduleItem.className = 'module-item';
-            moduleItem.style.cssText = `
-                padding: 3px 12px 3px 24px;
-                font-size: 10px;
-                color: #aaa;
-                cursor: pointer;
-                user-select: none;
-                border-left: 2px solid transparent;
-                margin: 0;
-                border-radius: 0;
-            `;
-            moduleItem.textContent = '📦 ' + moduleName;
-            
-            moduleItem.onmouseenter = () => {
-                moduleItem.style.background = '#2a2a2a';
-                moduleItem.style.color = '#fff';
-            };
-            moduleItem.onmouseleave = () => {
-                moduleItem.style.background = 'transparent';
-                moduleItem.style.color = '#aaa';
-            };
-            moduleItem.onclick = (e) => {
-                e.stopPropagation();
-                menu.handleModuleSelect(moduleName);
-            };
-            userCont.appendChild(moduleItem);
-        });
-        
-        // Открываем User
-        userCont.style.display = 'block';
-        const userHeader = leftPanel.querySelector('.level-header[data-level="user"]');
-        if (userHeader) {
-            const arrow = userHeader.querySelector('.level-arrow');
-            if (arrow) arrow.textContent = '▼';
-        }
-        
-        //console.log(`✅ User groups updated with ${realModules.length} modules`);
-    }
-
-    async loadUserModules() {
-        try {
-            //console.log('📂 Loading user modules...');
-
-            const modules = await moduleStore.list();
-            //console.log(`📦 Found ${modules.length} user modules:`, modules);
-
-            // Очищаем существующие пользовательские модули
-            this.userModules = {
-                'My Modules': []
-            };
-
-            if (modules.length === 0) {
-                this.userModules['My Modules'] = ['(No user modules)'];
-                this.updateUserGroupsInLeftPanel();
-                return;
-            }
-
-            // Добавляем каждый модуль
-            for (const moduleName of modules) {
-                this.userModules['My Modules'].push(moduleName);
-                if (!this._userModuleMap) {
-                    this._userModuleMap = {};
-                }
-                this._userModuleMap[moduleName] = moduleName;
-            }
-
-            // Обновляем allModules
-            Object.entries(this.userModules).forEach(([group, mods]) => {
-                mods.forEach(module => {
-                    this.allModules[module] = group;
-                });
-            });
-
-            this.updateUserGroupsInLeftPanel();
-            this.updateMenuUI();
-
-        } catch (error) {
-            console.error('❌ Error loading user modules:', error);
-            this.userModules = {
-                'My Modules': ['(Error loading)']
-            };
-            this.updateUserGroupsInLeftPanel();
-            this.updateMenuUI();
-        }
-    }
-
     async show(mouseX = null, mouseY = null) {
-        // ⭐ в DEV — preload статусов один раз (для правильных цветов)
-        //    в BUILD — preload не нужен (точек нет, только звёзды)
-        if (IS_DEV && !this._statusesLoaded) {
-            this._statusesLoaded = true;
-            // показываем меню сразу, а preload — в фоне
-            this._showImmediate(mouseX, mouseY);
-            await this.preloadStatuses();
-            if (this.isVisible) this.updateMenuUI();
-            return;
-        }
-
-        this._showImmediate(mouseX, mouseY);
-    }
-
-    async preloadStatuses() {
-        if (!IS_DEV) return;
-        const allNames = [...new Set(Object.values(this.nm2Modules).flat())];
-        let loaded = 0, failed = 0;
-        for (const name of allNames) {
-            if (this.system.moduleFactory.moduleRegistry[name]) continue;
-            try {
-                const mod = await import(/* @vite-ignore */ `/modules/${name}.js`);
-                const key = Object.keys(mod)[0];
-                if (mod[key]) {
-                    this.system.moduleFactory.registerModule(name, mod[key]);
-                    loaded++;
-                }
-            } catch (e) { failed++; }
-        }
-        console.log(`[ContextMenu/DEV] preloaded ${loaded}, failed ${failed}`);
-    }
-
-
-    _showImmediate(mouseX = null, mouseY = null) {
-        // ⭐ это твой текущий show() БЕЗ preload
         if (this.isVisible) return;
 
-        if (this.system.jackContextMenu && this.system.jackContextMenu.menuElement.style.display === 'block') {
+        // Закрываем JackContextMenu, если открыт
+        if (this.system?.jackContextMenu?.menuElement?.style.display === 'block') {
             this.system.jackContextMenu.hide();
         }
+
+        // ⭐ Свежий список библиотек — модуль могли добавить/удалить
+        await this.refreshLibraryGroups();
 
         this.lastOpenMouseX = mouseX;
         this.lastOpenMouseY = mouseY;
@@ -1422,31 +832,11 @@ export class ContextMenu {
         this.menuElement.style.opacity = '1';
         this.menuElement.style.transform = 'scale(1)';
         this.menuElement.style.visibility = 'visible';
-
         this.isVisible = true;
 
         if (this.searchInput) {
             this.searchInput.value = '';
-            setTimeout(() => { this.searchInput.focus(); }, 50);
-
-            const firstGroup = Object.keys(this.moduleGroups)[0];
-            if (firstGroup) {
-                const leftPanel = this.menuElement.querySelector('#left-panel');
-                if (leftPanel) {
-                    leftPanel.querySelectorAll('.group-item').forEach(item => {
-                        item.style.background = 'transparent';
-                        item.style.borderLeftColor = 'transparent';
-                        item.style.color = '#aaa';
-                    });
-                    const firstItem = leftPanel.querySelector('.group-item');
-                    if (firstItem) {
-                        firstItem.style.background = '#2a2a2a';
-                        firstItem.style.borderLeftColor = '#0af';
-                        firstItem.style.color = '#fff';
-                        this.showModulesForGroup(firstGroup);
-                    }
-                }
-            }
+            setTimeout(() => this.searchInput.focus(), 50);
         }
     }
 
@@ -1477,7 +867,7 @@ export class ContextMenu {
         }
     }
     
-    handleModuleSelect(moduleName) {
+    handleModuleSelect({ name, library }) {
         let targetLayer = 'voice';
         let targetGridX = 0;
         let targetGridY = 0;
@@ -1511,11 +901,8 @@ export class ContextMenu {
             }
         }
 
-        // ⭐ addNewModuleAtPosition сам разрулит коллизии и найдёт свободное место
         if (this.system?.addNewModuleAtPosition) {
-            this.system.addNewModuleAtPosition(moduleName, targetLayer, targetGridX, targetGridY);
-        } else if (this.system?.addNewModule) {
-            this.system.addNewModule(moduleName, targetLayer, targetGridX, targetGridY);
+            this.system.addNewModuleAtPosition(name, targetLayer, targetGridX, targetGridY, { library });
         }
 
         this.hide();
@@ -1591,10 +978,6 @@ export class ContextMenu {
 
             case 'open-editor': // ← НОВЫЙ КЕЙС
                 this.openModuleEditor();
-                break;
-
-            case 'about':
-                this.system.splash?.openAbout();
                 break;
         }
         
@@ -1700,22 +1083,4 @@ export class ContextMenu {
             window.open('/editor/editor.html', '_blank');
         }
     }
-
-
-    // Обновление UI после добавления модуля
-    updateMenuUI() {
-        // Обновляем левую панель
-        const leftPanel = this.menuElement.querySelector('#left-panel');
-        if (leftPanel) {
-            this.createHierarchicalGroupList(leftPanel);
-        }
-        
-        // Обновляем правую панель (если есть активная группа)
-        const activeGroup = this.menuElement.querySelector('.group-item[style*="border-left-color"]');
-        if (activeGroup) {
-            const groupName = activeGroup.dataset.group;
-            this.showModulesForGroup(groupName);
-        }
-    }
-
 }

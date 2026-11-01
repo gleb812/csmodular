@@ -1,5 +1,5 @@
 // src/csound/CsoundGenerator.js
-import { moduleStore } from '../api/index.js';
+import { libraryStore } from '../api/index.js';
 export class CsoundGenerator {
     constructor() {
         // Множество инклудов (typeId)
@@ -23,11 +23,9 @@ export class CsoundGenerator {
         this._controlBusCounter = 2; // следующий свободный номер для control
         this._availableAudioBuses = [];   // освободившиеся audio номера
         this._availableControlBuses = []; // освободившиеся control номера
-        // Шаблон Csound (будет обновляться динамически)
-        this.userModules = {};        
+        // Шаблон Csound (будет обновляться динамически)      
         this.includes.add('led_rms.txt');
         this.includes.add('mVU_rms.txt');  
-        this._userModulesLoaded = false;
         // ⭐ Scope tables
         this._scopeTables = new Map();      // cableId -> { tableNum, bus, isAudio }
         this._scopeTableCounter = 9000;
@@ -160,9 +158,6 @@ i3 0 [60*60*24*7]
         this.log('📁 CsoundGenerator initialized');
     }
 
-
-
-
     /**
      * Загрузить UDO по пути, как он хранится в this.includes.
      *  - "user/MultiOsc.txt"     → moduleStore (localStorage / Tauri fs)
@@ -173,23 +168,23 @@ i3 0 [60*60*24*7]
     async _loadUdoByPath(udoPath) {
         if (!udoPath) return null;
 
-        // 1. Пользовательский модуль — только через moduleStore
-        if (udoPath.startsWith('user/')) {
-            const name = udoPath.replace(/^user\//, '').replace(/\.txt$/, '');
+       // 1. Библиотечный модуль: "library/<lib>/<Name>.txt"
+        const mLib = udoPath.match(/^library\/([^/]+)\/(.+)\.txt$/);
+        if (mLib) {
+            const [, lib, name] = mLib;
             try {
-                const data = await moduleStore.load(name);
-                if (!data || !data.dsp_code) {
-                    console.warn(`⚠️ User UDO not found in moduleStore: ${name}`);
-                    return null;
+                const text = await libraryStore.loadUdo(lib, name);
+                if (!text) {
+                    console.warn(`⚠️ Library UDO not found: ${lib}/${name}`);
                 }
-                return data.dsp_code;
+                return text;
             } catch (e) {
-                console.warn(`⚠️ Failed to load user UDO: ${name}`, e);
+                console.warn(`⚠️ Failed to load library UDO: ${lib}/${name}`, e);
                 return null;
             }
         }
 
-        // 2. Встроенный — fetch, но с защитой от SPA-fallback
+        // 3. Встроенный UDO из public/csound/modules/ (led_rms, mVU_rms и т.п.)
         try {
             const response = await fetch(`/csound/modules/${udoPath}`);
             if (!response.ok) return null;
@@ -983,7 +978,7 @@ i3 0 [60*60*24*7]
         //console.log('🎯 addModule called with:', moduleData);
         
         const { 
-            typeId,           // ← это может быть строка ("Noise") или число (31)
+            typeId,           // ключ в moduleRegistry (уже не numericTypeId)
             instanceId,       
             instanceName,     
             layer,            
@@ -995,48 +990,22 @@ i3 0 [60*60*24*7]
             outlets = 1,   
             isUser = false  
         } = moduleData;
-        
-        // ⭐ Получаем числовой typeID из определения модуля
+
+        // ⭐ Библиотека модуля — из definition (проставляется ModuleFactory.loadModule).
+        //    Fallback 'user' для старых регистраций (preloadStatuses в DEV и т.п.)
         const moduleDef = this.system?.moduleFactory?.moduleRegistry?.[typeId];
-        let numericTypeId = typeId;
-        
-        // Если есть определение, берём typeID из него
-        if (moduleDef && moduleDef.typeID !== undefined) {
-            numericTypeId = moduleDef.typeID;
-            //console.log(`  🔢 Found typeID in definition: ${numericTypeId}`);
-        } else {
-            // Пробуем найти typeID в модулях по имени
-            const registry = this.system?.moduleFactory?.moduleRegistry;
-            if (registry) {
-                for (const [key, def] of Object.entries(registry)) {
-                    if (key === typeId && def.typeID !== undefined) {
-                        numericTypeId = def.typeID;
-                        //console.log(`  🔢 Found typeID by key match: ${numericTypeId}`);
-                        break;
-                    }
-                }
-            }
-        }
-        
-        // ⭐ Определяем путь к UDO-файлу
-        let filename;
-        if (isUser) {
-            // Пользовательский: /csound/modules/user/Zgen.txt
-            filename = `user/${typeId}.txt`;
-        } else {
-            // Встроенный: /csound/modules/9.txt
-            filename = `${numericTypeId}.txt`;
-        }
+        const lib = moduleDef?.library || (isUser ? 'user' : 'user');
+
+        // ⭐ UDO-путь: "library/<lib>/<Name>.txt"
+        const filename = `library/${lib}/${typeId}.txt`;        
 
         if (!this.includes.has(filename)) {
             this.includes.add(filename);
-            //this.log(`📄 Added include: ${filename}`);
         }
         // Сохраняем модуль с правильным typeId
         const moduleKey = `${instanceName}_${instanceId}`;
         this.modules.set(moduleKey, {
-            typeId: typeId,           // "Noise" для поиска в registry
-            numericTypeId: numericTypeId, // 31 для include
+            typeId,
             instanceId,
             instanceName,
             layer,
@@ -1049,9 +1018,6 @@ i3 0 [60*60*24*7]
             isUser,
             udoPath: filename,
         });
-        
-        //console.log('  ✅ Module saved with numericTypeId:', numericTypeId);
-        //this.log(`✅ Added module: ${moduleKey} (${layer})`);
     }
     
     removeModule(instanceId, instanceName, typeId, layer) {
@@ -1123,8 +1089,11 @@ i3 0 [60*60*24*7]
         if (moduleDef && moduleDef.type) {
             moduleName = moduleDef.type;
         }
-        if (moduleDef?.variants?.length > 1) {
-            const suffix = module._activeVariant || moduleDef.defaultSuffix || 'k';
+
+        // ⭐ Суффикс добавляем при наличии defaultSuffix, даже если варианта одна:
+        //    opcode в UDO может называться <type>_<suffix> (например TestOsc_k).
+        if (moduleDef?.variants?.length > 0 && moduleDef.defaultSuffix) {
+            const suffix = module._activeVariant || moduleDef.defaultSuffix;
             moduleName = `${moduleDef.type}_${suffix}`;
         }
 
@@ -1531,28 +1500,6 @@ i3 0 [60*60*24*7]
         //console.log(`📝 CsoundGenerator: registered user module "${name}"`);
     }
 
-    // ⭐ ЗАГРУЗКА ПОЛЬЗОВАТЕЛЬСКИХ МОДУЛЕЙ
-    async loadUserModules() {
-        try {
-            const modules = await moduleStore.list();
-            
-            for (const name of modules) {
-                const moduleData = await moduleStore.load(name);
-                if (!moduleData) continue;
-                
-                this.registerUserModule(name, {
-                    jsCode: moduleData.code,
-                    dspCode: moduleData.dsp_code,
-                    displayName: this._extractDisplayName(moduleData.code) || name,
-                    gridHeight: this._extractGridHeight(moduleData.code) || 3,
-                    inputs: this._extractInputs(moduleData.code) || [],
-                    outputs: this._extractOutputs(moduleData.code) || []
-                });
-            }
-        } catch (error) {
-            console.warn('Could not load user modules:', error);
-        }
-    }
 
     // ⭐ ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ДЛЯ ПАРСИНГА
     _extractDisplayName(code) {

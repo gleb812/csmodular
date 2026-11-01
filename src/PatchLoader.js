@@ -1,8 +1,8 @@
 // src/PatchLoader.js
-import { NM2_HPOS_TO_GRIDX, PANEL_GRID_WIDTH } from './constants.js';
+import { PANEL_GRID_WIDTH } from './constants.js';
 import { createFileInput, triggerFileInput } from './utils/fileInput.js';
 import { Sticker } from './stickers/Sticker.js';
-
+import { libraryStore } from './api/index.js';
 export class PatchLoader {
     constructor(system) {
         this.system = system;
@@ -34,7 +34,6 @@ export class PatchLoader {
         
         console.log(`📦 Found ${patchData.modules.length} modules, ${patchData.cables?.length || 0} cables`);
         
-        // Очищаем текущий патч
         this.clearCurrentPatch();
 
         // ⭐ Предварительный проход: ищем самый нижний Voice
@@ -114,6 +113,16 @@ export class PatchLoader {
             }
         }
 
+        // ⭐ Сбрасываем viewport, чтобы модули были видны сразу
+        if (typeof this.system.resetZoom === 'function') {
+            this.system.resetZoom();
+        }
+        this.system.forceRedraw?.();
+        // ⭐ Пересобираем ORC, если Csound запущен
+        if (this.system.csoundEngine?.state === 'running') {
+            this.system._recompileDebounced?.();
+        }
+
         return this.moduleMap;
     }
 
@@ -159,13 +168,11 @@ export class PatchLoader {
     async createModuleFromDef(moduleDef) {
         
         const moduleName = moduleDef.name;
+        const moduleLibrary = moduleDef.library || null;  
         const moduleId = moduleDef.id;
         const area = moduleDef.area;
-        // ⭐ NM2-совместимость: hpos в старых патчах шёл с шагом 260px (целая панель).
-        // Конвертируем в новую grid-систему с шагом 20px.
-        // hpos = 1 → gridX = 13 → pixelX = 260. Расстояние сохраняется.
-        const hpos = (moduleDef.hpos || 0) * NM2_HPOS_TO_GRIDX;
-        let vpos = moduleDef.vpos || 0;   // шаг по Y не менялся
+        const hpos = moduleDef.hpos || 0;
+        let vpos = moduleDef.vpos || 0;  
         
         // Проверяем валидность данных
         if (!moduleName) {
@@ -182,8 +189,7 @@ export class PatchLoader {
             vpos = fxStartY + vpos;   // оригинальный vpos FX — это offset внутри FX-зоны
         }
 
-        // Загружаем модуль если нужно
-        await this.ensureModuleLoaded(moduleName);
+        await this.ensureModuleLoaded(moduleName, moduleLibrary);
         
         // Находим позицию
         const position = this.findModulePosition(layerName, hpos, vpos);
@@ -207,48 +213,47 @@ export class PatchLoader {
         return module;
     }
     
-    ensureModuleLoaded(moduleName) {
-        
-        if (!this.moduleFactory.moduleRegistry[moduleName]) {
-            return this.loadModuleFile(moduleName);
-        } else {
+    ensureModuleLoaded(moduleName, preferredLib = null) {
+        if (this.moduleFactory.moduleRegistry[moduleName]) {
             return Promise.resolve(true);
         }
+        return this.loadModuleFile(moduleName, preferredLib);
     }
 
-// src/PatchLoader.js - обновлённый loadModuleFile()
-
-    async loadModuleFile(moduleName) {
+    async loadModuleFile(moduleName, lib = null) {
         try {
-            // ⭐ Сначала пробуем загрузить из modules/user/ (пользовательский)
-            try {
-                const userPath = `./modules/user/${moduleName}.js`;
-                console.log(`   Trying user path: ${userPath}`);
-                const module = await import(/* @vite-ignore */ userPath);
-                const moduleKey = Object.keys(module)[0];
-                if (moduleKey && module[moduleKey]) {
-                    this.moduleFactory.registerModule(moduleName, module[moduleKey]);
-                    console.log(`✅ User module ${moduleName} registered from modules/user/`);
+
+            // ⭐ 1. Библиотека из патча (v2) — если указана
+            if (lib) {
+                if (await this.moduleFactory.loadModule(lib, moduleName)) {
                     return true;
                 }
-            } catch (userError) {
-                // Не нашли в user — пробуем встроенный
-                console.log(`   Not in user/, trying built-in...`);
+                console.warn(
+                    `[PatchLoader] "${moduleName}" not found in library "${lib}", trying fallbacks`
+                );
             }
-            
-            // ⭐ Пробуем загрузить из modules/ (встроенный)
-            const modulePath = `./modules/${moduleName}.js`;
-            console.log(`   Trying built-in path: ${modulePath}`);
-            const module = await import(/* @vite-ignore */ modulePath);
-            const moduleKey = Object.keys(module)[0];
 
-            if (moduleKey && module[moduleKey]) {
-                this.moduleFactory.registerModule(moduleName, module[moduleKey]);
-                console.log(`✅ Built-in module ${moduleName} registered`);
+            // ⭐ 2. Fallback: user, потом все builtin
+            if (await this.moduleFactory.loadModule('user', moduleName)) {
                 return true;
             }
-            
-            throw new Error('Module not found in file');
+            const all = await libraryStore.listLibraries();
+            for (const entry of all) {
+                if (entry.name === lib) continue; // уже пробовали
+                if (await this.moduleFactory.loadModule(entry.name, moduleName)) {
+                    console.warn(
+                        `[PatchLoader] "${moduleName}" loaded from fallback "${entry.name}" ` +
+                        `(${entry.source})${lib ? ` — patch expected "${lib}"` : ''}`
+                    );
+                    return true;
+                }
+            }
+
+            throw new Error(
+                `Module "${moduleName}" not found` +
+                (lib ? ` in library "${lib}"` : '') +
+                ` nor in any fallback library`
+            );
         } catch (error) {
             console.error(`❌ Failed to load module ${moduleName}:`, error);
             throw error;
@@ -274,10 +279,26 @@ export class PatchLoader {
         // Сохраняем JSON данные
         module.jsonId = moduleId;
         module.jsonName = moduleDef.name;
-        
-        // Родительская система
         module.parentSystem = this.system;
-        
+
+       // ⭐ Регистрируем в csoundGen (как в main.addNewModuleAtPosition)
+        if (this.system.csoundGen) {
+            const registryDef = this.system.moduleFactory.moduleRegistry[moduleDef.name];
+            this.system.csoundGen.addModule({
+                typeId: moduleDef.name,
+                instanceId: moduleId,
+                instanceName: moduleDef.name,
+                layer: module.layer,
+                parameters: this._parseParameters(moduleDef.parameters),
+                mode: this._parseModes(moduleDef.modes),
+                defaultParams: registryDef?.defaultParams || [0],
+                defaultMode: registryDef?.mode || [],
+                inlets: registryDef?.inputs || 1,
+                outlets: registryDef?.outputs || 1,
+                isUser: registryDef?.isUser === true,
+            });
+        }
+
         // Добавляем в систему
         // ВАЖНО: Добавляем в layerManager, а не в старый system.layers
         if (this.system.layerManager && this.system.layerManager.layers[module.layer]) {
@@ -309,7 +330,22 @@ export class PatchLoader {
                 component.parameterId = parseInt(component.id) || 0;
             }
         });
-        
+
+        // ⭐ Пересоздаём csoundChannel с правильным jsonId.
+        // ModuleFactory создал канал с panel.moduleId (внутренний счётчик),
+        // а CsoundGenerator.formatModuleLine использует module.jsonId (из патча).
+        module.components.forEach((component) => {
+            if (component.csoundChannel && component.id !== undefined) {
+                component.csoundChannel =
+                    `module_${moduleDef.name}_${moduleId}_${component.id}`;
+            }
+        });
+
+        // ⭐ Применяем сохранённые параметры (Knob/Slider/Button*)
+        if (moduleDef.parameters) {
+            this.applyParameters(module, moduleDef.parameters);
+        }
+
         if (moduleDef.customColor) {
             // ⭐ Новый формат: отдельное поле
             module.customColor = moduleDef.customColor;
@@ -330,8 +366,45 @@ export class PatchLoader {
                 }
             } catch (error) {}
         }
+
+        // ⭐ Регистрируем LED/MiniVU-каналы (как в main.addNewModuleAtPosition)
+        if (this.system.csoundEngine && module.components) {
+            const leds = module.components.filter(c => c.constructor.name === 'LED');
+            leds.forEach(led => {
+                if (led.sourceComponentId === null || led.sourceComponentId === undefined) return;
+                const channelName = `led_${moduleDef.name}_${moduleId}_${led.id}`;
+                led.sourceChannel = channelName;
+                this.system.csoundEngine.registerLedChannel(channelName);
+            });
+
+            const mvus = module.components.filter(c => c.constructor.name === 'MiniVU');
+            mvus.forEach(mvu => {
+                if (mvu.sourceComponentId === null || mvu.sourceComponentId === undefined) return;
+                const channelName = `mvu_${moduleDef.name}_${moduleId}_${mvu.id}`;
+                mvu.sourceChannel = channelName;
+                this.system.csoundEngine.registerLedChannel(channelName);
+            });
+        }
+
     }
-    
+
+    _parseParameters(raw) {
+        if (!raw) return [];
+        try {
+            const arr = JSON.parse(raw);
+            return Array.isArray(arr) ? arr : [];
+        } catch { return []; }
+    }
+
+    _parseModes(raw) {
+        if (!raw) return [];
+        try {
+            const arr = JSON.parse(raw);
+            return Array.isArray(arr) ? arr : [];
+        } catch { return []; }
+    }
+
+
     applyParameters(module, parametersString) {
         try {
             const parameters = JSON.parse(parametersString);

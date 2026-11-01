@@ -7,26 +7,22 @@ A next step of the [pch2csd](https://github.com/gleb812/pch2csd) project.
 
 ## Features
 
-- Modular architecture with interchangeable audio modules
-- Real-time Csound synthesis engine (`@csound/browser`)
-- Web + desktop (Tauri: Windows / Linux / macOS)
-- Infinite workspace with pan, zoom, scroll, snap-to-grid
-- Two layers: **Voice** (per-voice) and **FX** (global)
-- **Four jack types** with NM2-compatible visual semantics:
+- **Four jack types**:
   - `audio` (red) / `control` (blue) — Csound `a` / `k` rates
-  - `logic` (yellow) / `logicAudio` (orange) — NM2 visual only, both `control` in Csound
+  - `logic` (yellow) / `logicAudio` (orange) — visual only, both `control` in Csound
 - **Dynamic jacks** — `audio ↔ control` and `logic ↔ logicAudio` auto-switch by connection;
   `static` (strict) jacks keep their type, converters (`K2A`/`A2K`) are inserted in the ORC
 - **Module variants** — `;@ variant k/a` in UDO; k-rate modules auto-promote to a-rate
   when an audio-rate cable reaches a non-strict input
-- MIDI input via Web MIDI API → Csound (`instr 3`, NM2-compatible `gkGate`/`gkNote`)
+- MIDI input via Web MIDI API → Csound (`instr 3`, `gkGate`/`gkNote`)
 - Multi-channel **oscilloscope** — attach to any cable via right-click → *Send to Scope*
 - **Level indicators** — LED and MiniVU (3-zone VU); tap any Input/Output, Outputs work without a cable
-- Two visual themes: **Classic** (NM2-style) and **LCD** (Casio-style)
+- Two visual themes: **Classic** and **LCD** (monochrome, glowing lines)
 - Design Settings panel (`D`) — colors, glow, line weight, cables, grid, backgrounds
 - **Module Editor** — IDE-style workspace with dock panels and command terminal
 - Protected Csound structure (`opcode` / `xin` / `zaw` / `endop` locked); user edits only the DSP body
-- User modules stored as plain files (Tauri) — easy to back up, share, version
+- **User module libraries** — builtin (`public/libraries/`) and user
+  (`~/Documents/CsModular/libraries/` on desktop, IndexedDB on web)
 
 ## Requirements
 
@@ -46,7 +42,7 @@ npx tauri dev         # desktop
 npx tauri build       # desktop executable
 ```
 
-User modules (desktop) live in `~/Documents/CsModular/`.
+User libraries (desktop) live in `~/Documents/CsModular/libraries/`.
 
 ## Keyboard Shortcuts
 
@@ -79,7 +75,7 @@ User modules (desktop) live in `~/Documents/CsModular/`.
 ```
 .
 ├── src/                 # Frontend (main app)
-│   ├── api/             # moduleStore — user module storage (web / Tauri)
+│   ├── api/             # libraryStore — module libraries (web / Tauri)
 │   ├── csound/          # CsoundEngine, CsoundGenerator, MappingTables
 │   ├── midi/            # MidiManager (Web MIDI API)
 │   ├── components/      # UI components (Knob, Slider, LED, MiniVU, PartSelector, ...)
@@ -92,20 +88,21 @@ User modules (desktop) live in `~/Documents/CsModular/`.
 │   ├── ComponentRegistry.js   # single source of truth for components
 │   ├── CodeViewerWindow.js    # Csound code editor (protected structure)
 │   └── ui/              # DockLayout, Toolbar, PropertiesPanel, TerminalPanel, ...
-├── public/              # Static assets (csound modules, tables, backgrounds)
+├── public/              # Static assets (libraries, csound modules, tables, backgrounds)
 ├── src-tauri/           # Tauri (Rust) shell
-├── scripts/             # Python utility scripts (NM2 patchers)
-└── _legacy_backend/     # Old Flask backend (reference only)
+└── scripts/             # Python utility scripts (NM2 patchers)
 ```
 
 ## Adding Custom Modules
 
 1. Open the **Module Editor** (`Space → Editor`, or `editor.html`).
-2. Design the panel, write the DSP body, save.
-3. The module appears in `Space → Add Module` immediately.
+2. Design the panel, pick a **category**, write the DSP body, save.
+3. The module appears in `Space → Add Module` under `👤 user` immediately.
 
-**Manually:** create `modules/user/<Name>.js` (JS description) and
-`csound/modules/user/<Name>.txt` (UDO), reload.
+**Manually:** create `public/libraries/<lib>/modules/<Name>.js` (JS description)
+and `<Name>.txt` (UDO) next to it, add `<Name>` to the library's `_index.json`.
+For a quick personal library, use `~/Documents/CsModular/libraries/<lib>/`
+on desktop.
 
 See `AI Context.md` for the module format, `EDITOR.md` for editor internals,
 `TODO.md` for the roadmap.
@@ -122,7 +119,7 @@ Every Input/Output has a `jackType` and a `bandwidth`:
 **Families** (a `dynamic` jack may switch only inside its family):
 
 - `{audio, control}` — Csound `a` / `k`
-- `{logic, logicAudio}` — both `control` in Csound, NM2 visual only
+- `{logic, logicAudio}` — both `control` in Csound, visual distinction only
 
 **Rules:**
 
@@ -155,7 +152,7 @@ New FX modules are auto-placed below the lowest voice module.
 
 ## Grid
 
-- Base cell 20×15 px, panel always 13 cells wide (260 px — NM2 compat)
+- Base cell 20×15 px, panel always 13 cells wide (260 px)
 - Step multipliers and snap toggle in **Design Settings → Grid**
 - Changing multipliers does not move existing modules
 - Settings persist in `localStorage` as part of the theme
@@ -171,16 +168,14 @@ by `ksmps`. Not persisted in the patch.
 
 ## MIDI
 
-Web MIDI API → `MidiManager` → `CsoundEngine.midiMessage()` → Csound `instr 3`.
 Click **`MI`** in the bottom bar to enable (browser asks permission).
-`instr 3` exposes `gkGate` / `gkNote`; velocity is currently ignored
-(NM2 compatibility). See `README` → *Known issue* in `AI Context.md` for
-the `@csound/browser` recompile bug.
+`instr 3` exposes `gkGate` / `gkNote`; velocity is currently ignored.
+See `AI Context.md` → *Known issues* for the `@csound/browser` recompile bug.
 
 ## Themes
 
-- **Classic** — original NM2-style, colored panels
-- **LCD** — monochrome Casio-style, transparent panels, glowing lines
+- **Classic** — colored panels
+- **LCD** — monochrome, transparent panels, glowing lines
 
 Both editable live in **Design Settings** (`D`): accent color, glow,
 opacity, line/cable widths, grid, background, parallax. Saved to `localStorage`.
