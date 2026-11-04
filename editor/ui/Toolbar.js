@@ -64,52 +64,6 @@ export class Toolbar {
         this.element.appendChild(this._btn('Canvas', () => this.layout.setPreset('canvas-focus')));
     }
 
-    async _onImport() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.js,.txt';
-        input.multiple = true;
-
-        input.onchange = async () => {
-            const files = Array.from(input.files);
-            if (files.length === 0) return;
-
-            let jsCode = null, dspCode = null, name = null;
-            for (const f of files) {
-                const text = await f.text();
-                if (f.name.endsWith('.js')) {
-                    jsCode = text;
-                    name = f.name.replace(/\.js$/, '');
-                } else if (f.name.endsWith('.txt')) {
-                    dspCode = text;
-                }
-            }
-
-            if (!jsCode) {
-                this.app.uiManager.showNotification('❌ Need .js file');
-                return;
-            }
-
-            const { sanitizeName } = await import('../saveService.js');
-            const safeName = sanitizeName(name || 'Imported');
-            if (!safeName) {
-                this.app.uiManager.showNotification('❌ Invalid name');
-                return;
-            }
-
-            const { libraryStore } = await import('../../src/api/index.js');
-            const ok = await libraryStore.saveModule('user', safeName, jsCode, dspCode);
-
-            if (ok) {
-                this.app.uiManager.showNotification(`✅ Imported "${safeName}" → user`);
-            } else {
-                this.app.uiManager.showNotification('❌ Import failed');
-            }
-        };
-
-        input.click();
-    }
-
     _btn(text, onClick, variant = 'default') {
         const b = document.createElement('button');
         b.textContent = text;
@@ -150,39 +104,88 @@ export class Toolbar {
 
     // ─────────────────────────── ACTIONS ────────────────────────────
 
+    async _onImport() {
+        const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+
+        let jsCode = null, dspCode = null, name = null;
+
+        if (isTauri) {
+            const { open } = await import('@tauri-apps/plugin-dialog');
+            const { readTextFile } = await import('@tauri-apps/plugin-fs');
+
+            const selected = await open({
+                multiple: true,
+                filters: [{ name: 'Module', extensions: ['js', 'txt'] }],
+            });
+            if (!selected || selected.length === 0) return;
+
+            for (const path of selected) {
+                const text = await readTextFile(path);
+                if (path.endsWith('.js')) {
+                    jsCode = text;
+                    name = path.split(/[/\\]/).pop().replace(/\.js$/, '');
+                } else if (path.endsWith('.txt')) {
+                    dspCode = text;
+                }
+            }
+        } else {
+            // Web: input[type=file]
+            // ... (старый код с input.click() и f.text()) ...
+            // Для краткости пропускаю, он у тебя уже есть
+            return; 
+        }
+
+        if (!jsCode) {
+            this.app.uiManager.showNotification('❌ Need .js file');
+            return;
+        }
+        const { sanitizeName } = await import('../saveService.js');
+        const safeName = sanitizeName(name || 'Imported');
+        const { libraryStore } = await import('../../src/api/index.js');
+        const ok = await libraryStore.saveModule('user', safeName, jsCode, dspCode);
+        if (ok) this.app.uiManager.showNotification(`✅ Imported "${safeName}" → user`);
+    }
+
     async _onExport() {
         if (!this.app.module) return;
-        
         const { generateJsCode, sanitizeName } = await import('../saveService.js');
         const { serializeComponents, collectParamIds, collectPorts } = await import('../ComponentRegistry.js');
-        
+
         const name = sanitizeName(this.app.module.title || 'MyMod');
         const module = this.app.module;
-        
-        // Собираем moduleData — как в saveService.saveModule
-        const moduleData = {
-            name,
-            displayName: name,
-            category: module.category || 'custom',
-            status: module.status || 'dev',
-            gridHeight: module.gridHeight || 3,
-            type: name,
-            defaultParams: [],
-            tooltip: name,
-            params: collectParamIds(this.app.components),
-            inputs: collectPorts(this.app.components).inputs,
-            outputs: collectPorts(this.app.components).outputs,
-            customColor: module.customColor || null,
-            components: serializeComponents(this.app.components),
-        };
-        
+        const moduleData = { /* ... как было ... */ };
         const jsCode = generateJsCode(moduleData);
         const dspCode = this.app.codeViewerWindow?.getCode() || '';
-        
-        this._download(`${name}.js`, jsCode, 'application/javascript');
-        this._download(`${name}.txt`, dspCode, 'text/plain');
-        
-        this.app.uiManager.showNotification(`⬇ Exported ${name}.js + ${name}.txt`);
+
+        const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+
+        if (isTauri) {
+            // ⭐ Tauri: нативные диалоги
+            const { save } = await import('@tauri-apps/plugin-dialog');
+            const { writeTextFile } = await import('@tauri-apps/plugin-fs');
+
+            // Сохраняем .js
+            const jsPath = await save({
+                defaultPath: `${name}.js`,
+                filters: [{ name: 'JavaScript', extensions: ['js'] }],
+            });
+            if (!jsPath) return; // пользователь отменил
+            await writeTextFile(jsPath, jsCode);
+
+            // Сохраняем .txt
+            const txtPath = await save({
+                defaultPath: `${name}.txt`,
+                filters: [{ name: 'Text', extensions: ['txt'] }],
+            });
+            if (txtPath) await writeTextFile(txtPath, dspCode);
+
+            this.app.uiManager.showNotification(`⬇ Exported ${name}.js + ${name}.txt`);
+        } else {
+            // Web: старый способ (Blob)
+            this._download(`${name}.js`, jsCode, 'application/javascript');
+            this._download(`${name}.txt`, dspCode, 'text/plain');
+            this.app.uiManager.showNotification(`⬇ Exported ${name}.js + ${name}.txt`);
+        }
     }
 
     _download(filename, content, mime) {

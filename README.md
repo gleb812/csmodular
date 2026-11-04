@@ -2,27 +2,17 @@
 # CsModular
 
 A web-based modular synthesizer built with Csound and vanilla JavaScript + Canvas.
-
 A next step of the [pch2csd](https://github.com/gleb812/pch2csd) project.
 
 ## Features
 
-- **Four jack types**:
-  - `audio` (red) / `control` (blue) — Csound `a` / `k` rates
-  - `logic` (yellow) / `logicAudio` (orange) — visual only, both `control` in Csound
-- **Dynamic jacks** — `audio ↔ control` and `logic ↔ logicAudio` auto-switch by connection;
-  `static` (strict) jacks keep their type, converters (`K2A`/`A2K`) are inserted in the ORC
-- **Module variants** — `;@ variant k/a` in UDO; k-rate modules auto-promote to a-rate
-  when an audio-rate cable reaches a non-strict input
-- MIDI input via Web MIDI API → Csound (`instr 3`, `gkGate`/`gkNote`)
-- Multi-channel **oscilloscope** — attach to any cable via right-click → *Send to Scope*
-- **Level indicators** — LED and MiniVU (3-zone VU); tap any Input/Output, Outputs work without a cable
-- Two visual themes: **Classic** and **LCD** (monochrome, glowing lines)
-- Design Settings panel (`D`) — colors, glow, line weight, cables, grid, backgrounds
-- **Module Editor** — IDE-style workspace with dock panels and command terminal
-- Protected Csound structure (`opcode` / `xin` / `zaw` / `endop` locked); user edits only the DSP body
-- **User module libraries** — builtin (`public/libraries/`) and user
-  (`~/Documents/CsModular/libraries/` on desktop, IndexedDB on web)
+- **Four jack types** — `audio` / `control` (Csound a/k) + `logic` / `logicAudio` (visual).
+- **Dynamic jacks** — auto-switch by connection; `static` jacks keep their type (converters inserted in ORC).
+- **Module variants** — `;@ variant k/a`, auto-promote on audio-rate cable.
+- **MIDI input** (Web MIDI API) → Csound.
+- **Oscilloscope** (multi-channel), **LED / MiniVU** indicators.
+- **Two themes** — Classic / LCD; live editor (`D`).
+- **Module Editor** (`editor.html`) — IDE-style, protected Csound structure, user module libraries.
 
 ## Requirements
 
@@ -77,126 +67,27 @@ User libraries (desktop) live in `~/Documents/CsModular/libraries/`.
 ├── src/                 # Frontend (main app)
 │   ├── api/             # libraryStore — module libraries (web / Tauri)
 │   ├── csound/          # CsoundEngine, CsoundGenerator, MappingTables
-│   ├── midi/            # MidiManager (Web MIDI API)
-│   ├── components/      # UI components (Knob, Slider, LED, MiniVU, PartSelector, ...)
-│   ├── grid/            # Grid system
+│   ├── components/      # UI components (Knob, Slider, LED, MiniVU, ...)
 │   ├── managers/        # EventManager, LayerManager, UIManager
 │   ├── theme/           # Classic / LCD themes
 │   └── ui/              # ContextMenu, DesignSettingsPanel, ScopeWindow, ...
 ├── editor/              # Module Editor (separate HTML entry)
 │   ├── editor.html      # entry point
 │   ├── ComponentRegistry.js   # single source of truth for components
-│   ├── CodeViewerWindow.js    # Csound code editor (protected structure)
 │   └── ui/              # DockLayout, Toolbar, PropertiesPanel, TerminalPanel, ...
 ├── public/              # Static assets (libraries, csound modules, tables, backgrounds)
 ├── src-tauri/           # Tauri (Rust) shell
-└── scripts/             # Python utility scripts (NM2 patchers)
+└── scripts/             # Python utility scripts
 ```
 
 ## Adding Custom Modules
 
-1. Open the **Module Editor** (`Space → Editor`, or `editor.html`).
-2. Design the panel, pick a **category**, write the DSP body, save.
-3. The module appears in `Space → Add Module` under `👤 user` immediately.
+Open the **Module Editor** (`Space → Editor`, or `editor.html`), design the panel,
+pick a **category**, write the DSP body, save.
+Modules appear in `Space → Add Module → 👤 user` immediately.
 
-**Manually:** create `public/libraries/<lib>/modules/<Name>.js` (JS description)
-and `<Name>.txt` (UDO) next to it, add `<Name>` to the library's `_index.json`.
-For a quick personal library, use `~/Documents/CsModular/libraries/<lib>/`
-on desktop.
-
-See `AI Context.md` for the module format, `EDITOR.md` for editor internals,
-`TODO.md` for the roadmap.
-
-## Jack Types & Converters
-
-Every Input/Output has a `jackType` and a `bandwidth`:
-
-| Field | Values | Effect |
-|---|---|---|
-| `jackType` | `audio`, `control`, `logic`, `logicAudio` | visual color; Csound rate |
-| `bandwidth` | `static`, `dynamic` | whether the jack may change its type |
-
-**Families** (a `dynamic` jack may switch only inside its family):
-
-- `{audio, control}` — Csound `a` / `k`
-- `{logic, logicAudio}` — both `control` in Csound, visual distinction only
-
-**Rules:**
-
-- Jack color = its current type, never the cable's color.
-- Cable color = source jack's current type.
-- `static` jack + type mismatch → converter (`K2A` / `A2K`) in ORC, jack stays its color.
-- `dynamic` jack + compatible type → jack changes type (and output cables re-color).
-- `logic ↔ logicAudio`, `control ↔ logic`, `audio ↔ logicAudio` need **no** converter
-  (same Csound rate).
-
-## Module Variants
-
-A UDO may declare `;@ variant k` / `;@ variant a`, `;@ strict 0 0 1`, `;@ ins k k k`.
-`CsoundGenerator._prepareVariants()` picks the variant per module:
-
-- start with `defaultSuffix` (usually `k`);
-- if an audio-rate cable reaches a non-strict input → switch module to `a`;
-- iterate until stable.
-
-UI effect: `dynamic` jacks of the module re-color when the variant flips.
-`static` (strict) jacks never change.
-
-## Voice / FX Layers
-
-- **Voice** — triggered per polyphony voice (default)
-- **FX** — global effects / master processing
-
-Cables only within one layer. Change via right-click → Layer.
-New FX modules are auto-placed below the lowest voice module.
-
-## Grid
-
-- Base cell 20×15 px, panel always 13 cells wide (260 px)
-- Step multipliers and snap toggle in **Design Settings → Grid**
-- Changing multipliers does not move existing modules
-- Settings persist in `localStorage` as part of the theme
-
-## Oscilloscope
-
-Multi-channel waveform viewer, bound to **cables** (ZAK buses), not modules.
-Right-click a jack → **📊 Send to Scope**. Up to 8 channels. Buffer 4096
-samples (~85 ms at 48 kHz); audio-rate shown as-is, control-rate downsampled
-by `ksmps`. Not persisted in the patch.
-
-> For per-module level indication use **LED** / **MiniVU** components, not the scope.
-
-## MIDI
-
-Click **`MI`** in the bottom bar to enable (browser asks permission).
-`instr 3` exposes `gkGate` / `gkNote`; velocity is currently ignored.
-See `AI Context.md` → *Known issues* for the `@csound/browser` recompile bug.
-
-## Themes
-
-- **Classic** — colored panels
-- **LCD** — monochrome, transparent panels, glowing lines
-
-Both editable live in **Design Settings** (`D`): accent color, glow,
-opacity, line/cable widths, grid, background, parallax. Saved to `localStorage`.
-
-## Editor
-
-Separate HTML entry (`editor.html`): dock layout (Canvas / Code / Properties /
-Terminal), resizable splitters, three presets. Component palette in
-`editor/ComponentRegistry.js` — adding a new component type = one entry.
-
-Protected Csound structure: `opcode` / `xin` / `zar` / `zkr` / `init` /
-`zaw` / `zkw` / `endop` are regenerated from the model; the user only edits
-the **body** between the input-jack and output-jack blocks.
-
-Component properties are declared via `static getPropertySchema()` and
-rendered by `PropertiesPanel`. Terminal DSL for fast editing.
-
-**LED** and **MiniVU** are in `display` / `graphics`; bind them via
-Properties → *Source* (`ioComponents`).
-
-Full editor docs: **`EDITOR.md`**.
+For **release** (builtin library, in git) and **sharing** (export/import `.js` + `.txt`) —
+see **[CONTRIBUTING.md](CONTRIBUTING.md)**.
 
 ## Development
 
@@ -207,28 +98,19 @@ npx tauri dev       # verify Tauri-specific (fs, native windows)
 
 Don't run both — port 3000 is shared.
 
-## Troubleshooting & Known Issues
+## Documentation
 
-See **`AI Context.md`** → *Known issues (short)* and *TODO*. Highlights:
-
-- **HTML inside Csound ORC** — Vite SPA-fallback. Fixed via `_loadUdoByPath()`.
-- **LED / oscilloscope erratic after load** — `mappingTable` was not serialized. Fixed.
-- **LED / MiniVU does not light up** — `sourceComponentId` missing or not a
-  jack. Set via Properties (editor) or module JS. On Inputs without a cable
-  the indicator is disabled; on Outputs a tap-bus is allocated automatically.
-- **Jack color changes when a cable is connected** — jack color must be its
-  own `jackType`, never the cable's color. Fixed: `BaseJack.getEffectiveColor()`,
-  `PatchManager` no longer paints jacks with cable color; `synchronizeInputCables`
-  removed.
-- **`logic` / `logicAudio` jacks turn red/blue** — `logic`/`logicAudio` are a
-  separate family, only re-color to each other (`dynamic` only). In Csound
-  both are `control`, so no converter between them.
-- **MIDI dies after recompile** — `@csound/browser` IPC ports not recreated. Restart Csound.
-- **HiDPI drag** — `resizeCanvasToWindow` uses `dpr = 1` workaround.
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** — add a module, export, release, share
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** — modules, cables, jacks, Csound pipeline
+- **[EDITOR.md](EDITOR.md)** — module editor internals
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** — known issues, workarounds
+- **[TODO.md](TODO.md)** — roadmap
+- **[AI Context.md](AI Context.md)** — full AI-facing context
+- **[CSP_API.md](CSP_API.md)** — HTTP + OSC bridge for external control (OSC, Python, curl)
 
 ## Contributing
 
-Issues, PRs, new modules, new themes — all welcome.
+Issues, PRs, new modules, new themes — all welcome. See **[CONTRIBUTING.md](CONTRIBUTING.md)**.
 
 ## Acknowledgments
 
@@ -243,3 +125,4 @@ MIT — see `LICENSE`.
 ## Author
 
 Gleb Rogozinski — [GitHub](https://github.com/gleb812)
+```

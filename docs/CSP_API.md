@@ -1,106 +1,128 @@
-# CsPanels HTTP + OSC API (csp-bridge)
 
-Локальный мост: HTTP + WebSocket + UDP OSC in/out.
+# CSP API — HTTP + OSC bridge
 
-## Запуск
+External control for CsModular via `bridge/` (Node.js). Accepts **HTTP POST** and
+**UDP OSC**, forwards to the UI over **WebSocket**. Also relays **OSC out** from
+UI to external devices.
 
-    cd bridge
-    npm install
-    npm start
+## Why a bridge
 
-Слушает:
-- HTTP + WS: `http://127.0.0.1:8765` / `ws://127.0.0.1:8765/ws`
-- OSC in : `udp://0.0.0.0:9000`  (настраивается)
-- OSC out: `udp://127.0.0.1:9001` (настраивается)
+Browser cannot:
+- listen on UDP (OSC) — no raw sockets
+- accept incoming HTTP on a custom port (only the dev server on `:3000`)
 
-В браузере UI подключается к `ws://127.0.0.1:8765/ws` автоматически
-(URL можно поменять в настройках OSC — кнопка **OSC** в BottomBar).
+`bridge/` solves both. UI auto-connects to `ws://127.0.0.1:8765/ws`.
 
-## Как это работает
+## Flow
 
-- REST `POST /csp/...` → мост ставит команду в очередь → по WS рассылает
-  `{type:'csp-cmd', cmd:'...', args:{...}}` всем подключённым UI →
-  UI выполняет действие (добавить модуль, пересоздать патч, и т.д.).
-- OSC-пакет на `udp://<хост>:9000` → мост → WS `{type:'osc', address, args, from}`
-  → UI (мигает лампочка OSC, история). Параллельно известные адреса
-  (`/csp/...`) маппятся в те же `csp-cmd`, что и REST.
-- UI шлёт `{type:'osc-out', address, args}` по WS → мост → `udp://<outHost>:<outPort>`.
+```
+┌──────────────┐   HTTP POST /csp/...   ┌──────────────┐
+│ curl / Python│ ─────────────────────▶ │              │
+└──────────────┘                        │              │   WebSocket    ┌──────────┐
+┌──────────────┐   UDP OSC :9000        │   bridge/    │ ◀────────────▶ │    UI    │
+│  TouchOSC    │ ─────────────────────▶ │  (Node.js)   │                │ (browser)│
+└──────────────┘                        │              │                └──────────┘
+┌──────────────┐   UDP OSC :9001        │              │
+│  External    │ ◀───────────────────── │              │
+│  device      │                        └──────────────┘
+└──────────────┘
+```
+
+## Run
+
+```bash
+# terminal 1 — UI
+npm run dev                    # http://localhost:3000
+
+# terminal 2 — bridge
+cd bridge
+npm install
+npm start
+```
+
+Default ports:
+
+| | |
+|---|---|
+| HTTP + WS | `127.0.0.1:8765` (`ws://127.0.0.1:8765/ws`) |
+| OSC in | `0.0.0.0:9000` |
+| OSC out | `127.0.0.1:9001` |
+
+Configurable via `POST /csp/osc/config` or **OSC** button in BottomBar.
+
+**If bridge is not running** — UI works normally (only OSC panel / external control disabled).
 
 ## REST
 
-Все `POST` принимают JSON, возвращают `{ok:true, queued:N}`.
+All `POST` accept JSON, return `{ ok: true, queued: N }`.
 
-### System
-| Method | Path | Body | Описание |
-|---|---|---|---|
-| GET  | /csp/ping              | — | проверка моста |
-| GET  | /csp/osc/config        | — | текущие порты |
-| POST | /csp/osc/config        | `{inPort, outPort?, outHost?}` | применить порты |
+| Method | Path | Body |
+|---|---|---|
+| `GET`  | `/csp/ping` | — |
+| `GET`  | `/csp/osc/config` | — |
+| `POST` | `/csp/osc/config` | `{ inPort, outPort?, outHost? }` |
+| `POST` | `/csp/main/reset` | — |
+| `POST` | `/csp/main/new` | — |
+| `POST` | `/csp/main/save` | `{ filename? }` |
+| `POST` | `/csp/main/load` | `{ filename? }` |
+| `POST` | `/csp/main/csound/start` | — |
+| `POST` | `/csp/main/csound/stop` | — |
+| `POST` | `/csp/module/add` | `{ type, layer? }` |
+| `POST` | `/csp/module/remove` | `{ id }` |
+| `POST` | `/csp/module/move` | `{ id, gridX, gridY }` |
+| `POST` | `/csp/module/layer` | `{ id, layer }` (`voice`/`fx`) |
+| `POST` | `/csp/cable/connect` | `{ fromId, fromJack, toId, toJack }` |
+| `POST` | `/csp/cable/remove` | `{ cableId }` |
+| `POST` | `/csp/midi/send` | `{ status, data1, data2 }` |
+| `POST` | `/csp/osc/send` | `{ address, args: [...] }` |
 
-### Main
-| Method | Path | Body | Описание |
-|---|---|---|---|
-| POST | /csp/main/reset         | — | полный сброс (patch + Csound + MIDI) |
-| POST | /csp/main/new           | — | новый пустой патч |
-| POST | /csp/main/save          | `{filename?}` | сохранить патч |
-| POST | /csp/main/load          | `{filename?}` | загрузить патч |
-| POST | /csp/main/csound/start  | — | запустить Csound |
-| POST | /csp/main/csound/stop   | — | остановить Csound |
+## OSC addresses (incoming)
 
-### Modules
-| POST | /csp/module/add    | `{type, layer?}` |
-| POST | /csp/module/remove | `{id}` |
-| POST | /csp/module/move   | `{id, gridX, gridY}` |
-| POST | /csp/module/layer  | `{id, layer}` (`voice`/`fx`) |
+```
+/csp/main/reset
+/csp/main/new
+/csp/main/csound/start
+/csp/main/csound/stop
+/csp/module/add   <type:s> [layer:s]
+/csp/midi/send    <status:i> <data1:i> <data2:i>
+/csp/osc/send     <address:s> <arg...>
+```
 
-### Cables
-| POST | /csp/cable/connect | `{fromId, fromJack, toId, toJack}` |
-| POST | /csp/cable/remove  | `{cableId}` |
+Any other OSC address is accepted too — it goes to the UI history (OSC indicator flashes), no action. Useful for capturing TouchOSC events (OSC routing — TODO).
 
-### Исходящие MIDI / OSC
-| POST | /csp/midi/send | `{status, data1, data2}` |
-| POST | /csp/osc/send  | `{address, args:[...]}` |
+## Examples
 
-## OSC-адреса (входящие на мост)
+```bash
+# New patch
+curl -X POST http://127.0.0.1:8765/csp/main/new
 
-    /csp/main/reset
-    /csp/main/new
-    /csp/main/csound/start
-    /csp/main/csound/stop
-    /csp/module/add   <type:s> [layer:s]
-    /csp/midi/send    <status:i> <data1:i> <data2:i>
-    /csp/osc/send     <address:s> <arg...>
+# Add VCO to voice layer
+curl -X POST http://127.0.0.1:8765/csp/module/add \
+     -H 'Content-Type: application/json' \
+     -d '{"type":"VCO","layer":"voice"}'
 
-Любой другой OSC-адрес тоже принимается — он просто попадает в историю UI
-и не вызывает действий. Это позволяет «поймать» событие из TouchOSC и
-потом связать его в будущем (OSC-роутинг — TODO).
+# MIDI Note On (channel 1, note 60, velocity 100)
+curl -X POST http://127.0.0.1:8765/csp/midi/send \
+     -H 'Content-Type: application/json' \
+     -d '{"status":144,"data1":60,"data2":100}'
+```
 
-## Примеры
+```python
+# Python (python-osc)
+from pythonosc.udp_client import SimpleUDPClient
+c = SimpleUDPClient("127.0.0.1", 9000)
+c.send_message("/csp/module/add", ["VCO", "voice"])
+```
 
-    # 1. Новый патч
-    curl -X POST http://127.0.0.1:8765/csp/main/new
+## Security
 
-    # 2. Добавить VCO в voice-слой
-    curl -X POST http://127.0.0.1:8765/csp/module/add \
-         -H 'Content-Type: application/json' \
-         -d '{"type":"VCO","layer":"voice"}'
+- HTTP/WS bind to `127.0.0.1` — **local only**.
+- OSC in binds to `0.0.0.0` — **all interfaces**. Use firewall, or change to `127.0.0.1` if TouchOSC runs on the same machine.
+- **No auth**. Do not expose `8765` to the internet.
 
-    # 3. Послать MIDI Note On
-    curl -X POST http://127.0.0.1:8765/csp/midi/send \
-         -H 'Content-Type: application/json' \
-         -d '{"status":144,"data1":60,"data2":100}'
+## Tauri
 
-    # 4. Отправить OSC-сообщение на внешнее устройство
-    curl -X POST http://127.0.0.1:8765/csp/osc/send \
-         -H 'Content-Type: application/json' \
-         -d '{"address":"/fx/reverb","args":[0.7]}'
+Tauri app is a separate window; bridge runs **outside** (same as web — `cd bridge && npm start`). UI auto-connects. Bundling bridge into Tauri as a sidecar — TODO.
+```
 
-    # 5. Поменять OSC-порты моста
-    curl -X POST http://127.0.0.1:8765/csp/osc/config \
-         -H 'Content-Type: application/json' \
-         -d '{"inPort":9100,"outPort":9101}'
 
-    # 6. Из Python (python-osc)
-    from pythonosc.udp_client import SimpleUDPClient
-    c = SimpleUDPClient("127.0.0.1", 9000)
-    c.send_message("/csp/module/add", ["VCO", "voice"])
