@@ -3,30 +3,26 @@
 
 Separate entry (`editor.html`) — IDE-style workspace for designing custom modules visually. Opens in its own window (Tauri) or tab (web).
 
-Full architecture in `AI Context.md` → *Module Editor*.
+Architecture in `AI Context.md` → *Module Editor*.
 
-## Overview
+## Layout
 
-Fixed dock, 4 panels + toolbar. Resizable splitters, sizes persist in `localStorage` (`csmodular:editor-layout`).
+Fixed dock, 4 panels + toolbar. Splitters resizable, sizes persist in `localStorage` (`csmodular:editor-layout`).
 
 ```
 ┌─────────────────────────────────────────────────┐
 │ toolbar: [New] [Load] [Save] | Layout presets   │
 ├──────────────────────┬──────────────────────────┤
-│                      │                          │
 │   Canvas (module)    │   Csound Code            │
-│                      │                          │
 ├──────────────────────┼──────────────────────────┤
-│                      │                          │
 │   Properties         │   Terminal               │
 │   (Module/Component) │   (command language)     │
-│                      │                          │
 └──────────────────────┴──────────────────────────┘
 ```
 
-**Presets:** `Default` (balanced), `Code` (code-focused), `Canvas` (canvas-focused).
+Presets: `Default` (balanced), `Code` (code-focused), `Canvas` (canvas-focused).
 
-## File Structure
+## Files
 
 ```
 editor/
@@ -36,11 +32,12 @@ editor/
 ├── EditorPanel.js                 # Module panel on canvas
 ├── ComponentRegistry.js           # Single source of truth for components
 ├── CodeViewerWindow.js            # Csound editor (protected structure)
-├── ModulePropertiesWindow.js      # Headless (legacy) — save API
-├── ComponentPropertiesWindow.js   # Headless (legacy) — mapping browser
+├── saveService.js                 # Unified save (Toolbar + Terminal)
+├── ModulePropertiesWindow.js      # Headless legacy — DOM detached
+├── ComponentPropertiesWindow.js   # Headless legacy — mapping browser only
 └── ui/
     ├── DockLayout.js              # Split-pane + presets
-    ├── Toolbar.js                 # New / Load / Save + presets
+    ├── Toolbar.js                 # New / Load / Save + Save As dialog
     ├── PropertiesPanel.js         # Module / Component tabs
     ├── TerminalPanel.js           # Command terminal
     ├── Toast.js                   # Notifications
@@ -48,15 +45,11 @@ editor/
     └── ModuleContextMenu.js       # Editor-specific menu
 ```
 
-**Legacy files:** `ModulePropertiesWindow.js` / `ComponentPropertiesWindow.js` **do not render** (DOM detached in bootstrap). Kept for two APIs:
-- `ModulePropertiesWindow.saveModule()`
-- `ComponentPropertiesWindow._showMappingBrowser()`
+Legacy `ModulePropertiesWindow` / `ComponentPropertiesWindow` **do not render**. Kept for `ComponentPropertiesWindow._showMappingBrowser()`, still called by `PropertiesPanel`.
 
-**Plan:** replace with `saveService` + `MappingBrowser` modal, then delete.
+`EditorApp.uiManager` is a **stub** — `{ showNotification, updateZoomInfo }` from `ui/Toast.js`. No `EditorUIManager` class.
 
 ## Bootstrap
-
-`editor.html` → `editor.js`:
 
 ```js
 const layout = new DockLayout({ root });
@@ -67,10 +60,8 @@ const app = new EditorApp(canvas);
 const toolbar = new Toolbar({ app, layout });
 layout.mount('toolbar', toolbar.element);
 
-// EditorUIManager удалён — вся логика в Toolbar / PropertiesPanel / TerminalPanel
-
 layout.mount('leftTop', canvas);
-app.setupCanvas();     // after mount, so parentElement exists
+app.setupCanvas();
 
 layout.mount('rightTop', app.codeViewerWindow.windowElement);
 app.codeViewerWindow.show();
@@ -82,28 +73,11 @@ app.terminalPanel = new TerminalPanel(app);
 layout.mount('rightBottom', app.terminalPanel.element);
 ```
 
-**Important:** `EditorApp` is constructed **before** panels are mounted. `EditorApp` constructor creates: `module`, `components[]`, `codeViewerWindow`, `propertiesWindow`, `componentPropertiesWindow`.
+`EditorApp` is constructed **before** panels mount. Constructor creates `module`, `components[]`, `codeViewerWindow`, `propertiesWindow`, `componentPropertiesWindow`.
 
-## DockLayout
+## ComponentRegistry
 
-`editor/ui/DockLayout.js`:
-
-- **Slots:** `leftTop`, `leftBottom`, `rightTop`, `rightBottom`, `toolbar`
-- **Splitters:** vertical (between columns), horizontal in each column
-- **Sizes:** `leftWidth`, `leftTopHeight`, `rightTopHeight` (fractions)
-- **Persist:** `csmodular:editor-layout`
-
-```js
-layout.mount('leftTop', element);
-layout.setPreset('default');   // 'default' | 'code-focus' | 'canvas-focus'
-layout.getSizes();             // → { leftWidth, leftTopHeight, rightTopHeight }
-```
-
-Panels are pure DOM, mounted into slots. Swap `DockLayout` for `dockview`/`Golden Layout` without touching panel code if ever needed.
-
-## ComponentRegistry — single source of truth
-
-Each component type is described **once**:
+Each component type described **once**:
 
 ```js
 Knob: {
@@ -119,9 +93,9 @@ Knob: {
 }
 ```
 
-**Used by:** `ModulePropertiesWindow.collectModuleData()`, `EditorApp._createComponentFromData()`, `CodeViewerWindow.generateCsoundCode()`, `ModuleContextMenu._componentSubmenu()`, `TerminalPanel`, `PropertiesPanel` (palette sizes).
+Used by `PropertiesPanel`, `TerminalPanel`, `ModuleContextMenu`, `CodeViewerWindow.generateCsoundCode`, `saveService`.
 
-**Adding a new component type = one entry in registry.** No other file needs editing (except optionally aliases in `TerminalPanel.js`).
+**Adding a component type = one entry.** No other file needs editing (except optional aliases in `TerminalPanel.js`).
 
 ### Categories
 
@@ -164,18 +138,19 @@ Matches `src/ModuleFactory.js`:
 **Context menu:** right-click component → `Properties` / `Delete`.
 
 **Rename (4 paths, all call `updateCode()` + re-render Properties if Module tab):**
+
 - Double-click module on canvas
 - Right-click → Rename Module
 - Properties → Module tab → Name field (Enter or blur)
 - Terminal `name <newName>`
 
-**Sanitization:** strip spaces, prefix `M` if digit start, remove non-`[a-zA-Z0-9_]`. Empty → `NewModule`.
+Sanitization: strip spaces, prefix `M` if digit start, remove non-`[a-zA-Z0-9_]`. Empty → `NewModule`.
 
-**Resize:** bottom-right handle → `gridHeight` (width always 1).
+**Resize:** bottom-right handle → `gridHeight` (width always 1 cell = 13 grid units).
 
 **Zoom/pan:** `Ctrl+wheel` / `+` / `-` (zoom around cursor), `0` (reset, canvas focus), middle mouse (pan).
 
-**⚠️ Keyboard rule:** global key handlers must skip when `e.target` is `<input>`, `<textarea>`, or `contentEditable`. Otherwise typing `0` in a numeric field triggers `resetZoom()`.
+**Keyboard rule:** global key handlers must skip when `e.target` is `<input>`, `<textarea>`, or `contentEditable`. Otherwise typing `0` in a numeric field triggers `resetZoom()`.
 
 ```js
 const isEditable = target.tagName === 'INPUT' ||
@@ -186,14 +161,19 @@ if (isEditable) return;
 
 ## Properties panel
 
-- **Panel Color** — 12 presets + `↺ Default` + hex input
-- **Category** — dropdown from `CATEGORIES` (`src/moduleCategories.js`). Default `custom`. Saved to `module.category` → used by `getModuleCategoryColor` in minimap and ContextMenu.
-
 ### Module tab
 
 - **Name** — sanitized Csound-safe identifier. Enter → blur → change: `module.title` updated, `codeViewerWindow.updateCode()` (opcode line regenerated, body preserved)
 - **Height** — grid cells (1..20)
 - **Panel Color** — 12 presets + `↺ Default` + hex input
+- **Category** — dropdown from `CATEGORIES` (`src/moduleCategories.js`). Default `custom`. Saved to `module.category` → used by `getModuleCategoryColor` in minimap and ContextMenu.
+- **Status** — dropdown with 4 options, colored dot from `getStatusMeta(status)`:
+  - `stable` — green `#3ecf6e`
+  - `passable` — light green `#8fdc6e`
+  - `dev` — yellow `#e8c547` (default)
+  - `broken` — red `#e84a4a`
+
+  Saved to `module.status` → written to JS by `saveService.generateJsCode` (`status: '${m.status}'`). Used by `vite.config.js` → `stableModulesOnly` build filter (`status ∈ {stable, passable}` are shipped).
 
 ### Component tab
 
@@ -207,6 +187,7 @@ Rendered from `static getPropertySchema()`. Field types:
 | `list` | comma-separated → array |
 | `checkbox` | toggle |
 | `mapping-select` | custom field + `🔍` browser |
+| `mapping-multi-select` | modal with checkboxes, order = selection order |
 
 Each field supports `afterChange(comp, value)` (clamp, rebuild labels, update `width`).
 
@@ -224,8 +205,10 @@ Each field supports `afterChange(comp, value)` (clamp, rebuild labels, update `w
 | `PartSelector` | `items` (`list`), `selectedIndex` |
 
 **`optionsFrom`:**
+
 - `'mappingTables'` — all names in `MappingTables`
 - `'ioComponents'` — all Input/Output in current module
+- `'parametricComponents'` — Knob/Slider/Button*/PartSelector except current `TextField` (used by `TextField` for Controller/Mode switch)
 - fallback — `propDef.options` array
 
 **Mapping browser** (`🔍`): opens `ComponentPropertiesWindow._showMappingBrowser()` — modal, search min 2 chars, scrollable, click to bind.
@@ -323,16 +306,103 @@ endop
 
 **Naming:** `kKnob1`, `kSlider1`, `kButton1`, `kText1`, `kLevel1`, `kIn1` / `kOut1` (jacks — **shared counter** across audio/control).
 
-### Save
-
-- **Auto-save** 60s after last edit (`setTimeout`)
-- **Ctrl+S** immediate
-- Saved to `app.module._userCsoundCode`
-- **Not** saved on close — if you close within 60s of last edit, code is lost
-
 ### Dirty state
 
 `isDirty` tracks body edits only. `updateCode()` always replaces protected ranges, preserves body. `⟳` (`syncFromModule`) resets everything.
+
+## Save / Load
+
+### Save — `saveService.js` (single source of truth)
+
+**All save paths go through `saveService.saveModule()`.** No duplication between Toolbar and Terminal.
+
+```js
+import { saveModule, sanitizeName, generateJsCode } from '../saveService.js';
+
+const result = await saveModule(app, { lib: 'user', name: null });
+// → { lib: 'user', name: 'MyOsc' }
+```
+
+**What `saveModule` does:**
+
+1. `sanitizeName(name || app.module.title)` — Csound-safe identifier
+2. If `lib !== 'user'` and library doesn't exist → `libraryStore.createLibrary(lib, { displayName: lib })`
+3. Collects `moduleData` from `app.components[]` via `ComponentRegistry` (`serializeComponents`, `collectParamIds`, `collectPorts`)
+4. Generates JS via `generateJsCode()` — single template, includes `category`, `status`, `gridHeight`, `customColor`, `params`, `inputs`, `outputs`, `components`
+5. `dspCode` from `app.codeViewerWindow.getCode()` (live content, **not** `_userCsoundCode`)
+6. `libraryStore.saveModule(lib, name, jsCode, dspCode)`
+7. Syncs `app.module.title`, `app.module.status`, `app._sourceLibrary`
+
+### Save — Toolbar
+
+`💾 Save` → `Toolbar._showSaveDialog()`:
+
+```
+┌─ Save Module ──────────────────────────┐
+│ Name:    [MyOsc                      ] │
+│ Library: [👤 user ▾]  [+ New]           │
+│                                         │
+│ [Cancel]  [Save]                       │
+└─────────────────────────────────────────┘
+```
+
+- **Name** — prefilled from `app.module.title`, sanitized on save
+- **Library** — dropdown from `libraryStore.listLibraries()`, `user` first
+- **`+ New`** — reveals inline form: `name` (a-z, 0-9, _ -), `author` (optional) → `libraryStore.createLibrary()`. If library exists — error, use dropdown instead.
+- **Enter** in input → Save, **Escape** → Cancel
+
+### Save — Terminal
+
+`save` → `saveService.saveModule(app, { lib: 'user', name })`:
+
+| Command | Effect |
+|---|---|
+| `save` | Save to `user` under current name |
+| `save as <Name>` | Save to `user` under new name |
+
+**Save always targets a chosen library.** Builtin libraries (`test-lib`, `nm2`, ...) are **read-only** — `libraryStore.saveModule` writes only to `user` / IndexedDB / `$DOCUMENT/CsModular/libraries/`.
+
+### Load — Toolbar
+
+`📂 Load` dialog from `libraryStore.listLibraries()` + `listModules()`:
+
+- Shows `[lib]` + `displayName` + colored status dot (`getStatusMeta(status)`)
+- **Fast** — `listModules` reads `_index.json` only, no JS eval
+- Click → `libraryStore.loadModule(lib, name)` → `app.restoreModuleFromData(description, dspCode)` → `app._sourceLibrary = lib`
+
+### Load — Terminal
+
+| Command | Effect |
+|---|---|
+| `load` | List all modules in all libraries |
+| `load <name>` | Search `user` first, then all libraries |
+| `load <lib>/<name>` | From specific library |
+| `load <lib> <name>` | Same, space-separated |
+
+**Ambiguity:** if `load <name>` and the name exists in multiple libraries — **`user` wins** (first in order). Other libraries are searched in `listLibraries()` order. No error, no prompt.
+
+### Storage
+
+- **Web:** IndexedDB (`csmodular` → store `libraries`)
+  - `<lib>/<Name>.js`, `<lib>/<Name>.txt`
+  - `<lib>/_index.json` — module manifest (`{ modules: [{ name, displayName, category, status }] }`), updated on save/remove
+  - `<lib>/_meta.json` — library metadata (`{ name, displayName, author, version, description, geometry, createdAt }`)
+- **Tauri:** `~/Documents/CsModular/libraries/<lib>/`
+  - `modules/<Name>.js`, `modules/<Name>.txt`
+  - `_index.json`, `_meta.json` in library root
+
+Builtin libraries live in `public/libraries/<lib>/` — same structure, read-only.
+
+### Round-trip preserves
+
+- `mappingTable` on `Knob`/`Slider`
+- Multi-position labels on `ButtonFlat`/`ButtonRadio`/`ButtonIncDec`
+- Default index/state on button-likes
+- `TextLabel` text, fontSize, color
+- DSP body (protected structure rebuilt around it)
+- `category` on the module
+- **`status`** on the module — `restoreModuleFromData` reads `moduleData.status`, `clearModule` resets to `'dev'`
+- `library` field is **not** stored in JS (it's the storage location); module JSON only carries `category`, `status`, etc.
 
 ## Terminal
 
@@ -387,7 +457,7 @@ endop
 
 ### Type aliases
 
-`TYPE_ALIASES` and `JACK_TYPE_ALIASES` — единственное место, где lowercase → `ClassName` / `{ type, jackType }`. Terminal lookup через `ComponentRegistry` — не хардкодить имена.
+`TYPE_ALIASES` and `JACK_TYPE_ALIASES` — the only place for lowercase → `ClassName` / `{ type, jackType }`. Terminal lookup via `ComponentRegistry` — no hardcoded names.
 
 ### `del` examples
 
@@ -410,76 +480,31 @@ del knob button       all Knobs and Buttons
 - `↑` / `↓` — history (per session, not persisted)
 - Errors red `✗`, success green `✓`, info blue, echo grey
 
-### `save` / `load`
+### `save` / `load` / `rm` / `lsmod`
 
-`save` uses `moduleStore.save()` (inline JS code gen — duplicates `ModulePropertiesWindow.generateModuleCode`, should be unified into `saveService`).
+`save` uses `saveService.saveModule()` — no inline JS generation. `jsCode` from `generateJsCode()`, `dspCode` from `codeViewerWindow.getCode()`.
 
-`load <name>` parses with:
 ```js
-/export\s+const\s+\w+\s*=\s*(\{[\s\S]*\});?\s*$/m
+// TerminalPanel._cmdSave (short form)
+async _cmdSave(args) {
+    const { saveModule, sanitizeName } = await import('../saveService.js');
+    let name = null;
+    if (args[0]?.toLowerCase() === 'as' && args[1]) {
+        name = sanitizeName(args.slice(1).join(' '));
+        if (!name) { this._printError('Invalid name for "save as"'); return; }
+    }
+    const result = await saveModule(this.app, { lib: 'user', name });
+    this._printOk(`Saved "${result.name}" → ${result.lib}`);
+}
 ```
-then `app.restoreModuleFromData(moduleData, dsp_code)`.
+
+`load <name>` parses with `libraryStore.loadModule`, then `app.restoreModuleFromData(moduleData, dsp_code)`.
 
 ⚠️ `load` must **not** call `syncFromModule()` after `restoreModuleFromData()` — wipes DSP body.
 
-## Module save / load
+`rm <name>` — deletes **user module** (`libraryStore.removeModule('user', name)`). Prompts with `window.confirm`. If module is currently open — prints warning, does **not** reset the editor.
 
-### Save
-
-- Toolbar `💾 Save` → `app.propertiesWindow.saveModule()`
-- Terminal `save` → inline in `TerminalPanel._cmdSave`
-
-Both call `moduleStore.save(name, jsCode, dspCode)`.
-
-`jsCode`:
-```js
-export const NameModule = {
-    type: 'Name', typeID: 999, defaultParams: [],
-    displayName: 'Name', gridHeight: N,
-    originalName: 'Name', tooltip: 'Name',
-    customColor: '#2a2a2a' | null,
-    params: [...], inputs: [...], outputs: [...], components: [...]
-};
-```
-
-`dspCode` = `app.module._userCsoundCode` OR `app.codeViewerWindow.getCode()`.
-
-### Load
-
-- Toolbar `📂 Load` → in-Toolbar dialog (`Toolbar._onLoad` → `_loadModuleFrom(lib, name)`)
-- Terminal `load` → list / `load [<lib>/]<name>`
-
-Both → `restoreModuleFromData(moduleData, dspCode)`:
-- also stores `app._sourceLibrary` (for display / info)
-
-1. Clear `components[]`, reset `_nextComponentId`
-2. Resize module from `gridHeight`
-3. `ComponentRegistry.deserializeComponents` (with `mappingTable`)
-4. Center on canvas
-5. Code Viewer:
-   - `cv.editor.value = dspCode`
-   - `cv._lastValidBody = null`
-   - `cv._rebuildStructure()` — reference from model
-   - `cv._rebuildStructureFromCurrent()` — cache from `editor.value`
-   - `cv._updateGutter()` / `cv._updateHighlight()`
-   - **NOT** `syncFromModule()` (would wipe body)
-
-### Storage
-
-- **Web:** IndexedDB (`csmodular` → store `libraries`, key `<lib>/<name>.{js,txt}`)
-- **Tauri:** `~/Documents/CsModular/libraries/<lib>/modules/<name>.{js,txt}`
-
-`libraryStore` singleton picks backend lazily via `isTauri()` (see `src/api/libraryStore.*`).
-
-### Round-trip preserves
-
-- `mappingTable` on `Knob`/`Slider`
-- Multi-position labels on `ButtonFlat`/`ButtonRadio`/`ButtonIncDec`
-- Default index/state on button-likes
-- `TextLabel` text, fontSize, color
-- DSP body (protected structure rebuilt around it)
-- `category` on the module
-- `library` field is **not** stored in JS (it is the storage location); module JSON only carries `category`, `status`, etc.
+`lsmod [filter]` — lists **user modules** from `libraryStore.listModules('user')`. With filter — names containing substring. Marks current module with `← current`.
 
 ## Keyboard shortcuts
 
@@ -508,45 +533,51 @@ Both → `restoreModuleFromData(moduleData, dspCode)`:
 9. **`updateCode()` preserves body.** Never call `syncFromModule()` from `updateCode()`.
 10. **`syncFromModule()` resets everything.** Only from user's ⟳ / `New` flow (via `clearModule`). **Never** after `restoreModuleFromData()`.
 11. **`mappingTable` on `Knob`/`Slider` — in both `serialize` and `deserialize`.** Otherwise round-trip loses it (LFO too fast, oscilloscope broken). Same for any future parametric component with mapping.
-12. **`save` uses `getCode()`** (live editor content), not `_userCsoundCode`.
+12. **All saves go through `saveService.saveModule()`.** No duplication between Toolbar, Terminal, or anywhere else. `generateJsCode()` lives **only** in `saveService.js`.
 13. **`_cmdNew` / `Toolbar._onNew` must reset `_userCsoundCode`** and rebuild code panel (`clearModule({ title, resetColor })`). Otherwise old DSP body leaks into "new" module.
 14. **`rm` ≠ `del`** in terminal `switch` — `rm`/`remove` for user modules, `del`/`delete` for components.
-15. **Save always targets `user`** (MVP). Builtin libraries (`test-lib`, `nm2`, ...) are
-    **read-only**; the editor can load from them but not overwrite. Future: "Save As →"
-    to pick library, plus `libraryStore.createLibrary()`.
-16. **`category` is required in generated JS.** `collectModuleData` falls back to `'custom'`
-    if missing. Must be valid per `isValidCategory()` (see `src/moduleCategories.js`).
-17. **No `typeID` in generated JS.** `CsoundGenerator.addModule` builds the UDO path
-    from `definition.library`; `typeID` is dead.
+15. **Save always targets an explicit library.** `saveService` takes `{ lib }`. Builtin libraries are **read-only**; `libraryStore.saveModule` writes only to `user` (or any user library on IndexedDB / Tauri fs).
+16. **`category` and `status` are required in generated JS.** `saveService.generateJsCode` reads `app.module.category || 'custom'`, `app.module.status || 'dev'`. Both must be valid per `isValidCategory()` / `getStatusMeta()`.
+17. **No `typeID` in generated JS.** `CsoundGenerator.addModule` builds the UDO path from `definition.library`; `typeID` is dead.
+18. **`libraryStore.createLibrary(name)`** — creates `<lib>/_meta.json` and `<lib>/modules/`. Called from `Toolbar._showSaveDialog` (`+ New` button) and `saveService` (if `lib` doesn't exist). Never overwrites existing `_meta.json`.
+19. **`module.status` is per-module, not per-library.** Stored in JS (`status: 'dev'`), read by `restoreModuleFromData`, written by `saveService`.
+20. **No `await import()` inside sync methods.** `PropertiesPanel._renderModuleTab` is **synchronous** — `getStatusMeta` imported at top of file, not inline.
 
 ## Known issues
 
-- `TerminalPanel._cmdSave` / `_generateJsCode` duplicates `ModulePropertiesWindow.generateModuleCode`
-  and `Toolbar._onSave` — unify into `saveService`
-- `ModulePropertiesWindow` / `ComponentPropertiesWindow` headless — delete when `PropertiesPanel` covers all cases
+- `ModulePropertiesWindow` / `ComponentPropertiesWindow` headless — only `_showMappingBrowser()` still used; delete when standalone modal exists
 - `PropertiesPanel` category select has no visual grouping (flat list from `CATEGORIES`)
-- **Save always goes to `user`** — no UI to pick another target library yet
 - **Load dialog shows all libraries flat** — no search / filter; fine for small counts
-- **No library-level meta** — `test-lib` is a hardcoded demo; real libraries will need `meta.json` (author, version, description)
+- **No library-level meta UI** — `_meta.json` written by `createLibrary`, but no editor to change `author`/`version`/`description` after creation
 - Code Viewer no undo/redo (browser-default for `<textarea>`)
 - `DockLayout` no collapse, no tabs (only Properties has tabs)
 - No virtualized highlight — may lag on very large code
 - Terminal no autocomplete
-- `PropertiesPanel._render()` uses `style.cssText +=` — accumulates
-- `TerminalPanel._cmdSet(mappingTable)` calls `updateCode()`, `PropertiesPanel` mapping-select doesn't — unify
+- `PropertiesPanel._render()` uses `style.cssText +=` — accumulates (minor leak; fix by resetting `cssText = ''` before appending)
+- **`TerminalPanel._cmdSet(mappingTable)` calls `updateCode()`, `PropertiesPanel` mapping-select doesn't** — unify
 - Context menu still has `Change Color` — should be removed (color in Properties)
 - Old modules lack `mappingTable` on `Knob`/`Slider` — re-assign and re-save
+- **`load <name>` ambiguity:** if the name exists in multiple libraries, `user` wins silently. No error, no candidate list. Fine for MVP, but complicates debugging "wrong module loaded"
+- **`save` overwrites without confirmation.** `libraryStore.saveModule` replaces `<lib>/<Name>.{js,txt}` silently. `saveService` does not check existing. Users can lose work by saving under an existing name
+- **`window.confirm()` on Tauri macOS WKWebView** — unreliable. `_onNew` and `_cmdRm` use it; on macOS may return `true` without showing dialog
+- **`/tables/` HTML listing** — Vite in dev serves directory listing; in build/prod may not. `_listTableNames` will return `[]`. Workaround: `public/tables/_index.json` (TODO)
+- **`mapping-multi-select` reorder** — no drag/↑↓ UI; to reorder, uncheck all and select in desired order
+- **`PartSelector.onChange` missing** in constructor — `ModuleFactory` wraps it for Csound `setControlChannel`
 
 ## Roadmap
 
 **Short:**
+
 - `PropertiesPanel` mapping-select: call `updateCode()`
-- Category select in `PropertiesPanel` — already done; add grouping (optgroup) if `CATEGORIES` grows
-- `Save as → <library>` (dropdown, default `user`)
-- `libraryStore.createLibrary(name)` — mkdir on Tauri, IndexedDB first key on web
+- Category select in `PropertiesPanel` — add grouping (optgroup) if `CATEGORIES` grows
+- **Save confirmation dialog** — check `libraryStore.loadModule(lib, name)` before save; `confirm()` if exists
+- **Replace `window.confirm()`** with custom `ConfirmDialog` (Tauri macOS WKWebView issue)
 - Fix `PropertiesPanel._render()` `cssText +=`
+- **Library meta editor** — edit `author`/`version`/`description`/`geometry` in Toolbar after `+ New`
+- **`load` ambiguity error** — show candidate list when name exists in multiple libraries
 
 **Mid:**
+
 - CodeMirror 5 or 6 (protected ranges as `readOnly` marks)
 - Collapse panels in `DockLayout`
 - Editor undo/redo (separate from main app)
@@ -554,11 +585,14 @@ Both → `restoreModuleFromData(moduleData, dspCode)`:
 - `led_peak` UDO variant with `abs()`
 - Export / Import library (ZIP, JSZip or `CompressionStream`)
 - `libraryStore` URL import (`_index.json` with `libraries: ["https://..."]`)
+- **Repair patch dialog** — main app: if `user/Zgen` missing but `my-fm/Zgen` exists, offer replacement
 
 **Long:**
+
 - Component grouping (visual)
 - Live preview (`preview` command → send UDO to main app)
 - Macro recording in terminal
 - Multi-select in Properties
 - Community library registry (optional server / GitHub Releases)
 - Patch format v2 with `libraries: []` field for portable sharing
+- **`ModuleFactory` keyed by `<lib>/<type>`** — proper collision handling (currently first-wins). Allows `user/Zgen` and `my-fm/Zgen` in same patch via type mangling (`Zgen_user`, `Zgen_myfm`)

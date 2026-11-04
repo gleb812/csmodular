@@ -5,9 +5,10 @@
 // Заменяет ModulePropertiesWindow + ComponentPropertiesWindow.
 // Логика — из них же (schema-based рендер для компонента,
 // form-based для модуля).
-
 import { ColorPicker } from '../../src/ui/ColorPicker.js';
 import { CATEGORIES, isValidCategory } from '../../src/moduleCategories.js';
+import { getStatusMeta } from '../../src/api/moduleStatusStore.js';   // ⭐ NEW
+import { TablesPanel } from './TablesPanel.js';
 import {
     serializeComponents,
     collectParamIds,
@@ -50,8 +51,10 @@ export class PropertiesPanel {
 
         this.tabModule = this._makeTab('📦 Module', 'module');
         this.tabComponent = this._makeTab('🔧 Component', 'component');
+        this.tabTables = this._makeTab('📊 Tables', 'tables');   // ⭐ NEW
         tabs.appendChild(this.tabModule);
         tabs.appendChild(this.tabComponent);
+        tabs.appendChild(this.tabTables);
 
         // Body
         this.body = document.createElement('div');
@@ -64,8 +67,8 @@ export class PropertiesPanel {
 
         this.element.appendChild(tabs);
         this.element.appendChild(this.body);
-
-        this._render();
+        this.tablesPanel = new TablesPanel(this.app);
+        this.element.appendChild(this.tablesPanel.element);
     }
 
     _makeTab(label, key) {
@@ -91,14 +94,28 @@ export class PropertiesPanel {
     // ─────────────────────────── RENDER ─────────────────────────────
 
     _render() {
-        // Подсветка активного таба
         const base = 'padding: 8px 16px; cursor: pointer; font-size: 11px; border-right: 1px solid #333; user-select: none; transition: background 0.15s;';
         const active = 'color: #0af; background: #1e1e1e; font-weight: bold;';
         const inactive = 'color: #666; background: transparent;';
         this.tabModule.style.cssText = base + (this.activeTab === 'module' ? active : inactive);
         this.tabComponent.style.cssText = base + (this.activeTab === 'component' ? active : inactive);
+        if (this.tabTables) {
+            this.tabTables.style.cssText = base + (this.activeTab === 'tables' ? active : inactive);
+        }
 
-        // Перерисовка содержимого
+        // ⭐ Tables — отдельный panel, скрываем body
+        const isTables = this.activeTab === 'tables';
+        this.body.style.display = isTables ? 'none' : 'block';
+        if (this.tablesPanel) {
+            this.tablesPanel.element.style.display = isTables ? 'flex' : 'none';
+        }
+
+        if (isTables) {
+            this.tablesPanel?.refresh();
+            this.tablesPanel?.onShow();
+            return;
+        }
+
         this.body.innerHTML = '';
 
         if (this.activeTab === 'module') {
@@ -145,11 +162,13 @@ export class PropertiesPanel {
         this._field('Module Name', nameInput);
 
         // ── Height ── (width всегда 1)
-        this._field('Height (grid cells)', this._numberInput(
+        const heightInput = this._numberInput(
             module.gridHeight || 3, 1, 20,
             () => this._updateSize(),
             'module-height-input'
-        ));
+        );
+        heightInput.style.cssText += 'width: 70px;';
+        this._inlineField('Height', heightInput);
 
         // ── Color ──
         this._field('Panel Color', this._makeColorSection(module));
@@ -163,19 +182,91 @@ export class PropertiesPanel {
             border: 1px solid #444; border-radius: 3px; color: white;
             font-size: 12px; box-sizing: border-box;
         `;
+        const CAT_GROUPS = {
+            'Sources':   ['osc', 'noise', 'sample', 'lfo'],
+            'Processing':['filter', 'fx', 'dynamics'],
+            'Routing':   ['mixer', 'switch', 'logic'],
+            'Control':   ['env', 'midi', 'control', 'util', 'math'],
+            'I/O':       ['io'],
+            'Other':     ['custom', 'unknown'],
+        };
+        const grouped = new Set();
+        for (const [groupName, cats] of Object.entries(CAT_GROUPS)) {
+            const present = cats.filter(c => CATEGORIES.includes(c));
+            if (present.length === 0) continue;
+            const og = document.createElement('optgroup');
+            og.label = groupName;
+            for (const c of present) {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                if (c === cat) opt.selected = true;
+                og.appendChild(opt);
+                grouped.add(c);
+            }
+            catSelect.appendChild(og);
+        }
+        // ungrouped fallback
         for (const c of CATEGORIES) {
+            if (grouped.has(c)) continue;
             const opt = document.createElement('option');
             opt.value = c;
             opt.textContent = c;
             if (c === cat) opt.selected = true;
             catSelect.appendChild(opt);
         }
+
         catSelect.onchange = (e) => {
             if (this.app.module) {
                 this.app.module.category = e.target.value;
             }
         };
         this._field('Category', catSelect);
+
+        // ── Status ── (⭐ NEW)
+        const statusValue = module.status || 'dev';
+        const statusMeta = getStatusMeta(statusValue);
+
+        const statusWrapper = document.createElement('div');
+        statusWrapper.style.cssText = 'display: flex; gap: 8px; align-items: center; max-width: 180px;';
+
+        const dot = document.createElement('span');
+        dot.style.cssText = `
+            display: inline-block; width: 10px; height: 10px;
+            border-radius: 50%; background: ${statusMeta.color};
+            flex-shrink: 0;
+        `;
+
+        const statusSelect = document.createElement('select');
+        statusSelect.style.cssText = `
+            flex: 1; padding: 4px 8px; background: #1a1a1a;
+            border: 1px solid #444; border-radius: 3px; color: white;
+            font-size: 12px; box-sizing: border-box;
+        `;
+        const STATUS_OPTIONS = [
+            { value: 'stable',   label: '✅ stable' },
+            { value: 'passable', label: '🟢 passable' },
+            { value: 'dev',      label: '🟡 dev' },
+            { value: 'broken',   label: '🔴 broken' },
+        ];
+        for (const opt of STATUS_OPTIONS) {
+            const optEl = document.createElement('option');
+            optEl.value = opt.value;
+            optEl.textContent = opt.label;
+            if (opt.value === statusValue) optEl.selected = true;
+            statusSelect.appendChild(optEl);
+        }
+        statusSelect.onchange = () => {
+            if (this.app.module) {
+                this.app.module.status = statusSelect.value;
+                const newMeta = getStatusMeta(statusSelect.value);
+                dot.style.background = newMeta.color;
+            }
+        };
+
+        statusWrapper.appendChild(dot);
+        statusWrapper.appendChild(statusSelect);
+        this._inlineField('Status', statusWrapper);
 
     }
 
@@ -343,6 +434,8 @@ export class PropertiesPanel {
             inputEl = this._makeMappingField(comp, propDef);
         } else if (propDef.type === 'mapping-multi-select') {
             inputEl = this._makeMappingMultiField(comp, propDef);
+        } else if (propDef.type === 'size') {
+            inputEl = this._makeSizeField(comp, propDef);
         } else if (propDef.type === 'checkbox') {
             inputEl = document.createElement('input');
             inputEl.type = 'checkbox';
@@ -364,6 +457,47 @@ export class PropertiesPanel {
             wrapper.appendChild(help);
         }
 
+        return wrapper;
+    }
+
+    _makeSizeField(comp, propDef) {
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'display: flex; gap: 6px; align-items: center;';
+
+        const mkNum = (key, min, max) => {
+            const inp = document.createElement('input');
+            inp.type = 'number';
+            inp.value = comp[key] ?? 0;
+            inp.min = min;
+            inp.max = max;
+            inp.style.cssText = `
+                width: 64px; padding: 4px 8px; background: #1a1a1a;
+                border: 1px solid #444; border-radius: 3px; color: white;
+                font-size: 12px; box-sizing: border-box;
+            `;
+            inp.onchange = () => {
+                const v = parseFloat(inp.value);
+                if (isNaN(v) || v <= 0) {
+                    inp.value = comp[key] ?? '';
+                    return;
+                }
+                comp[key] = v;
+                if (propDef.afterChange) propDef.afterChange(comp, v);
+                this._onSchemaChange();
+            };
+            return inp;
+        };
+
+        const wInput = mkNum('width',  propDef.minWidth  ?? 1, propDef.maxWidth  ?? 500);
+        const hInput = mkNum('height', propDef.minHeight ?? 1, propDef.maxHeight ?? 500);
+
+        const x = document.createElement('span');
+        x.textContent = '×';
+        x.style.cssText = 'color: #666; font-size: 11px;';
+
+        wrapper.appendChild(wInput);
+        wrapper.appendChild(x);
+        wrapper.appendChild(hInput);
         return wrapper;
     }
 
@@ -810,6 +944,23 @@ export class PropertiesPanel {
         wrapper.style.marginBottom = '12px';
         wrapper.appendChild(this._label(labelText));
         wrapper.appendChild(inputEl);
+        this.body.appendChild(wrapper);
+    }
+
+    _inlineField(labelText, inputEl, labelWidth = 90) {
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-bottom: 12px;';
+
+        const lbl = document.createElement('label');
+        lbl.textContent = labelText;
+        lbl.style.cssText = `color: #888; font-size: 10px; flex: 0 0 ${labelWidth}px;`;
+
+        const right = document.createElement('div');
+        right.style.cssText = 'flex: 1; min-width: 0;';
+        right.appendChild(inputEl);
+
+        wrapper.appendChild(lbl);
+        wrapper.appendChild(right);
         this.body.appendChild(wrapper);
     }
 

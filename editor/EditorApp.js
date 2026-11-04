@@ -4,6 +4,8 @@ import {
     collectPorts,
     createComponent,
     ComponentRegistry,
+    hasCollisions,   
+    getTypeOf,
 } from './ComponentRegistry.js';
 
 
@@ -276,8 +278,6 @@ export class EditorApp {
 
     createComponentInstance(type, x, y, size, jackType = null) {
         const opts = { x, y };
-        
-        // ⭐ type уже ClassName (Knob, Slider, Input, Output, ...)
         if (type === 'Input' || type === 'Output') {
             opts.jackType = jackType || 'audio';
         }
@@ -288,16 +288,20 @@ export class EditorApp {
         component.id = this._generateComponentId().toString();
         component.originalID = component.id;
         component.parameterId = parseInt(component.id);
-        component.width = size.width;
-        component.height = size.height;
+        
+        // ⭐ NEW: для auto-size компонентов (TextLabel) НЕ перезаписываем размеры
+        const def = ComponentRegistry[type];
+        if (!def?.autoSize) {
+            component.width = size.width;
+            component.height = size.height;
+        }
+        
         component.parent = this.module;
         component._editorModule = this.module;
         component._isNewDragging = true;
-        
+
         return component;
     }
-
-    // editor/EditorApp.js - в класс EditorApp добавим
 
     // ⭐ Генератор ID с переиспользованием
     _nextComponentId = 1;
@@ -535,20 +539,7 @@ export class EditorApp {
                 comp.y + comp.height <= this.module.y + this.module.height;
             
             // Проверка коллизий с другими компонентами
-            let hasCollision = false;
-            for (const other of this.components) {
-                if (other === comp || other._isNewDragging) continue;
-                
-                if (comp.x < other.x + other.width &&
-                    comp.x + comp.width > other.x &&
-                    comp.y < other.y + other.height &&
-                    comp.y + comp.height > other.y) {
-                    hasCollision = true;
-                    break;
-                }
-            }
-            
-            this.dropValid = isInsideModule && !hasCollision;
+            this.dropValid = isInsideModule && !this._hasCollision(comp);
             this.dropTargetModule = isInsideModule ? this.module : null;
             
             this.canvas.style.cursor = this.dropValid ? 'copy' : 'not-allowed';
@@ -622,22 +613,8 @@ export class EditorApp {
             comp.relY = newY - this.module.y;
             
             // Проверяем коллизии с другими компонентами
-            let hasCollision = false;
-            for (const other of this.components) {
-                if (other === comp || other._isNewDragging) continue;
-                
-                if (comp.x < other.x + other.width &&
-                    comp.x + comp.width > other.x &&
-                    comp.y < other.y + other.height &&
-                    comp.y + comp.height > other.y) {
-                    hasCollision = true;
-                    break;
-                }
-            }
-            
-            // Меняем курсор если есть коллизия
+            const hasCollision = this._hasCollision(comp);
             this.canvas.style.cursor = hasCollision ? 'not-allowed' : 'grabbing';
-            
             return;
         }
         
@@ -725,6 +702,7 @@ export class EditorApp {
         this.module.height = gridHeight * GRID_UNITS.Y;
         this.module.title = moduleData.displayName || moduleData.type || 'Module';
         this.module.category = moduleData.category || 'custom';
+        this.module.status = moduleData.status || 'dev';   // ⭐ NEW
         // ⭐ Цвет модуля из данных
         if (moduleData.customColor) {
             this.module.customColor = moduleData.customColor;
@@ -840,18 +818,7 @@ export class EditorApp {
                            comp.y + comp.height <= this.module.y + this.module.height;
             
             // Проверяем коллизии с другими компонентами
-            let hasCollision = false;
-            for (const other of this.components) {
-                if (other === comp || other._isNewDragging) continue;
-                
-                if (comp.x < other.x + other.width &&
-                    comp.x + comp.width > other.x &&
-                    comp.y < other.y + other.height &&
-                    comp.y + comp.height > other.y) {
-                    hasCollision = true;
-                    break;
-                }
-            }
+            const hasCollision = this._hasCollision(comp);
             
             // Если позиция невалидна или есть коллизия - возвращаем на исходную
             if (!isValid || hasCollision) {
@@ -1075,6 +1042,7 @@ export class EditorApp {
         if (this.module) {
             if (opts.title !== undefined) this.module.title = opts.title;
             this.module.category = 'custom';
+            this.module.status = 'dev';   // ⭐ NEW
             if (opts.resetColor) this.module.customColor = null;
             this.module._userCsoundCode = null;
         }
@@ -1306,19 +1274,52 @@ export class EditorApp {
         ctx.restore();
     }
 
+    /**
+     * Проверка коллизий компонента с другими.
+     * Ярлыки (noCollision) не проверяются и не мешают.
+     * @param {object} comp — компонент, который двигаем/ставим
+     * @param {number} x — новые мировые X
+     * @param {number} y — новые мировые Y
+     * @returns {boolean} true если есть коллизия
+     */
+    _hasCollision(comp, x = comp.x, y = comp.y) {
+        if (!hasCollisions(comp)) return false;   // сам ярлык — не проверяем
+        for (const other of this.components) {
+            if (other === comp) continue;
+            if (other._isNewDragging) continue;
+            if (!hasCollisions(other)) continue;  // ярлык не мешает
+            if (x < other.x + other.width &&
+                x + comp.width > other.x &&
+                y < other.y + other.height &&
+                y + comp.height > other.y) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     drawSelection(comp) {
         const ctx = this.ctx;
         ctx.save();
         ctx.strokeStyle = '#0af';
         ctx.lineWidth = 2 / this.zoom;
         ctx.setLineDash([4 / this.zoom, 4 / this.zoom]);
-        
+
         const x = comp.x || 0;
         const y = comp.y || 0;
         const w = comp.width || comp.actualSize || 20;
         const h = comp.height || comp.actualSize || 20;
-        
-        ctx.strokeRect(x - 3 / this.zoom, y - 3 / this.zoom, w + 6 / this.zoom, h + 6 / this.zoom);
+
+        // ⭐ auto-size компоненты (TextLabel) — без отступа
+        const def = ComponentRegistry[getTypeOf(comp)];
+        const pad = def?.autoSize ? 0 : 3;
+
+        ctx.strokeRect(
+            x - pad / this.zoom,
+            y - pad / this.zoom,
+            w + 2 * pad / this.zoom,
+            h + 2 * pad / this.zoom
+        );
         ctx.setLineDash([]);
         ctx.restore();
     }

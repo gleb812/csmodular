@@ -128,7 +128,7 @@ export class ModuleFactory {
                         `[ModuleFactory] type "${moduleDef.type}" already registered ` +
                         `from library "${prev.library}", skipping "${lib}/${name}"`
                     );
-                    return false;
+                    return true;
                 }
                 // Тот же lib, тот же type — перезагрузка (invalidate), ок
             }
@@ -141,11 +141,6 @@ export class ModuleFactory {
             console.error(`[ModuleFactory] loadModule("${lib}/${name}") error:`, error);
             return false;
         }
-    }
-
-    // ⭐ Алиас для обратной совместимости (старые вызовы loadUserModule(name))
-    async loadUserModule(moduleName) {
-        return this.loadModule('user', moduleName);
     }
 
     // ⭐ Является ли модуль пользовательским — теперь по definition.isUser
@@ -193,7 +188,11 @@ export class ModuleFactory {
         if (definition.customColor) {
             panel.customColor = definition.customColor;
         }
-        
+
+        if (definition.library) {
+            panel.library = definition.library;
+        }
+
         // Создаем компоненты 
         this._addComponentsToPanel(panel, definition.components);
         
@@ -307,9 +306,10 @@ export class ModuleFactory {
                 case 'ButtonText':
                     component = new ButtonText(
                         tempX, tempY,
-                        compDef.width || 40,
+                        compDef.width || 40,  
                         compDef.text || 'M',
-                        compDef.initialState !== undefined ? compDef.initialState : true
+                        compDef.initialState !== undefined ? compDef.initialState : true,
+                        compDef.height  
                     );
                     break;
 
@@ -338,7 +338,6 @@ export class ModuleFactory {
                         tempX, tempY,
                         compDef.text || '',
                         compDef.fontSize || 10,
-                        compDef.color || '#888'
                     );
                     break;
 
@@ -347,6 +346,8 @@ export class ModuleFactory {
                         tempX, tempY,
                         compDef.width || 40,
                         compDef.text || 'Text',
+                        true,
+                        compDef.height || 13
                     );
                     break;
                     

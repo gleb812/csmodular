@@ -85,7 +85,7 @@ class WebLibraryStore {
         const result = [];
         const seen = new Set();
 
-        // 1. Builtin — из _index.json
+        // 1. Builtin
         try {
             const res = await fetch(BUILTIN_INDEX_URL, { cache: 'no-cache' });
             if (res.ok) {
@@ -99,22 +99,19 @@ class WebLibraryStore {
                             result.push({ name, source: 'builtin' });
                         }
                     }
-                } else {
-                    console.warn('[libraryStore/web] _index.json → HTML fallback, no builtin libs');
                 }
-            } else {
-                console.warn('[libraryStore/web] _index.json not found (status', res.status, ')');
             }
         } catch (e) {
             console.warn('[libraryStore/web] listLibraries builtin failed:', e);
         }
 
-        // 2. User — из IndexedDB (уникальные имена библиотек)
+        // 2. User
         try {
             const keys = await this._idbKeys();
             for (const key of keys) {
-                const lib = String(key).split('/')[0];
-                if (lib && !seen.has(lib)) {
+                const s = String(key);
+                const lib = s.split('/')[0];
+                if (lib && lib !== '_meta' && !seen.has(lib)) {
                     seen.add(lib);
                     result.push({ name: lib, source: 'user' });
                 }
@@ -123,56 +120,89 @@ class WebLibraryStore {
             console.warn('[libraryStore/web] listLibraries user failed:', e);
         }
 
+        // 3. ⭐ Подтянуть meta для каждой
+        for (const entry of result) {
+            try {
+                entry.meta = await this.getLibraryMeta(entry.name);
+            } catch {
+                entry.meta = { name: entry.name, displayName: entry.name, author: 'unknown',
+                               version: '0.0.0', description: '', geometry: 'square', createdAt: null };
+            }
+        }
+
         return result;
     }
 
     // ---------- Список модулей библиотеки ----------
 
     async listModules(lib) {
-        const names = new Set();
+        const result = new Map();  // name -> { name, displayName, category, status }
 
-        // 1. Builtin: <lib>/modules/<Name>.js
-        //    В web нельзя прочитать папку — нужен манифест внутри библиотеки.
-        //    Пробуем _index.json внутри библиотеки, иначе fallback: не знаем.
+        // 1. Builtin: <lib>/_index.json
         try {
-            const url = `/libraries/${lib}/_index.json`;
-            const res = await fetch(url, { cache: 'no-cache' });
+            const res = await fetch(`/libraries/${lib}/_index.json`, { cache: 'no-cache' });
             if (res.ok) {
                 const text = await res.text();
                 if (!looksLikeHtml(text)) {
                     const data = JSON.parse(text);
                     const mods = Array.isArray(data?.modules) ? data.modules : [];
-                    mods.forEach(m => names.add(m));
+                    for (const m of mods) {
+                        if (typeof m === 'string') {
+                            result.set(m, { name: m, displayName: m, category: 'custom', status: 'dev' });
+                        } else if (m && m.name) {
+                            result.set(m.name, {
+                                name: m.name,
+                                displayName: m.displayName || m.name,
+                                category: m.category || 'custom',
+                                status: m.status || 'dev',
+                            });
+                        }
+                    }
+                }
+            }
+        } catch { /* ignore */ }
+
+        // 2. User: _index.json из IDB, fallback — по ключам
+        try {
+            const raw = await this._idbGet(`${lib}/_index.json`);
+            if (raw) {
+                const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+                const mods = Array.isArray(data?.modules) ? data.modules : [];
+                for (const m of mods) {
+                    if (typeof m === 'string') {
+                        result.set(m, { name: m, displayName: m, category: 'custom', status: 'dev' });
+                    } else if (m && m.name) {
+                        result.set(m.name, {
+                            name: m.name,
+                            displayName: m.displayName || m.name,
+                            category: m.category || 'custom',
+                            status: m.status || 'dev',
+                        });
+                    }
                 }
             }
         } catch (e) {
-            // нет _index.json — нормально для user-библиотек
+            console.warn('[libraryStore/web] listModules user _index failed:', e);
         }
 
-        // 2. User: ключи из IndexedDB "<lib>/<Name>.js"
+        // 2b. Fallback: без _index.json — по ключам IDB (для user)
         try {
             const keys = await this._idbKeys();
+            const prefix = lib + '/';
             for (const key of keys) {
                 const s = String(key);
-                const prefix = lib + '/';
                 if (!s.startsWith(prefix)) continue;
                 const rest = s.slice(prefix.length);
                 const m = rest.match(/^([^/]+)\.js$/);
-                if (m) names.add(m[1]);
+                if (m && !result.has(m[1])) {
+                    result.set(m[1], {
+                        name: m[1], displayName: m[1], category: 'custom', status: 'dev',
+                    });
+                }
             }
-        } catch (e) {
-            console.warn('[libraryStore/web] listModules user failed:', e);
-        }
+        } catch { /* ignore */ }
 
-        // Загружаем описания (чтобы вернуть [{ name, description }])
-        const result = [];
-        for (const name of [...names].sort()) {
-            const loaded = await this.loadModule(lib, name);
-            if (loaded?.description) {
-                result.push({ name, description: loaded.description });
-            }
-        }
-        return result;
+        return [...result.values()].sort((a, b) => a.name.localeCompare(b.name));
     }
 
     // ---------- Загрузка модуля ----------
@@ -233,7 +263,7 @@ class WebLibraryStore {
         return this._fetchText(`/libraries/${lib}/modules/${name}.txt`);
     }
 
-    // ---------- Сохранение / удаление (только user) ----------
+    // ---------- Сохранение / удаление  ----------
 
     async saveModule(lib, name, jsCode, dspCode = null) {
         try {
@@ -242,6 +272,9 @@ class WebLibraryStore {
                 await this._idbSet(`${lib}/${name}.txt`, dspCode);
             }
             this._moduleCache.delete(`${lib}/${name}`);
+
+            // ⭐ Обновить _index.json библиотеки
+            await this._updateIndex(lib, name, jsCode);
             return true;
         } catch (e) {
             console.warn(`[libraryStore/web] saveModule("${lib}/${name}") failed:`, e);
@@ -249,11 +282,155 @@ class WebLibraryStore {
         }
     }
 
+    async removeLibrary(lib) {
+        const name = String(lib || '').trim();
+        if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
+            console.warn(`[libraryStore/web] removeLibrary: invalid name "${name}"`);
+            return false;
+        }
+        // builtin — read-only
+        try {
+            const res = await fetch(BUILTIN_INDEX_URL, { cache: 'no-cache' });
+            if (res.ok) {
+                const text = await res.text();
+                if (!looksLikeHtml(text)) {
+                    const data = JSON.parse(text);
+                    const names = Array.isArray(data?.libraries) ? data.libraries : [];
+                    if (names.includes(name)) {
+                        console.warn(`[libraryStore/web] removeLibrary: "${name}" is builtin (read-only)`);
+                        return false;
+                    }
+                }
+            }
+        } catch { /* ignore */ }
+
+        try {
+            // Удалить все ключи `<lib>/*`
+            const keys = await this._idbKeys();
+            const prefix = name + '/';
+            let deleted = 0;
+            for (const key of keys) {
+                if (String(key).startsWith(prefix)) {
+                    await this._idbDelete(key);
+                    deleted++;
+                }
+            }
+            this._moduleCache.clear();  // проще, чем точечно
+            return deleted > 0;
+        } catch (e) {
+            console.warn(`[libraryStore/web] removeLibrary("${name}") failed:`, e);
+            return false;
+        }
+    }
+
+    async _updateIndex(lib, name, jsCode) {
+        // читаем текущий
+        let index = { modules: [] };
+        try {
+            const raw = await this._idbGet(`${lib}/_index.json`);
+            if (raw) index = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        } catch { /* ignore */ }
+
+        // ⚠️ eval — но только при save, и только своего кода
+        const def = parseModuleDefinition(jsCode);
+
+        // удаляем старую запись
+        index.modules = (index.modules || []).filter(m =>
+            (typeof m === 'string' ? m : m.name) !== name
+        );
+
+        // добавляем новую
+        index.modules.push({
+            name,
+            displayName: def?.displayName || name,
+            category: def?.category || 'custom',
+            status: def?.status || 'dev',
+        });
+        index.modules.sort((a, b) => a.name.localeCompare(b.name));
+
+        await this._idbSet(`${lib}/_index.json`, index);
+    }
+
+    async createLibrary(name, meta = {}) {
+        const lib = String(name || '').trim();
+        if (!/^[a-zA-Z0-9_-]+$/.test(lib)) {
+            console.warn(`[libraryStore/web] createLibrary: invalid name "${lib}"`);
+            return false;
+        }
+        const metaObj = {
+            name: lib,
+            displayName: meta.displayName || lib,
+            author: meta.author || 'unknown',
+            version: meta.version || '0.1.0',
+            description: meta.description || '',
+            geometry: meta.geometry || 'square',
+            createdAt: new Date().toISOString(),
+        };
+        try {
+            // ⭐ Если _meta.json уже есть — не перезаписываем (защита от случайного клоббера)
+            const existing = await this._idbGet(`${lib}/_meta.json`);
+            if (!existing) {
+                await this._idbSet(`${lib}/_meta.json`, metaObj);
+            }
+            return true;
+        } catch (e) {
+            console.warn('[libraryStore/web] createLibrary failed:', e);
+            return false;
+        }
+    }
+
+    async getLibraryMeta(lib) {
+        const defaultMeta = {
+            name: lib, displayName: lib, author: 'unknown',
+            version: '0.0.0', description: '',
+            geometry: 'square', createdAt: null,
+        };
+
+        // builtin: fetch
+        try {
+            const res = await fetch(`/libraries/${lib}/_meta.json`, { cache: 'no-cache' });
+            if (res.ok) {
+                const text = await res.text();
+                if (!looksLikeHtml(text)) {
+                    return { ...defaultMeta, ...JSON.parse(text) };
+                }
+            }
+        } catch { /* ignore */ }
+
+        // user: IDB
+        try {
+            const meta = await this._idbGet(`${lib}/_meta.json`);
+            if (meta) {
+                return { ...defaultMeta, ...(typeof meta === 'string' ? JSON.parse(meta) : meta) };
+            }
+        } catch { /* ignore */ }
+
+        return defaultMeta;
+    }
+
     async removeModule(lib, name) {
         try {
             await this._idbDelete(`${lib}/${name}.js`);
             await this._idbDelete(`${lib}/${name}.txt`);
             this._moduleCache.delete(`${lib}/${name}`);
+
+            // ⭐ Обновить _index.json — убрать запись
+            try {
+                const raw = await this._idbGet(`${lib}/_index.json`);
+                if (raw) {
+                    const index = typeof raw === 'string' ? JSON.parse(raw) : raw;
+                    const before = (index.modules || []).length;
+                    index.modules = (index.modules || []).filter(m =>
+                        (typeof m === 'string' ? m : m.name) !== name
+                    );
+                    if (index.modules.length !== before) {
+                        await this._idbSet(`${lib}/_index.json`, index);
+                    }
+                }
+            } catch (e) {
+                console.warn(`[libraryStore/web] removeModule("${lib}/${name}") index update failed:`, e);
+            }
+
             return true;
         } catch (e) {
             console.warn(`[libraryStore/web] removeModule("${lib}/${name}") failed:`, e);

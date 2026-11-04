@@ -288,6 +288,7 @@ export const ComponentRegistry = {
             x: Math.round(c.relX ?? 0),
             y: Math.round(c.relY ?? 0),
             width: c.width ?? 40,
+            height: c.height ?? 13,  
             text: c.text ?? 'M',
             initialState: c.isActive !== undefined ? c.isActive : true,
         }),
@@ -297,7 +298,8 @@ export const ComponentRegistry = {
                 ctx.module.x + d.x, ctx.module.y + d.y,
                 d.width ?? 40,
                 d.text ?? 'M',
-                d.initialState !== undefined ? d.initialState : true
+                d.initialState !== undefined ? d.initialState : true,
+                d.height ?? 13   
             );
             c.relX = d.x;
             c.relY = d.y;
@@ -422,34 +424,36 @@ export const ComponentRegistry = {
         label: 'Label',
         category: 'display',
         paletteSize: { width: 60, height: 16 },
+        autoSize: true,          
         isParametric: false,
         isJack: false,
+        noCollision: true, 
 
         create: (opts = {}) => new TextLabel(
             opts.x ?? 0, opts.y ?? 0,
             opts.text ?? 'Label',
             opts.fontSize ?? 10,
-            opts.color ?? '#888888',
             opts.align ?? 'left',
             opts.valign ?? 'top'
         ),
 
-        serialize: (c) => ({
-            componentType: 'TextLabel',
-            id: String(c.id),
-            x: Math.round(c.relX ?? 0),
-            y: Math.round(c.relY ?? 0),
-            text: c.text ?? 'Label',
-            fontSize: c.fontSize ?? 10,
-            color: c.color ?? '#888888',
-        }),
+        serialize: (c) => {
+            const out = {
+                componentType: 'TextLabel',
+                id: String(c.id),
+                x: Math.round(c.relX ?? 0),
+                y: Math.round(c.relY ?? 0),
+                text: c.text ?? 'Label',
+                fontSize: c.fontSize ?? 10,
+            };
+            return out;
+        },
 
         deserialize: (d, ctx) => {
             const c = new TextLabel(
                 ctx.module.x + d.x, ctx.module.y + d.y,
                 d.text ?? 'Label',
                 d.fontSize ?? 10,
-                d.color ?? '#888888',
                 d.align ?? 'left',
                 'top'
             );
@@ -1002,6 +1006,18 @@ export function collectPorts(components) {
     }
 
     return { inputs, outputs };
+}
+
+/**
+ * Участвует ли компонент в проверке коллизий.
+ * `noCollision: true` → ни сам не проверяется, ни другим не мешает.
+ */
+export function hasCollisions(componentOrType) {
+    const type = typeof componentOrType === 'string'
+        ? componentOrType
+        : getTypeOf(componentOrType);
+    if (!type) return true;   // неизвестный тип — считаем коллизирующим (безопасно)
+    return ComponentRegistry[type]?.noCollision !== true;
 }
 
 /**

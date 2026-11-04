@@ -1,9 +1,11 @@
 // src/api/libraryStore.tauri.js
 //
 // Tauri-бэкенд libraryStore:
-//   - builtin: <resourceDir>/libraries/<lib>/  (копия public/libraries)
+//   - builtin: <resourceDir>/libraries/<lib>/
 //   - user:    $DOCUMENT/CsModular/libraries/<lib>/
-//              modules/<Name>.js + csound/modules/<Name>.txt
+//              modules/<Name>.js + modules/<Name>.txt
+//              _meta.json  (метаданные библиотеки)
+//              _index.json (манифест модулей, обновляется при saveModule)
 
 import {
     readTextFile,
@@ -14,7 +16,7 @@ import {
     remove,
     BaseDirectory,
 } from '@tauri-apps/plugin-fs';
-import { parseModuleDefinition, looksLikeHtml } from './libraryStore.js';
+import { parseModuleDefinition } from './libraryStore.js';
 
 const ROOT_FOLDER = 'CsModular';
 const LIBS_SUBFOLDER = 'libraries';
@@ -23,7 +25,7 @@ class TauriLibraryStore {
     constructor() {
         this._rootReady = false;
         this._moduleCache = new Map(); // "lib/Name" -> { description, dspCode }
-        this._builtinDir = null;       // вычисляется лениво
+        this._builtinDir = null;
     }
 
     // ---------- Пути ----------
@@ -39,8 +41,6 @@ class TauriLibraryStore {
 
     async _getBuiltinDir() {
         if (this._builtinDir !== null) return this._builtinDir;
-        // В Tauri 2 ресурсы доступны через BaseDirectory.Resource.
-        // public/libraries попадает в resources как "libraries".
         this._builtinDir = 'libraries';
         return this._builtinDir;
     }
@@ -53,6 +53,10 @@ class TauriLibraryStore {
         }
     }
 
+    _userLibPath(lib) {
+        return `${ROOT_FOLDER}/${LIBS_SUBFOLDER}/${lib}`;
+    }
+
     // ---------- Список библиотек ----------
 
     async listLibraries() {
@@ -61,8 +65,6 @@ class TauriLibraryStore {
         const seen = new Set();
 
         // 1. Builtin — из <resource>/libraries/_index.json
-        //    (прочитать директорию ресурсов напрямую нельзя из-за scope,
-        //     поэтому используем тот же _index.json, что и web)
         try {
             const builtinDir = await this._getBuiltinDir();
             const path = `${builtinDir}/_index.json`;
@@ -96,15 +98,24 @@ class TauriLibraryStore {
             console.warn('[libraryStore/tauri] user list failed:', e);
         }
 
+        // 3. ⭐ Meta для каждой
+        for (const entry of result) {
+            try {
+                entry.meta = await this.getLibraryMeta(entry.name);
+            } catch {
+                entry.meta = this._defaultMeta(entry.name);
+            }
+        }
+
         return result;
     }
 
-    // ---------- Список модулей библиотеки ----------
+    // ---------- Список модулей библиотеки (без eval) ----------
 
     async listModules(lib) {
-        const names = new Set();
+        const result = new Map();  // name -> { name, displayName, category, status }
 
-        // 1. Builtin — из <resource>/libraries/<lib>/_index.json
+        // 1. Builtin: <resource>/libraries/<lib>/_index.json
         try {
             const builtinDir = await this._getBuiltinDir();
             const path = `${builtinDir}/${lib}/_index.json`;
@@ -112,36 +123,62 @@ class TauriLibraryStore {
                 const text = await readTextFile(path, { baseDir: BaseDirectory.Resource });
                 const data = JSON.parse(text);
                 const mods = Array.isArray(data?.modules) ? data.modules : [];
-                mods.forEach(m => names.add(m));
+                for (const m of mods) {
+                    if (typeof m === 'string') {
+                        result.set(m, { name: m, displayName: m, category: 'custom', status: 'dev' });
+                    } else if (m && m.name) {
+                        result.set(m.name, {
+                            name: m.name,
+                            displayName: m.displayName || m.name,
+                            category: m.category || 'custom',
+                            status: m.status || 'dev',
+                        });
+                    }
+                }
             }
-        } catch (e) {
-            // ignore
-        }
+        } catch { /* ignore */ }
 
-        // 2. User — readDir modules/
+        // 2. User: _index.json
         try {
-            const path = `${ROOT_FOLDER}/${LIBS_SUBFOLDER}/${lib}/modules`;
+            const indexPath = `${this._userLibPath(lib)}/_index.json`;
+            if (await this._exists(indexPath, BaseDirectory.Document)) {
+                const text = await readTextFile(indexPath, { baseDir: BaseDirectory.Document });
+                const data = JSON.parse(text);
+                const mods = Array.isArray(data?.modules) ? data.modules : [];
+                for (const m of mods) {
+                    if (typeof m === 'string') {
+                        result.set(m, { name: m, displayName: m, category: 'custom', status: 'dev' });
+                    } else if (m && m.name) {
+                        result.set(m.name, {
+                            name: m.name,
+                            displayName: m.displayName || m.name,
+                            category: m.category || 'custom',
+                            status: m.status || 'dev',
+                        });
+                    }
+                }
+            }
+        } catch { /* ignore */ }
+
+        // 2b. Fallback: без _index.json — readDir modules/
+        try {
+            const path = `${this._userLibPath(lib)}/modules`;
             if (await this._exists(path, BaseDirectory.Document)) {
                 const entries = await readDir(path, { baseDir: BaseDirectory.Document });
                 for (const e of entries) {
                     if (e.isFile && e.name?.endsWith('.js')) {
-                        names.add(e.name.replace(/\.js$/, ''));
+                        const name = e.name.replace(/\.js$/, '');
+                        if (!result.has(name)) {
+                            result.set(name, {
+                                name, displayName: name, category: 'custom', status: 'dev',
+                            });
+                        }
                     }
                 }
             }
-        } catch (e) {
-            // ignore
-        }
+        } catch { /* ignore */ }
 
-        // Загружаем описания
-        const result = [];
-        for (const name of [...names].sort()) {
-            const loaded = await this.loadModule(lib, name);
-            if (loaded?.description) {
-                result.push({ name, description: loaded.description });
-            }
-        }
-        return result;
+        return [...result.values()].sort((a, b) => a.name.localeCompare(b.name));
     }
 
     // ---------- Загрузка модуля ----------
@@ -155,13 +192,13 @@ class TauriLibraryStore {
         let jsCode = null;
         let dspCode = null;
 
-        // 1. User: $DOCUMENT/CsModular/libraries/<lib>/modules/<Name>.js
+        // 1. User: <userLib>/modules/<Name>.{js,txt}
         try {
-            const jsPath = `${ROOT_FOLDER}/${LIBS_SUBFOLDER}/${lib}/modules/${name}.js`;
+            const jsPath = `${this._userLibPath(lib)}/modules/${name}.js`;
             if (await this._exists(jsPath, BaseDirectory.Document)) {
                 jsCode = await readTextFile(jsPath, { baseDir: BaseDirectory.Document });
             }
-            const dspPath = `${ROOT_FOLDER}/${LIBS_SUBFOLDER}/${lib}/csound/modules/${name}.txt`;
+            const dspPath = `${this._userLibPath(lib)}/modules/${name}.txt`;
             if (await this._exists(dspPath, BaseDirectory.Document)) {
                 dspCode = await readTextFile(dspPath, { baseDir: BaseDirectory.Document });
             }
@@ -169,7 +206,7 @@ class TauriLibraryStore {
             console.warn(`[libraryStore/tauri] loadModule("${lib}/${name}") user read failed:`, e);
         }
 
-        // 2. Builtin: <resource>/libraries/<lib>/...
+        // 2. Builtin: <resource>/libraries/<lib>/modules/<Name>.{js,txt}
         if (jsCode === null) {
             try {
                 const builtinDir = await this._getBuiltinDir();
@@ -177,13 +214,11 @@ class TauriLibraryStore {
                 if (await this._exists(jsPath, BaseDirectory.Resource)) {
                     jsCode = await readTextFile(jsPath, { baseDir: BaseDirectory.Resource });
                 }
-                const dspPath = `${builtinDir}/${lib}/csound/modules/${name}.txt`;
+                const dspPath = `${builtinDir}/${lib}/modules/${name}.txt`;
                 if (await this._exists(dspPath, BaseDirectory.Resource)) {
                     dspCode = await readTextFile(dspPath, { baseDir: BaseDirectory.Resource });
                 }
-            } catch (e) {
-                // ignore
-            }
+            } catch { /* ignore */ }
         }
 
         if (jsCode === null) {
@@ -207,13 +242,11 @@ class TauriLibraryStore {
     async loadUdo(lib, name) {
         // 1. User
         try {
-            const path = `${ROOT_FOLDER}/${LIBS_SUBFOLDER}/${lib}/modules/${name}.txt`;
+            const path = `${this._userLibPath(lib)}/modules/${name}.txt`;
             if (await this._exists(path, BaseDirectory.Document)) {
                 return await readTextFile(path, { baseDir: BaseDirectory.Document });
             }
-        } catch (e) {
-            // ignore
-        }
+        } catch { /* ignore */ }
 
         // 2. Builtin
         try {
@@ -222,9 +255,7 @@ class TauriLibraryStore {
             if (await this._exists(path, BaseDirectory.Resource)) {
                 return await readTextFile(path, { baseDir: BaseDirectory.Resource });
             }
-        } catch (e) {
-            // ignore
-        }
+        } catch { /* ignore */ }
 
         return null;
     }
@@ -235,24 +266,25 @@ class TauriLibraryStore {
         try {
             await this._ensureUserRoot();
 
-            const jsPath = `${ROOT_FOLDER}/${LIBS_SUBFOLDER}/${lib}/modules/${name}.js`;
-            await mkdir(`${ROOT_FOLDER}/${LIBS_SUBFOLDER}/${lib}/modules`, {
+            const modulesDir = `${this._userLibPath(lib)}/modules`;
+            await mkdir(modulesDir, {
                 baseDir: BaseDirectory.Document,
                 recursive: true,
             });
-            await writeTextFile(jsPath, jsCode, { baseDir: BaseDirectory.Document });
 
+            await writeTextFile(`${modulesDir}/${name}.js`, jsCode, {
+                baseDir: BaseDirectory.Document,
+            });
             if (dspCode !== null && dspCode !== undefined) {
-                const dspDir = `${ROOT_FOLDER}/${LIBS_SUBFOLDER}/${lib}/modules`;
-                await mkdir(dspDir, {
+                await writeTextFile(`${modulesDir}/${name}.txt`, dspCode, {
                     baseDir: BaseDirectory.Document,
-                    recursive: true,
                 });
-                const dspPath = `${dspDir}/${name}.txt`;
-                await writeTextFile(dspPath, dspCode, { baseDir: BaseDirectory.Document });
             }
 
             this._moduleCache.delete(`${lib}/${name}`);
+
+            // ⭐ Обновить _index.json
+            await this._updateIndex(lib, name, jsCode);
             return true;
         } catch (e) {
             console.warn(`[libraryStore/tauri] saveModule("${lib}/${name}") failed:`, e);
@@ -260,21 +292,67 @@ class TauriLibraryStore {
         }
     }
 
+    async _updateIndex(lib, name, jsCode) {
+        const indexPath = `${this._userLibPath(lib)}/_index.json`;
+        let index = { modules: [] };
+        try {
+            if (await this._exists(indexPath, BaseDirectory.Document)) {
+                const text = await readTextFile(indexPath, { baseDir: BaseDirectory.Document });
+                index = JSON.parse(text);
+            }
+        } catch { /* ignore */ }
+
+        // ⚠️ eval — только при save, только своего кода
+        const def = parseModuleDefinition(jsCode);
+
+        index.modules = (index.modules || []).filter(m =>
+            (typeof m === 'string' ? m : m.name) !== name
+        );
+        index.modules.push({
+            name,
+            displayName: def?.displayName || name,
+            category: def?.category || 'custom',
+            status: def?.status || 'dev',
+        });
+        index.modules.sort((a, b) => a.name.localeCompare(b.name));
+
+        await writeTextFile(indexPath, JSON.stringify(index, null, 2), {
+            baseDir: BaseDirectory.Document,
+        });
+    }
+
     async removeModule(lib, name) {
         try {
             await this._ensureUserRoot();
             let deleted = false;
 
-            const jsPath = `${ROOT_FOLDER}/${LIBS_SUBFOLDER}/${lib}/modules/${name}.js`;
+            const modulesDir = `${this._userLibPath(lib)}/modules`;
+            const jsPath = `${modulesDir}/${name}.js`;
             if (await this._exists(jsPath, BaseDirectory.Document)) {
                 await remove(jsPath, { baseDir: BaseDirectory.Document });
                 deleted = true;
             }
-
-            const dspPath = `${ROOT_FOLDER}/${LIBS_SUBFOLDER}/${lib}/modules/${name}.txt`;
+            const dspPath = `${modulesDir}/${name}.txt`;
             if (await this._exists(dspPath, BaseDirectory.Document)) {
                 await remove(dspPath, { baseDir: BaseDirectory.Document });
                 deleted = true;
+            }
+
+            if (deleted) {
+                // ⭐ Обновить _index.json — убрать запись
+                try {
+                    const indexPath = `${this._userLibPath(lib)}/_index.json`;
+                    if (await this._exists(indexPath, BaseDirectory.Document)) {
+                        const text = await readTextFile(indexPath, { baseDir: BaseDirectory.Document });
+                        const index = JSON.parse(text);
+                        index.modules = (index.modules || []).filter(m =>
+                            (typeof m === 'string' ? m : m.name) !== name
+                        );
+                        await writeTextFile(indexPath, JSON.stringify(index, null, 2), {
+                            baseDir: BaseDirectory.Document,
+                        });
+                    }
+                } catch { /* ignore */ }
             }
 
             this._moduleCache.delete(`${lib}/${name}`);
@@ -283,6 +361,106 @@ class TauriLibraryStore {
             console.warn(`[libraryStore/tauri] removeModule("${lib}/${name}") failed:`, e);
             return false;
         }
+    }
+
+    // ---------- Library meta ----------
+
+    _defaultMeta(lib) {
+        return {
+            name: lib, displayName: lib, author: 'unknown',
+            version: '0.0.0', description: '',
+            geometry: 'square', createdAt: null,
+        };
+    }
+
+    async createLibrary(name, meta = {}) {
+        const lib = String(name || '').trim();
+        if (!/^[a-zA-Z0-9_-]+$/.test(lib)) {
+            console.warn(`[libraryStore/tauri] createLibrary: invalid name "${lib}"`);
+            return false;
+        }
+        try {
+            await this._ensureUserRoot();
+            const libDir = this._userLibPath(lib);
+            await mkdir(`${libDir}/modules`, {
+                baseDir: BaseDirectory.Document,
+                recursive: true,
+            });
+
+            const metaPath = `${libDir}/_meta.json`;
+            if (!(await this._exists(metaPath, BaseDirectory.Document))) {
+                const metaObj = {
+                    name: lib,
+                    displayName: meta.displayName || lib,
+                    author: meta.author || 'unknown',
+                    version: meta.version || '0.1.0',
+                    description: meta.description || '',
+                    geometry: meta.geometry || 'square',
+                    createdAt: new Date().toISOString(),
+                };
+                await writeTextFile(metaPath, JSON.stringify(metaObj, null, 2), {
+                    baseDir: BaseDirectory.Document,
+                });
+            }
+            return true;
+        } catch (e) {
+            console.warn('[libraryStore/tauri] createLibrary failed:', e);
+            return false;
+        }
+    }
+
+    async removeLibrary(lib) {
+        const name = String(lib || '').trim();
+        if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
+            console.warn(`[libraryStore/tauri] removeLibrary: invalid name "${name}"`);
+            return false;
+        }
+        // builtin — read-only
+        try {
+            const builtinDir = await this._getBuiltinDir();
+            const builtinPath = `${builtinDir}/${name}`;
+            if (await this._exists(builtinPath, BaseDirectory.Resource)) {
+                console.warn(`[libraryStore/tauri] removeLibrary: "${name}" is builtin (read-only)`);
+                return false;
+            }
+        } catch { /* ignore */ }
+
+        try {
+            await this._ensureUserRoot();
+            const libDir = this._userLibPath(name);
+            if (!(await this._exists(libDir, BaseDirectory.Document))) {
+                return false;
+            }
+            await remove(libDir, { baseDir: BaseDirectory.Document, recursive: true });
+            this._moduleCache.clear();
+            return true;
+        } catch (e) {
+            console.warn(`[libraryStore/tauri] removeLibrary("${name}") failed:`, e);
+            return false;
+        }
+    }
+
+    async getLibraryMeta(lib) {
+        // 1. User: <userLib>/_meta.json
+        try {
+            const path = `${this._userLibPath(lib)}/_meta.json`;
+            if (await this._exists(path, BaseDirectory.Document)) {
+                const text = await readTextFile(path, { baseDir: BaseDirectory.Document });
+                return { ...this._defaultMeta(lib), ...JSON.parse(text) };
+            }
+        } catch { /* ignore */ }
+
+        // 2. Builtin: <resource>/libraries/<lib>/_meta.json
+        try {
+            const builtinDir = await this._getBuiltinDir();
+            const path = `${builtinDir}/${lib}/_meta.json`;
+            if (await this._exists(path, BaseDirectory.Resource)) {
+                const text = await readTextFile(path, { baseDir: BaseDirectory.Resource });
+                return { ...this._defaultMeta(lib), ...JSON.parse(text) };
+            }
+        } catch { /* ignore */ }
+
+        return this._defaultMeta(lib);
     }
 
     invalidateCache() {

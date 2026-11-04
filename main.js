@@ -1013,7 +1013,7 @@ _renderDynamic() {
 
         // ⭐ Библиотека модуля — из definition (проставляется ModuleFactory.loadModule)
         const def = this.moduleFactory.moduleRegistry[module.jsonName || module.type];
-        const library = def?.library || null;
+        const library = module.library || def?.library || null;
 
         return {
             name: module.jsonName || module.type || 'Unknown',

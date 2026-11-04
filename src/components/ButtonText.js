@@ -2,10 +2,10 @@ import { BaseComponent } from './BaseComponent.js';
 import { getCurrentTheme } from '../theme/currentTheme.js';
 
 export class ButtonText extends BaseComponent {
-    static FIXED_HEIGHT = 13; // 13
+    static FIXED_HEIGHT = 13;
     
-    constructor(x, y, width = 40, text = 'M', initialState = true) {
-        super(x, y, width, ButtonText.FIXED_HEIGHT);
+    constructor(x, y, width = 20, text = 'M', initialState = true, height = ButtonText.FIXED_HEIGHT) {
+        super(x, y, width, height);
         
         this.isInteractive = true;
         this.supportsDrag = false;
@@ -17,19 +17,17 @@ export class ButtonText extends BaseComponent {
         this.csoundChannel = null;
         this.onToggle = null;
         
-        // Тултип
         this.showTooltip = false;
         this.tooltipTimeout = null;
         this.tooltipDelay = 300;
-        
-        // Анимация
+
         this.animationProgress = 0;
         this.animationDuration = 150;
     }
     
     // Метод для получения высоты
     getActualHeight() {
-        return ButtonText.FIXED_HEIGHT;
+        return this.height;
     }
     
 
@@ -50,11 +48,11 @@ export class ButtonText extends BaseComponent {
         }
 
         const centerX = this.x + this.width / 2;
-        const centerY = this.y + ButtonText.FIXED_HEIGHT / 2;
+        const centerY = this.y + this.height / 2;
         const drawX = centerX - (this.width * scale) / 2;
-        const drawY = centerY - (ButtonText.FIXED_HEIGHT * scale) / 2 + offsetY;
+        const drawY = centerY - (this.height * scale) / 2 + offsetY;
         const drawWidth = this.width * scale;
-        const drawHeight = ButtonText.FIXED_HEIGHT * scale;
+        const drawHeight = this.height * scale;
 
         const radius = 2;
 
@@ -309,6 +307,8 @@ export class ButtonText extends BaseComponent {
     
     static getPropertySchema() {
         return [
+            { key: 'size',     label: 'Size (W × H)',  type: 'size',
+              minWidth: 20, maxWidth: 300, minHeight: 10, maxHeight: 60 },
             { key: 'text',     label: 'Text',          type: 'text' },
             { key: 'isActive', label: 'Default (ON)',  type: 'checkbox' },
         ];

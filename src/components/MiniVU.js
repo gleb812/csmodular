@@ -115,6 +115,7 @@ export class MiniVU extends BaseComponent {
 
     static getPropertySchema() {
         return [
+            { key: 'size', label: 'Size (W × H)', type: 'size', minWidth: 2, maxWidth: 60, minHeight: 4, maxHeight: 200 },
             {
                 key: 'sourceComponentId',
                 label: 'Source',

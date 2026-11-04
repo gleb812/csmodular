@@ -267,15 +267,20 @@ export class ContextMenu {
         
     }
 
-    _createStatusDot(description) {
-        const status = getModuleStatus(description);
+    _createStatusDot(statusOrDesc, displayName = '') {
+        let status, display;
+        if (typeof statusOrDesc === 'string') {
+            status = statusOrDesc;
+            display = displayName;
+        } else {
+            status = getModuleStatus(statusOrDesc);
+            display = statusOrDesc?.displayName || statusOrDesc?.type || '';
+        }
         const meta = getStatusMeta(status);
-        const displayName = description?.displayName || description?.type || '';
-
         const dot = document.createElement('span');
         dot.className = 'status-dot';
         dot.dataset.status = status;
-        dot.title = `${displayName} — ${meta.label}`;
+        dot.title = `${display} — ${meta.label}`;
         dot.style.cssText = `
             display: inline-block;
             width: 8px;
@@ -328,7 +333,7 @@ export class ContextMenu {
 
     _createModuleRow(moduleEntry, libName) {
         const { name, description } = moduleEntry;
-        const displayName = description?.displayName || name;
+        const displayName = moduleEntry.displayName || description?.displayName || name;
         const isUser = this.libraryGroups[libName]?.source === 'user';
 
         const item = document.createElement('div');
@@ -356,7 +361,7 @@ export class ContextMenu {
 
         // Статус-точка (DEV) или звёзды (BUILD)
         if (IS_DEV) {
-            item.appendChild(this._createStatusDot(description));
+            item.appendChild(this._createStatusDot(moduleEntry.status, displayName));
         } else {
             item.appendChild(this._createStars(name));
         }

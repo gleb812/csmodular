@@ -19,7 +19,6 @@ export class TextLabel extends BaseComponent {
         return [
             { key: 'text',     label: 'Text',      type: 'text' },
             { key: 'fontSize', label: 'Font Size', type: 'number', min: 4, max: 72, step: 1 },
-            { key: 'color',    label: 'Color',     type: 'text', help: 'Hex, e.g. #ff8800' },
         ];
     }
     
@@ -85,12 +84,13 @@ export class TextLabel extends BaseComponent {
         // Устанавливаем стиль текста
         ctx.font = `${this.fontSize}px ${this.fontFamily}`;
 
-        // ⭐ В LCD — используем цвет темы, если цвет не задан явно
-        if (isLcd && (!this.color || this.color === '#ffffff' || this.color === '#fff')) {
-            ctx.fillStyle = theme.getTextColor();
+        // ⭐ Всегда цвет темы (как название модуля)
+        if (isLcd) {
+            ctx.fillStyle = theme.getTextColor() || '#8fbc8f';
             theme.applyGlow(ctx);
         } else {
-            ctx.fillStyle = this.color;
+            // Classic — как заголовок модуля в Panel.draw()
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
         }
 
         ctx.textAlign = this.align;

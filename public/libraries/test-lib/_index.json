@@ -1,3 +1,3 @@
 {
-  "modules": ["TestOsc"]
+  "modules": ["TestOsc","Noise"]
 }

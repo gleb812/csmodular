@@ -26,8 +26,17 @@ const fallbackStore = {
     async loadModule() { console.warn('[libraryStore] fallback'); return null; },
     async loadUdo() { console.warn('[libraryStore] fallback'); return null; },
     async saveModule() { console.warn('[libraryStore] fallback'); return false; },
+    async removeLibrary() { console.warn('[libraryStore] fallback'); return false; },
     async removeModule() { console.warn('[libraryStore] fallback'); return false; },
     invalidateCache() {},
+    async createLibrary() { console.warn('[libraryStore] fallback'); return false; },
+    async getLibraryMeta(lib) {
+        return {
+            name: lib, displayName: lib, author: 'unknown',
+            version: '0.0.0', description: '',
+            geometry: 'square', createdAt: null,
+        };
+    },
 };
 
 class LazyLibraryStore {
@@ -67,8 +76,11 @@ class LazyLibraryStore {
     async loadModule(lib, name)            { return (await this._getImpl()).loadModule(lib, name); }
     async loadUdo(lib, name)               { return (await this._getImpl()).loadUdo(lib, name); }
     async saveModule(lib, name, js, dsp)   { return (await this._getImpl()).saveModule(lib, name, js, dsp); }
+    async removeLibrary(lib) { return (await this._getImpl()).removeLibrary(lib); }
     async removeModule(lib, name)          { return (await this._getImpl()).removeModule(lib, name); }
     invalidateCache()                      { this._impl?.invalidateCache?.(); }
+    async createLibrary(name, meta)        { return (await this._getImpl()).createLibrary(name, meta); }
+    async getLibraryMeta(lib)              { return (await this._getImpl()).getLibraryMeta(lib); }
 }
 
 export const libraryStore = new LazyLibraryStore();

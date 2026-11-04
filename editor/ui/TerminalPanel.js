@@ -23,28 +23,8 @@
 //   help [cmd]               — справка
 
 import { libraryStore } from '../../src/api/index.js';
-import { createComponent, getTypeOf, getByCategory } from '../ComponentRegistry.js';
+import { ComponentRegistry, serializeComponents, deserializeComponents, createComponent, getTypeOf, getByCategory, hasCollisions } from '../ComponentRegistry.js';
 import { CATEGORIES, isValidCategory } from '../../src/moduleCategories.js';
-const PALETTE_SIZE = {
-    Knob: { width: 24, height: 24 },
-    Slider: { width: 14, height: 50 },
-    ButtonFlat: { width: 50, height: 16 },
-    ButtonRadio: { width: 120, height: 16 },
-    ButtonIncDec: { width: 50, height: 16 },
-    ButtonText: { width: 40, height: 16 },
-    TextLabel: { width: 60, height: 16 },
-    TextField: { width: 50, height: 16 },
-    TextEdit: { width: 50, height: 16 },
-    LevelShift: { width: 15, height: 12 },
-    LED: { width: 16, height: 10 },
-    PartSelector: { width: 70, height: 16 },
-    SVG: { width: 28, height: 28 },
-    Line: { width: 60, height: 2 },
-    Graph: { width: 60, height: 24 },
-    MiniVU: { width: 40, height: 24 },
-    Input: { width: 14, height: 14 },
-    Output: { width: 14, height: 14 },
-};
 
 const TYPE_ALIASES = {
     knob: 'Knob', k: 'Knob',
@@ -112,6 +92,29 @@ export class TerminalPanel {
         `;
         header.textContent = '⌨ Terminal';
 
+        // Font size controls
+        const fontCtrl = document.createElement('span');
+        fontCtrl.style.cssText = 'float: right; display: flex; gap: 4px; align-items: center;';
+
+        const fontDown = document.createElement('button');
+        fontDown.textContent = 'A−';
+        fontDown.style.cssText = 'padding: 1px 6px; background: #2a2a2a; border: 1px solid #444; color: #ccc; border-radius: 3px; cursor: pointer; font-size: 10px;';
+        fontDown.onclick = () => this._changeFontSize(-1);
+
+        const fontUp = document.createElement('button');
+        fontUp.textContent = 'A+';
+        fontUp.style.cssText = fontDown.style.cssText;
+        fontUp.onclick = () => this._changeFontSize(+1);
+
+        fontCtrl.appendChild(fontDown);
+        fontCtrl.appendChild(fontUp);
+        header.appendChild(fontCtrl);
+
+        // Font size state (persisted)
+        this.fontSize = parseInt(localStorage.getItem('csmodular:editor-terminal-fontsize') || '12', 10);
+        if (isNaN(this.fontSize)) this.fontSize = 12;
+        this._applyFontSize();
+
         this.output = document.createElement('div');
         this.output.style.cssText = `
             flex: 1;
@@ -165,6 +168,20 @@ export class TerminalPanel {
         this._print('', '#666');
     }
 
+    _changeFontSize(delta) {
+        const next = Math.max(8, Math.min(20, this.fontSize + delta));
+        if (next === this.fontSize) return;
+        this.fontSize = next;
+        localStorage.setItem('csmodular:editor-terminal-fontsize', String(next));
+        this._applyFontSize();
+    }
+
+    _applyFontSize() {
+        this.element.style.fontSize = `${this.fontSize}px`;
+        if (this.output) this.output.style.fontSize = `${this.fontSize}px`;
+        if (this.input) this.input.style.fontSize = `${this.fontSize}px`;
+    }
+
     // ─────────────────────────── INPUT ──────────────────────────────
 
     _onKeyDown(e) {
@@ -173,6 +190,9 @@ export class TerminalPanel {
             const line = this.input.value;
             this.input.value = '';
             this._execute(line);
+        } else if (e.key === 'Tab') {
+            e.preventDefault();
+            this._autocomplete();
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
             if (this.historyIndex < this.history.length - 1) {
@@ -189,6 +209,79 @@ export class TerminalPanel {
                 this.input.value = '';
             }
         }
+    }
+
+    async _autocomplete() {
+        const raw = this.input.value;
+        const tokens = this._tokenize(raw);
+        const endsWithSpace = /\s$/.test(raw);
+        const lastIdx = endsWithSpace ? tokens.length : tokens.length - 1;
+        const lastToken = endsWithSpace ? '' : (tokens[lastIdx] || '');
+
+        // Собираем кандидатов по контексту
+        let candidates = [];
+
+        const cmd = (tokens[0] || '').toLowerCase();
+
+        if (lastIdx === 0) {
+            // Первый токен — команды
+            candidates = [
+                'help', 'clear', 'ls', 'add', 'del', 'mv', 'map', 'name',
+                'category', 'set', 'align', 'distr', 'grid', 'new', 'save',
+                'load', 'rm', 'lsmod', 'lslib', 'lib', 'where', 'stats',
+            ];
+        } else if (cmd === 'load' || cmd === 'rm') {
+            // load <name>, load <lib>/<name> — библиотеки и модули
+            try {
+                const libs = await libraryStore.listLibraries();
+                for (const l of libs) {
+                    if (lastToken.includes('/')) break; // не подсказываем после /
+                    candidates.push(l.name);
+                }
+                // Модули из текущей библиотеки (для load <name>)
+                const curLib = this.app._sourceLibrary || 'user';
+                const mods = await libraryStore.listModules(curLib);
+                for (const m of mods) candidates.push(m.name);
+            } catch { /* ignore */ }
+        } else if (cmd === 'save') {
+            // save as <name>, save <lib> <name>
+            if (tokens[1]?.toLowerCase() === 'as') {
+                candidates = []; // имя модуля — свободный ввод
+            } else {
+                try {
+                    const libs = await libraryStore.listLibraries();
+                    for (const l of libs) candidates.push(l.name);
+                } catch { /* ignore */ }
+            }
+        } else if (cmd === 'set') {
+            candidates = [
+                'text', 'items', 'labels', 'positions', 'count', 'default',
+                'item', 'fontSize', 'color', 'mappingTable', 'min', 'max',
+                'jackType',
+            ];
+        } else if (cmd === 'align') {
+            candidates = ['l', 'r', 'u', 'd'];
+        } else if (cmd === 'distr') {
+            candidates = ['h', 'v'];
+        } else if (cmd === 'grid') {
+            candidates = ['on', 'off'];
+        }
+
+        if (candidates.length === 0) return;
+
+        const matches = candidates.filter(c => c.startsWith(lastToken));
+        if (matches.length === 0) return;
+
+        if (matches.length === 1) {
+            // Один кандидат — подставить
+            tokens[lastIdx] = matches[0];
+            this.input.value = tokens.join(' ') + (endsWithSpace ? ' ' : '');
+            return;
+        }
+
+        // Несколько — вывести в output и НЕ менять input (bash-style)
+        this._print('', '#666');
+        this._print(matches.join('  '), '#0af');
     }
 
     // ─────────────────────────── OUTPUT ─────────────────────────────
@@ -230,6 +323,8 @@ export class TerminalPanel {
                 case 'ina': case 'ink': case 'outa': case 'outk':
                     return this._cmdAdd([cmd, ...args]);
                 case 'del': case 'delete':return this._cmdDel(args);
+                case 'cp': case 'copy': return this._cmdCp(args);
+                case 'cpmod': case 'copymod': return await this._cmdCpmod(args);
                 case 'mv': case 'move':   return this._cmdMv(args);
                 case 'map':               return this._cmdMap(args);
                 case 'name':              return this._cmdName(args);
@@ -241,8 +336,11 @@ export class TerminalPanel {
                 case 'new': return this._cmdNew(args);
                 case 'save':              return await this._cmdSave(args);
                 case 'load':              return await this._cmdLoad(args);
+                case 'rmlib': return await this._cmdRmlib(args);
                 case 'rm':                return await this._cmdRm(args);       // ⭐ NEW
                 case 'lsmod':             return await this._cmdLsmod(args);    // ⭐ NEW
+                case 'lslib': return await this._cmdLslib(args);
+                case 'lib': case 'where': return await this._cmdLib(args);
                 case 'stats':             return this._cmdStats();
                 default:
                     this._printError(`Unknown command: ${cmd}`);
@@ -252,6 +350,337 @@ export class TerminalPanel {
             this._printError(e.message || String(e));
         }
     }
+
+    async _cmdRmlib(args) {
+        if (args.length === 0) {
+            this._printError('Usage: rmlib <name>');
+            this._print('  Tip: lslib — list libraries', '#666');
+            return;
+        }
+        const lib = args[0];
+        try {
+            const libs = await libraryStore.listLibraries();
+            const entry = libs.find(l => l.name === lib);
+            if (!entry) {
+                this._printError(`Library "${lib}" not found`);
+                return;
+            }
+            if (entry.source === 'builtin') {
+                this._printError(`Library "${lib}" is builtin (read-only) — cannot delete`);
+                return;
+            }
+            const mods = await libraryStore.listModules(lib);
+            const ok = typeof window.confirm === 'function'
+                ? window.confirm(`Delete library "${lib}" with ${mods.length} module(s)? This cannot be undone.`)
+                : true;
+            if (!ok) { this._print('Cancelled', '#888'); return; }
+
+            const removed = await libraryStore.removeLibrary(lib);
+            if (removed) {
+                this._printOk(`Deleted library: ${lib}`);
+                if (this.app._sourceLibrary === lib) {
+                    this._print(`   ⚠️ Current library was "${lib}" — switched to "user"`, '#f90');
+                    this.app._sourceLibrary = 'user';
+                }
+            } else {
+                this._printError(`Delete failed: ${lib}`);
+            }
+        } catch (e) {
+            this._printError(`rmlib error: ${e.message}`);
+        }
+    }
+
+    async _cmdCpmod(args) {
+        if (args.length === 0) {
+            this._printError('Usage: cpmod <newName> | cpmod <lib>/<newName> | cpmod <oldName> <newName>');
+            this._print('  cpmod Mix2            — copy current module as Mix2 (same library)', '#666');
+            this._print('  cpmod user/Mix2       — copy current module to user library', '#666');
+            this._print('  cpmod Mix Mix2        — copy module Mix as Mix2 (same library)', '#666');
+            return;
+        }
+
+        const { sanitizeName } = await import('../saveService.js');
+        const { saveModule } = await import('../saveService.js');
+
+        let targetLib = this.app._sourceLibrary || 'user';
+        let newName = null;
+        let srcName = this.app.module?.title || null;
+
+        // Разбор: 
+        //   cpmod <newName>          → [newName]
+        //   cpmod <lib>/<newName>    → [lib/name]
+        //   cpmod <oldName> <newName> → [oldName, newName]
+        if (args.length === 1) {
+            if (args[0].includes('/')) {
+                const [l, n] = args[0].split('/', 2);
+                targetLib = l;
+                newName = n;
+            } else {
+                newName = args[0];
+            }
+        } else if (args.length >= 2) {
+            // ⭐ args[0] = имя исходного модуля, args[1] = новое имя
+            srcName = args[0];
+            newName = args[1];
+            // Библиотека — текущая, либо та, где srcName
+            // (проверим ниже)
+        }
+
+        newName = sanitizeName(newName);
+        if (!newName) {
+            this._printError('Invalid module name');
+            return;
+        }
+
+        // Если srcName !== app.module.title — надо загрузить srcName
+        if (srcName && srcName !== this.app.module?.title) {
+            // Ищем srcName в библиотеках
+            const libs = await libraryStore.listLibraries();
+            let foundLib = null;
+            let foundData = null;
+            for (const entry of libs) {
+                const data = await libraryStore.loadModule(entry.name, srcName);
+                if (data) {
+                    foundLib = entry.name;
+                    foundData = data;
+                    break;
+                }
+            }
+            if (!foundData) {
+                this._printError(`Module "${srcName}" not found`);
+                return;
+            }
+            // Загружаем в редактор
+            this.app.restoreModuleFromData(foundData.description, foundData.dspCode);
+            this.app._sourceLibrary = foundLib;
+            targetLib = foundLib;
+        }
+
+        // Проверка перезаписи
+        try {
+            const mods = await libraryStore.listModules(targetLib);
+            if (mods.some(m => m.name === newName)) {
+                const ok = typeof window.confirm === 'function'
+                    ? window.confirm(`Module "${newName}" already exists in "${targetLib}". Overwrite?`)
+                    : true;
+                if (!ok) {
+                    this._print('Cancelled', '#888');
+                    return;
+                }
+            }
+        } catch { /* ignore */ }
+
+        // Запомнить состояние
+        const oldTitle = this.app.module.title;
+        const oldSourceLib = this.app._sourceLibrary;
+
+        if (oldTitle === newName && targetLib === oldSourceLib) {
+            this._printError(`Already "${newName}" in "${targetLib}" — nothing to copy`);
+            return;
+        }
+
+        try {
+            const result = await saveModule(this.app, { lib: targetLib, name: newName });
+
+            // ⭐ Откатить текущий модуль на оригинал
+            if (this.app.codeViewerWindow) {
+                this.app.module.title = oldTitle;
+                this.app.codeViewerWindow.updateCode();
+            } else {
+                this.app.module.title = oldTitle;
+            }
+            this.app._sourceLibrary = oldSourceLib;
+
+            this._printOk(`Copied "${oldTitle}" → ${result.lib}/${result.name}`);
+            this._print(`   (still editing "${oldTitle}")`, '#888');
+        } catch (e) {
+            this._printError(`cpmod error: ${e.message}`);
+        }
+    }
+
+    _cmdCp(args) {
+        if (args.length === 0) {
+            this._printError('Usage: cp <id> [x y | +dx +dy]');
+            return;
+        }
+
+        const srcId = parseInt(args[0]);
+        if (isNaN(srcId)) {
+            this._printError(`Invalid id: ${args[0]}`);
+            return;
+        }
+
+        const src = this.app.components.find(c => parseInt(c.id) === srcId);
+        if (!src) {
+            this._printError(`Component id=${srcId} not found`);
+            return;
+        }
+
+        // 1. Клонирование через ComponentRegistry (хелперы)
+        let clone;
+        try {
+            const arr = serializeComponents([src]);
+            if (!arr || arr.length === 0) {
+                this._printError('Clone failed: serializeComponents returned empty');
+                return;
+            }
+            const data = arr[0];
+
+            // Сбрасываем то, что НЕ должно копироваться
+            delete data.id;
+            delete data.cables;
+            delete data.connected;
+            delete data.csoundChannel;
+            delete data.originalID;
+            delete data.parameterId;
+            if ('sourceComponentId' in data) data.sourceComponentId = null;
+            if ('targetId' in data) data.targetId = null;
+            if ('modeComponentId' in data) data.modeComponentId = null;
+
+            const restored = deserializeComponents([data], { module: this.app.module });
+            if (!restored || restored.length === 0) {
+                this._printError('Clone failed: deserializeComponents returned empty');
+                return;
+            }
+            clone = restored[0];
+        } catch (e) {
+            this._printError(`Clone failed: ${e.message}`);
+            console.error('[cp] clone error:', e);
+            return;
+        }
+
+        if (!clone) {
+            this._printError('Clone failed: clone is null');
+            return;
+        }
+
+        // 2. Позиция
+        let newX, newY;
+        if (args.length >= 3) {
+            const rawX = args[1], rawY = args[2];
+            if (rawX.startsWith('+') || rawX.startsWith('-') ||
+                rawY.startsWith('+') || rawY.startsWith('-')) {
+                const dx = parseFloat(rawX);
+                const dy = parseFloat(rawY);
+                if (isNaN(dx) || isNaN(dy)) {
+                    this._printError('Delta must be numbers');
+                    return;
+                }
+                newX = (src.relX ?? 0) + dx;
+                newY = (src.relY ?? 0) + dy;
+            } else {
+                newX = parseFloat(rawX);
+                newY = parseFloat(rawY);
+                if (isNaN(newX) || isNaN(newY)) {
+                    this._printError('Coordinates must be numbers');
+                    return;
+                }
+            }
+        } else {
+            newX = (src.relX ?? 0) + (src.width || 20) + 4;
+            newY = src.relY ?? 0;
+        }
+
+        // 3. Границы + коллизии
+        const module = this.app.module;
+        if (newX < 0 || newX + clone.width > module.width ||
+            newY < 0 || newY + clone.height > module.height) {
+            this._printError(`Outside module (${module.width}×${module.height})`);
+            return;
+        }
+        if (this._collides(newX, newY, clone.width, clone.height, null)) {
+            const spot = this._findFreeSpotNear(newX, newY, clone.width, clone.height, src);
+            if (!spot) {
+                this._printError(`Collision at (${newX}, ${newY}) — no free space nearby`);
+                return;
+            }
+            newX = spot.x;
+            newY = spot.y;
+            this._print(`⚠️ Collision — placed at (${newX}, ${newY}) instead`, '#f90');
+        }
+
+        // 4. Финализация
+        clone.id = this.app._generateComponentId().toString();
+        clone.originalID = clone.id;
+        clone.parameterId = parseInt(clone.id);
+        clone.relX = newX;
+        clone.relY = newY;
+        clone.x = module.x + newX;
+        clone.y = module.y + newY;
+        clone.parent = module;
+        clone._editorModule = module;
+        clone._isNewDragging = false;
+        if (!Array.isArray(clone.cables)) clone.cables = [];
+
+        this.app.components.push(clone);
+
+        if (this.app.codeViewerWindow) this.app.codeViewerWindow.updateCode();
+
+        this._printOk(`Copied ${src.constructor.name} id=${srcId} → id=${clone.id} at (${Math.round(newX)}, ${Math.round(newY)})`);
+    }
+
+    async _cmdLslib(args) {
+        try {
+            const libs = await libraryStore.listLibraries();
+            if (libs.length === 0) {
+                this._print('📭 No libraries', '#888');
+                return;
+            }
+            const curLib = this.app._sourceLibrary || 'user';
+            const filter = args.join(' ').trim().toLowerCase();
+            const filtered = filter
+                ? libs.filter(l => l.name.toLowerCase().includes(filter))
+                : libs;
+
+            this._printInfo(`📚 Libraries (${filtered.length}):`);
+            for (const l of filtered) {
+                const icon = l.source === 'user' ? '👤' : '📦';
+                const meta = l.meta || {};
+                const author = meta.author && meta.author !== 'unknown' ? ` — ${meta.author}` : '';
+                const ver = meta.version && meta.version !== '0.0.0' ? ` v${meta.version}` : '';
+                const current = l.name === curLib ? '  ← current' : '';
+                this._print(`  ${icon} ${l.name}${ver}${author}${current}`);
+            }
+        } catch (e) {
+            this._printError(`lslib error: ${e.message}`);
+        }
+    }
+
+    async _cmdLib(args) {
+        const curLib = this.app._sourceLibrary || 'user';
+        
+        // ⭐ Переключение
+        if (args.length > 0) {
+            const target = args[0];
+            try {
+                const libs = await libraryStore.listLibraries();
+                const entry = libs.find(l => l.name === target);
+                if (!entry) {
+                    this._printError(`Library "${target}" not found`);
+                    this._print('  Tip: lslib — list libraries', '#666');
+                    return;
+                }
+                this.app._sourceLibrary = target;
+                this._printOk(`Switched to library: ${target}`);
+                return;
+            } catch (e) {
+                this._printError(`lib error: ${e.message}`);
+                return;
+            }
+        }
+
+        // Показать текущую
+        const modName = this.app.module?.title || '?';
+        const isDirty = this.app.codeViewerWindow?.isDirty;
+
+        this._printInfo(`📚 Current library: ${curLib}`);
+        this._print(`   Module: ${modName}${isDirty ? ' (unsaved)' : ''}`, '#ccc');
+        this._print('', '#666');
+        this._print('  Tip: lib <name> — switch library', '#666');
+        this._print('  Tip: save — save to current library', '#666');
+        this._print('  Tip: save <lib>/<name> — save to specific library', '#666');
+    }
+
 
     _cmdCategory(args) {
         if (args.length === 0) {
@@ -476,6 +905,17 @@ export class TerminalPanel {
             return;
         }
 
+        if (propRaw === 'size') {
+            const m = rawValue.match(/^(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)$/);
+            if (!m) { this._printError('size format: WxH (e.g. 40x20)'); return; }
+            comp.width  = parseFloat(m[1]);
+            comp.height = parseFloat(m[2]);
+            if (this.app.codeViewerWindow) this.app.codeViewerWindow.updateCode();
+            this._printOk(`id=${id}.size = ${comp.width}×${comp.height}`);
+            return;
+        }
+
+
         this._printError(`Unknown property: ${args[1]}`);
     }
 
@@ -560,29 +1000,37 @@ export class TerminalPanel {
         if (args.length > 0) return this._cmdHelpTopic(args[0]);
 
         this._printInfo('Commands:');
-        this._print('  add <type> [x y]       add component (auto-place or at x,y)');
-        this._print('  ina / ink              add audio / control input');
-        this._print('  outa / outk            add audio / control output');
-        this._print('  in / out               shorthand for ina / outa (audio)');
+        this._print('  add <type> [x y]       add component');
+        this._print('  ina / ink / outa / outk add input/output');
         this._print('  ls [type] [-l]         list components');
-        this._print('  del <id|type|range>... delete (e.g. del 3, del knob, del 3 4 5, del 3..7)');
-        this._print('  mv <id> <x> <y>        move (absolute)');
-        this._print('  mv <id> +dx +dy        move (relative)');
-        this._print('  map <id> <table>       bind mapping table (or unset)');
-        this._print('  new [name]             clear module (optionally set name)');
-        this._print('  category <cat>         set module category');
-        this._print('  set <id> <prop> <value> set property (text, items, count, default, item, fontSize, color, mappingTable, min, max, jackType)');
-        this._print('  align <ids...> l|r|u|d align components');
-        this._print('  distr <ids...> h|v     distribute evenly');
-        this._print('  grid on|off|N          toggle micro-grid or set step');
-        this._print('  new                    clear module');
-        this._print('  save [as <name>]       save module');
-        this._print('  load <name>            load module');
-        this._print('  rm <name>              delete user module');           // ⭐ NEW
-        this._print('  lsmod [filter]         list user modules');            // ⭐ NEW
+        this._print('  del <id|type|range>... delete components');
+        this._print('  mv <id> <x> <y>        move (absolute or +dx +dy)');
+        this._print('  cp <id> [x y]          copy component');
+        this._print('  cpmod <newName>        copy module to new name (stay on original)');
+        this._print('  cpmod <lib>/<newName>  copy module to specific library');
+        this._print('  map <id> <table>       bind mapping table');
+        this._print('  set <id> <prop> <v>    set property');
+        this._print('  align <ids> l|r|u|d    align');
+        this._print('  distr <ids> h|v        distribute');
+        this._print('  grid on|off|N          micro-grid');
+        this._print('  name <newName>         rename module');
+        this._print('  category <cat>         set category');
+        this._print('  new [name]             new module');
+        this._print('  save [as <name>]       save (current library)');
+        this._print('  save <lib>/<name>      save to specific library');
+        this._print('  load <name>            load (current, then all)');
+        this._print('  load <lib>/<name>      load from specific library');
+        this._print('  rm <name>              delete user module');
+        this._print('  rmlib <name>           delete library (user only)');
+        this._print('  lsmod [lib] [filter]   list modules');
+        this._print('  lslib [filter]         list libraries');
+        this._print('  lib [name]             show or switch current library');
+        this._print('  where [name]           alias for lib');
         this._print('  stats                  module statistics');
         this._print('  clear                  clear output');
         this._print('  help [cmd]             this help');
+        this._print('');
+        this._print('  Tip: Tab completes commands, libraries, and modules', '#666');
     }
 
     _cmdHelpTopic(cmd) {
@@ -596,6 +1044,14 @@ export class TerminalPanel {
                  '  jack types: ' + Object.keys(JACK_TYPE_ALIASES).join(', '),
             del: 'del <id> | del <type> | del <id> <id> ... | del <from>..<to>\n  examples: del 3, del knob, del 3 4 5, del 3..7',
             mv:  'mv <id> <x> <y>   — absolute position\nmv <id> +dx +dy   — relative shift',
+            cp: 'cp <id>                    — copy component (same settings)\n' +
+                'cp <id> <x> <y>            — copy to specific position\n' +
+                'cp <id> +dx +dy            — copy with offset\n' +
+                '\n  Note: id, cables, and cross-references (sourceComponentId, etc.)\n' +
+                '  are NOT copied.',
+            cpmod: 'cpmod <newName>              — copy current module, stay on original\n' +
+                   'cpmod <lib>/<newName>        — copy to specific library\n' +
+                   'cpmod <lib> <newName>        — same, space-separated',
             map: 'map <id> <table>  — bind mapping table\nmap <id>          — unbind',
             name: 'name <newName>  — rename module\n  e.g. name MyFilter, name "Cool Synth"',
             new: 'new [name]  — clear module and reset DSP code\n  new           → "NewModule"\n  new MyFilter  → "MyFilter"',
@@ -615,14 +1071,24 @@ export class TerminalPanel {
                  '    set 7 max 1000\n' +
                  '    set 8 jackType control',
             grid: 'grid         — show current grid\n  grid on      — enable micro-grid\n  grid off     — disable\n  grid N       — set grid step to N pixels',
-            save: 'save           — save (uses current module name)\n  save as <name> — save under new name',
-            load: 'load <name>    — load user module by name',
-            rm:   'rm <name>      — delete user module (cannot be undone)\n' +
-                  '  rm foo\n' +
-                  '  Tip: lsmod — see available user modules',
-            lsmod: 'lsmod [filter]  — list user modules\n' +
-                   '  lsmod          → all\n' +
-                   '  lsmod filt     → names containing "filt"',
+            save: 'save                    — save to current library\n' +
+                  'save as <name>          — save to current library, new name\n' +
+                  'save <lib>/<name>       — save to specific library\n' +
+                  'save <lib> <name>       — same, space-separated',
+            load: 'load                    — show help\n' +
+                  'load <name>             — search current library, then all\n' +
+                  'load <lib>/<name>       — specific library\n' +
+                  'load <lib> <name>       — same, space-separated',
+            lslib: 'lslib [filter]          — list libraries\n' +
+                   '  lslib                → all\n' +
+                   '  lslib test           → names containing "test"',
+            lib: 'lib                     — show current library + module\n' +
+                 'lib <name>              — switch current library\n' +
+                 'where                   — alias for lib',
+            lsmod: 'lsmod [lib] [filter]    — list modules\n' +
+                   '  lsmod                 → current library\n' +
+                   '  lsmod user            → all user modules\n' +
+                   '  lsmod user filt       → user modules matching "filt"',
         };
         if (topics[cmd]) {
             this._printInfo(`Help for "${cmd}":`);
@@ -711,11 +1177,12 @@ export class TerminalPanel {
             return;
         }
 
-        const size = PALETTE_SIZE[type];
-        if (!size) {
+        const def = ComponentRegistry[type];
+        if (!def || !def.paletteSize) {
             this._printError(`No palette size for ${type}`);
             return;
         }
+        const size = def.paletteSize;
 
         // ── 2. ⭐ Для TextLabel: второй аргумент может быть текстом (не числом) ──
         let labelText = null;
@@ -761,7 +1228,7 @@ export class TerminalPanel {
             return;
         }
 
-        if (this._collides(x, y, size.width, size.height, null)) {
+        if (hasCollisions(type) && this._collides(x, y, size.width, size.height, null)) {
             this._printError(`Collision at (${x}, ${y})`);
             return;
         }
@@ -786,8 +1253,10 @@ export class TerminalPanel {
         component.id = this.app._generateComponentId().toString();
         component.originalID = component.id;
         component.parameterId = parseInt(component.id);
-        component.width = size.width;
-        component.height = size.height;
+        if (!def.autoSize) {
+            component.width = size.width;
+            component.height = size.height;
+        }
         component.relX = x;
         component.relY = y;
         component.parent = module;
@@ -981,7 +1450,7 @@ export class TerminalPanel {
         }
 
         // Проверка коллизий
-        if (this._collides(newX, newY, comp.width, comp.height, comp)) {
+        if (hasCollisions(comp) && this._collides(newX, newY, comp.width, comp.height, comp)) {
             this._printError(`Collision at (${newX}, ${newY})`);
             return;
         }
@@ -1242,146 +1711,66 @@ export class TerminalPanel {
     // ─────────────────────────── SAVE ───────────────────────────────
 
     async _cmdSave(args) {
-        let name = this.app.module.title || 'NewModule';
-        name = name.replace(/\s/g, '');
-        if (/^[0-9]/.test(name)) name = 'M' + name;
-        name = name.replace(/[^a-zA-Z0-9_]/g, '') || 'NewModule';
-
-        // save as <name>
-        const isSaveAs = args[0]?.toLowerCase() === 'as' && args[1];
-        if (isSaveAs) {
-            let raw = args.slice(1).join(' ').trim();
-            raw = raw.replace(/\s/g, '');
-            if (/^[0-9]/.test(raw)) raw = 'M' + raw;
-            raw = raw.replace(/[^a-zA-Z0-9_]/g, '');
-            if (!raw) {
-                this._printError('Invalid name for "save as"');
-                return;
-            }
-            name = raw;
-            this.app.module.title = name;
-
-            // Обновить структуру кода под новое имя (opcode-строка)
-            if (this.app.codeViewerWindow) {
-                this.app.codeViewerWindow.updateCode();
-            }
-        }
-
-        // Собираем модуль
-        const moduleData = {
-            name: name,
-            displayName: name,
-            category: this.app.module.category || 'custom',
-            gridHeight: this.app.module.gridHeight || 3,
-            type: name,
-            defaultParams: [],
-            tooltip: name,
-            params: [],
-            inputs: [],
-            outputs: [],
-            customColor: this.app.module.customColor || null,
-            components: [],
-        };
-
-        const { serializeComponents, collectParamIds, collectPorts } =
-            await import('../ComponentRegistry.js');
-        moduleData.components = serializeComponents(this.app.components);
-        moduleData.params = collectParamIds(this.app.components);
-        const ports = collectPorts(this.app.components);
-        moduleData.inputs = ports.inputs;
-        moduleData.outputs = ports.outputs;
-
-        // JS-код
-        const jsCode = this._generateJsCode(moduleData);
-
-        // DSP-код: актуальное содержимое редактора (включая тело),
-        // а не устаревший _userCsoundCode
-        let dspCode = null;
-        if (this.app.codeViewerWindow) {
-            dspCode = this.app.codeViewerWindow.getCode();
-        } else if (this.app.module._userCsoundCode) {
-            dspCode = this.app.module._userCsoundCode;
-        } else if (this.app.codeViewerWindow) {
-            dspCode = this.app.codeViewerWindow.generateCsoundCode();
-        }
-
         try {
-            const ok = await libraryStore.saveModule('user', name, jsCode, dspCode);
-            if (ok) {
-                this.app.module.title = name;
+            const { saveModule, sanitizeName } = await import('../saveService.js');
 
-                if (this.app.propertiesPanel?.activeTab === 'module') {
-                    this.app.propertiesPanel._render();
+            // Текущая библиотека
+            let lib = this.app._sourceLibrary || 'user';
+            let name = null;
+
+            // Разбор аргументов:
+            //   save                     → текущая lib, текущее имя
+            //   save as <name>           → текущая lib, новое имя
+            //   save <lib> <name>        → lib + name
+            //   save <lib>/<name>        → то же
+            if (args.length > 0) {
+                const a0 = args[0];
+                if (a0.toLowerCase() === 'as' && args[1]) {
+                    name = sanitizeName(args.slice(1).join(' '));
+                    if (!name) { this._printError('Invalid name for "save as"'); return; }
+                } else if (a0.includes('/')) {
+                    const [l, n] = a0.split('/', 2);
+                    lib = l;
+                    name = sanitizeName(n);
+                    if (!name) { this._printError('Invalid name'); return; }
+                } else if (args.length >= 2) {
+                    lib = a0;
+                    name = sanitizeName(args.slice(1).join(' '));
+                    if (!name) { this._printError('Invalid name'); return; }
+                } else {
+                    // save <something> — считаем это именем в текущей lib
+                    name = sanitizeName(a0);
+                    if (!name) { this._printError('Invalid name'); return; }
                 }
+            }
 
-                this._printOk(`Saved "${name}" → user`);
-            } else {
-                this._printError(`Save failed for "${name}"`);
+            const result = await saveModule(this.app, { lib, name });
+            this._printOk(`Saved "${result.name}" → ${result.lib}`);
+            this.app._sourceLibrary = result.lib;
+
+            if (this.app.propertiesPanel?.activeTab === 'module') {
+                this.app.propertiesPanel._render();
             }
         } catch (e) {
             this._printError(`Save error: ${e.message}`);
         }
     }
-
-    _generateJsCode(moduleData) {
-        const name = moduleData.name;
-        const componentsJSON = JSON.stringify(moduleData.components, null, 8);
-
-        const paramsStr = moduleData.params.length > 0
-            ? `    params: [${moduleData.params.join(', ')}],`
-            : '    params: [],';
-
-        const inputsStr = moduleData.inputs.length > 0
-            ? `    inputs: [${moduleData.inputs.join(', ')}],`
-            : '    inputs: [],';
-
-        const outputsStr = moduleData.outputs.length > 0
-            ? `    outputs: [${moduleData.outputs.join(', ')}],`
-            : '    outputs: [],';
-
-        const customColorStr = moduleData.customColor
-            ? `    customColor: '${moduleData.customColor}',`
-            : `    customColor: null,`;
-
-        return `// Automatically generated by Module Editor
-export const ${name}Module = {
-    type: '${name}',
-    defaultParams: [],
-    displayName: '${name}',
-    category: '${moduleData.category || 'custom'}',
-    gridHeight: ${moduleData.gridHeight},
-    originalName: '${name}',
-    tooltip: '${name}',
-${customColorStr}
-${paramsStr}
-${inputsStr}
-${outputsStr}
-    components: ${componentsJSON}
-};`;
-    }
-
     // ─────────────────────────── LOAD ───────────────────────────────
 
     async _cmdLoad(args) {
+        // Без аргументов — help
         if (args.length === 0) {
-            // Показать список всех модулей всех библиотек
-            const libs = await libraryStore.listLibraries();
-            let total = 0;
-            for (const entry of libs) {
-                const mods = await libraryStore.listModules(entry.name);
-                if (mods.length === 0) continue;
-                this._printInfo(`📦 ${entry.name} (${entry.source}, ${mods.length}):`);
-                for (const m of mods) {
-                    this._print(`  [${entry.name}] ${m.name}`);
-                    total++;
-                }
-            }
-            if (total === 0) this._print('(no modules)', '#666');
+            this._printInfo('Usage:');
+            this._print('  load <name>            — search current library, then all');
+            this._print('  load <lib>/<name>      — specific library');
+            this._print('  load <lib> <name>      — same, space-separated');
+            this._print('', '#666');
+            this._print('  lslib                  — list libraries');
+            this._print('  lsmod [lib]            — list modules (default: current)');
             return;
         }
 
-        // load <name> — ищем в user, потом во всех builtin
-        // load <lib>/<name> или load <lib> <name> — конкретная библиотека
+        // Разбор аргументов
         let lib = null;
         let name = args[0];
 
@@ -1392,25 +1781,31 @@ ${outputsStr}
             name = args[1];
         }
 
-        // Если lib не указана — ищем
+        // Если lib не указана — ищем в текущей, потом user, потом все
         let found = null;
         if (lib) {
             found = await libraryStore.loadModule(lib, name);
+            if (!found) {
+                this._printError(`Module "${name}" not found in library "${lib}"`);
+                return;
+            }
+            found = { ...found, lib };
         } else {
-            // user первым, потом все builtin
+            const curLib = this.app._sourceLibrary || 'user';
             const libs = await libraryStore.listLibraries();
-            const order = ['user', ...libs.filter(l => l.name !== 'user').map(l => l.name)];
+            const order = [curLib, 'user', ...libs.filter(l => l.name !== curLib && l.name !== 'user').map(l => l.name)];
+            const tried = new Set();
             for (const l of order) {
+                if (tried.has(l)) continue;
+                tried.add(l);
                 const data = await libraryStore.loadModule(l, name);
-                if (data) {
-                    found = { ...data, lib: l };
-                    break;
-                }
+                if (data) { found = { ...data, lib: l }; break; }
             }
         }
 
         if (!found) {
             this._printError(`Module "${name}" not found`);
+            this._print('  Tip: lslib — list libraries; lsmod [lib] — list modules', '#666');
             return;
         }
 
@@ -1427,47 +1822,81 @@ ${outputsStr}
             this._printError(`Parse error: ${e.message}`);
         }
     }
-
     // ─────────────────────────── RM ────────────────────────────────
 
     async _cmdRm(args) {
-        const name = args.join(' ').trim();
+        if (args.length === 0) {
+            this._printError('Usage: rm <name> | rm <lib>/<name> | rm <lib> <name>');
+            this._print('  Tip: lsmod [lib] — list modules', '#666');
+            return;
+        }
+
+        // Разбор аргументов
+        let lib = null;
+        let name = null;
+
+        if (args[0].includes('/')) {
+            [lib, name] = args[0].split('/', 2);
+        } else if (args.length >= 2) {
+            lib = args[0];
+            name = args[1];
+        } else {
+            name = args[0];
+            lib = this.app._sourceLibrary || 'user';
+        }
+
         if (!name) {
-            this._printError('Usage: rm <moduleName>');
-            this._print('  Tip: lsmod — list user modules', '#666');
+            this._printError('Module name is required');
             return;
         }
 
         try {
-            // Проверяем, что это user-модуль
-            const userMods = await libraryStore.listModules('user');
-            const exists = userMods.some(m => m.name === name);
+            // Проверка: библиотека существует?
+            const libs = await libraryStore.listLibraries();
+            const libEntry = libs.find(l => l.name === lib);
+
+            if (!libEntry) {
+                this._printError(`Library "${lib}" not found`);
+                this._print('  Tip: lslib — list libraries', '#666');
+                return;
+            }
+
+            // Builtin — read-only
+            if (libEntry.source === 'builtin') {
+                this._printError(`Library "${lib}" is builtin (read-only) — cannot delete`);
+                return;
+            }
+
+            // Проверка: модуль существует?
+            const mods = await libraryStore.listModules(lib);
+            const exists = mods.some(m => m.name === name);
 
             if (!exists) {
-                this._printError(`Not a user module: ${name}`);
-                if (userMods.length > 0) {
-                    this._print(`Available user modules: ${userMods.map(m => m.name).join(', ')}`, '#666');
+                this._printError(`Module "${name}" not found in library "${lib}"`);
+                if (mods.length > 0) {
+                    this._print(`  Available in "${lib}": ${mods.map(m => m.name).join(', ')}`, '#666');
                 }
                 return;
             }
 
+            // Подтверждение
             const ok = typeof window.confirm === 'function'
-                ? window.confirm(`Delete user module "${name}"? This cannot be undone.`)
+                ? window.confirm(`Delete module "${name}" from "${lib}"? This cannot be undone.`)
                 : true;
             if (!ok) {
                 this._print('Cancelled', '#888');
                 return;
             }
 
-            const removed = await libraryStore.removeModule('user', name);
+            const removed = await libraryStore.removeModule(lib, name);
 
             if (removed) {
-                this._printOk(`Deleted: ${name}`);
-                if (this.app?.module?.title === name) {
+                this._printOk(`Deleted: ${lib}/${name}`);
+                if (this.app?.module?.title === name && this.app?._sourceLibrary === lib) {
                     this._print(`   ⚠️ "${name}" is currently open — use "new" to start fresh`, '#f90');
                 }
             } else {
-                this._printError(`Delete failed: ${name}`);
+                this._printError(`Delete failed: ${lib}/${name}`);
             }
         } catch (e) {
             this._printError(`rm error: ${e.message}`);
@@ -1477,13 +1906,29 @@ ${outputsStr}
     // ─────────────────────────── LSMOD ─────────────────────────────
 
     async _cmdLsmod(args) {
-        const filter = args.join(' ').trim().toLowerCase();
+        const curLib = this.app._sourceLibrary || 'user';
+        let lib = curLib;
+        let filter = '';
+
+        if (args.length > 0) {
+            // lsmod <lib> [filter] или lsmod [filter] (если args[0] — известная либа)
+            try {
+                const libs = await libraryStore.listLibraries();
+                if (libs.some(l => l.name === args[0])) {
+                    lib = args[0];
+                    filter = args.slice(1).join(' ').trim().toLowerCase();
+                } else {
+                    filter = args.join(' ').trim().toLowerCase();
+                }
+            } catch {
+                filter = args.join(' ').trim().toLowerCase();
+            }
+        }
 
         try {
-            const mods = await libraryStore.listModules('user');
-
+            const mods = await libraryStore.listModules(lib);
             if (mods.length === 0) {
-                this._print('📭 No user modules', '#888');
+                this._print(`📭 No modules in "${lib}"`, '#888');
                 return;
             }
 
@@ -1492,17 +1937,16 @@ ${outputsStr}
                 : mods;
 
             if (filtered.length === 0) {
-                this._print(`📭 No user modules matching "${filter}"`, '#888');
+                this._print(`📭 No modules matching "${filter}" in "${lib}"`, '#888');
                 return;
             }
 
-            this._printInfo(`📦 User modules (${filtered.length}):`);
-            filtered.sort((a, b) => a.name.localeCompare(b.name));
+            this._printInfo(`📦 ${lib} (${filtered.length}):`);
             filtered.forEach((m, i) => {
-                const current = this.app?.module?.title === m.name ? '  ← current' : '';
-                const dn = m.description?.displayName;
-                const label = dn && dn !== m.name ? `${m.name} (${dn})` : m.name;
-                this._print(`  ${i + 1}. ${label}${current}`);
+                const current = (this.app?.module?.title === m.name && lib === curLib) ? '  ← current' : '';
+                const status = m.status && m.status !== 'dev' ? ` [${m.status}]` : '';
+                const dn = m.displayName && m.displayName !== m.name ? ` (${m.displayName})` : '';
+                this._print(`  ${i + 1}. ${m.name}${dn}${status}${current}`);
             });
         } catch (e) {
             this._printError(`lsmod error: ${e.message}`);
@@ -1539,6 +1983,38 @@ ${outputsStr}
 
     // ─────────────────────────── HELPERS ────────────────────────────
 
+    _findFreeSpotNear(startX, startY, w, h, exclude, maxRadius = 200) {
+        const module = this.app.module;
+        const step = 5;
+
+        // Сканируем концентрические квадраты вокруг (startX, startY)
+        for (let r = 0; r <= maxRadius; r += step) {
+            // Верхняя и нижняя стороны
+            for (let dx = -r; dx <= r; dx += step) {
+                const x1 = startX + dx;
+                const y1 = startY - r;
+                if (this._isFreeSpot(x1, y1, w, h, exclude, module)) return { x: x1, y: y1 };
+                const y2 = startY + r;
+                if (this._isFreeSpot(x1, y2, w, h, exclude, module)) return { x: x1, y: y2 };
+            }
+            // Левая и правая стороны
+            for (let dy = -r + step; dy < r; dy += step) {
+                const x1 = startX - r;
+                const y1 = startY + dy;
+                if (this._isFreeSpot(x1, y1, w, h, exclude, module)) return { x: x1, y: y1 };
+                const x2 = startX + r;
+                if (this._isFreeSpot(x2, y1, w, h, exclude, module)) return { x: x2, y: y1 };
+            }
+        }
+        return null;
+    }
+
+    _isFreeSpot(x, y, w, h, exclude, module) {
+        if (x < 0 || y < 0) return false;
+        if (x + w > module.width || y + h > module.height) return false;
+        return !this._collides(x, y, w, h, exclude);
+    }
+
     _findFreeSpot(size) {
         const module = this.app.module;
         const step = 5;
@@ -1558,11 +2034,11 @@ ${outputsStr}
         for (const c of this.app.components) {
             if (c === exclude) continue;
             if (c._isNewDragging) continue;
+            if (!hasCollisions(c)) continue;    // ← NEW: ярлыки не мешают
             const cx = c.relX ?? 0;
             const cy = c.relY ?? 0;
             const cw = c.width ?? 0;
             const ch = c.height ?? 0;
-
             const overlap = !(x + w <= cx ||
                               x >= cx + cw ||
                               y + h <= cy ||

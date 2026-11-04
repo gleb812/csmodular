@@ -1,12 +1,14 @@
 // editor/ui/Toolbar.js
 //
 // Верхняя панель инструментов.
-//
 // Кнопки: New / Load / Save + пресеты layout.
 //
 // API:
 //   const tb = new Toolbar({ app, layout });
 //   layout.mount('toolbar', tb.element);
+
+import { saveModule } from '../saveService.js';
+import { getStatusMeta } from '../../src/api/moduleStatusStore.js';
 
 export class Toolbar {
     constructor(opts = {}) {
@@ -30,7 +32,6 @@ export class Toolbar {
             user-select: none;
         `;
 
-        // ── Логотип / название ──
         const title = document.createElement('div');
         title.style.cssText = `
             color: #0af;
@@ -42,15 +43,17 @@ export class Toolbar {
         title.textContent = '📐 Module Editor';
         this.element.appendChild(title);
 
-        // ── Основные кнопки ──
         this.element.appendChild(this._btn('🆕 New', () => this._onNew()));
         this.element.appendChild(this._btn('📂 Load', () => this._onLoad()));
         this.element.appendChild(this._btn('💾 Save', () => this._onSave(), 'primary'));
 
-        // Разделитель
         this.element.appendChild(this._divider());
 
-        // ── Пресеты layout ──
+        this.element.appendChild(this._btn('⬇ Export', () => this._onExport(), 'default',
+            'Download .js + .txt (for release / sharing)'));
+        this.element.appendChild(this._btn('⬆ Import', () => this._onImport(), 'default',
+            'Import .js + .txt into user library'));
+
         const layoutLabel = document.createElement('span');
         layoutLabel.style.cssText = 'color: #666; font-size: 10px; margin-right: 4px;';
         layoutLabel.textContent = 'Layout:';
@@ -59,6 +62,52 @@ export class Toolbar {
         this.element.appendChild(this._btn('Default', () => this.layout.setPreset('default')));
         this.element.appendChild(this._btn('Code', () => this.layout.setPreset('code-focus')));
         this.element.appendChild(this._btn('Canvas', () => this.layout.setPreset('canvas-focus')));
+    }
+
+    async _onImport() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.js,.txt';
+        input.multiple = true;
+
+        input.onchange = async () => {
+            const files = Array.from(input.files);
+            if (files.length === 0) return;
+
+            let jsCode = null, dspCode = null, name = null;
+            for (const f of files) {
+                const text = await f.text();
+                if (f.name.endsWith('.js')) {
+                    jsCode = text;
+                    name = f.name.replace(/\.js$/, '');
+                } else if (f.name.endsWith('.txt')) {
+                    dspCode = text;
+                }
+            }
+
+            if (!jsCode) {
+                this.app.uiManager.showNotification('❌ Need .js file');
+                return;
+            }
+
+            const { sanitizeName } = await import('../saveService.js');
+            const safeName = sanitizeName(name || 'Imported');
+            if (!safeName) {
+                this.app.uiManager.showNotification('❌ Invalid name');
+                return;
+            }
+
+            const { libraryStore } = await import('../../src/api/index.js');
+            const ok = await libraryStore.saveModule('user', safeName, jsCode, dspCode);
+
+            if (ok) {
+                this.app.uiManager.showNotification(`✅ Imported "${safeName}" → user`);
+            } else {
+                this.app.uiManager.showNotification('❌ Import failed');
+            }
+        };
+
+        input.click();
     }
 
     _btn(text, onClick, variant = 'default') {
@@ -101,6 +150,54 @@ export class Toolbar {
 
     // ─────────────────────────── ACTIONS ────────────────────────────
 
+    async _onExport() {
+        if (!this.app.module) return;
+        
+        const { generateJsCode, sanitizeName } = await import('../saveService.js');
+        const { serializeComponents, collectParamIds, collectPorts } = await import('../ComponentRegistry.js');
+        
+        const name = sanitizeName(this.app.module.title || 'MyMod');
+        const module = this.app.module;
+        
+        // Собираем moduleData — как в saveService.saveModule
+        const moduleData = {
+            name,
+            displayName: name,
+            category: module.category || 'custom',
+            status: module.status || 'dev',
+            gridHeight: module.gridHeight || 3,
+            type: name,
+            defaultParams: [],
+            tooltip: name,
+            params: collectParamIds(this.app.components),
+            inputs: collectPorts(this.app.components).inputs,
+            outputs: collectPorts(this.app.components).outputs,
+            customColor: module.customColor || null,
+            components: serializeComponents(this.app.components),
+        };
+        
+        const jsCode = generateJsCode(moduleData);
+        const dspCode = this.app.codeViewerWindow?.getCode() || '';
+        
+        this._download(`${name}.js`, jsCode, 'application/javascript');
+        this._download(`${name}.txt`, dspCode, 'text/plain');
+        
+        this.app.uiManager.showNotification(`⬇ Exported ${name}.js + ${name}.txt`);
+    }
+
+    _download(filename, content, mime) {
+        const blob = new Blob([content], { type: mime });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+
     _onNew() {
         if (!confirm('Clear current module?')) return;
         this.app.clearModule({ title: 'NewModule', resetColor: true });
@@ -108,119 +205,9 @@ export class Toolbar {
     }
 
     async _onLoad() {
-        const { libraryStore } = await import('../../src/api/index.js');
-
-        try {
-            const libs = await libraryStore.listLibraries();
-            const all = [];
-
-            for (const entry of libs) {
-                try {
-                    const mods = await libraryStore.listModules(entry.name);
-                    for (const m of mods) {
-                        all.push({
-                            lib: entry.name,
-                            name: m.name,
-                            displayName: m.description?.displayName || m.name,
-                            source: entry.source,
-                        });
-                    }
-                } catch (e) {
-                    console.warn(`[Toolbar] listModules(${entry.name}) failed:`, e);
-                }
-            }
-
-            if (all.length === 0) {
-                this.app.uiManager.showNotification('📭 No modules found');
-                return;
-            }
-
-            all.sort((a, b) => {
-                if (a.source !== b.source) return a.source === 'user' ? -1 : 1;
-                if (a.lib !== b.lib) return a.lib.localeCompare(b.lib);
-                return a.displayName.localeCompare(b.displayName);
-            });
-
-            const dialog = document.createElement('div');
-            dialog.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: #2a2a2a;
-                border: 1px solid #444;
-                border-radius: 8px;
-                padding: 20px;
-                z-index: 10000;
-                min-width: 320px;
-                max-width: 480px;
-                box-shadow: 0 8px 40px rgba(0, 0, 0, 0.8);
-            `;
-
-            dialog.innerHTML = `
-                <div style="color: #0af; font-weight: bold; font-size: 14px; margin-bottom: 12px;">📂 Load Module</div>
-                <div style="margin-bottom: 12px; max-height: 400px; overflow-y: auto;">
-                    ${all.map(({ lib, name, displayName, source }) => {
-                        const icon = source === 'user' ? '👤' : '📦';
-                        const label = displayName !== name
-                            ? `${displayName} <span style="color:#666;font-size:10px;">(${name})</span>`
-                            : displayName;
-                        return `<button data-lib="${lib}" data-name="${name}" style="
-                            width: 100%;
-                            padding: 8px 12px;
-                            margin-bottom: 4px;
-                            background: #1a1a1a;
-                            border: 1px solid #333;
-                            border-radius: 4px;
-                            color: #ccc;
-                            cursor: pointer;
-                            text-align: left;
-                            font-size: 12px;
-                        ">${icon} <span style="color:#0af;font-size:10px;">[${lib}]</span> ${label}</button>`;
-                    }).join('')}
-                </div>
-                <button id="close-dialog-btn" style="
-                    padding: 6px 20px;
-                    background: #333;
-                    border: 1px solid #555;
-                    border-radius: 4px;
-                    color: #aaa;
-                    cursor: pointer;
-                    font-size: 12px;
-                ">Cancel</button>
-            `;
-
-            document.body.appendChild(dialog);
-
-            dialog.querySelectorAll('[data-name]').forEach(btn => {
-                btn.onclick = async () => {
-                    const lib = btn.dataset.lib;
-                    const name = btn.dataset.name;
-                    dialog.remove();
-                    overlay.remove();
-                    await this._loadModuleFrom(lib, name);
-                };
-            });
-
-            dialog.querySelector('#close-dialog-btn').onclick = () => {
-                dialog.remove();
-                overlay.remove();
-            };
-
-            const overlay = document.createElement('div');
-            overlay.style.cssText = `
-                position: fixed; top: 0; left: 0;
-                width: 100%; height: 100%;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 9999;
-            `;
-            overlay.onclick = () => { dialog.remove(); overlay.remove(); };
-            document.body.insertBefore(overlay, dialog);
-
-        } catch (e) {
-            console.error('[Toolbar] Load error:', e);
-            this.app.uiManager.showNotification(`❌ ${e.message}`);
-        }
+        const { LoadDialog } = await import('./LoadDialog.js');
+        const dialog = new LoadDialog({ app: this.app });
+        await dialog.show();
     }
 
     async _loadModuleFrom(lib, name) {
@@ -239,10 +226,8 @@ export class Toolbar {
     }
 
     async _onSave() {
-        if (this.app.propertiesWindow) {
-            await this.app.propertiesWindow.saveModule();
-        } else {
-            console.warn('[Toolbar] propertiesWindow not available');
-        }
+        const { SaveDialog } = await import('./SaveDialog.js');
+        const dialog = new SaveDialog({ app: this.app });
+        await dialog.show();
     }
 }

@@ -222,37 +222,57 @@ export class PatchLoader {
 
     async loadModuleFile(moduleName, lib = null) {
         try {
-
-            // ⭐ 1. Библиотека из патча (v2) — если указана
+            // ⭐ 1. Если патч требует конкретную библиотеку
             if (lib) {
+                // Проверим, установлена ли библиотека
+                const libs = await libraryStore.listLibraries();
+                const libExists = libs.some(l => l.name === lib);
+                if (!libExists) {
+                    throw new Error(
+                        `Patch requires library "${lib}" — not installed. ` +
+                        `Install it or remove the module.`
+                    );
+                }
+
+                // Пробуем загрузить
                 if (await this.moduleFactory.loadModule(lib, moduleName)) {
+                    // ⭐ Проверим, что registry реально взял из lib
+                    const registered = this.moduleFactory.moduleRegistry[moduleName];
+                    if (registered && registered.library !== lib) {
+                        // Коллизия: type уже был загружен из другой библиотеки
+                        throw new Error(
+                            `Module "${moduleName}" from library "${lib}" conflicts with ` +
+                            `already-loaded "${registered.library}/${moduleName}" ` +
+                            `(Csound opcode "${moduleName}" is global — only one can be loaded). ` +
+                            `Remove the conflicting module or use a different type.`
+                        );
+                    }
                     return true;
                 }
-                console.warn(
-                    `[PatchLoader] "${moduleName}" not found in library "${lib}", trying fallbacks`
+
+                throw new Error(
+                    `Module "${moduleName}" not found in library "${lib}" ` +
+                    `(library is installed, but module is missing).`
                 );
             }
 
-            // ⭐ 2. Fallback: user, потом все builtin
+            // ⭐ 2. Без library в патче (v1) — старый fallback
             if (await this.moduleFactory.loadModule('user', moduleName)) {
                 return true;
             }
             const all = await libraryStore.listLibraries();
             for (const entry of all) {
-                if (entry.name === lib) continue; // уже пробовали
                 if (await this.moduleFactory.loadModule(entry.name, moduleName)) {
                     console.warn(
                         `[PatchLoader] "${moduleName}" loaded from fallback "${entry.name}" ` +
-                        `(${entry.source})${lib ? ` — patch expected "${lib}"` : ''}`
+                        `(patch has no "library" field — legacy v1)`
                     );
                     return true;
                 }
             }
 
             throw new Error(
-                `Module "${moduleName}" not found` +
-                (lib ? ` in library "${lib}"` : '') +
-                ` nor in any fallback library`
+                `Module "${moduleName}" not found in any installed library.`
             );
         } catch (error) {
             console.error(`❌ Failed to load module ${moduleName}:`, error);
@@ -276,16 +296,16 @@ export class PatchLoader {
     
     configureModule(module, moduleDef, moduleId) {
         
-        // Сохраняем JSON данные
         module.jsonId = moduleId;
         module.jsonName = moduleDef.name;
         module.parentSystem = this.system;
+        module.library = moduleDef.library || registryDef?.library || null;
 
-       // ⭐ Регистрируем в csoundGen (как в main.addNewModuleAtPosition)
+        const registryDef = this.system.moduleFactory.moduleRegistry[moduleDef.name];
+        const typeId = registryDef?.type || moduleDef.name;
         if (this.system.csoundGen) {
-            const registryDef = this.system.moduleFactory.moduleRegistry[moduleDef.name];
             this.system.csoundGen.addModule({
-                typeId: moduleDef.name,
+                typeId,
                 instanceId: moduleId,
                 instanceName: moduleDef.name,
                 layer: module.layer,
@@ -299,7 +319,6 @@ export class PatchLoader {
             });
         }
 
-        // Добавляем в систему
         // ВАЖНО: Добавляем в layerManager, а не в старый system.layers
         if (this.system.layerManager && this.system.layerManager.layers[module.layer]) {
             this.system.layerManager.layers[module.layer].modules.push(module);

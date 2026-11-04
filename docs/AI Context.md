@@ -15,21 +15,29 @@ Two entries:
 Debug tools: **Oscilloscope** (waveform viewer for cables), **LED / MiniVU**
 (per-module level indicators), **Minimap** (world overview, `M` / `Mp`).
 
-## Stack
+## Storage
 
 - **Storage:** `src/api/index.js`
   - `libraryStore` — **primary** (lazy proxy) for module libraries
     - Web: `libraryStore.web.js` — builtin via `fetch('/libraries/...')`, user via IndexedDB (`csmodular/libraries`)
     - Tauri: `libraryStore.tauri.js` — builtin via `BaseDirectory.Resource`, user via `~/Documents/CsModular/libraries/<lib>/`
-  - `moduleStore` — **legacy**, only for old `~/Documents/CsModular/modules/user/*.js` (to be removed)
+  - `moduleStore` — **removed** (legacy, gone)
 - **Libraries:** `public/libraries/<lib>/`
-  - `_index.json` — `{ "modules": ["Name1", "Name2"] }`
+  - `_index.json` — `{ "modules": [{ name, displayName, category, status }] }` (backward-compat: string entries accepted, treated as `{ name, status: 'dev', category: 'custom' }`)
+  - `_meta.json` — `{ name, displayName, author, version, description, geometry, createdAt }` (optional, default fallback if missing)
   - `modules/<Name>.js` — JS description
   - `modules/<Name>.txt` — UDO (Csound code)
   - `public/libraries/_index.json` — `{ "libraries": ["lib1", "lib2"] }`
 - **UDO (builtin, non-module):** `public/csound/modules/led_rms.txt`, `mVU_rms.txt`
 - **Tables:** `public/tables/*.json` (read by `TextField` and `;@ map` ftgens)
 - **Scripts:** `scripts/` (Python)
+
+**Storage keys:**
+
+- Web: `<lib>/<Name>.js`, `<lib>/<Name>.txt`, `<lib>/_index.json`, `<lib>/_meta.json`
+- Tauri: `modules/<Name>.{js,txt}`, `_index.json`, `_meta.json` in library root
+
+**Both backends update `_index.json` on `saveModule` / `removeModule`.**
 
 ## Module status (DEV / BUILD)
 
@@ -192,15 +200,13 @@ checkboxes from `/tables/`, order = selection order via `_orderBySelection`),
 
 ### Create module
 1. `ModuleFactory.createModule(type, gridX, gridY, layer)` → `Panel`
-   (width=260, gridWidth=13, gridHeight from def)
-2. `CsoundGenerator.addModule({ typeId, instanceId, instanceName: type, ... })`
+   (width=260, gridWidth=13, gridHeight from def, `panel.status`, `panel.library`)
+2. `CsoundGenerator.addModule({ typeId, instanceId, instanceName, ... })`
 3. `recomputeVariantUI()` — apply default variant to jacks **immediately**
 4. Recompile → ORC regenerated
 
-**Snap on create:** if `snap` → `gridX/gridY` snapped to multiples of
-`multX/multY`. Collision → `findFreeSpace(...)` → snap again.
-**Soft limit:** if `checkSaneDistance()` fails → `findFreeSpace` near nearest
-module + notify (see Grid system / Soft limit).
+**Snap on create:** if `snap` → `gridX/gridY` snapped to multiples of `multX/multY`. Collision → `findFreeSpace(...)` → snap again.
+**Soft limit:** if `checkSaneDistance()` fails → `findFreeSpace` near nearest module + notify (see Grid system / Soft limit).
 
 ### Add cable
 1. `PatchManager.addCable(from, to)` → `Cable` (`typeColor` = source jack color)
@@ -221,16 +227,16 @@ forceRedraw + debounced recompile.
 5. `instr 2` (fx) — same
 6. `instr 3` — MIDI filter; `instr 4` — offline render
 
+
 ### UDO loading — `_loadUdoByPath()`
 - `library/<lib>/<Name>.txt` → `libraryStore.loadUdo(lib, name)`
-  (builtin: `fetch('/libraries/<lib>/modules/<Name>.txt')`; user: IndexedDB / Tauri fs)
-- `user/<Name>.txt` → `moduleStore.load(name).dsp_code` (**legacy** fallback)
+  (builtin: `fetch('/libraries/<lib>/modules/<Name>.txt')`; user: IndexedDB / Tauri fs `modules/<Name>.txt`)
 - `<id>.txt`, `led_rms.txt`, `mVU_rms.txt` → `fetch('/csound/modules/<path>')`
   with HTML-fallback detection (builtin non-module UDOs)
 
-**Never** raw `fetch('/csound/modules/user/...')` — Vite SPA-fallback returns
-`index.html` (status 200, HTML leaks into ORC). `libraryStore.loadUdo` and
-`_fetchText` both detect HTML via `looksLikeHtml()`.
+**Never** raw `fetch('/csound/modules/user/...')` — Vite SPA-fallback returns `index.html` (status 200, HTML leaks into ORC). `libraryStore.loadUdo` and `_fetchText` both detect HTML via `looksLikeHtml()`.
+
+**Tauri paths:** user UDOs live in `<lib>/modules/<Name>.txt`, **not** `csound/modules/`. `loadModule` / `loadUdo` / `removeModule` / `saveModule` all use `modules/`.
 
 ### Recompile
 `reset()` + `setOption('-odac')` + `compileOrc` + `readScore` + `start`.
@@ -661,172 +667,124 @@ Must match `bandwidth: 'static'` in JS (e.g. `EnvD`: `Trig`, `AM` static,
 
 ## Development rules
 
-1. **No `chnset`/`chnget` inside UDO opcode** — parameters via `chnget` in
-   `instr 1/2` outside opcode.
-2. Indicators via external UDOs (`led_rms`, `mVU_rms`) called in `instr 1/2`
-   after the module.
+1. **No `chnset`/`chnget` inside UDO opcode** — parameters via `chnget` in `instr 1/2` outside opcode.
+2. Indicators via external UDOs (`led_rms`, `mVU_rms`) called in `instr 1/2` after the module.
 3. `ConnectorIndex` — legacy NM2, unused in runtime.
 4. User modules always in `user/`. One opcode per file.
 5. `params`/`inputs`/`outputs` fixed order, matches `xin`.
 6. **Csound names always from `type`/`jsonName`**, never `displayName`/`title`.
-7. **No direct `fetch('/api/...')`** — use `moduleStore`.
+7. **No direct `fetch('/api/...')`** — use `libraryStore`.
 8. **No top-level await** in entry points.
 9. **All draw code uses `getCurrentTheme()`**.
 10. **`removeModuleFromLayer` searches ALL layers**.
 11. **`getLayerAtPoint` always `'voice'`**.
 12. **Keyboard shortcuts skip in `<input>`/`<textarea>`/`contentEditable`**.
-13. **Component serialization via `ComponentRegistry`** — no manual `if/else`
-    on `constructor.name`.
-14. **`params` order = `components[]` order**, never sort. `formatModuleLine`
-    reads `moduleDef.params` from JSON directly.
+13. **Component serialization via `ComponentRegistry`** — no manual `if/else` on `constructor.name`.
+14. **`params` order = `components[]` order**, never sort. `formatModuleLine` reads `moduleDef.params` from JSON directly.
 15. **Grid step = `BASE_STEP_X/Y * multX/multY`.** No hardcoded 20/15.
-16. **`gridX/gridY` integers in base cells.** Multipliers affect only
-    snap/render.
+16. **`gridX/gridY` integers in base cells.** Multipliers affect only snap/render.
 17. **Changing `multX/multY` does not move existing modules.**
 18. **`findFreeSpace(..., stepX, stepY)`** with `multX/multY` (snap) or `1/1`.
 19. **UDO loading via `_loadUdoByPath()`** — no raw fetch for `user/*`.
 20. **`mappingTable` serialized for `Knob`/`Slider`.**
 21. **`syncFromModule()` not after `restoreModuleFromData()`** — wipes body.
 22. **`mappingTable` only on `Knob`/`Slider`.**
-23. **`MidiManager` never touches Csound directly** — always via
-    `CsoundEngine.midiMessage()`. Wired in `main.js` with `state === 'running'`.
+23. **`MidiManager` never touches Csound directly** — always via `CsoundEngine.midiMessage()`. Wired in `main.js` with `state === 'running'`.
 24. **MIDI enabled by user click** (`MI`) — never auto-init.
 25. **`phasor` frequency = `(sr / ksmps) / bufferSize`**, not `1/bufferSize`.
 26. **`tablew` with normalized index needs `ixmode=1`.**
-27. **Control-cable scope uses `k(aScopeIdx)`**; audio-cable uses a-rate
-    `aScopeIdx` directly.
+27. **Control-cable scope uses `k(aScopeIdx)`**; audio-cable uses a-rate `aScopeIdx` directly.
 28. **Scope tables never persisted** — cleared on `reset()`/`removeCable`.
-29. **`Panel.draw()` sets `comp._panelHeight = this.height`** before
-    `comp.draw()` — needed by `PartSelector.getMenuBounds()`.
-30. **`PartSelector` requires `this.onChange = null`** in constructor —
-    `ModuleFactory` wraps `onChange` for Csound `setControlChannel`.
-31. **Overlay drawing** via `comp.drawOverlay(ctx)` in a separate pass
-    **after** all panels (`EditorApp.drawOverlays()`,
-    `ModularSystem._renderCables()` overlay loop). Never inside `comp.draw()`.
+29. **`Panel.draw()` sets `comp._panelHeight = this.height`** before `comp.draw()` — needed by `PartSelector.getMenuBounds()`.
+30. **`PartSelector` requires `this.onChange = null`** in constructor — `ModuleFactory` wraps `onChange` for Csound `setControlChannel`.
+31. **Overlay drawing** via `comp.drawOverlay(ctx)` in a separate pass **after** all panels (`EditorApp.drawOverlays()`, `ModularSystem._renderCables()` overlay loop). Never inside `comp.draw()`.
 32. **`rm` ≠ `del`** in terminal. `rm` must not be aliased in `_cmdDel` case.
-33. **`moduleDef.params` is source of truth for `formatModuleLine`.**
-    Update manually or re-save from editor if components change.
-34. **Indicators require `sourceComponentId`** pointing to same-module
-    Input/Output. Missing → disabled with warn.
-35. **Indicator tap-buses are local to `formatModuleLine`** — recreated each
-    generation. LED gets A2K for audio taps (cached in local Map). MiniVU
-    skips control taps.
-36. **`includes.add('led_rms.txt')` and `includes.add('miniVU.txt')`** in
-    `CsoundGenerator` constructor.
+33. **`moduleDef.params` is source of truth for `formatModuleLine`.** Update manually or re-save from editor if components change.
+34. **Indicators require `sourceComponentId`** pointing to same-module Input/Output. Missing → disabled with warn.
+35. **Indicator tap-buses are local to `formatModuleLine`** — recreated each generation. LED gets A2K for audio taps (cached in local Map). MiniVU skips control taps.
+36. **`includes.add('led_rms.txt')` and `includes.add('miniVU.txt')`** in `CsoundGenerator` constructor.
 37. **Jack color = its own `type`.** `BaseJack.getEffectiveColor()` only.
-38. **`PatchManager.updateJackConnection` never paints jack with cable's
-    color.**
+38. **`PatchManager.updateJackConnection` never paints jack with cable's color.**
 39. **`synchronizeInputCables` / `findColoredCable` removed.**
-40. **`changeCableColor(jack, color, isVisual)`** — only `visualColor` is
-    user-editable. Functional color derived from source jack type.
-41. **`_getCableType` uses `_resolveSourceType(cable)`** (respects source
-    module's active variant), then `csoundRateOf()`.
+40. **`changeCableColor(jack, color, isVisual)`** — only `visualColor` is user-editable. Functional color derived from source jack type.
+41. **`_getCableType` uses `_resolveSourceType(cable)`** (respects source module's active variant), then `csoundRateOf()`.
 42. **`logic`/`logicAudio` never get converters between each other.**
-43. **`PatchManager.resetCableColors` resets `visualColor` and re-paints
-    jack with `getEffectiveColor()`.**
-44. **`BaseJack.originalType`** (immutable, from JS `jackType`),
-    **`BaseJack.type`** (mutable, variant-applied),
-    **`BaseJack.bandwidth`** (must match UDO `;@ strict`).
-45. **`CABLE_COLORS` and `TYPE_FAMILY` in `src/constants.js`.** No local
-    copies. `BaseJack.typeColors` gone.
-46. **Status field is `status`** — `'stable' | 'passable' | 'dev' | 'broken'`,
-    default `'dev'`. Colors from `getStatusMeta(status)`. Never hardcode color
-    in UI.
+43. **`PatchManager.resetCableColors` resets `visualColor` and re-paints jack with `getEffectiveColor()`.**
+44. **`BaseJack.originalType`** (immutable, from JS `jackType`), **`BaseJack.type`** (mutable, variant-applied), **`BaseJack.bandwidth`** (must match UDO `;@ strict`).
+45. **`CABLE_COLORS` and `TYPE_FAMILY` in `src/constants.js`.** No local copies. `BaseJack.typeColors` gone.
+46. **Status field is `status`** — `'stable' | 'passable' | 'dev' | 'broken'`, default `'dev'`. Colors from `getStatusMeta(status)`. Never hardcode color in UI.
 47. **`IS_DEV`** from `moduleStatusStore` = `import.meta.env.DEV`.
-    - DEV: `ContextMenu._createStatusDot` shows colored dot; `preloadStatuses()`
-      runs once on first `show()`.
-    - BUILD: `preloadStatuses` is a no-op; `main.js` reads
-      `/modules/manifest.json` → `window.__STABLE_MODULES__`;
-      `initModuleStructure` filters `ALL_NM2` by it.
+    - DEV: `ContextMenu._createStatusDot` shows colored dot; `preloadStatuses()` runs once on first `show()`.
+    - BUILD: `preloadStatuses` is a no-op; `main.js` reads `/libraries/manifest.json` → `window.__STABLE_MODULES__`; `initModuleStructure` filters `ALL_NM2` by it.
 48. vite.config.js stableModulesOnly must:
     - read `public/libraries/_index.json`
     - filter modules by `status ∈ {stable, passable}`
     - copy `<lib>/modules/*.{js,txt}` → `dist/libraries/<lib>/modules/`
     - rewrite `<lib>/_index.json` and root `_index.json` (non-empty libs only)
-49. **In BUILD, status dots are hidden** (`IS_DEV = false`) — stars are shown
-    until removed; do not add dots in BUILD.
-50. **`moduleStatusStore` is a separate file** — `getModuleStatus`,
-    `getStatusMeta`, `IS_DEV`. Do not read `status` inline elsewhere.
-51. **`TextField` — controller field is `targetId` (live), JSON field is
-    `referenceElementId`.** `ComponentRegistry` renames between them.
-52. **`TextField` priority:** `tableByMode[mode]` → `tableName` → raw.
-    `modeValue`: `ButtonText` → `isActive ? 1 : 0`; others → `selectedIndex` /
-    `currentIndex` / `value`. Clamp `[0, tableByMode.length-1]`. Missing
-    `modeComponent` → `tableByMode[0]` + warn.
-53. **`TextField` tables loaded via `/tables/<name>.json`** with HTML-fallback
-    detection (Vite SPA). Cache in `_tableCache`.
-54. **`PropertiesPanel` `optionsFrom: 'parametricComponents'`** —
-    Knob/Slider/Button*/PartSelector except the current `TextField`.
-55. **`mapping-multi-select`** — modal with checkboxes from `fetch('/tables/')`
-    + `_listTableNames()` (cached). Order = selection order via
-    `_orderBySelection` (current first, then new in list order). Preview
-    shows `Order: A → B → C`.
-56. **`Splash` is independent of `CsoundEngine`.** Show after theme +
-    `ModularSystem` init; never wait for `state === 'running'`. Session
-    marker — `sessionStorage`, not `localStorage`.
-57. **ModuleFactory.loadModule(lib, name)** — the only way to register a
-module. It sets `definition.library` and `definition.isUser.
-loadUserModule(name)` is a legacy alias. `_parseModuleDefinition` is
-removed — parsing lives in `libraryStore.parseModuleDefinition`.
+49. **In BUILD, status dots are hidden** (`IS_DEV = false`) — stars are shown until removed; do not add dots in BUILD.
+50. **`moduleStatusStore` is a separate file** — `getModuleStatus`, `getStatusMeta`, `IS_DEV`. Do not read `status` inline elsewhere.
+51. **`TextField` — controller field is `targetId` (live), JSON field is `referenceElementId`.** `ComponentRegistry` renames between them.
+52. **`TextField` priority:** `tableByMode[mode]` → `tableName` → raw. `modeValue`: `ButtonText` → `isActive ? 1 : 0`; others → `selectedIndex` / `currentIndex` / `value`. Clamp `[0, tableByMode.length-1]`. Missing `modeComponent` → `tableByMode[0]` + warn.
+53. **`TextField` tables loaded via `/tables/<name>.json`** with HTML-fallback detection (Vite SPA). Cache in `_tableCache`.
+54. **`PropertiesPanel` `optionsFrom: 'parametricComponents'`** — Knob/Slider/Button*/PartSelector except the current `TextField`.
+55. **`mapping-multi-select`** — modal with checkboxes from `fetch('/tables/')` + `_listTableNames()` (cached). Order = selection order via `_orderBySelection` (current first, then new in list order). Preview shows `Order: A → B → C`.
+56. **`Splash` is independent of `CsoundEngine`.** Show after theme + `ModularSystem` init; never wait for `state === 'running'`. Session marker — `sessionStorage`, not `localStorage`.
+57. **`ModuleFactory.loadModule(lib, name)`** — the only way to register a module. It sets `definition.library` and `definition.isUser`. On type collision from a different library: console warning, **returns `true`** (type is registered, but from another library). `loadUserModule(name)` is a legacy alias. `_parseModuleDefinition` is removed — parsing lives in `libraryStore.parseModuleDefinition`.
+58. **`PatchLoader.loadModuleFile(name, lib)`** — if `lib` specified in patch:
+    - check `libraryStore.listLibraries()` — if missing → throw "library not installed"
+    - `loadModule(lib, name)` → if registered def's `library !== lib` → throw "conflicts with already-loaded"
+    - if not found → throw "module missing in installed library"
+    
+    No silent fallback. Without `lib` (v1 patch) — fallback to `user`, then all libraries, with console warning.
+59. **`collectModulesForExport`** writes `library` from `module.library || registryDef.library`. `PatchLoader.createModuleFromDef` reads `moduleDef.library`.
+60. **`saveService.saveModule(app, { lib, name })`** — the only save path. Used by Toolbar and Terminal. `generateJsCode()` lives **only** in `saveService.js`. No inline JS generation elsewhere.
+61. **`libraryStore.createLibrary(name, meta)`** — writes `<lib>/_meta.json` + `<lib>/modules/`. Called from `Toolbar._showSaveDialog` and `saveService` (if lib doesn't exist). Never overwrites existing `_meta.json`.
+62. **`_index.json` updated on `saveModule` / `removeModule`** — both web and Tauri. `listModules` reads manifest only, **no eval**.
+63. **`module.status`** — per-module, not per-library. Stored in JS (`status: 'dev'`). `restoreModuleFromData` reads it, `clearModule` resets to `'dev'`, `saveService` writes it. `PropertiesPanel` Module tab has status select.
+64. **No `await import()` inside sync methods.** `PropertiesPanel._renderModuleTab` is synchronous — `getStatusMeta` imported at top of file.
 
 ## Known issues
 
 - Variant switching UI not wired (jacks/cables recolor automatically)
 - `CsoundEngine._ledValues` not cleared on `stop()`
 - `led_rms` signed — intentional; use `portk abs(kin)` for level
-- `ModulePropertiesWindow`/`ComponentPropertiesWindow` headless (legacy)
-- `TerminalPanel._cmdSave` duplicates JS code generation
+- `ModulePropertiesWindow`/`ComponentPropertiesWindow` headless (legacy) — only `_showMappingBrowser()` still used
+- `TerminalPanel._cmdSave` no longer duplicates JS code (moved to `saveService`), but `_cmdSet(mappingTable)` calls `updateCode()` while `PropertiesPanel` mapping-select doesn't — unify
 - `PropertiesPanel._render()` uses `style.cssText +=` — accumulates
 - Code Viewer no undo, no virtualized highlight
 - Terminal no autocomplete
 - **HiDPI (dpr > 1)** disabled (`dpr = 1` workaround)
 - **MIDI dies after recompile** — `@csound/browser` IPC bug
 - **`sourceComponentId` missing in old modules** — LED/MiniVU disabled
-- **`bandwidth` missing in old modules** — defaults to `dynamic`, static
-  jacks may have changed. Re-save.
-- **`tableByMode` missing in old modules** — `TextField` falls back to
-  `tableName` or raw value
-- **HTML leaks into ORC** if raw `fetch` for `user/*` slips — `_loadUdoByPath`
-  catches
+- **`bandwidth` missing in old modules** — defaults to `dynamic`, static jacks may have changed. Re-save.
+- **`tableByMode` missing in old modules** — `TextField` falls back to `tableName` or raw value
+- **HTML leaks into ORC** if raw `fetch` for `user/*` slips — `_loadUdoByPath` catches
 - **`PartSelector.onChange` missing** in constructor
 - **`formatModuleLine` uses `moduleDef.params`** — not recalculated
-- **Module call order** — insertion order, not topological. Feedback may
-  see 1 k-block delay.
+- **Module call order** — insertion order, not topological. Feedback may see 1 k-block delay.
 - **`passable` not included in BUILD filter** — extend plugin when needed
-- **Dot color in first DEV menu open** — appears yellow for a moment until
-  `preloadStatuses` finishes (~1 s); expected
-- **`/tables/` HTML listing** — Vite in dev serves directory listing; in
-  build/prod it may not. `_listTableNames` will return `[]`. Workaround:
-  `public/tables/_index.json` (TODO).
-- **`mapping-multi-select` reorder** — no drag/↑↓ UI; to reorder, uncheck all
-  and select in desired order.
+- **Dot color in first DEV menu open** — appears yellow for a moment until `preloadStatuses` finishes (~1 s); expected
+- **`/tables/` HTML listing** — Vite in dev serves directory listing; in build/prod it may not. `_listTableNames` will return `[]`. Workaround: `public/tables/_index.json` (TODO).
+- **`mapping-multi-select` reorder** — no drag/↑↓ UI; to reorder, uncheck all and select in desired order.
+- **`load <name>` ambiguity** — if name exists in multiple libraries, `user` wins silently. No error, no candidate list.
+- **`save` overwrites without confirmation** — `libraryStore.saveModule` replaces silently. `saveService` does not check existing.
+- **`window.confirm()` on Tauri macOS WKWebView** — unreliable. `_onNew` and `_cmdRm` use it.
+- **`ModuleFactory` type collision** — first loaded wins. `my-fm/Zgen` ignored if `user/Zgen` already loaded. Warning in console, returns `true`. Patch with `library: 'my-fm'` will throw explicit error if `registry` has `user/Zgen`. Full fix (keyed by `<lib>/<type>`) — Roadmap.
+- **No library-level meta UI** — `_meta.json` written by `createLibrary`, but no editor to change `author`/`version`/`description` after creation.
 
 ## TODO
 
-**Main app:** variant switching UI, split 4 canvas layers, `channelPtr`,
-background upload, cable width per type, HiDPI, MIDI velocity, poly voice
-allocation, Tauri/macOS MIDI, OSC, **topological module sort**; scope:
-Auto/ms/trigger/unipolar/larger buffer/persist; indicators: `led_peak` UDO,
-MiniVU peak-hold, per-indicator gain/threshold UI; **jack type picker** in
-editor; **`bandwidth` toggle** in Properties; **`logicAudio` LCD style**.
+**Main app:** variant switching UI, split 4 canvas layers, `channelPtr`, background upload, cable width per type, HiDPI, MIDI velocity, poly voice allocation, Tauri/macOS MIDI, OSC, **topological module sort**; scope: Auto/ms/trigger/unipolar/larger buffer/persist; indicators: `led_peak` UDO, MiniVU peak-hold, per-indicator gain/threshold UI; **jack type picker** in editor; **`bandwidth` toggle** in Properties; **`logicAudio` LCD style**.
 
-**TextField:** `displayScale` (e.g. show `kLev/64`); `_index.json` for
-`/tables/` listing in build; multi-select reorder UI (↑↓ or drag).
+**TextField:** `displayScale` (e.g. show `kLev/64`); `_index.json` for `/tables/` listing in build; multi-select reorder UI (↑↓ or drag).
 
-**Editor:** remove `Change Color` from context menu, terminal autocomplete/
-`!!`/`history`, unify `_cmdSave` with `ModulePropertiesWindow`, unify
-`_cmdSet(mappingTable)` updateCode with `PropertiesPanel`, remove legacy
-properties windows, CodeMirror, collapsible panels, align/distribute UI,
-`preview` command, undo/redo, fix `cssText +=`, indicator source picker.
+**Editor:** remove `Change Color` from context menu, terminal autocomplete/`!!`/`history`, unify `_cmdSet(mappingTable)` updateCode with `PropertiesPanel`, remove legacy properties windows, CodeMirror, collapsible panels, align/distribute UI, `preview` command, undo/redo, fix `cssText +=`, indicator source picker, **save confirmation dialog**, **library meta editor**, **`load` ambiguity error**, **`ConfirmDialog`** (Tauri macOS).
 
-**Shared:** IndexedDB for web `moduleStore`, tests, undo/redo;
-`patch_indicators.py` (heuristic `sourceComponentId`); `patch_textfields.py`
-(heuristic `tableByMode` from `;@ map` + Button*); script to backfill
-`bandwidth` from `;@ strict`.
+**Library / patch:** **Repair patch dialog** (if `user/X` missing but `my-fm/X` exists — offer replacement); **`ModuleFactory` keyed by `<lib>/<type>`** (proper collision handling); **patch format v2** with `libraries: []` field for portable sharing; **library export/import** (ZIP); **URL import** (`_index.json` with `libraries: ["https://..."]`); **community registry** (optional server / GitHub Releases).
 
-**Release prep:** extend `stableModulesOnly` to `passable`; make sure all
-modules have `status`; remove stars (legacy rating) once `status` is complete;
-add **"Show unstable"** toggle in BUILD if requested.
+**Shared:** IndexedDB for web `moduleStore` (gone — replaced by `libraryStore`), tests, undo/redo; `patch_indicators.py` (heuristic `sourceComponentId`); `patch_textfields.py` (heuristic `tableByMode` from `;@ map` + Button*); script to backfill `bandwidth` from `;@ strict`.
+
+**Release prep:** extend `stableModulesOnly` to `passable`; make sure all modules have `status`; remove stars (legacy rating) once `status` is complete; add **"Show unstable"** toggle in BUILD if requested; **demo library** for lecture (`test-lib` with 2–3 modules, `meta.json`, `_index.json`).
 
 ## How to start working
 
