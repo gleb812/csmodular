@@ -4,7 +4,7 @@ export const PingPongModule = {
     defaultParams: [],
     displayName: 'PingPong',
     category: 'custom',
-    status: 'dev',
+    status: 'passable',
     gridHeight: 3,
     originalName: 'PingPong',
     tooltip: 'PingPong',

@@ -4,7 +4,7 @@ export const SWModule = {
     defaultParams: [],
     displayName: 'SW',
     category: 'custom',
-    status: 'dev',
+    status: 'stable',
     gridHeight: 3,
     originalName: 'SW',
     tooltip: 'SW',

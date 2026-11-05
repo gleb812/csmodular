@@ -4,7 +4,7 @@ export const REVModule = {
     defaultParams: [],
     displayName: 'REV',
     category: 'custom',
-    status: 'dev',
+    status: 'passable',
     gridHeight: 3,
     originalName: 'REV',
     tooltip: 'REV',

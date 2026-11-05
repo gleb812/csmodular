@@ -4,7 +4,7 @@ export const FdbkDelModule = {
     defaultParams: [],
     displayName: 'FdbkDel',
     category: 'custom',
-    status: 'dev',
+    status: 'passable',
     gridHeight: 3,
     originalName: 'FdbkDel',
     tooltip: 'FdbkDel',
