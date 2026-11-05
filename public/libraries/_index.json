@@ -1,6 +1,5 @@
 {
   "libraries": [
-    "my-lib",
-    "test-lib"
+    "my-lib"
   ]
 }

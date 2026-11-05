@@ -170,7 +170,7 @@ export class ButtonText extends BaseComponent {
     
     handleClick(x, y) {
         if (this.isPointInside(x, y)) {
-            console.log(`🟩 ButtonText.handleClick at (${x}, ${y})`);
+            //console.log(`🟩 ButtonText.handleClick at (${x}, ${y})`);
             
             // Переключаем состояние
             this.toggle();
@@ -203,7 +203,7 @@ export class ButtonText extends BaseComponent {
             this.onToggle(this.isActive, this.text, oldState);
         }
         
-        console.log(`ButtonText toggled: ${this.text} = ${this.isActive ? 'ON' : 'OFF'}`);
+        //console.log(`ButtonText toggled: ${this.text} = ${this.isActive ? 'ON' : 'OFF'}`);
     }
     
     startAnimation() {
