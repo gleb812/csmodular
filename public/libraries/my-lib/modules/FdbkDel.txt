@@ -1,0 +1,23 @@
+; --- user prelude end ---
+;@ map DLY_2s CLA000
+opcode FdbkDel, 0, kkkkk
+krate, kfeed, klev, kIn1, kOut1 xin
+    ; --- mapping tables ---
+    krate table krate, giDLY_2s
+    kfeed table kfeed, giCLA000
+    klev table klev, giCLA000
+    ; ----------------------
+ain1 zar kIn1
+aout1 init 0
+; --- module body ---
+; Add your DSP code here
+krate /= 1000
+abuf delayr 2.1
+atap deltap krate
+delayw ain1 + atap * kfeed
+
+aout1 = atap * klev
+; --- io epilogue ---
+zaw aout1, kOut1
+endop
+; --- user postlude ---

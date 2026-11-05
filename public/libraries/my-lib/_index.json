@@ -1,0 +1,40 @@
+{
+  "modules": [
+    {
+      "name": "FdbkDel",
+      "displayName": "FdbkDel",
+      "category": "custom",
+      "status": "dev"
+    },
+    {
+      "name": "LEV",
+      "displayName": "LEV",
+      "category": "custom",
+      "status": "dev"
+    },
+    {
+      "name": "Noise",
+      "displayName": "Noise",
+      "category": "custom",
+      "status": "passable"
+    },
+    {
+      "name": "PingPong",
+      "displayName": "PingPong",
+      "category": "custom",
+      "status": "dev"
+    },
+    {
+      "name": "REV",
+      "displayName": "REV",
+      "category": "custom",
+      "status": "dev"
+    },
+    {
+      "name": "SW",
+      "displayName": "SW",
+      "category": "custom",
+      "status": "dev"
+    }
+  ]
+}

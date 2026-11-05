@@ -1,0 +1,15 @@
+; --- user prelude end ---
+opcode SW, 0, kkkk
+kButton1, kIn1, kOut1, kOut2 xin
+ain1 zar kIn1
+aout1 init 0
+aout2 init 0
+; --- module body ---
+; Add your DSP code here
+aout1 = ain1 * kButton1
+aout2 = ain1 * (1 - kButton1)
+; --- io epilogue ---
+zaw aout1, kOut1
+zaw aout2, kOut2
+endop
+; --- user postlude ---

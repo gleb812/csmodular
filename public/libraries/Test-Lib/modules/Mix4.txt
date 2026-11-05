@@ -1,0 +1,13 @@
+opcode Mix4, 0, kkkkk
+kIn1, kIn2, kIn3, kIn4, kOut1 xin
+ain1 zar kIn1
+ain2 zar kIn2
+ain3 zar kIn3
+ain4 zar kIn4
+aout1 init 0
+
+; --- module body ---
+; Add your DSP code here
+aout1 = ain1 + ain2 + ain3 + ain4
+zaw aout1, kOut1
+endop
