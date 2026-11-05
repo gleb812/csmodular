@@ -148,12 +148,30 @@ export class Toolbar {
 
     async _onExport() {
         if (!this.app.module) return;
+
         const { generateJsCode, sanitizeName } = await import('../saveService.js');
         const { serializeComponents, collectParamIds, collectPorts } = await import('../ComponentRegistry.js');
 
         const name = sanitizeName(this.app.module.title || 'MyMod');
         const module = this.app.module;
-        const moduleData = { /* ... как было ... */ };
+
+        // ⭐ Собираем moduleData — как в saveService.saveModule
+        const moduleData = {
+            name,
+            displayName: name,
+            category: module.category || 'custom',
+            status: module.status || 'dev',
+            gridHeight: module.gridHeight || 3,
+            type: name,
+            defaultParams: [],
+            tooltip: name,
+            params: collectParamIds(this.app.components),
+            inputs: collectPorts(this.app.components).inputs,
+            outputs: collectPorts(this.app.components).outputs,
+            customColor: module.customColor || null,
+            components: serializeComponents(this.app.components),
+        };
+
         const jsCode = generateJsCode(moduleData);
         const dspCode = this.app.codeViewerWindow?.getCode() || '';
 
@@ -181,7 +199,7 @@ export class Toolbar {
 
             this.app.uiManager.showNotification(`⬇ Exported ${name}.js + ${name}.txt`);
         } else {
-            // Web: старый способ (Blob)
+            // Web: Blob download
             this._download(`${name}.js`, jsCode, 'application/javascript');
             this._download(`${name}.txt`, dspCode, 'text/plain');
             this.app.uiManager.showNotification(`⬇ Exported ${name}.js + ${name}.txt`);

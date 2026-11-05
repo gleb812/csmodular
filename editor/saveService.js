@@ -25,7 +25,7 @@ export function sanitizeName(raw) {
  * @returns {string}
  */
 export function generateJsCode(m) {
-    const name = m.name;
+    const name = m.name || m.originalName || m.type || m.displayName || 'Unknown';
     const componentsJSON = JSON.stringify(m.components, null, 8);
     const list = (arr) => (arr && arr.length) ? `[${arr.join(', ')}]` : '[]';
     const color = m.customColor ? `'${m.customColor}'` : 'null';
