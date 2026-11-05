@@ -24,12 +24,15 @@ export class PatchManager {
 
       let actualFrom = fromJack;
       let actualTo = toJack;
-      
+
       if (fromJack.direction === 'input' && toJack.direction === 'output') {
           actualFrom = toJack;
           actualTo = fromJack;
-          console.log('🔄 Swapped jacks: input → output corrected to output → input');
       }
+
+      // ⭐ Один кабель на ВХОД. Выход может fan-out на много входов.
+      const existingTo = this.cables.find(c => c.toJack === actualTo);
+      if (existingTo) this.removeCable(existingTo);
 
       const cableColor = this.determineCableColor(actualFrom);
 
@@ -40,26 +43,14 @@ export class PatchManager {
       this.updateJackConnection(actualTo, cable);
 
       console.log(`✅ Cable added (color: ${cableColor}). Total: ${this.cables.length}`);
-      
-      if (this.system) {
-          this.system._cablesDirty = true;
-      }
 
-      if (this.system && this.system.csoundGen) {
-          this.system.csoundGen.addCable(cable);
-      }
-      
-      if (this.system?.csoundEngine?.state === 'running') {
-          this.system._recompileDebounced();
-      }
-
-      if (this.system?.recomputeVariantUI) {
-          this.system.recomputeVariantUI();
-      }
+      if (this.system) this.system._cablesDirty = true;
+      if (this.system && this.system.csoundGen) this.system.csoundGen.addCable(cable);
+      if (this.system?.csoundEngine?.state === 'running') this.system._recompileDebounced();
+      if (this.system?.recomputeVariantUI) this.system.recomputeVariantUI();
 
       return cable;
   }
-
 
   getCablesForJack(jack) {
     return this.cables.filter(
@@ -181,13 +172,16 @@ export class PatchManager {
 
   // === ПРОВЕРКИ СОЕДИНЕНИЙ ===
   canConnect(jack1, jack2) {
-    //console.log('🔍 canConnect check:');
-    //console.log('  Jack1:', jack1.type, jack1.direction, jack1.parentModule?.title);
-    //console.log('  Jack2:', jack2.type, jack2.direction, jack2.parentModule?.title);
     // Нельзя подключить к самому себе
     if (jack1 === jack2) {
       console.log('❌ Cannot connect to itself');
       return false;
+    }
+
+    // в canConnect, после проверки jack1 === jack2:
+    if (jack1.parentModule === jack2.parentModule) {
+        console.log('❌ Cannot connect within same module');
+        return false;
     }
 
     // Нельзя подключить выход к выходу

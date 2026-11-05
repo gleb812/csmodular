@@ -22,14 +22,18 @@ export class OscManager {
 
         this._messageSubs = new Set();
         this._stateSubs   = new Set();
-        this._controlSubs = new Set();   // csp-cmd
+        this._controlSubs = new Set();
 
         this._autoReconnect = opts.autoReconnect !== false;
         this._reconnectTimer = null;
         this._manualClose = false;
+
+        // ⭐ Новые флаги
+        this._silent = false;          // не логировать провал connect
+        this._allowRetry = true;       // разрешён ли реконнект в этой сессии
     }
 
-    // ---------- подписки ----------
+    // ---------- subscriptions ----------
 
     onMessage(cb)  { this._messageSubs.add(cb); return () => this._messageSubs.delete(cb); }
     onStateChange(cb){ this._stateSubs.add(cb); return () => this._stateSubs.delete(cb); }
@@ -43,13 +47,16 @@ export class OscManager {
         });
     }
 
-    // ---------- подключение ----------
+    // ---------- connection ----------
 
-    async connect(url = this.url) {
+    async connect(url = this.url, opts = {}) {
+        const { silent = false, retry = true } = opts;
         this.url = url;
+        this._silent = silent;
+        this._allowRetry = retry;
         this._manualClose = false;
 
-        if (this.ws && this.ws.readyState <= 1) return true;  // CONNECTING/OPEN
+        if (this.ws && this.ws.readyState <= 1) return true;
 
         this._setState('connecting');
 
@@ -58,7 +65,7 @@ export class OscManager {
             try {
                 ws = new WebSocket(url);
             } catch (err) {
-                console.error('[OscManager] WebSocket create failed:', err);
+                if (!this._silent) console.error('[OscManager] WebSocket create failed:', err);
                 this._setState('error');
                 this._scheduleReconnect();
                 return resolve(false);
@@ -66,13 +73,15 @@ export class OscManager {
             this.ws = ws;
 
             ws.onopen = () => {
-                console.log('[OscManager] ✓ connected:', url);
+                if (!this._silent) console.log('[OscManager] ✓ connected:', url);
+                // ⭐ при успехе silent больше не нужен — живой мост
+                this._silent = false;
                 this._setState('ready');
                 resolve(true);
             };
 
             ws.onclose = () => {
-                console.log('[OscManager] closed:', url);
+                if (!this._silent) console.log('[OscManager] closed:', url);
                 this.ws = null;
                 if (this._manualClose) {
                     this._setState('idle');
@@ -84,7 +93,7 @@ export class OscManager {
             };
 
             ws.onerror = (err) => {
-                console.warn('[OscManager] ws error', err);
+                if (!this._silent) console.warn('[OscManager] ws error', err);
                 // onclose вызовется следом
             };
 
@@ -94,6 +103,7 @@ export class OscManager {
 
     disconnect() {
         this._manualClose = true;
+        this._allowRetry = false;
         if (this._reconnectTimer) {
             clearTimeout(this._reconnectTimer);
             this._reconnectTimer = null;
@@ -106,11 +116,17 @@ export class OscManager {
     }
 
     _scheduleReconnect() {
-        if (!this._autoReconnect || this._manualClose) return;
+        if (!this._autoReconnect) return;
+        if (!this._allowRetry) return;   // ⭐ не ретраим, если запрещено
+        if (this._manualClose) return;
         if (this._reconnectTimer) return;
         this._reconnectTimer = setTimeout(() => {
             this._reconnectTimer = null;
-            this.connect(this.url);
+            // ⭐ реконнект без silent-логов только если был тихим изначально
+            this.connect(this.url, {
+                silent: this._silent,
+                retry: true,
+            });
         }, RECONNECT_MS);
     }
 

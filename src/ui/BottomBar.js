@@ -72,7 +72,7 @@ export class BottomBar {
             { id: 'new',    label: 'Ne', title: 'New patch',       action: () => this.system.resetEverything?.() },
             { id: 'load',   label: 'Lo', title: 'Load patch',      action: () => this.system.loadJsonPatch?.() },
             { id: 'save',   label: 'Sa', title: 'Save patch',      action: () => this.system.exportPatch?.() },
-            { id: 'saveas', label: 'SV', title: 'Save patch as…',  action: () => this.system.savePatchAs?.() },
+            //{ id: 'saveas', label: 'SV', title: 'Save patch as…',  action: () => this.system.savePatchAs?.() },
             { id: 'sep1', label: null },
 
             // --- Zoom ---
@@ -87,7 +87,8 @@ export class BottomBar {
 
             // --- Csound run/stop ---
             { id: 'run', label: '▶', title: 'Run / Stop Csound',   action: () => this._toggleCsound() },
-            { id: 'csd', label: 'Cs', title: 'Csound window',      toggle: () => this._isCsoundWindowVisible() },
+            //{ id: 'csd', label: 'Cs', title: 'Csound window',      toggle: () => this._isCsoundWindowVisible() },
+            //{ id: 'perf', label: '—', title: 'Performance: FPS / last recompile', action: () => {} },
             { id: 'sep4', label: null },
 
             // --- UI panels ---
@@ -97,7 +98,7 @@ export class BottomBar {
             { id: 'sep5', label: null },
 
             // --- Snap ---
-            { id: 'snap',   label: 'Sn', title: 'Toggle snap to grid', action: () => this._toggleSnap(), toggle: () => !!this.system.grid?.snap },
+            //{ id: 'snap',   label: 'Sn', title: 'Toggle snap to grid', action: () => this._toggleSnap(), toggle: () => !!this.system.grid?.snap },
 
             // --- Minimap ---
             { id: 'minimap', label: 'Mp', title: 'Toggle minimap (M)', action: () => this._toggleMinimap(), toggle: () => !!this.system.minimap?.visible },
@@ -364,14 +365,6 @@ export class BottomBar {
         }
     }
 
-    _toggleSnap() {
-        const grid = this.system?.grid;
-        if (!grid) return;
-        this.system.setGridSnap?.(!grid.snap);
-        this.system.forceRedraw?.();
-        this.refreshState();
-    }
-
     _addSticker() {
         const worldX = (window.innerWidth  / 2 - this.system.offsetX) / this.system.scale;
         const worldY = (window.innerHeight / 2 - this.system.offsetY) / this.system.scale;
@@ -438,27 +431,62 @@ export class BottomBar {
             ? (theme.getAccentColor() || '#8fbc8f')
             : '#0af';
 
-        const modules = (s.components || []).filter(
+        // --- Счётчики ---
+        const modules  = (s.components || []).filter(
             c => c.constructor?.name === 'Panel'
         ).length;
-        const cables = s.patchManager?.cables?.length || 0;
+        const cables   = s.patchManager?.cables?.length || 0;
         const stickers = s.stickers?.length || 0;
 
+        // --- Csound ---
         const cs = s.csoundEngine?.state || 'idle';
         const csColor = {
-            idle: '#888',
-            initializing: '#fa0',
-            running: '#0f0',
-            error: '#f44',
+            idle: '#888', initializing: '#fa0', running: '#0f0', error: '#f44',
         }[cs] || '#fff';
 
+        // --- FPS / Zoom ---
         const zoom = Math.round((s.scale || 1) * 100);
-        const fps = s.currentFPS || 0;
+        const fps  = s.currentFPS || 0;
         const fpsColor = fps < 30 ? '#f66' : fps < 50 ? '#ff6' : '#6f6';
 
-        const grid = s.grid;
-        const gridStep = grid ? `${grid.stepX}×${grid.stepY}px` : '—';
-        const gridSnap = grid?.snap ? 'on' : 'off';
+        // --- Recompile ---
+        const engine      = s.csoundEngine;
+        const recompiling = !!engine?.isRecompiling;
+        const recompileMs = engine?.lastRecompileMs;
+        const recompileColor = recompiling
+            ? '#fa0'
+            : recompileMs == null
+                ? '#888'
+                : recompileMs > 500
+                    ? '#f66'
+                    : recompileMs > 200
+                        ? '#ff6'
+                        : '#6f6';
+        const recompileText = recompiling
+            ? '⏳ …'
+            : (recompileMs != null ? `${recompileMs} ms` : '—');
+
+        // --- MIDI (объявляем ДО innerHTML) ---
+        const midi       = s.midiManager;
+        const midiState  = midi?.state || 'idle';
+        const midiColor  = {
+            idle: '#888', requesting: '#fa0', ready: '#0f0',
+            denied: '#f44', unsupported: '#f44',
+        }[midiState] || '#888';
+        const midiInputs = midi?.getInfo?.().inputCount ?? 0;
+        const midiLast   = midi?._lastMessage;
+        const midiLastDesc = midiLast
+            ? `${midiLast.status.toString(16).padStart(2, '0')} ${midiLast.data1} ${midiLast.data2}`
+            : '—';
+
+        // --- OSC (объявляем ДО innerHTML) ---
+        const osc      = s.oscManager;
+        const oscState = osc?.state || 'idle';
+        const oscColor = {
+            idle: '#888', connecting: '#fa0', ready: '#0f0', error: '#f44',
+        }[oscState] || '#888';
+        const oscLast = osc?._lastMessage;
+        const oscDesc = oscLast ? `${oscLast.address} (${oscLast.args.length})` : '—';
 
         const patchName = s.currentPatchFilename || '(unsaved)';
 
@@ -477,9 +505,9 @@ export class BottomBar {
             ${row('Cables', cables)}
             ${row('Stickers', stickers)}
             ${row('FPS', fps, fpsColor)}
+            ${row('Recompile', recompileText, recompileColor)}
             ${row('Zoom', zoom + '%')}
             <div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.08);">
-                ${row('Snap', gridStep + ' / snap ' + gridSnap)}
                 ${row('Csound', cs.toUpperCase(), csColor)}
                 ${row('MIDI', `${midiState.toUpperCase()} / ${midiInputs} in`, midiColor)}
                 ${row('Last MIDI', midiLastDesc, '#aaa')}
@@ -487,27 +515,6 @@ export class BottomBar {
                 ${row('Last OSC', oscDesc, '#aaa')}
             </div>
         `;
-
-        const midi = s.midiManager;
-        const midiState = midi?.state || 'idle';
-        const midiColor = {
-            idle: '#888',
-            requesting: '#fa0',
-            ready: '#0f0',
-            denied: '#f44',
-            unsupported: '#f44',
-        }[midiState] || '#888';
-        const midiInputs = midi?.getInfo?.().inputCount ?? 0;
-        const midiLast = midi?._lastMessage;
-        const midiLastDesc = midiLast
-            ? `${midiLast.status.toString(16).padStart(2, '0')} ${midiLast.data1} ${midiLast.data2}`
-            : '—';
-        const osc = s.oscManager;
-        const oscState = osc?.state || 'idle';
-        const oscColor = { idle: '#888', connecting: '#fa0', ready: '#0f0', error: '#f44' }[oscState] || '#888';
-        const oscLast  = osc?._lastMessage;
-        const oscDesc  = oscLast ? `${oscLast.address} (${oscLast.args.length})` : '—';
-
     }
 
     // ============================================================
@@ -536,8 +543,6 @@ export class BottomBar {
             active = !!this.system.designSettings?.isVisible;
         } else if (cfg.id === 'csd') {
             active = this._isCsoundWindowVisible();
-        } else if (cfg.id === 'snap') {
-            active = !!this.system.showGrid;
         } else if (cfg.id === 'minimap') {
             active = !!this.system.minimap?.visible;
         } else if (cfg.id === 'sysinfo') {
@@ -554,6 +559,34 @@ export class BottomBar {
             } else {
                 btn.textContent = 'MI';
             }
+        }
+
+        if (cfg.id === 'perf') {
+            const s = this.system;
+            const fps = s.currentFPS || 0;
+            const engine = s.csoundEngine;
+            const recompileMs = engine?.lastRecompileMs;
+
+            let text, color;
+            if (engine?.isRecompiling) {
+                text = '⏳';
+                color = '#fa0';
+            } else if (recompileMs != null) {
+                text = `${fps}fps · ${recompileMs}ms`;
+                color = (fps < 30 || recompileMs > 500) ? '#f66'
+                      : (fps < 50 || recompileMs > 200) ? '#ff6'
+                      : '#6f6';
+            } else {
+                text = `${fps}fps`;
+                color = fps < 30 ? '#f66' : fps < 50 ? '#ff6' : '#6f6';
+            }
+
+            btn.textContent = text;
+            btn.title = `FPS: ${fps} · Recompile: ${recompileMs != null ? recompileMs + ' ms' : '—'}`;
+            btn.style.background = this._rgba(color, 0.15);
+            btn.style.color = color;
+            btn.style.borderColor = this._rgba(color, 0.4);
+            return;
         }
 
         // Run-button: динамическая иконка и цвет

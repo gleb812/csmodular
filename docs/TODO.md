@@ -8,7 +8,6 @@ NM2 legacy is gone — no `patch_params.py`, no `moduleStore`, no `typeID`.
 
 - [ ] **`libraryStore` round-trip** — save → reload → ORC identical (regression test)
 - [ ] **Reinit problem** — adding a module with controllers (repro + fix)
-- [ ] **Zoom < 50%** — working area resizes unexpectedly
 - [ ] **Save confirmation** — `saveModule` overwrites silently; check `loadModule` first, `confirm()` if exists
 - [ ] **`ConfirmDialog`** — replace `window.confirm()` (Tauri macOS WKWebView unreliable)
 - [ ] **MIDI dies after recompile** — `@csound/browser` IPC bug; try 7.0.0-beta or 6.18.5; document workaround

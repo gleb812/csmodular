@@ -1,4 +1,6 @@
 // src/managers/EventManager.js
+import { MIN_SCALE, MAX_SCALE } from '../constants.js';
+
 export class EventManager {
   constructor(canvas, system) {
     this.canvas = canvas;
@@ -480,7 +482,7 @@ export class EventManager {
     if (e.ctrlKey || e.metaKey) {
       const delta = -e.deltaY * 0.001;
       const oldScale = system.scale;
-      system.scale = Math.max(0.1, Math.min(5, system.scale + delta));
+      system.scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, system.scale + delta));
 
       // Zoom вокруг курсора
       const rect = this.canvas.getBoundingClientRect();

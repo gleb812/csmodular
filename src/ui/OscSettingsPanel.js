@@ -180,7 +180,9 @@ export class OscSettingsPanel {
 
         mgr.disconnect();
         this._setStatus('connecting…', '#fa0');
-        const ok = await mgr.connect(s.url);
+
+        // ⭐ Ручной connect из UI — не silent, с ретраями
+        const ok = await mgr.connect(s.url, { silent: false, retry: true });
         if (ok) this._setStatus('✓ connected', '#0f0');
         else    this._setStatus('✗ connection failed', '#f44');
     }

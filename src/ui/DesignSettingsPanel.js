@@ -119,14 +119,6 @@ export class DesignSettingsPanel {
             this.buildSlider('cables.controlWidth', 'Control Width', settings.cables.controlWidth, 0.5, 5, 0.25),
         ]));
 
-        // === GRID ===
-        const gridSettings = settings.grid || { multX: 1, multY: 1, snap: true, size: 4 };
-        content.appendChild(this.buildSection('Grid', [
-            this.buildSlider('grid.multX', 'Step X ×', gridSettings.multX, 1, 13, 1),
-            this.buildSlider('grid.multY', 'Step Y ×', gridSettings.multY, 1, 10, 1),
-            this.buildCheckbox('grid.snap', 'Snap to grid', gridSettings.snap !== false),
-        ]));
-
         // === BACKGROUND ===
         content.appendChild(this.buildSection('Background', [
             this.buildBackgroundPresets(settings.background?.image),

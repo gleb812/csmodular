@@ -14,7 +14,9 @@ export class CsoundEngine {
         this.system = system;
         this.instance = null;
         this.state = 'idle';   // 'idle' | 'initializing' | 'running' | 'error'
-        
+        this.lastRecompileMs = null;
+        this.lastRecompileAt = null;
+        this.isRecompiling = false;
         // Подписчики на события
         this._stateListeners = [];
         this._messageListeners = [];
@@ -86,6 +88,7 @@ export class CsoundEngine {
             return true;
         }
         
+        this.isRecompiling = false;  
         this._setState('initializing');
         
         try {
@@ -167,6 +170,9 @@ export class CsoundEngine {
             this.instance = null;
             this._setState('error', error.message);
             return false;
+            
+        } finally {
+            this.isRecompiling = false;   // ⭐
         }
     }
 
@@ -206,39 +212,40 @@ export class CsoundEngine {
         if (this.state !== 'running' || !this.instance) {
             return this.init();
         }
-        
+
         console.log('[CsoundEngine] Recompiling via reset + compileOrc...');
         const t0 = performance.now();
-        
+        this.isRecompiling = true;
+
         try {
             // 1. Сбросить состояние (инстанс остаётся живой)
             await this.instance.reset();
-            
+
             // 2. Заново выставить опции (после reset они сброшены)
             await this.instance.setOption('-odac');
             await this.instance.setOption('-d');
             await this.instance.setOption('-m16');
             await this.instance.setOption('-M0');
-            
+
             // 3. Сгенерировать ORC
             const orc = await this.system.csoundGen.generateOrc();
-            
+
             // 4. Компилировать
             const rc = await this.instance.compileOrc(orc);
             if (rc !== 0) throw new Error(`compileOrc failed: ${rc}`);
-            
+
             // 5. Score
             const sco = 'i1 0 [60*60*24*7]\ni2 0 [60*60*24*7]\ni3 0 [60*60*24*7]';
             const rs = await this.instance.readScore(sco);
             if (rs !== 0) throw new Error(`readScore failed: ${rs}`);
-            
+
             // 6. Start
             const st = await this.instance.start();
             if (st !== 0) throw new Error(`start failed: ${st}`);
-            
+
             // 7. ⭐ Resync control-каналов
             await this._resyncAllControls();
-            
+
             // 8. Перезапуск поллинга LED
             if (this._ledChannels.size > 0) {
                 if (this._ledPollInterval) {
@@ -256,16 +263,21 @@ export class CsoundEngine {
                 }
                 this._ensureScopePolling();
             }
-            
+
             const dt = Math.round(performance.now() - t0);
             console.log(`[CsoundEngine] ✓ Recompiled in ${dt}ms`);
+            this.lastRecompileMs = dt;
+            this.lastRecompileAt = Date.now();
             return true;
-            
+
         } catch (e) {
             console.error('[CsoundEngine] recompile via reset failed:', e);
             console.log('[CsoundEngine] Falling back to full restart...');
             await this.stop();
             return this.init();
+        } finally {
+            // ⭐ Гарантированно сбрасываем, при любом исходе
+            this.isRecompiling = false;
         }
     }
 

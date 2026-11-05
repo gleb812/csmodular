@@ -18,31 +18,15 @@ export class Grid {
         this.multY = 1;
         this.snap = true;
         this.enabled = true;
-
-        // ⭐ Подхватываем настройки из темы (если уже инициализирована)
-        this.applyThemeSettings();
     }
 
-    /**
-     * Прочитать multX/multY/snap из текущей темы.
-     * @returns {boolean} true, если что-то изменилось
-     */
     applyThemeSettings() {
-        const theme = getCurrentTheme();
-        const grid = theme?.settings?.grid;
-        if (!grid) return false;
-
-        const mx = Math.max(1, Math.round(grid.multX ?? 1));
-        const my = Math.max(1, Math.round(grid.multY ?? 1));
-        const snap = grid.snap !== false;
-
-        const changed = (this.multX !== mx) || (this.multY !== my) || (this.snap !== snap);
-
-        this.multX = mx;
-        this.multY = my;
-        this.snap = snap;
-
-        return changed;
+        // Настройки сетки больше не читаются из темы.
+        // Snap всегда включён, шаг всегда 1×1.
+        this.multX = 1;
+        this.multY = 1;
+        this.snap = true;
+        return false;
     }
 
     // ============================================================
@@ -95,19 +79,9 @@ export class Grid {
      * Возвращает { gridX, gridY } — целые.
      */
     snapToGrid(worldX, worldY) {
-        const cellX = worldX / BASE_STEP_X;
-        const cellY = worldY / BASE_STEP_Y;
-
-        if (!this.snap) {
-            return {
-                gridX: Math.round(cellX),
-                gridY: Math.round(cellY),
-            };
-        }
-
         return {
-            gridX: Math.round(cellX / this.multX) * this.multX,
-            gridY: Math.round(cellY / this.multY) * this.multY,
+            gridX: Math.round(worldX / BASE_STEP_X),
+            gridY: Math.round(worldY / BASE_STEP_Y),
         };
     }
 

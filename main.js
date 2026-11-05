@@ -1,7 +1,8 @@
 // main.js
 import { ModuleFactory } from './src/ModuleFactory.js';
 import { Grid } from './src/grid/Grid.js';
-import { BASE_STEP_X, BASE_STEP_Y, PANEL_GRID_WIDTH,CABLE_COLORS } from './src/constants.js';
+import { BASE_STEP_X, BASE_STEP_Y, PANEL_GRID_WIDTH, CABLE_COLORS,
+         MIN_SCALE, MAX_SCALE } from './src/constants.js';
 import { themeStore } from './src/theme/themeStore.js';
 import { libraryStore } from './src/api/index.js';
 import { Panel } from './src/components/Panel.js';
@@ -1536,18 +1537,21 @@ _renderDynamic() {
   }
 
   zoom(amount) {
-    const oldScale = this.scale;
-    this.scale = Math.max(0.1, Math.min(5, this.scale + amount));
+      const oldScale = this.scale;
+      this.scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, this.scale + amount));
 
-    const rect = this.canvas.getBoundingClientRect();
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
+      // если не сдвинулись — выходим, чтобы не дёргать offset
+      if (this.scale === oldScale) return;
 
-    const scaleFactor = this.scale / oldScale;
-    this.offsetX = centerX - (centerX - this.offsetX) * scaleFactor;
-    this.offsetY = centerY - (centerY - this.offsetY) * scaleFactor;
-    this.forceRedraw();
-    this.updateZoomInfo();
+      const rect = this.canvas.getBoundingClientRect();
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      const scaleFactor = this.scale / oldScale;
+      this.offsetX = centerX - (centerX - this.offsetX) * scaleFactor;
+      this.offsetY = centerY - (centerY - this.offsetY) * scaleFactor;
+      this.forceRedraw();
+      this.updateZoomInfo();
   }
 
   resetZoom() {
@@ -1559,42 +1563,6 @@ _renderDynamic() {
 
   updateZoomInfo() {
     this.uiManager.updateZoomInfo(this.scale);
-  }
-
-  /**
-   * Изменить множители шага сетки.
-   * Существующие модули НЕ двигаются — только следующий drag.
-   * Сохраняется в тему.
-   */
-  setGridMultipliers(multX, multY) {
-    if (!this.grid) return;
-    const mx = Math.max(1, Math.round(multX));
-    const my = Math.max(1, Math.round(multY));
-
-    this.grid.multX = mx;
-    this.grid.multY = my;
-
-    // ⭐ Пишем в тему и сохраняем
-    const theme = getCurrentTheme();
-    if (!theme.settings.grid) theme.settings.grid = {};
-    theme.settings.grid.multX = mx;
-    theme.settings.grid.multY = my;
-    themeStore.save(theme.settings);
-
-    this.forceRedraw();
-  }
-
-  /**
-   * Включить/выключить прилипание. Сохраняется в тему.
-   */
-  setGridSnap(enabled) {
-    if (!this.grid) return;
-    this.grid.snap = !!enabled;
-
-    const theme = getCurrentTheme();
-    if (!theme.settings.grid) theme.settings.grid = {};
-    theme.settings.grid.snap = !!enabled;
-    themeStore.save(theme.settings);
   }
 
   animate() {
@@ -2354,7 +2322,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     })();
     if (oscCfg === null || oscCfg.autoConnect !== false) {
         const url = oscCfg?.url || 'ws://127.0.0.1:8765/ws';
-        modularSystem.oscManager.connect(url).catch(() => {});
+        // ⭐ Автостарт: одна тихая попытка, без реконнекта.
+        // Если bridge не запущен — просто не подключаемся, никакого шума.
+        modularSystem.oscManager.connect(url, { silent: true, retry: false }).catch(() => {});
     }
 
     // ⭐ Управляющие команды /csp/... → UI

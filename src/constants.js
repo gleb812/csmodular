@@ -57,6 +57,8 @@ export const MINIMAP_WIDTH = 220;
 export const MINIMAP_HEIGHT = 160;
 export const MINIMAP_MARGIN = 16;
 
+export const MIN_SCALE = 0.5;
+export const MAX_SCALE = 1.5;
 // ============================================================
 //  MODULE CATEGORIES (Minimap colors)
 // ============================================================
