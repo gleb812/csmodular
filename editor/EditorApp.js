@@ -488,12 +488,12 @@ export class EditorApp {
                 this.dragStartRelX = comp.relX;
                 this.dragStartRelY = comp.relY;
                 
-                // Поднимаем компонент наверх (z-index)
-                const idx = this.components.indexOf(comp);
-                if (idx > -1) {
-                    this.components.splice(idx, 1);
-                    this.components.push(comp);
-                }
+                // Z-order — отдельный массив, НЕ мутируем components[]
+                // (см. AI Context.md: params[] order = components[] order, never sort)
+                if (!this._zOrder) this._zOrder = [];
+                const zi = this._zOrder.indexOf(comp);
+                if (zi > -1) this._zOrder.splice(zi, 1);
+                this._zOrder.push(comp);
                 
                 return;
             }
@@ -688,6 +688,7 @@ export class EditorApp {
         
         // ⭐ 1. Очищаем текущее состояние
         this.components = [];
+        this._zOrder = [];
         this.selectedComponent = null;
         this._nextComponentId = 1;
         this._availableIds = [];
@@ -722,7 +723,7 @@ export class EditorApp {
                 this._nextComponentId = id + 1;
             }
         }
-        
+        this._zOrder = [...this.components];
         // ⭐ 4. Центрируем модуль на экране
         this.centerModuleInGrid();
         
@@ -1035,6 +1036,7 @@ export class EditorApp {
     // EditorApp.js
     clearModule(opts = {}) {
         this.components = [];
+        this._zOrder = [];
         this.selectedComponent = null;
         this._nextComponentId = 1;
         this._availableIds = [];
@@ -1097,8 +1099,24 @@ export class EditorApp {
             this.drawMicroGrid(this.ctx);
         }
 
-        // 3. Компоненты
-        for (const comp of this.components) {
+        // 3. Компоненты — рисуем по z-order, данные берём из components[]
+        //    ⭐ ВАЖНО: components[] НЕ мутируем (params[] order = components[] order).
+        //    Z-order — отдельный массив this._zOrder.
+        const drawList = [];
+        const seen = new Set();
+        if (this._zOrder && this._zOrder.length > 0) {
+            for (const c of this._zOrder) {
+                if (this.components.includes(c)) {
+                    drawList.push(c);
+                    seen.add(c);
+                }
+            }
+        }
+        for (const c of this.components) {
+            if (!seen.has(c)) drawList.push(c);
+        }
+
+        for (const comp of drawList) {
             const isDragging = comp._isNewDragging === true;
 
             if (isDragging) {
@@ -1157,6 +1175,7 @@ export class EditorApp {
 
         requestAnimationFrame(() => this.animate());
     }
+
     /**
      * Overlay-проход: всё, что должно быть ПОВЕРХ модулей.
      * Сейчас — выпадающее меню PartSelector (и любых других компонентов

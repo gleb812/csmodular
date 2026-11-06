@@ -73,7 +73,8 @@ export const ComponentRegistry = {
             if (c.min !== undefined && c.min !== 0) out.min = c.min;
             if (c.max !== undefined && c.max !== 127) out.max = c.max;
             if (c.value !== undefined) out.defaultValue = c.value;
-            if (c.mappingTable) out.mappingTable = c.mappingTable;   // ⭐ NEW
+            if (c.mappingTable) out.mappingTable = c.mappingTable;
+            if (c.csoundName) out.csoundName = c.csoundName;    // ⭐ NEW
             return out;
         },
 
@@ -88,7 +89,8 @@ export const ComponentRegistry = {
             );
             c.relX = d.x;
             c.relY = d.y;
-            if (d.mappingTable) c.mappingTable = d.mappingTable;   // ⭐ NEW
+            if (d.mappingTable) c.mappingTable = d.mappingTable; 
+            if (d.csoundName) c.csoundName = d.csoundName;     // ⭐ NEW
             return c;
         },
 
@@ -122,7 +124,8 @@ export const ComponentRegistry = {
                 max: c.max ?? 127,
                 defaultValue: c.value ?? 0,
             };
-            if (c.mappingTable) out.mappingTable = c.mappingTable;   // ⭐ NEW
+            if (c.mappingTable) out.mappingTable = c.mappingTable;  
+            if (c.csoundName) out.csoundName = c.csoundName;   // ⭐ NEW
             return out;
         },
 
@@ -135,7 +138,8 @@ export const ComponentRegistry = {
             );
             c.relX = d.x;
             c.relY = d.y;
-            if (d.mappingTable) c.mappingTable = d.mappingTable;   // ⭐ NEW
+            if (d.mappingTable) c.mappingTable = d.mappingTable;  
+            if (d.csoundName) c.csoundName = d.csoundName;   // ⭐ NEW
             return c;
         },
 
@@ -165,7 +169,9 @@ export const ComponentRegistry = {
             width: c.width ?? 50,
             height: c.height ?? 16,
             labels: Array.isArray(c.positions) ? c.positions : ['Off', 'On'],
+            ...(c.csoundName ? { csoundName: c.csoundName } : {}),  
         }),
+
 
         deserialize: (d, ctx) => {
             const labels = d.labels ?? ['Off', 'On'];
@@ -176,6 +182,7 @@ export const ComponentRegistry = {
             );
             c.relX = d.x;
             c.relY = d.y;
+            if (d.csoundName) c.csoundName = d.csoundName;  
             return c;
         },
 
@@ -207,6 +214,7 @@ export const ComponentRegistry = {
             buttonWidth: c.buttonWidth ?? 30,
             labels: Array.isArray(c.labels) ? c.labels : ['One', 'Two', 'Three', 'Four'],
             orientation: c.orientation ?? 'horizontal',
+            ...(c.csoundName ? { csoundName: c.csoundName } : {}),   
         }),
 
         deserialize: (d, ctx) => {
@@ -220,6 +228,7 @@ export const ComponentRegistry = {
             );
             c.relX = d.x;
             c.relY = d.y;
+            if (d.csoundName) c.csoundName = d.csoundName;    
             return c;
         },
 
@@ -249,6 +258,7 @@ export const ComponentRegistry = {
             width: c.width ?? 50,
             items: Array.isArray(c.items) ? c.items : ['One', 'Two', 'Three', 'Four'],
             initialIndex: c.currentIndex ?? 0,
+            ...(c.csoundName ? { csoundName: c.csoundName } : {}),  
         }),
 
         deserialize: (d, ctx) => {
@@ -261,6 +271,7 @@ export const ComponentRegistry = {
             );
             c.relX = d.x;
             c.relY = d.y;
+            if (d.csoundName) c.csoundName = d.csoundName;  
             return c;
         },
 
@@ -291,6 +302,7 @@ export const ComponentRegistry = {
             height: c.height ?? 13,  
             text: c.text ?? 'M',
             initialState: c.isActive !== undefined ? c.isActive : true,
+            ...(c.csoundName ? { csoundName: c.csoundName } : {}),   
         }),
 
         deserialize: (d, ctx) => {
@@ -303,6 +315,7 @@ export const ComponentRegistry = {
             );
             c.relX = d.x;
             c.relY = d.y;
+            if (d.csoundName) c.csoundName = d.csoundName;  
             return c;
         },
 
@@ -548,6 +561,7 @@ export const ComponentRegistry = {
             y: Math.round(c.relY ?? 0),
             width: c.width ?? 50,
             text: c.text ?? '',
+            ...(c.csoundName ? { csoundName: c.csoundName } : {}), 
         }),
 
         deserialize: (d, ctx) => {
@@ -559,6 +573,7 @@ export const ComponentRegistry = {
             );
             c.relX = d.x;
             c.relY = d.y;
+            if (d.csoundName) c.csoundName = d.csoundName;      
             return c;
         },
 
@@ -672,6 +687,7 @@ export const ComponentRegistry = {
             height: c.height ?? 16,
             items: c.items ?? [],
             selectedIndex: c.selectedIndex ?? 0,
+            ...(c.csoundName ? { csoundName: c.csoundName } : {}), 
         }),
 
         deserialize: (d, ctx) => {
@@ -687,6 +703,7 @@ export const ComponentRegistry = {
             );
             c.relX = d.x;
             c.relY = d.y;
+            if (d.csoundName) c.csoundName = d.csoundName;  
             return c;
         },
 
@@ -1029,4 +1046,28 @@ export function getCsoundPorts(component) {
     if (!t) return null;
     const def = ComponentRegistry[t];
     return typeof def.csoundPorts === 'function' ? def.csoundPorts(component) : null;
+}
+
+/**
+ * Csound-имя параметра (без префикса k).
+ * Fallback: Param<id> — стабильно, не зависит от позиции в components[].
+ */
+export function getCsoundParamName(comp) {
+    if (comp.csoundName) return comp.csoundName;
+    return `Param${comp.id}`;
+}
+
+/**
+ * Проверка уникальности csoundName в наборе компонентов.
+ * Возвращает { ok, conflictId }.
+ */
+export function validateCsoundNames(components) {
+    const used = new Map();   // name → id
+    for (const c of components) {
+        if (!isParametric(c)) continue;
+        const n = getCsoundParamName(c);
+        if (used.has(n)) return { ok: false, name: n, conflictId: used.get(n) };
+        used.set(n, c.id);
+    }
+    return { ok: true };
 }

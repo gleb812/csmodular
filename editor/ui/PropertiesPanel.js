@@ -10,6 +10,9 @@ import { CATEGORIES, isValidCategory } from '../../src/moduleCategories.js';
 import { getStatusMeta } from '../../src/api/moduleStatusStore.js';   // ⭐ NEW
 import { TablesPanel } from './TablesPanel.js';
 import {
+    isParametric,
+    getCsoundParamName,
+    validateCsoundNames,
     serializeComponents,
     collectParamIds,
     collectPorts,
@@ -322,6 +325,70 @@ export class PropertiesPanel {
         header.style.cssText = 'color: #0af; font-weight: bold; font-size: 12px; margin-bottom: 10px;';
         header.textContent = `${compType} (id=${comp.id || '?'})`;
         this.body.appendChild(header);
+
+
+        if (isParametric(comp)) {
+            const wrapper = document.createElement('div');
+            wrapper.style.marginBottom = '12px';
+            wrapper.appendChild(this._label('Csound Name'));
+
+            const row = document.createElement('div');
+            row.style.cssText = 'display: flex; align-items: center; gap: 4px;';
+
+            const prefix = document.createElement('span');
+            prefix.textContent = 'k';
+            prefix.style.cssText = 'color: #0af; font-family: monospace; font-size: 12px;';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = getCsoundParamName(comp);
+            input.style.cssText = `
+                flex: 1; padding: 4px 8px; background: #1a1a1a;
+                border: 1px solid #444; border-radius: 3px; color: white;
+                font-size: 12px; font-family: monospace; box-sizing: border-box;
+            `;
+
+            const hint = document.createElement('div');
+            hint.style.cssText = 'color: #555; font-size: 9px; margin-top: 3px;';
+            hint.textContent = 'Unique identifier in Csound UDO (xin, mapping, body)';
+
+            input.onchange = () => {
+                const oldName = getCsoundParamName(comp);
+                let raw = input.value.trim().replace(/\s/g, '');
+                if (!raw) raw = `Param${comp.id}`;
+                if (/^[0-9]/.test(raw)) raw = 'M' + raw;
+                raw = raw.replace(/[^a-zA-Z0-9_]/g, '');
+                if (!raw) raw = `Param${comp.id}`;
+
+                // Проверка уникальности
+                const others = this.app.components.filter(c => c !== comp);
+                const conflict = others.some(c =>
+                    isParametric(c) && getCsoundParamName(c) === raw
+                );
+                if (conflict) {
+                    alert(`Csound name "${raw}" already used in this module`);
+                    input.value = oldName;
+                    return;
+                }
+
+                if (raw === oldName) { input.value = raw; return; }
+
+                comp.csoundName = raw;
+                input.value = raw;
+
+                // ⭐ Переписать тело UDO: \bkOLD\b → kNEW
+                if (this.app.codeViewerWindow) {
+                    this.app.codeViewerWindow.renameParamInBody(oldName, raw);
+                }
+                this._onSchemaChange();
+            };
+
+            row.appendChild(prefix);
+            row.appendChild(input);
+            wrapper.appendChild(row);
+            wrapper.appendChild(hint);
+            this.body.appendChild(wrapper);
+        }
 
         // Schema-based поля
         const schema = this._getSchemaForComponent(comp);

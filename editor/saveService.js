@@ -48,15 +48,19 @@ export const ${name}Module = {
 };`;
 }
 
-/**
- * Собрать moduleData из текущего состояния EditorApp.
- * @param {EditorApp} app
- * @param {string} finalName — уже санитайзенное имя
- * @returns {Promise<object>}
- */
 async function _collectModuleData(app, finalName) {
-    const { serializeComponents, collectParamIds, collectPorts }
+    const { serializeComponents, collectParamIds, collectPorts,
+            isParametric, getCsoundParamName }
         = await import('./ComponentRegistry.js');
+
+    // ⭐ Миграция: явно зафиксировать csoundName для параметрических
+    //    компонентов без него. Fallback — Param<id>, стабильно между save/load.
+    for (const c of app.components) {
+        if (c._isNewDragging) continue;
+        if (isParametric(c) && !c.csoundName) {
+            c.csoundName = getCsoundParamName(c);   // Param<id>
+        }
+    }
 
     const components = serializeComponents(app.components);
     const params = collectParamIds(app.components);

@@ -23,7 +23,11 @@
 //   help [cmd]               — справка
 
 import { libraryStore } from '../../src/api/index.js';
-import { ComponentRegistry, serializeComponents, deserializeComponents, createComponent, getTypeOf, getByCategory, hasCollisions } from '../ComponentRegistry.js';
+import {
+    ComponentRegistry, serializeComponents, deserializeComponents,
+    createComponent, getTypeOf, getByCategory, hasCollisions,
+    isParametric,          // ⭐ NEW
+} from '../ComponentRegistry.js';
 import { CATEGORIES, isValidCategory } from '../../src/moduleCategories.js';
 
 const TYPE_ALIASES = {
@@ -552,6 +556,22 @@ export class TerminalPanel {
         if (!clone) {
             this._printError('Clone failed: clone is null');
             return;
+        }
+
+        // ⭐ Уникализировать csoundName клона (иначе два kVol в xin → Csound сломается)
+        if (isParametric(clone)) {
+            const base = clone.csoundName || `Param${clone.id}`;
+            const taken = new Set(
+                this.app.components
+                    .filter(c => isParametric(c))
+                    .map(c => c.csoundName || `Param${c.id}`)
+            );
+            let candidate = base;
+            let n = 2;
+            while (taken.has(candidate)) {
+                candidate = `${base}${n++}`;
+            }
+            clone.csoundName = candidate;
         }
 
         // 2. Позиция

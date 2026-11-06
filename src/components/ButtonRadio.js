@@ -230,7 +230,7 @@ export class ButtonRadio extends BaseComponent {
     
     handleClick(x, y) {
         if (this.isPointInside(x, y)) {
-            console.log(`🔘 ButtonRadio.handleClick at (${x}, ${y})`);
+            //console.log(`🔘 ButtonRadio.handleClick at (${x}, ${y})`);
             
             // Определяем, по какой кнопке кликнули
             let clickedIndex;
@@ -244,7 +244,7 @@ export class ButtonRadio extends BaseComponent {
             if (clickedIndex >= 0 && clickedIndex < this.buttonCount) {
                 // Если кнопка уже выбрана, не делаем ничего
                 if (clickedIndex === this.selectedIndex) {
-                    console.log(`ButtonRadio: button ${clickedIndex} already selected`);
+                    //console.log(`ButtonRadio: button ${clickedIndex} already selected`);
                     return {
                         type: 'component-click',
                         component: this,
@@ -290,7 +290,7 @@ export class ButtonRadio extends BaseComponent {
                 this.onChange(index, this.labels[index], oldIndex, this.labels[oldIndex]);
             }
             
-            console.log(`ButtonRadio selected: ${this.labels[index]} (index: ${index})`);
+            //console.log(`ButtonRadio selected: ${this.labels[index]} (index: ${index})`);
         }
     }
     

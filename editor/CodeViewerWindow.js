@@ -1,5 +1,5 @@
 // editor/CodeViewerWindow.js
-import { getCsoundPorts, isParametric } from './ComponentRegistry.js';
+import { getCsoundPorts, isParametric, getCsoundParamName } from './ComponentRegistry.js';
 
 const PROTECTED_COLOR = '#7a8a9a';
 const PROTECTED_FLASH_COLOR = 'rgba(244, 68, 68, 0.18)';
@@ -735,11 +735,8 @@ export class CodeViewerWindow {
         let outputIndex = 0;
 
         const paramComponents = [];
-        const typeCounters = { Knob: 0, Slider: 0, Button: 0, Level: 0, TextEdit: 0 };
 
         for (const comp of components) {
-            const type = comp.constructor.name;
-
             const port = getCsoundPorts(comp);
             if (port) {
                 if (port.dir === 'in') {
@@ -758,23 +755,10 @@ export class CodeViewerWindow {
 
             if (!isParametric(comp)) continue;
 
-            if (type === 'Knob') {
-                typeCounters.Knob++;
-                paramComponents.push({ comp, paramName: `kKnob${typeCounters.Knob}` });
-            } else if (type === 'Slider') {
-                typeCounters.Slider++;
-                paramComponents.push({ comp, paramName: `kSlider${typeCounters.Slider}` });
-            } else if (type === 'ButtonFlat' || type === 'ButtonText'
-                       || type === 'ButtonIncDec' || type === 'ButtonRadio') {
-                typeCounters.Button++;
-                paramComponents.push({ comp, paramName: `kButton${typeCounters.Button}` });
-            } else if (type === 'LevelShift') {
-                typeCounters.Level++;
-                paramComponents.push({ comp, paramName: `kLevel${typeCounters.Level}` });
-            } else if (type === 'TextEdit') {
-                typeCounters.TextEdit++;
-                paramComponents.push({ comp, paramName: `kText${typeCounters.TextEdit}` });
-            }
+            // ⭐ Имя = k + csoundName (fallback Param<id>).
+            //    Стабильно между reorder / add / delete.
+            const base = getCsoundParamName(comp);   // без 'k'
+            paramComponents.push({ comp, paramName: `k${base}` });
         }
 
         const allParams = [];
@@ -926,6 +910,43 @@ export class CodeViewerWindow {
         };
     }
 
+    renameParamInBody(oldBase, newBase) {
+        const s = this._structureCache;
+        if (!s) { this.syncFromModule(); return; }
+
+        const lines = this.editor.value.split('\n');
+        const oldVar = `k${oldBase}`;
+        const newVar = `k${newBase}`;
+        // Целые слова: kOld не должен матчить kOld2
+        const re = new RegExp(`\\b${oldVar}\\b`, 'g');
+
+        for (let i = s.bodyStartLine; i < s.bodyEndLine; i++) {
+            if (s.protectedLineIndices.has(i)) continue;
+            lines[i] = lines[i].replace(re, newVar);
+        }
+
+        const newValue = lines.join('\n');
+        if (newValue === this.editor.value) {
+            // тело не изменилось — просто перегенерируем шапку/xin через updateCode
+            this.updateCode();
+            return;
+        }
+
+        this.editor.value = newValue;
+
+        // Пересобрать структуру по новому value
+        const fresh = this._rebuildStructureFromCurrent();
+        if (fresh) this._structureCache = fresh;
+
+        // Перегенерировать protected-строки (xin, mapping) с новыми именами
+        this.updateCode();
+
+        this.isDirty = true;
+        this.updateStatus('modified');
+        this._updateGutter();
+        this._updateHighlight();
+    }
+
     // ─────────────────────────── SYNC / UPDATE ──────────────────────
 
     syncFromModule() {
@@ -939,6 +960,55 @@ export class CodeViewerWindow {
         this._updateGutter();
         this._updateHighlight();
         this.app.uiManager.showNotification('🔄 Synced from module');
+    }
+
+    /**
+     * Переименовать Csound-параметр в ТЕЛЕ UDO: k<oldBase> → k<newBase>.
+     * Protected-строки (xin, mapping, zar/zkr, zaw/zkw) НЕ трогаем —
+     * они перегенерируются через updateCode() из актуального csoundName.
+     *
+     * @param {string} oldBase — старое имя БЕЗ префикса k (например "Vol")
+     * @param {string} newBase — новое имя БЕЗ префикса k (например "Amp")
+     */
+    renameParamInBody(oldBase, newBase) {
+        const s = this._structureCache;
+        if (!s) {
+            // Структура не распознана — просто перегенерируем шапку/хвост,
+            // тело останется как есть (пользователь сам поправит).
+            this.updateCode();
+            return;
+        }
+
+        const oldVar = `k${oldBase}`;
+        const newVar = `k${newBase}`;
+        // \b...\b — чтобы kVol не матчил kVolume
+        const re = new RegExp(`\\b${oldVar}\\b`, 'g');
+
+        const lines = this.editor.value.split('\n');
+        let changed = false;
+
+        for (let i = s.bodyStartLine; i < s.bodyEndLine; i++) {
+            if (s.protectedLineIndices.has(i)) continue;
+            if (re.test(lines[i])) {
+                lines[i] = lines[i].replace(re, newVar);
+                changed = true;
+            }
+            re.lastIndex = 0;   // сброс после test()
+        }
+
+        if (changed) {
+            this.editor.value = lines.join('\n');
+            const fresh = this._rebuildStructureFromCurrent();
+            if (fresh) this._structureCache = fresh;
+            this.isDirty = true;
+            this.updateStatus('modified');
+            this._updateGutter();
+        }
+
+        // Перегенерировать protected-строки с новыми именами
+        // (updateCode берёт body из текущего editor.value — уже с kNew)
+        this.updateCode();
+        this._updateHighlight();
     }
 
     updateCode() {
