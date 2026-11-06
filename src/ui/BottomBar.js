@@ -102,6 +102,7 @@ export class BottomBar {
 
             // --- Minimap ---
             { id: 'minimap', label: 'Mp', title: 'Toggle minimap (M)', action: () => this._toggleMinimap(), toggle: () => !!this.system.minimap?.visible },
+            { id: 'reload', label: '⟳', title: 'Reload user modules (hot-reload)', action: () => this._reloadUserModules() },
 
             { id: 'sep5b', label: null },
 
@@ -137,6 +138,19 @@ export class BottomBar {
 
         document.body.appendChild(this.element);
         this.makeDraggable();
+    }
+
+    async _reloadUserModules() {
+        if (typeof this.system.reloadUserModules !== 'function') {
+            this.system.showNotification?.('❌ Hot-reload not available');
+            return;
+        }
+        try {
+            await this.system.reloadUserModules();
+        } catch (e) {
+            console.error('[BottomBar] reloadUserModules failed:', e);
+            this.system.showNotification?.(`❌ Reload failed: ${e.message}`);
+        }
     }
 
     _toggleMinimap() {

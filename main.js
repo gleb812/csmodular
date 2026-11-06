@@ -1981,6 +1981,157 @@ _renderDynamic() {
       }
   }
 
+  /**
+   * Hot-reload всех user-модулей, стоящих в текущем патче.
+   *  - Перечитывает user-библиотеки.
+   *  - Обновляет каждую панель через moduleFactory.refreshPanel.
+   *  - Удаляет кабели удалённых джеков.
+   *  - Сбрасывает UDO-кэш CsoundGenerator для затронутых типов.
+   *  - Перекомпилирует ORC.
+   *
+   * Builtin-модули не трогаются (они read-only).
+   */
+  async reloadUserModules() {
+      const { libraryStore } = await import('./src/api/index.js');
+      libraryStore.invalidateCache?.();
+      // 1. Собрать user-модули, стоящие в патче
+      const panels = this.components.filter(
+          c => c.constructor.name === 'Panel' && c.library && c.library !== 'builtin'
+      );
+      if (panels.length === 0) {
+          this.showNotification?.('📭 No user modules in patch');
+          return { reloaded: 0, failed: 0 };
+      }
+
+      // Уникальные пары (library, type)
+      const targets = new Map();   // key: `${lib}/${type}`
+      for (const p of panels) {
+          const lib = p.library;
+          const type = p.jsonName || p.type || p.title;
+          targets.set(`${lib}/${type}`, { lib, type });
+      }
+
+      // 2. Перечитать definition'ы и обновить реестр + панели
+      let reloaded = 0, failed = 0;
+      const affectedTypes = new Set();
+      const removedJackCables = [];
+
+      for (const { lib, type } of targets.values()) {
+          const ok = await this.moduleFactory.loadModule(lib, type);
+          if (!ok) { failed++; continue; }
+
+          const newDef = this.moduleFactory.moduleRegistry[type];
+          if (!newDef) { failed++; continue; }
+
+          affectedTypes.add(type);
+
+          // Обновляем все панели этого типа
+          const matching = panels.filter(
+              p => (p.jsonName || p.type || p.title) === type && p.library === lib
+          );
+
+          for (const panel of matching) {
+              const { removed } = this.moduleFactory.refreshPanel(panel, newDef);
+
+              // Кабели удалённых компонентов — собрать id
+              for (const comp of removed) {
+                  const isJack = comp.constructor.name === 'Input'
+                              || comp.constructor.name === 'Output';
+                  if (isJack) removedJackCables.push({ panel, comp });
+              }
+
+              // ⭐ Пересобрать csoundChannel с правильным jsonId
+              //    (как в PatchLoader.configureModule)
+              if (this.csoundGen) {
+                  const instanceId = panel.jsonId;
+                  const instanceName = panel.jsonName || type;
+                  for (const comp of panel.components) {
+                      if (comp.csoundChannel && comp.id !== undefined) {
+                          comp.csoundChannel =
+                              `module_${instanceName}_${instanceId}_${comp.id}`;
+                      }
+                  }
+
+                  // Обновить запись модуля в CsoundGenerator
+                  // (inlets/outlets/params могли измениться)
+                  const def = this.moduleFactory.moduleRegistry[type];
+                  this.csoundGen.removeModule(
+                      instanceId, instanceName, type, panel.layer
+                  );
+                  this.csoundGen.addModule({
+                      typeId: type,
+                      instanceId,
+                      instanceName,
+                      layer: panel.layer,
+                      parameters: [],
+                      mode: [],
+                      defaultParams: def?.defaultParams || [],
+                      defaultMode: def?.mode || [],
+                      inlets: def?.inputs || 1,
+                      outlets: def?.outputs || 1,
+                      isUser: true,
+                  });
+              }
+
+              panel.setDirty?.(true);
+              reloaded++;
+          }
+      }
+
+      // 3. Удалить кабели удалённых джеков
+      for (const { comp } of removedJackCables) {
+          const cables = (this.patchManager?.cables || [])
+              .filter(c => c.fromJack === comp || c.toJack === comp);
+          for (const cable of cables) {
+              this.patchManager.removeCable(cable);
+          }
+      }
+
+      // 4. Сбросить UDO-кэш в CsoundGenerator (заставить перечитать txt)
+      if (this.csoundGen) {
+          if (this.csoundGen._variantsCache) {
+              for (const type of affectedTypes) {
+                  // Ключ кэша — udoPath "library/<lib>/<type>.txt"
+                  for (const key of Object.keys(this.csoundGen._variantsCache)) {
+                      if (key.endsWith(`/${type}.txt`)) {
+                          delete this.csoundGen._variantsCache[key];
+                      }
+                  }
+              }
+          }
+      }
+
+      // 5. Перерисовать
+      this._voiceDirty = true;
+      this._fxDirty = true;
+      this._cablesDirty = true;
+      this.forceRedraw?.();
+
+      // ⭐ recomputeVariantUI сам триггерит recompile (см. AI Context.md)
+      if (typeof this.recomputeVariantUI === 'function') {
+          try {
+              await this.recomputeVariantUI();
+          } catch (e) {
+              console.warn('[reloadUserModules] recomputeVariantUI failed:', e);
+              // fallback — явный recompile
+              if (this.csoundEngine?.state === 'running') {
+                  this._recompileDebounced?.();
+              }
+          }
+      } else if (this.csoundEngine?.state === 'running') {
+          // нет recomputeVariantUI — хотя бы перекомпилируем
+          this._recompileDebounced?.();
+      }
+
+      const msg = failed > 0
+          ? `🔄 Reloaded ${reloaded}, failed ${failed}`
+          : `🔄 Reloaded ${reloaded} user module(s)`;
+      this.showNotification?.(msg);
+      console.log('[reloadUserModules]', { reloaded, failed, affectedTypes: [...affectedTypes] });
+
+      return { reloaded, failed };
+  }
+
 
   /**
    * Найти "пол" для FX-модулей — ниже всех Voice.
