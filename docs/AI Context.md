@@ -28,6 +28,12 @@ Two entries:
 | Web | `public/libraries/` (read-only) | IndexedDB (`csmodular/libraries`) |
 | Tauri | `public/libraries/` (read-only) | `~/Documents/CsModular/libraries/` |
 
+**Web: `index.html` и `editor.html` — разные вкладки.** У каждой свой
+`WebLibraryStore` инстанс с `_moduleCache` (`Map<"lib/Name", { description, dspCode }>`).
+`saveModule` в редакторе инвалидирует **только свой** кэш. Основное окно при
+`loadModule` может вернуть старую версию из памяти — вызывать
+`libraryStore.invalidateCache()` перед перечитыванием (см. *Hot-reload*).
+
 **Library structure** (`public/libraries/<lib>/`):
 - `_index.json` — `{ modules: [{ name, displayName, category, status }] }`
 - `_meta.json` — `{ name, displayName, author, version, description, createdAt }` (optional)
@@ -182,6 +188,13 @@ Tables loaded via `/tables/<name>.json` (flat array), HTML-fallback detection, c
 `reset()` + `setOption('-odac')` + `compileOrc` + `readScore` + `start`.
 After: `_resyncAllControls()` pushes UI values back.
 
+### Hot-reload module (main app, user only)
+`BottomBar ⟳` → `ModularSystem.reloadUserModules()` →
+`libraryStore.invalidateCache()` → `moduleFactory.loadModule(lib, type)` →
+`moduleFactory.refreshPanel(panel, newDef)` →
+`csoundGen.removeModule` + `addModule` → `recomputeVariantUI()` (recompile).
+Full pipeline + ограничения → *Module Editor* → *Hot-reload*.
+
 ## Oscilloscope
 
 Right-click jack → **📊 Send to Scope** → `addScopeTable(cable)` → `_recompileDebounced()` → `registerScopeTable` → polls `tableCopyOut` every 33 ms → `ScopeWindow`.
@@ -274,7 +287,7 @@ Figma-style, right-top, `MINIMAP_WIDTH=220`, `MINIMAP_HEIGHT=160`. Toggle: hotke
 
 | Class | File | Role |
 |---|---|---|
-| `ModularSystem` | `main.js` | Coordinator (canvas, layers, animation, grid, minimap) |
+| `ModularSystem` | `main.js` | Coordinator (canvas, layers, animation, grid, minimap, reloadUserModules |
 | `ModuleFactory` | `src/ModuleFactory.js` | `loadModule(lib, name)`, `createModule(type, ...)` |
 | `PatchManager` | `src/PatchManager.js` | Cables, jack coloring |
 | `PatchLoader` | `src/PatchLoader.js` | Load/save patches |
@@ -395,6 +408,47 @@ Footer 🔒 — `zar`/`zkr`/`init`, `zaw`/`zkw`, `endop`.
 
 `library` field is **not** stored in JS — it's the storage location.
 
+### Hot-reload (main app)
+
+**Кнопка `⟳` в `BottomBar`** → `ModularSystem.reloadUserModules()` — обновляет
+user-модули, стоящие в патче, **без перезагрузки страницы**.
+
+Pipeline:
+1. `libraryStore.invalidateCache()` — ⭐ **обязательно**. Web: `index.html` и
+   `editor.html` — разные вкладки, у каждой свой `WebLibraryStore` с
+   `_moduleCache`. `saveModule` в редакторе чистит **только кэш редактора**.
+   Без `invalidateCache()` основное окно читает старую версию из памяти.
+2. `moduleFactory.loadModule(lib, type)` для каждого user-модуля в патче
+   (перечитывает `_index.json` + `<Name>.js` + `<Name>.txt`).
+3. `moduleFactory.refreshPanel(panel, newDef)` — in-place:
+   - существующие компоненты (совпадает `id` + `componentType`) → `_mergeComponentDef`:
+     обновляет описание (`x/y/labels/mappingTable/csoundName/jackType/bandwidth/sourceComponentId`),
+     **сохраняет** `value` / `isActive` / `selectedIndex` / `currentIndex` /
+     `connected` / `cables` / `csoundChannel`.
+   - новые → `_createOneComponent`.
+   - удалённые → `removed[]` (кабели удаляются в `reloadUserModules`).
+4. `csoundGen.removeModule` + `addModule` — обновляет `inlets`/`outlets`/
+   `defaultParams` (могли измениться). Bus'ы существующих кабелей
+   (`_cableBusMap`, привязаны к `cable.id`) **не трогаются**.
+5. `csoundGen._variantsCache` — сбросить ключи `*/<type>.txt` (варианты могли
+   поменяться в txt).
+6. `recomputeVariantUI()` — сам триггерит recompile; явный
+   `_recompileDebounced` **не нужен** (иначе двойной recompile).
+
+**Ограничения (осознанные):**
+- `csoundName` **не перезаписывается** из txt, если у инстанса уже задан
+  (пользователь мог переименовать в Properties — его правка приоритетнее).
+- Удаление джека → его кабели удаляются; новый джек **не** восстанавливает
+  кабели автоматически.
+- **Только user-модули** (builtin read-only, их не правим).
+- **Нет авто hot-reload** — только по кнопке. `BroadcastChannel` для авто —
+  в `TODO.md`.
+
+**⚠️ `ModuleFactory.loadModule`:** условие коллизии `prev.library !== lib`
+должно быть `prev.library && prev.library !== lib` — иначе при `prev.library
+=== undefined` (старые регистрации) перезагрузка того же type из того же lib
+**молча пропускается**, и `refreshPanel` получает старый definition.
+
 ### Editor rules (non-obvious)
 
 1. **`params[]` order = `components[]` order** — never sort.
@@ -475,6 +529,22 @@ Only non-obvious rules that are easy to violate. Full list → `ARCHITECTURE.md`
 28. **`saveService.saveModule(app, { lib, name })`** — the only save path. Used by Toolbar and Terminal. `generateJsCode()` lives **only** in `saveService.js`.
 29. **`libraryStore.createLibrary(name, meta)`** — writes `<lib>/_meta.json` + `<lib>/modules/`. Never overwrites existing `_meta.json`.
 30. **No `await import()` inside sync methods.** `PropertiesPanel._renderModuleTab` is synchronous — `getStatusMeta` imported at top.
+31. **`reloadUserModules()` → `libraryStore.invalidateCache()` первым делом.**
+    Web: `index.html` и `editor.html` — разные вкладки, разные инстансы
+    `WebLibraryStore`, разные `_moduleCache`. Без сброса основное окно читает
+    старую версию definition из памяти.
+32. **`ModuleFactory.loadModule` — `prev.library && prev.library !== lib`**
+    (не `prev.library !== lib`). Иначе при `undefined` library у старой
+    регистрации перезагрузка того же type из того же lib пропускается.
+33. **`refreshPanel` не перезаписывает runtime-состояние компонентов** —
+    `value` / `isActive` / `selectedIndex` / `currentIndex` / `connected` /
+    `cables` / `csoundChannel` / непустой `csoundName`. Обновляется только
+    «описание» (`x/y/labels/mappingTable/jackType/bandwidth/...`).
+34. **`csoundGen.removeModule` + `addModule` при hot-reload** — bus'ы
+    существующих кабелей (`_cableBusMap[cable.id]`) сохраняются, т.к. привязаны
+    к `cable.id`, а не к модулю. Не сбрасывать `_cableBusMap`.
+35. **`recomputeVariantUI()` сам триггерит recompile** — не вызывать
+    `_recompileDebounced()` перед ним в `reloadUserModules`, иначе двойной ORC.
 
 ## Style
 

@@ -122,6 +122,11 @@ NM2 legacy is gone — no `patch_params.py`, no `moduleStore`, no `typeID`.
 - [ ] **Remove fallback download** from `ModulePropertiesWindow.saveModule()`
 - [ ] **Rebuild exe** after design updates
 - [ ] Android / iOS targets (later)
+- **Auto hot-reload** — `BroadcastChannel('csmodular-library')` из
+  `saveService`/`libraryStore.saveModule` → `ModularSystem.reloadUserModules()`
+  без кнопки. Web: работает между вкладками. Tauri: тот же `BroadcastChannel`
+  в WebView (проверить).
+
 
 ## 🔌 Bridge / External API
 

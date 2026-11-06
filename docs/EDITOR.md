@@ -99,6 +99,11 @@ Matches `src/ModuleFactory.js`:
 - `width` / `height` — for all except `autoSize` (TextLabel)
 
 **`mappingTable`** serialized/deserialized for `Knob` and `Slider`. Same for any future parametric component with mapping.
+**`csoundName`** — optional, string, для параметрических компонентов (`isParametric: true`).
+Csound-имя параметра **без префикса `k`**. В `xin`/mapping/body → `k<csoundName>`.
+Fallback, если не задан → `Param<id>` (стабильно, не зависит от позиции в `components[]`).
+**Не** `kKnob1` — позиционная нумерация убрана (ломалась при reorder).
+Unique within module. Sanitize как `sanitizeName`.
 
 ### Helpers
 
@@ -133,6 +138,10 @@ const isEditable = target.tagName === 'INPUT' ||
                   target.isContentEditable;
 if (isEditable) return;
 ```
+**Select:** left-click → selects, switches Properties to Component tab, drag starts
+immediately. **Не** мутирует `components[]` для z-order (это ломало
+`params[] order = components[] order`). Z-order — отдельный `_zOrder` в
+`EditorApp`, `animate()` рисует по нему с fallback на `components[]`.
 
 ## Properties panel
 
@@ -279,7 +288,14 @@ zkw kOut2, kOut2                    ; control outputs write
 endop
 ```
 
-**Naming:** `kKnob1`, `kSlider1`, `kButton1`, `kText1`, `kLevel1`, `kIn1` / `kOut1` (jacks — **shared counter** across audio/control).
+**Naming:**
+- Параметры — `k<csoundName>` (fallback `kParam<id>`). **Не** по типу/счётчику.
+  Порядок `paramComponents` = порядок `components[]` (не сортировать), но
+  **имя** от позиции не зависит.
+- Джек-переменные — `kIn1`, `kIn2` / `kOut1`, `kOut2` (shared counter across
+  audio/control). Позиционны, т.к. джек — это позиция в `inputs[]`/`outputs[]`.
+- Все `isParametric` типы попадают в `allParams` **без `if type ===`**
+  (раньше `PartSelector` молча выпадал из `xin` — баг).
 
 ### Dirty state
 
@@ -374,4 +390,10 @@ help [cmd]                 help
 8. **`params[]` order = `components[]` order** — never sort.
 9. **`generateJsCode()` lives only in `saveService.js`.**
 10. **`rm` ≠ `del`** in terminal `switch`.
+11. **`csoundName` не перезаписывается из `components[]`.** `deserialize` берёт
+    `d.csoundName`, `serialize` пишет `c.csoundName` (если задан).
+    `saveService` фиксирует `Param<id>` для пустых. Позиционная нумерация
+    (`kKnob1`) — **удалена**, не возвращать.
+12. **`renameParamInBody(old, new)`** — сначала body (по `\bkOld\b`),
+    потом `updateCode()`. Не наоборот.
 ```
