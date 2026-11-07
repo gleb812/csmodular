@@ -171,6 +171,11 @@ export default defineConfig(({ mode }) => ({
   },
 
   build: {
+    minify: 'terser',
+    terserOptions: {
+      keep_classnames: true,
+    },
+    sourcemap: true,
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),

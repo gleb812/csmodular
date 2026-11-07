@@ -63,11 +63,13 @@ The module is listed in `public/libraries/<lib>/_index.json`.
      ]
    }
    ```
-   **`status`**: `stable` (ready) or `passable` (works, not perfect).
+   **`status`**: `stable` (ready) or `passable` (works, but not perfect).
    `dev` / `broken` — **not shipped** in release builds.
-4. Register the library in `public/libraries/_index.json` (if new):
-   ```json
-   { "libraries": ["test-lib", "<lib>"] }
+
+   You can generate **automatically** `_index.json` and `_meta.json` from the `.js` files:
+
+   ```bash
+   python scripts/generate-index.py <lib>
    ```
 
 ## Step 5 — Build & verify

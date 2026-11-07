@@ -44,6 +44,8 @@ export class Panel {
     this.defaultColor = '#606060'; // дефолтный серый
     this.dirty = true; // по умолчанию true, чтобы отрисовался при создании
     this.parentSystem = null; // ссылка на систему (устанавливается при создании)
+
+    this.componentType = this.constructor.name;
   }
 
   addComponent(component) {

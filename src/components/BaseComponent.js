@@ -19,6 +19,7 @@ export class BaseComponent {
         this.originalY = y;
         this.originalWidth = width;
         this.originalHeight = height;
+        this.componentType = this.constructor.name;
     }
 
 
