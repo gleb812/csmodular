@@ -245,8 +245,7 @@ export class CodeViewerWindow {
                 mappingEndLine = i;
             }
 
-            if (/^[aA]\w*\s+zar\s+k\w+$/.test(t) || /^[kK]\w*\s+zkr\s+k\w+$/.test(t) ||
-                /^[aA]\w*\s+init\s+0$/.test(t) || /^[kK]\w*\s+init\s+0$/.test(t)) {
+            if (/^[aA]\w*\s+zar\s+k\w+$/.test(t) || /^[kK]\w*\s+zkr\s+k\w+$/.test(t)) {
                 if (inputStartLine < 0) inputStartLine = i;
                 inputEndLine = i;
             }
@@ -361,7 +360,8 @@ export class CodeViewerWindow {
         const selStart = this.editor.selectionStart;
         const selEnd = this.editor.selectionEnd;
 
-        // Destructive-операции: проверяем, не затрагивают ли защищённую зону
+        // ── 1. Любой ввод/удаление, затрагивающий protected — блокировать ──
+        // (раньше проверяли только destructive — insertText проходил)
         const destructive = [
             'deleteContentBackward', 'deleteContentForward',
             'deleteByCut', 'deleteByDrag',
@@ -369,16 +369,19 @@ export class CodeViewerWindow {
             'insertFromPaste', 'insertFromDrop',
         ];
 
-        if (destructive.includes(inputType)) {
-            // Курсор/выделение считается «в защищённой зоне», если:
-            //   - курсор до начала тела (selStart < bodyStart)
-            //   - выделение заходит за конец тела (selEnd > bodyEnd)
-            //   - курсор стоит ровно на bodyStart и это destructive влево
-            //     (иначе Backspace в первой позиции тела удалит init-строку)
-            // Enter в bodyEnd — разрешён: там начинается zaw, а тело может расти
+        const isInsert = (inputType === 'insertText');
+        const isDestructive = destructive.includes(inputType);
+
+        if (isInsert || isDestructive) {
+            // Курсор/выделение в защищённой зоне, если:
+            //   - selStart < bodyStart  (курсор до body)
+            //   - selEnd > bodyEnd      (выделение заходит за body)
+            //   - selStart > bodyEnd    (курсор после body — в footer, включая endop)
+            //   - selStart === bodyStart && destructiveBackward (Backspace в начале body)
             const cursorAtBodyStart = (selStart === selEnd && selStart === s.bodyStart);
             const affectsProtected =
                 (selStart < s.bodyStart) ||
+                (selStart >= s.bodyEnd) ||
                 (selEnd > s.bodyEnd) ||
                 (cursorAtBodyStart && inputType === 'deleteContentBackward');
 
@@ -389,7 +392,7 @@ export class CodeViewerWindow {
             }
         }
 
-        // insertText / insertFromPaste: проверка на запрещённые слова
+        // ── 2. insertText / insertFromPaste: запрещённые слова ──
         if (inputType === 'insertText' || inputType === 'insertFromPaste') {
             const text = e.data || (e.dataTransfer ? e.dataTransfer.getData('text/plain') : '');
             if (text && FORBIDDEN_KEYWORDS_RE.test(text)) {
@@ -579,11 +582,11 @@ export class CodeViewerWindow {
         const tokenRe = new RegExp(
             [
                 '^(;@\\s*map)(.*)$',
-                '(;.*)$',
+                //'(;.*)$',
                 '("[^"\\n]*")',
                 '\\b(opcode|endop|instr|endin|xin|init|ftgen|zar|zkr|zaw|zkw|table|goto|if|then|endif|else|while|do|od)\\b',
                 '\\b(\\d+(?:\\.\\d+)?)\\b',
-                '\\b([kiga][A-Za-z_][A-Za-z0-9_]*)\\b',
+                '(?<![&;])\\b([kiga][A-Za-z0-9_]*)\\b',
             ].join('|'),
             'gm'
         );
@@ -852,9 +855,7 @@ export class CodeViewerWindow {
                 mappingEndLine = i;
             }
             if (/^[aA]\w*\s+zar\s+k\w+$/.test(t) ||
-                /^[kK]\w*\s+zkr\s+k\w+$/.test(t) ||
-                /^[aA]\w*\s+init\s+0$/.test(t) ||
-                /^[kK]\w*\s+init\s+0$/.test(t)) {
+                /^[kK]\w*\s+zkr\s+k\w+$/.test(t)) {
                 if (inputStartLine < 0) inputStartLine = i;
                 inputEndLine = i;
             }
