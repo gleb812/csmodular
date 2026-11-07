@@ -3,8 +3,8 @@ export const LEVModule = {
     type: 'LEV',
     defaultParams: [],
     displayName: 'LEV',
-    category: 'custom',
-    status: 'dev',
+    category: 'control',
+    status: 'stable',
     gridHeight: 3,
     originalName: 'LEV',
     tooltip: 'LEV',
@@ -20,7 +20,9 @@ export const LEVModule = {
                 "y": 10,
                 "infoFunc": 0,
                 "size": "medium",
-                "defaultValue": 64
+                "defaultValue": 64,
+                "mappingTable": "CLA000",
+                "csoundName": "Param1"
         },
         {
                 "componentType": "Output",

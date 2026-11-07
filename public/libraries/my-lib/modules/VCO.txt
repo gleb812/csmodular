@@ -1,0 +1,23 @@
+;@ map OSCfrq CLA000
+opcode VCO, 0, kkkkk
+kSel, kFreq, kVol, kMode, kOut1 xin
+
+    ; --- mapping tables ---
+    kFreq table kFreq, giOSCfrq
+    kVol table kVol, giCLA000
+    kMode table kMode, giCLA000
+    ; ----------------------
+
+aout1 init 0
+iMode[] fillarray 0, 10, 12, 4, 2
+kMode limit kMode, 0.01, 0.99
+if changed(kSel) == 1 then
+        reinit REINIT_OSC
+    endif
+
+REINIT_OSC:
+iNDX = i(kSel)
+iRes = iMode[iNDX]
+aout1 vco2 kVol,kFreq,iRes,kMode
+zaw aout1, kOut1
+endop

@@ -1,0 +1,21 @@
+;@ map CLA000
+opcode PAN, 0, kkkkkk
+kPanpos, kMod, kIn1, kIn2, kOut1, kOut2 xin
+
+    ; --- mapping tables ---
+    kPanpos table kPanpos, giCLA000
+    kMod table kMod, giCLA000
+    ; ----------------------
+
+ain1 zar kIn1
+kin2 zkr kIn2
+aout1 init 0
+aout2 init 0
+kPan = kPanpos + kMod * kin2
+kPan limit kPan, 0, 1
+
+aout1 = ain1 * kPan
+aout2 = ain1 * (1 - kPan)
+zaw aout1, kOut1
+zaw aout2, kOut2
+endop

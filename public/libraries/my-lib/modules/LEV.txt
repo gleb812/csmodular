@@ -1,10 +1,13 @@
-; --- user prelude end ---
+;@ map CLA000
 opcode LEV, 0, kk
-kKnob1, kOut1 xin
+kParam1, kOut1 xin
+
+    ; --- mapping tables ---
+    kParam1 table kParam1, giCLA000
+    ; ----------------------
 kout1 init 0
 ; --- module body ---
-kout1 = kKnob1 - 0.5
-; --- io epilogue ---
+kout1 = kParam1 - 0.5
+printk2 kout1
 zkw kout1, kOut1
 endop
-; --- user postlude ---

@@ -3,8 +3,8 @@ export const Mix4Module = {
     type: 'Mix4',
     defaultParams: [],
     displayName: 'Mix4',
-    category: 'custom',
-    status: 'dev',
+    category: 'mixer',
+    status: 'stable',
     gridHeight: 2,
     originalName: 'Mix4',
     tooltip: 'Mix4',
@@ -62,6 +62,46 @@ export const Mix4Module = {
                 "bandwidth": "dynamic",
                 "ConnectorName": "",
                 "ConnectorIndex": 0
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "6",
+                "x": 30,
+                "y": 10,
+                "text": "1",
+                "fontSize": 10
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "7",
+                "x": 65,
+                "y": 10,
+                "text": "2",
+                "fontSize": 10
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "8",
+                "x": 100,
+                "y": 10,
+                "text": "3",
+                "fontSize": 10
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "9",
+                "x": 135,
+                "y": 10,
+                "text": "4",
+                "fontSize": 10
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "10",
+                "x": 215,
+                "y": 10,
+                "text": "Out",
+                "fontSize": 10
         }
 ]
 };

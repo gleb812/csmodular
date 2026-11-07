@@ -1,28 +1,34 @@
 {
   "modules": [
     {
+      "name": "ADSR",
+      "displayName": "ADSR",
+      "category": "env",
+      "status": "passable"
+    },
+    {
       "name": "FdbkDel",
       "displayName": "FdbkDel",
       "category": "custom",
-      "status": "dev"
+      "status": "passable"
     },
     {
       "name": "LEV",
       "displayName": "LEV",
-      "category": "custom",
-      "status": "dev"
-    },
-    {
-      "name": "Mix4",
-      "displayName": "Mix4",
-      "category": "custom",
-      "status": "dev"
+      "category": "control",
+      "status": "stable"
     },
     {
       "name": "MOOG",
       "displayName": "MOOG",
       "category": "custom",
       "status": "passable"
+    },
+    {
+      "name": "Mix4",
+      "displayName": "Mix4",
+      "category": "mixer",
+      "status": "stable"
     },
     {
       "name": "Noise",
@@ -37,22 +43,34 @@
       "status": "passable"
     },
     {
+      "name": "PAN",
+      "displayName": "PAN",
+      "category": "mixer",
+      "status": "passable"
+    },
+    {
       "name": "PingPong",
       "displayName": "PingPong",
       "category": "custom",
-      "status": "dev"
+      "status": "passable"
     },
     {
       "name": "REV",
       "displayName": "REV",
       "category": "custom",
-      "status": "dev"
+      "status": "passable"
     },
     {
       "name": "SW",
       "displayName": "SW",
       "category": "custom",
-      "status": "dev"
+      "status": "stable"
+    },
+    {
+      "name": "VCO",
+      "displayName": "VCO",
+      "category": "osc",
+      "status": "passable"
     }
   ]
 }
