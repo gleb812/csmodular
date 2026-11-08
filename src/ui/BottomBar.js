@@ -118,7 +118,7 @@ export class BottomBar {
 #bottom-bar .bb-expand-btn {
     width: 28px; height: 28px;
     background: transparent;
-    border: 1px solid rgba(255,255,255,0.12);
+    border: var(--bb-accent-06, rgba(255,255,255,0.06));
     border-radius: 6px;
     color: #0af;
     font-family: inherit;
@@ -142,7 +142,7 @@ export class BottomBar {
 
 /* ---- Base cells ---- */
 #bottom-bar .bb-cell {
-    background: #26262f;
+    background: transparent;
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 6px;
     display: flex;
@@ -152,8 +152,8 @@ export class BottomBar {
     overflow: hidden;
 }
 #bottom-bar .bb-cell.filled {
-    background: #2b2b38;
-    border-color: rgba(0,170,255,0.3);
+    background: transparent;
+    border-color: var(--bb-accent-30, rgba(0,170,255,0.3));
 }
 #bottom-bar .bb-cell.empty {
     background: transparent;
@@ -162,7 +162,7 @@ export class BottomBar {
 #bottom-bar .bb-cell .bb-label {
     font-size: 11px;
     font-weight: 600;
-    color: #0af;
+    color: var(--bb-accent-06, rgba(255,255,255,0.06));
     text-align: center;
     padding: 0 4px;
     white-space: nowrap;
@@ -299,8 +299,8 @@ export class BottomBar {
 }
 /* ---- A3: zoom column ---- */
 #bottom-bar .bb-zoom-col {
-    background: #2b2b38;
-    border: 1px solid rgba(0,170,255,0.3);
+    background:transparent;
+    border: var(--bb-accent-30, rgba(0,170,255,0.3));
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -320,16 +320,16 @@ export class BottomBar {
     transition: background 0.1s;
     padding: 0;
 }
-#bottom-bar .bb-zoom-btn:hover { background: rgba(0,170,255,0.12); }
-#bottom-bar .bb-zoom-btn:active { background: rgba(0,170,255,0.25); }
+#bottom-bar .bb-zoom-btn:hover { background: var(--bb-accent-12, rgba(0,170,255,0.12)); }
+#bottom-bar .bb-zoom-btn:active { background: var(--bb-accent-25, rgba(0,170,255,0.25)); }
 #bottom-bar .bb-zoom-btn + .bb-zoom-btn {
-    border-top: 1px solid rgba(255,255,255,0.06);
+    border-top: 1px solid var(--bb-accent-15, rgba(255,255,255,0.06));
 }
 
 /* ---- A6: volume column ---- */
 #bottom-bar .bb-volume-col {
-    background: #2b2b38;
-    border: 1px solid rgba(0,170,255,0.3);
+    background: transparent;
+    border: var(--bb-accent-30, rgba(0,170,255,0.3));
     display: flex;
     align-items: stretch;
     justify-content: center;
@@ -350,7 +350,7 @@ export class BottomBar {
 #bottom-bar .bb-fader-fill {
     position: absolute;
     left: 0; right: 0; bottom: 0;
-    background: linear-gradient(to top, #0af, #08f);
+    background: linear-gradient(to top, var(--bb-accent, #0af), var(--bb-accent-70, #08f));
     border-radius: 3px;
     height: 40%;
     pointer-events: none;
@@ -1104,6 +1104,15 @@ export class BottomBar {
     applyTheme() {
         const theme = getCurrentTheme();
         const accent = theme.isLcd ? (theme.getAccentColor() || '#8fbc8f') : '#0af';
+
+        // Base accent variable + derived alpha variants for scoped CSS
+        this.element.style.setProperty('--bb-accent', accent);
+        this.element.style.setProperty('--bb-accent-06', this._rgba(accent, 0.06));
+        this.element.style.setProperty('--bb-accent-12', this._rgba(accent, 0.12));
+        this.element.style.setProperty('--bb-accent-15', this._rgba(accent, 0.15));
+        this.element.style.setProperty('--bb-accent-25', this._rgba(accent, 0.25));
+        this.element.style.setProperty('--bb-accent-30', this._rgba(accent, 0.30));
+        this.element.style.setProperty('--bb-accent-70', this._rgba(accent, 0.70));
 
         this.element.style.background = this._rgba(accent, 0.12);
         this.element.style.borderColor = this._rgba(accent, 0.25);
