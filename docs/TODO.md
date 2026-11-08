@@ -47,15 +47,12 @@ NM2 legacy is gone — no `patch_params.py`, no `moduleStore`, no `typeID`.
 
 ## 🎹 MIDI
 
-### Bugs
-- [ ] **MIDI dies after recompile** — see 🔥 Now
-
 ### Features
 - [ ] Velocity support (`gkVelocity` — currently ignored)
 - [ ] Polyphonic voice allocation — `gkGate` / `gkNote` global; need per-voice state
-- [ ] MIDI learn — map CC to knobs / sliders
 - [ ] MIDI channel filter — separate instruments per channel
-- [ ] Clock / transport (Start / Stop / Continue / Clock)
+- [ ] MIDI Learn — **multiple CCs per component** (currently one mapping)
+- [ ] MIDI Learn — **CC range / curve** (min/max, linear/log per mapping)
 - [ ] Device selection UI — pick one input out of many
 - [ ] Tauri/macOS — WKWebView has no Web MIDI; needs plugin or Rust-side (`midir` crate)
 - [ ] OSC — after MIDI is stable
@@ -105,6 +102,9 @@ NM2 legacy is gone — no `patch_params.py`, no `moduleStore`, no `typeID`.
 - [ ] **LED threshold** — verify save / load
 - [ ] **`ButtonFlat` / `ButtonIncDec`** — reposition + width recalculation after `items` / `positions` change via Properties
 - [ ] **`ComponentPropertiesWindow`** — open on click (currently only via button)
+- [ ] **MIDI Learn indicator on knob** — small 🎹 dot on canvas (currently only in tooltip)
+- [ ] **MIDI Learn on `ButtonFlat` / `ButtonIncDec` / `PartSelector`** — currently Knob/Slider only
+- [ ] **MIDI Learn visual feedback during learn** — knob glows / pulses while waiting for CC
 
 ### Indicators
 - [ ] `LED` / `MiniVU` — per-indicator gain/threshold UI in Properties
@@ -146,10 +146,11 @@ NM2 legacy is gone — no `patch_params.py`, no `moduleStore`, no `typeID`.
 - [ ] Search / filter modules when adding
 - [ ] Jack context menu with active channels
 - [ ] Hotkey summary in UI (or About)
-- [ ] Minimap of the world (for large patches)
 - [ ] Library selector in ContextMenu (multiple libraries)
 - [ ] **`libraryStore` import/export UI** (ZIP)
 - [ ] **Repair patch dialog** — if `user/X` missing but `my-fm/X` exists, offer replacement
+- [ ] **BPM automation** — record tempo changes in the patch, replay them
+- [ ] **Transport:** tap-tempo on BPM display (double-click resets to 120 — verify it's discoverable)
 
 ## 📐 Module Editor
 
@@ -222,12 +223,7 @@ NM2 legacy is gone — no `patch_params.py`, no `moduleStore`, no `typeID`.
 - [ ] **`ModuleFactory` keyed by `<lib>/<type>`** — proper collision handling (currently first-wins)
 
 ### Documentation
-- [x] `README.md` — condensed
-- [x] `CONTRIBUTING.md` — module workflow
-- [x] `ARCHITECTURE.md` — high-level overview
-- [x] `TROUBLESHOOTING.md` — known issues
-- [ ] `EDITOR.md` — regenerate after TODO cleanup
-- [ ] `AI Context.md` — remove TODO section (moved here), keep dev rules
+
 
 ## 🐛 Known issues (app)
 
@@ -268,4 +264,7 @@ NM2 legacy is gone — no `patch_params.py`, no `moduleStore`, no `typeID`.
 - **`load` must not call `syncFromModule()`**
 - **MIDI chain** — `MidiManager.onMessage` → `CsoundEngine.midiMessage()` → `instr 3` → `gkGate`/`gkNote`
 - **MIDI enabled only by user click** (`MI`)
+- **BPM channel** — literal `"bpm"`; `instr 5` polls `chnget "bpm"`; must be in `generateSco()` (never hardcode `sco` in `CsoundEngine`)
+- **MIDI Learn** — `BaseComponent.midiMapping` (`{cc, channel}` | `null`); `Knob`/`Slider` override `applyMidiValue()`
+- **EXT tempo** — `MIDI Clock` (`0xF8`, 24 ppqn); `_bpmSource` = `internal` | `external`
 ```

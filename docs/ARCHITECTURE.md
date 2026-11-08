@@ -139,10 +139,13 @@ CsoundGenerator.generateOrc()
   4. instr 1 (voice)               — module calls + converters + LED/MiniVU
   5. instr 2 (fx)                  — same
   6. instr 3 (MIDI filter), 4 (offline render)
+  7. instr 5 (BPM poller)          — reads chnget "bpm" → gkBPM
       │
       ▼
 CsoundEngine.compileOrc() + start()
 ```
+
+**BPM:** `gkBPM init 120` in ORC header; `instr 5` polls `chnget "bpm"` every k-cycle and updates `gkBPM` (ignored if channel is 0). `i5` is scheduled only via `generateSco()` — never hardcode `sco` in `CsoundEngine`. After `init()` / `recompile()` the engine calls `setChannel('bpm', getBPM())`, otherwise the channel is `0` and `instr 5` silently no-ops.
 
 **UDO loading** — `_loadUdoByPath()` → `libraryStore.loadUdo(lib, name)`:
 
@@ -159,7 +162,7 @@ CsoundEngine.compileOrc() + start()
 
 | Component | Purpose |
 |---|---|
-| `Knob`, `Slider` | continuous parameters (0..127) |
+| `Knob`, `Slider` | continuous parameters (0..127); override `applyMidiValue()` |
 | `ButtonFlat`, `ButtonRadio`, `ButtonIncDec`, `ButtonText`, `PartSelector` | discrete parameters |
 | `TextField` | numeric display with table mapping |
 | `Input`, `Output` | jacks (audio / control / logic) |
@@ -170,6 +173,18 @@ CsoundEngine.compileOrc() + start()
 `BaseJack` (base for `Input`/`Output`) — `getEffectiveColor()`, `getCsoundRate()`,
 `originalType` (immutable), `type` (mutable, variant-applied),
 `bandwidth` (must match `;@ strict`).
+
+`BaseComponent` carries `midiMapping` (`{cc, channel}` | `null`, default `null`) — the runtime binding set by MIDI Learn. `applyMidiValue(0..127)` is a no-op in the base class; `Knob` / `Slider` override it. Persisted per module as `midiMappings[]` in the patch JSON.
+
+## MIDI
+
+`src/midi/MidiManager.js` — Web MIDI API receiver. Enable from a user click (`MI` in BottomBar) — required by the browser gesture policy. States: `idle | requesting | ready | denied | unsupported`.
+
+**Notes → Csound:** `0x90` / `0x80` → `CsoundEngine.midiMessage()` → `instr 3` (`gkGate`, `gkNote`).
+
+**MIDI Clock → BPM:** `0xF8` (24 ppqn). `MidiManager._handleMidiClockTick()` averages the last 48 intervals → `getMidiClockBpm()`. When `ModularSystem._bpmSource === 'external'`, the value is pushed via `_applyExternalBpm()` → `setChannel('bpm', v)`. Timeout (500 ms) marks the clock as stopped.
+
+**MIDI Learn:** right-click `Knob`/`Slider` → `ComponentContextMenu` → «🎹 MIDI Learn». `MidiManager.startLearn(comp, onDone)` intercepts the next `0xB0` (CC), consumes it (does not reach `onMessage`), and returns `{cc, channel}`. Subsequent CCs on that binding → `main._handleMidiCC()` → `applyMidiValue()` on every match.
 
 ## Editor
 
@@ -250,11 +265,10 @@ theme.isLcd, theme.getTextColor(), theme.getAccentColor(), theme.applyGlow(ctx),
   "version": 1,
   "modules": [
     { "type": "Zgen", "library": "test-lib", "gridX": 5, "gridY": 10,
-      "layer": "voice", "components": [...] }
+      "layer": "voice", "components": [...],
+      "midiMappings": [{ "componentId": "1", "cc": 74, "channel": 1 }] }
   ],
-  "cables": [
-    { "fromModule": "Zgen_1", "fromJack": "4", "toModule": "Out2_1", "toJack": "3" }
-  ]
+  "cables": [...]
 }
 ```
 
@@ -262,6 +276,8 @@ theme.isLcd, theme.getTextColor(), theme.getAccentColor(), theme.applyGlow(ctx),
 Patch loading: `PatchLoader.loadModuleFile(lib, name)` — if `lib` specified,
 checks library exists, loads; else falls back to `user`, then all libraries
 (with console warning).
+
+`midiMappings[]` is runtime-only data (not Csound). Restored in `PatchLoader.configureModule` by matching `componentId` against `components[]`. Omitted if empty.
 
 ## Known issues
 
@@ -284,6 +300,15 @@ See [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) (user-facing) and
 9. **`mappingTable`** serialized for `Knob` / `Slider`.
 10. **Indicators** (`LED` / `MiniVU`) require `sourceComponentId` pointing to
     same-module Input/Output.
+11. **BPM channel is literal `"bpm"`** — `setChannel('bpm', v)` ↔ `chnget "bpm"`.
+    `instr 5` must be scheduled via `generateSco()` (never hardcoded `sco`).
+12. **MIDI Learn** lives on `BaseComponent.midiMapping`; `Knob`/`Slider`
+    override `applyMidiValue(0..127)`. After applying, set `_voiceDirty` /
+    `_fxDirty` — `setValue()` does not redraw by itself.
+13. **Code comments — always English** (inline `//`, JSDoc, Csound `;`), regardless
+    of user language.
+
+Full rules: [`AI Context.md`](AI Context.md) → *Development rules*.
 
 Full rules: [`AI Context.md`](AI Context.md) → *Development rules*.
 ```

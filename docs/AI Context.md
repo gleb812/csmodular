@@ -67,6 +67,9 @@ Only sends **UI commands** — never touches `CsoundEngine` directly. Full API �
     params: [1, 2],          // component IDs in xin order (components[] order)
     inputs: [3],
     outputs: [4, 5],
+    midiMappings: [          // ⭐ NEW — optional, MIDI Learn bindings
+        { componentId: '1', cc: 74, channel: 1 },
+    ],
     components: [
         { componentType: 'Knob', id: '1', ... },
         { componentType: 'Output', id: '4', jackType: 'audio', bandwidth: 'dynamic' },
@@ -82,10 +85,9 @@ Only sends **UI commands** — never touches `CsoundEngine` directly. Full API �
 - **`;@ strict[i] === 1`** must match `inputs[i].bandwidth === 'static'` in JS.
 - **Csound names** from `type` / `jsonName` — never from `displayName` / `title`.
 - **`library`** field is injected by `ModuleFactory.loadModule` — not stored in JS.
-
 **`layer`** — `'voice'` (default) / `'fx'`. Cables only within same layer.
-
 **`category`** — required, must be in `CATEGORIES` (`src/moduleCategories.js`). `normalizeCategory` falls back to `'custom'`.
+- **`midiMappings[]`** — runtime-only mapping (`{cc, channel}`) for Knob/Slider. Lives on `BaseComponent.midiMapping`; serialized only if set. Not a Csound concern.
 
 ## Module status (DEV / BUILD)
 
@@ -175,6 +177,20 @@ Tables loaded via `/tables/<name>.json` (flat array), HTML-fallback detection, c
 4. `instr 1` (voice) — module calls + converters + LED/MiniVU
 5. `instr 2` (fx) — same
 6. `instr 3` — MIDI filter; `instr 4` — offline render
+
+### BPM (internal / external)
+- **State:** `ModularSystem._bpm` (20..300), `_bpmSource` (`internal` | `external`).
+- **Internal:** `BottomBar` BPM display drag → `setBPM()` → `csoundEngine.setChannel('bpm', v)`.
+- **External:** MIDI Clock (`0xF8`, 24 ppqn) → `MidiManager._handleMidiClockTick()` → `getMidiClockBpm()` → `_applyExternalBpm()` → `setChannel('bpm', v)`.
+- **Csound side:** `gkBPM init 120` + `instr 5` polls `chnget "bpm"` every k-cycle. `i5` scheduled in score from `generateSco()`. After `init()`/`recompile()` — `await setChannel('bpm', getBPM())` (otherwise channel is 0 and `instr 5` ignores it).
+- **UI:** `SevenSegmentDisplay` (canvas). EXT mode → shows `EXT` (no drag). No clock → `---`.
+
+### MIDI Learn (Knob / Slider)
+1. Right-click Knob/Slider → `ComponentContextMenu` → «🎹 MIDI Learn».
+2. `MidiManager.startLearn(component, onDone)` — waits for next `0xB0` (CC), intercepts it, returns `{ cc, channel }`.
+3. Mapping stored on **`BaseComponent.midiMapping`** (`{cc, channel}` | `null`). `Knob`/`Slider` override `applyMidiValue(0..127)`.
+4. Incoming CC → `main._handleMidiCC(cc, val, ch)` → all matching components → `applyMidiValue()` → `setValue()` (Csound + redraw via `_voiceDirty`/`_fxDirty`).
+5. Persisted in patch as `module.midiMappings[]`; restored in `PatchLoader.configureModule`.
 
 ### UDO loading — `_loadUdoByPath()`
 - `library/<lib>/<Name>.txt` → `libraryStore.loadUdo(lib, name)`
@@ -277,6 +293,8 @@ Figma-style, right-top, `MINIMAP_WIDTH=220`, `MINIMAP_HEIGHT=160`. Toggle: hotke
 
 `MidiManager` (`src/midi/MidiManager.js`): `init()` (from click only), `dispose()`, `onStateChange`, `onMessage`, `getInfo`, `getHistory` (last 50). States: `idle | requesting | ready | denied | unsupported`.
 
+**Clock / Learn:** `_handleMidiClockTick()` (`0xF8`, avg interval over 48 ticks → BPM), `startLearn(comp, onDone)` / `cancelLearn()`. `0xF8` and learn-CC are **consumed before** `onMessage` subscribers (notes still pass).
+
 **`instr 3`:** `0x90` → `gkGate=1, gkNote=data1`; `0x80` → `gkGate=0`. Velocity ignored. Other messages pass.
 
 **Enable:** click **`MI`** in BottomBar (gesture requirement). State in SysInfo popup (`i`).
@@ -312,6 +330,9 @@ Figma-style, right-top, `MINIMAP_WIDTH=220`, `MINIMAP_HEIGHT=160`. Toggle: hotke
 | `spatial` | `src/utils/spatial.js` | `median`, `bboxNearModules`, `groupByOctant`, `isOutputModule` |
 | `Theme`, `themeStore`, `currentTheme` | `src/theme/*.js` | Classic / LCD |
 | `MidiManager` | `src/midi/MidiManager.js` | Web MIDI API receiver |
+| `MidiManager` | `src/midi/MidiManager.js` | Web MIDI API receiver, clock, learn |
+| `ComponentContextMenu` | `src/ui/ComponentContextMenu.js` | Knob/Slider menu (MIDI Learn) |
+| `SevenSegmentDisplay` | `src/ui/SevenSegmentDisplay.js` | Canvas 7-seg display (BPM / EXT) |
 
 ## Module Editor
 
@@ -545,10 +566,14 @@ Only non-obvious rules that are easy to violate. Full list → `ARCHITECTURE.md`
     к `cable.id`, а не к модулю. Не сбрасывать `_cableBusMap`.
 35. **`recomputeVariantUI()` сам триггерит recompile** — не вызывать
     `_recompileDebounced()` перед ним в `reloadUserModules`, иначе двойной ORC.
+36. **BPM channel name is `"bpm"`** (literal) — `setChannel('bpm', v)` ↔ `chnget "bpm"` in `instr 5`. No constants on either side.
+37. **`instr 5` (BPM poller)** must be scheduled via `generateSco()` — never hardcode `sco` in `CsoundEngine`. Otherwise `i5` silently never starts.
+38. **MIDI Learn:** `BaseComponent.midiMapping` (default `null`); `Knob`/`Slider` override `applyMidiValue(0..127)`. `_handleMidiCC` must set `_voiceDirty`/`_fxDirty` after applying (setValue does NOT redraw by itself).
 
 ## Style
 
 - **Russian for user, English for public docs and code comments.**
+- **⭐ Code comments — always English** (inline `//`, JSDoc `/** */`, `;` in Csound). Applies to every file, every commit. No Russian in code comments even if user is Russian.
 - **No "let's try"** — concrete edits. Show diff or full methods.
 - **Do not change what wasn't asked about.**
 - **Minimal patch.** Ask about goal → clarify files → check `TODO.md` for related issues → propose.
