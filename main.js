@@ -188,7 +188,6 @@ class ModularSystem {
     this.logPerformance = this.logPerformance.bind(this);
 
     // ⭐ Mapping tables
-    // в конструкторе:
     this.mappingTables = new MappingTables();
     this.mappingTables.load();
 
@@ -197,6 +196,7 @@ class ModularSystem {
     this.csoundGen.system = this; 
 
     this.midiManager = new MidiManager();
+    this._bpm = 120;
 
     // Csound Engine (управляет инстансом Csound)
     this.csoundEngine = new CsoundEngine(this);
@@ -218,6 +218,17 @@ class ModularSystem {
     this.applyBackgroundFromTheme();   // ⭐ применяем фон из темы
   }
 
+  setBPM(bpm) {
+      const v = Math.max(20, Math.min(300, Math.round(Number(bpm) || 120)));
+      if (this._bpm === v) return;
+      this._bpm = v;
+      this.csoundEngine?.setChannel?.('bpm', v);
+      // ⚠️ без showNotification — вызывается на каждый пиксель drag
+  }
+
+  getBPM() {
+      return this._bpm ?? 120;
+  }
 
   setupParallax() {
       if (!this.parallaxElement) return;
@@ -2445,7 +2456,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     modularSystem = new ModularSystem();
     window.modularSystem = modularSystem;
-
+    window.system = modularSystem;  
     modularSystem.splash.maybeShowOnStartup();
 
     // ⭐ MIDI: не автостартуем — браузер требует клик пользователя для разрешения.

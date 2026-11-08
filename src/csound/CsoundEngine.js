@@ -129,9 +129,9 @@ export class CsoundEngine {
                 throw new Error(`ORC compilation failed (code ${result}). Check console for Csound messages.`);
             }
             
-            // ⭐ Читаем score, чтобы запустить инструменты i1, i2, i3
+            // ⭐ Читаем score, чтобы запустить инструменты i1, i2, i3, i5
             //console.log('[CsoundEngine] Reading score...');
-            const sco = 'i1 0 [60*60*24*7]\ni2 0 [60*60*24*7]\ni3 0 [60*60*24*7]';
+            const sco = 'i1 0 [60*60*24*7]\ni2 0 [60*60*24*7]\ni3 0 [60*60*24*7]\ni5 0 [60*60*24*7]';
             await this.instance.readScore(sco);
             
             // Запуск
@@ -143,7 +143,7 @@ export class CsoundEngine {
 
             // ⭐ Resync control-каналов при первом запуске
             await this._resyncAllControls();
-            
+            await this.setChannel('bpm', this.system?.getBPM?.() ?? 120);
             // ⭐ Перезапускаем поллинг LED после recompile
             if (this._ledChannels.size > 0) {
                 if (this._ledPollInterval) {
@@ -235,7 +235,7 @@ export class CsoundEngine {
             if (rc !== 0) throw new Error(`compileOrc failed: ${rc}`);
 
             // 5. Score
-            const sco = 'i1 0 [60*60*24*7]\ni2 0 [60*60*24*7]\ni3 0 [60*60*24*7]';
+            const sco = 'i1 0 [60*60*24*7]\ni2 0 [60*60*24*7]\ni3 0 [60*60*24*7]\ni5 0 [60*60*24*7]';
             const rs = await this.instance.readScore(sco);
             if (rs !== 0) throw new Error(`readScore failed: ${rs}`);
 
@@ -245,7 +245,7 @@ export class CsoundEngine {
 
             // 7. ⭐ Resync control-каналов
             await this._resyncAllControls();
-
+            await this.setChannel('bpm', this.system?.getBPM?.() ?? 120);
             // 8. Перезапуск поллинга LED
             if (this._ledChannels.size > 0) {
                 if (this._ledPollInterval) {

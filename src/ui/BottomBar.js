@@ -15,6 +15,7 @@
 
 import { getCurrentTheme } from '../theme/currentTheme.js';
 import { IndicatorLamp } from './IndicatorLamp.js';
+import { SevenSegmentDisplay } from './SevenSegmentDisplay.js'
 export class BottomBar {
     constructor(system) {
         this.system = system;
@@ -27,6 +28,10 @@ export class BottomBar {
         this._midiOutLamp = null;
         this._oscLamp     = null;
         this._oscSettings = null;
+        this._bpmDisplay  = null;   // ⭐
+        this._extBtn      = null;   // ⭐
+        this._rowTop      = null;   // ⭐
+        this._rowBottom   = null;   // ⭐
         this.createBar();
         this.createSysInfoPopup();
         this.setupEvents();
@@ -51,8 +56,9 @@ export class BottomBar {
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            align-items: center;
-            gap: 4px;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 6px;
             padding: 6px 10px;
             background: rgba(20, 20, 25, 0.75);
             border: 1px solid rgba(255, 255, 255, 0.06);
@@ -64,6 +70,21 @@ export class BottomBar {
             pointer-events: auto;
             transition: opacity 0.2s;
         `;
+        // ⭐ Два ряда: верх — кнопки, низ — BPM-транспорт
+        this._rowTop = document.createElement('div');
+        this._rowTop.style.cssText = 'display:flex;align-items:center;gap:4px;';
+
+        this._rowBottom = document.createElement('div');
+        this._rowBottom.style.cssText = `
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        `;
+
+        this.element.appendChild(this._rowTop);
+        this.element.appendChild(this._rowBottom);
 
         // action: () => {} — выполнить
         // toggle: () => bool — вернуть состояние (активна ли кнопка)
@@ -122,22 +143,119 @@ export class BottomBar {
 
         buttons.forEach(b => {
             if (b.id.startsWith('sep')) {
-                this.element.appendChild(this._makeSeparator());
+                this._rowTop.appendChild(this._makeSeparator());
             } else if (b.special === 'lamp') {
                 const lamp = this._makeLamp(b.lamp);
-                this.element.appendChild(lamp.element);
+                this._rowTop.appendChild(lamp.element);
                 if (b.lamp === 'midiIn')  this._midiInLamp  = lamp;
                 if (b.lamp === 'midiOut') this._midiOutLamp = lamp;
                 if (b.lamp === 'osc')     this._oscLamp     = lamp;
             } else {
                 const btn = this._makeButton(b);
-                this.element.appendChild(btn);
+                this._rowTop.appendChild(btn);
                 this._buttons.push({ ...b, element: btn });
             }
         });
-
+        this._createBpmTransport();  
         document.body.appendChild(this.element);
         this.makeDraggable();
+    }
+
+    _createBpmTransport() {
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'display:flex;align-items:center;gap:8px;';
+
+        // --- Семисегментный дисплей ---
+        this._bpmDisplay = new SevenSegmentDisplay({ digits: 3, color: '#ff3b30' });
+        this._bpmDisplay.element.style.cursor = 'ns-resize';
+        this._bpmDisplay.element.title = 'Drag vertically to change BPM (Shift = fine)';
+        this._bpmDisplay.setText(String(this.system.getBPM?.() ?? 120));
+        wrap.appendChild(this._bpmDisplay.element);
+
+        // --- Подпись BPM ---
+        const label = document.createElement('div');
+        label.textContent = 'BPM';
+        label.style.cssText = `
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            opacity: 0.5;
+            color: #ccc;
+        `;
+        wrap.appendChild(label);
+
+        // --- Кнопка EXT (заглушка, этап 2) ---
+        this._extBtn = document.createElement('button');
+        this._extBtn.textContent = 'EXT';
+        this._extBtn.title = 'External tempo (MIDI clock) — coming soon';
+        this._extBtn.disabled = true;
+        this._extBtn.style.cssText = `
+            height: 26px;
+            padding: 0 8px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            color: #888;
+            font-size: 10px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            letter-spacing: 0.5px;
+            cursor: not-allowed;
+            opacity: 0.5;
+        `;
+        wrap.appendChild(this._extBtn);
+
+        this._rowBottom.appendChild(wrap);
+
+        this._setupBpmDrag();
+    }
+
+    _setupBpmDrag() {
+        const el = this._bpmDisplay.element;
+        let dragging = false;
+        let startY = 0;
+        let startBpm = 120;
+
+        el.addEventListener('mousedown', (e) => {
+            if (e.button !== 0) return;
+            e.preventDefault();
+            e.stopPropagation();
+            dragging = true;
+            startY = e.clientY;
+            startBpm = this.system.getBPM?.() ?? 120;
+            el.style.cursor = 'grabbing';
+            document.body.style.cursor = 'ns-resize';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!dragging) return;
+            const dy = startY - e.clientY;            // вверх = +BPM
+            const factor = e.shiftKey ? 0.1 : 1;
+            const next = startBpm + dy * factor;
+            this.system.setBPM?.(next);
+            this._bpmDisplay.setText(String(this._clampBpm(next)));
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (!dragging) return;
+            dragging = false;
+            el.style.cursor = 'ns-resize';
+            document.body.style.cursor = '';
+            const bpm = this._clampBpm(this.system.getBPM?.() ?? 120);
+            this.system.showNotification?.(`🎚 BPM: ${bpm}`);
+        });
+
+        el.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            this.system.setBPM?.(120);
+            this._bpmDisplay.setText('120');
+            this.system.showNotification?.('🎚 BPM: 120');
+        });
+    }
+
+    _clampBpm(v) {
+        return Math.max(20, Math.min(300, Math.round(Number(v) || 120)));
     }
 
     async _reloadUserModules() {
@@ -240,6 +358,7 @@ export class BottomBar {
         const onMouseDown = (e) => {
             // Не тащим, если кликнули по кнопке
             if (e.target.tagName === 'BUTTON') return;
+            if (e.target.tagName === 'CANVAS') return;  
             if (e.button !== 0) return;
 
             isDragging = true;
@@ -655,6 +774,14 @@ export class BottomBar {
         this._sysInfoPopup.style.background = this._rgba(accent, 0.12);
         this._sysInfoPopup.style.borderColor = this._rgba(accent, 0.25);
 
+        // ⭐ BPM display color
+        if (this._bpmDisplay) {
+            const segColor = theme.isLcd ? accent : '#ff3b30';
+            this._bpmDisplay.setColor(segColor);
+        }
+
+        this.refreshState();
+
         this.refreshState();
     }
 
@@ -663,6 +790,12 @@ export class BottomBar {
     // ============================================================
 
     _tick() {
+
+        if (this._bpmDisplay) {
+            const bpm = this._clampBpm(this.system.getBPM?.() ?? 120);
+            this._bpmDisplay.setText(String(bpm));
+        }
+
         // zoom % (кнопка «100%» показывает текущий)
         const zoomBtn = this._buttons.find(b => b.id === 'zoomreset');
         if (zoomBtn) {
