@@ -541,6 +541,15 @@ export class EventManager {
       return 'jack';
     }
 
+    // ⭐ Компоненты с параметром (Knob/Slider) — приоритет выше модуля
+    const comp = this.getComponentAtPosition(worldPos.x, worldPos.y);
+    if (comp) {
+      if (this.system.componentContextMenu) {
+        this.system.componentContextMenu.show(comp, screenX, screenY);
+      }
+      return 'component';
+    }
+
     const module = this.getModuleAtPosition(worldPos.x, worldPos.y);
     if (module) {
       if (this.system.moduleContextMenu) {
@@ -559,6 +568,26 @@ export class EventManager {
   updateMousePosition(x, y) {
     this.lastMouseX = x;
     this.lastMouseY = y;
+  }
+
+  /**
+   * Найти компонент с параметром (Knob/Slider) по world-координатам.
+   * @returns {Knob|Slider|null}
+   */
+  getComponentAtPosition(worldX, worldY) {
+      for (let i = this.system.components.length - 1; i >= 0; i--) {
+          const panel = this.system.components[i];
+          if (!panel.components) continue;
+          for (let j = panel.components.length - 1; j >= 0; j--) {
+              const comp = panel.components[j];
+              const name = comp.constructor?.name;
+              if (name !== 'Knob' && name !== 'Slider') continue;
+              if (comp.isPointInside && comp.isPointInside(worldX, worldY)) {
+                  return comp;
+              }
+          }
+      }
+      return null;
   }
 
   getModuleAtPosition(worldX, worldY) {

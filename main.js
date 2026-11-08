@@ -13,6 +13,7 @@ import { EventManager } from './src/managers/EventManager.js';
 import { UIManager } from './src/managers/UIManager.js';
 import { ContextMenu } from './src/ui/ContextMenu.js';
 import { JackContextMenu } from './src/ui/JackContextMenu.js';
+import { ComponentContextMenu } from './src/ui/ComponentContextMenu.js';
 import { ModuleContextMenu } from './src/ui/ModuleContextMenu.js'; 
 import { CSoundWindow } from './src/ui/CSoundWindow.js'; 
 import { CsoundGenerator } from './src/csound/CsoundGenerator.js';
@@ -31,7 +32,7 @@ import { MidiManager } from './src/midi/MidiManager.js';
 import { OscManager } from './src/midi/OscManager.js';
 import { OscSettingsPanel } from './src/ui/OscSettingsPanel.js';
 import { Minimap } from './src/ui/Minimap.js';
-import { Splash } from './src/ui/Splash.js';   // ⭐ NEW
+import { Splash } from './src/ui/Splash.js'; 
 
 
 // Глобальный обработчик ошибок
@@ -120,6 +121,7 @@ class ModularSystem {
     this.contextMenu = new ContextMenu(this);
     this.jackContextMenu = new JackContextMenu(this);
     this.moduleContextMenu = new ModuleContextMenu(this);
+    this.componentContextMenu = new ComponentContextMenu(this);
     this.stickerContextMenu = new StickerContextMenu(this);
     this.stickerProperties = new StickerPropertiesPanel(this);
     this.bottomBar = new BottomBar(this);
@@ -197,6 +199,7 @@ class ModularSystem {
 
     this.midiManager = new MidiManager();
     this._bpm = 120;
+    this._bpmSource = 'internal';   
 
     // Csound Engine (управляет инстансом Csound)
     this.csoundEngine = new CsoundEngine(this);
@@ -219,15 +222,41 @@ class ModularSystem {
   }
 
   setBPM(bpm) {
-      const v = Math.max(20, Math.min(300, Math.round(Number(bpm) || 120)));
-      if (this._bpm === v) return;
-      this._bpm = v;
-      this.csoundEngine?.setChannel?.('bpm', v);
-      // ⚠️ без showNotification — вызывается на каждый пиксель drag
+    if (this._bpmSource === 'external') return;   // ⭐ drag не работает в EXT
+    const v = Math.max(20, Math.min(300, Math.round(Number(bpm) || 120)));
+    if (this._bpm === v) return;
+    this._bpm = v;
+    this.csoundEngine?.setChannel?.('bpm', v);
+    // без showNotification — вызывается на каждый пиксель drag
   }
 
   getBPM() {
-      return this._bpm ?? 120;
+    return this._bpm ?? 120;
+  }
+
+  setBpmSource(source) {
+    if (source !== 'internal' && source !== 'external') return;
+    if (this._bpmSource === source) return;
+    this._bpmSource = source;
+
+    if (source === 'internal') {
+        // вернуться к последнему внутреннему BPM
+        this.csoundEngine?.setChannel?.('bpm', this._bpm ?? 120);
+    }
+    // external — BPM будет приходить из midiManager через _applyExternalBpm
+  }
+
+  getBpmSource() {
+    return this._bpmSource;
+  }
+
+  // вызывать из main.js при 0xF8 (если external)
+  _applyExternalBpm(bpm) {
+    if (this._bpmSource !== 'external') return;
+    const v = Math.max(20, Math.min(300, Math.round(bpm)));
+    if (this._bpm === v) return;
+    this._bpm = v;
+    this.csoundEngine?.setChannel?.('bpm', v);
   }
 
   setupParallax() {
@@ -1038,8 +1067,27 @@ _renderDynamic() {
             hpos: module.gridX || 0,
             vpos: module.gridY || 0,
             customColor: module.customColor || null,
+            midiMappings: this._collectMidiMappings(module),
         };
     });
+  }
+
+  /**
+   * Собрать MIDI-маппинги компонентов модуля.
+   * @returns {Array<{componentId: string, cc: number, channel: number}>}
+   */
+  _collectMidiMappings(module) {
+      const out = [];
+      if (!module.components) return out;
+      for (const comp of module.components) {
+          if (!comp.midiMapping) continue;
+          out.push({
+              componentId: String(comp.id),
+              cc: comp.midiMapping.cc,
+              channel: comp.midiMapping.channel,
+          });
+      }
+      return out;
   }
 
   collectModuleParameters(module) {
@@ -2161,6 +2209,22 @@ _renderDynamic() {
     return maxVoiceY + 10;
   }
 
+  /**
+   * Обработать входящий MIDI CC: применить ко всем выученным контролам.
+   */
+  _handleMidiCC(cc, value, channel) {
+      const panels = this.components.filter(c => c.constructor.name === 'Panel');
+      for (const panel of panels) {
+          if (!panel.components) continue;
+          for (const comp of panel.components) {
+              const m = comp.midiMapping;
+              if (!m) continue;
+              if (m.cc !== cc) continue;
+              if (m.channel !== channel) continue;
+              comp.applyMidiValue?.(value);
+          }
+      }
+  }
 
   _renderStickers() {
       const ctx = this.stickerCtx;
@@ -2465,10 +2529,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log(`[MIDI] state=${state}`, info);
     });
 
-    // ⭐ MIDI → Csound (instr 3 — NM2-совместимый фильтр gkGate/gkNote)
+    // ⭐ MIDI → Csound (instr 3 — gkGate/gkNote)
     modularSystem.midiManager.onMessage((evt) => {
+        // ⭐ MIDI Clock → BPM (если external)
+        if (evt.status === 0xF8 && modularSystem._bpmSource === 'external') {
+            const bpm = modularSystem.midiManager.getMidiClockBpm();
+            if (bpm) modularSystem._applyExternalBpm(bpm);
+        }
+
+        // ⭐ MIDI CC → выученные контролы
+        if ((evt.status & 0xF0) === 0xB0) {
+            const channel = (evt.status & 0x0F) + 1;
+            modularSystem._handleMidiCC(evt.data1, evt.data2, channel);
+        }
+
+        // обычная нота → Csound
         const engine = modularSystem.csoundEngine;
         if (!engine || engine.state !== 'running') return;
+        if (evt.status === 0xF8) return;   // clock doesn't go to Csound
         engine.midiMessage(evt.status, evt.data1, evt.data2);
     });
 

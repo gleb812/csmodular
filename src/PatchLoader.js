@@ -319,7 +319,6 @@ export class PatchLoader {
             });
         }
 
-        // ВАЖНО: Добавляем в layerManager, а не в старый system.layers
         if (this.system.layerManager && this.system.layerManager.layers[module.layer]) {
             this.system.layerManager.layers[module.layer].modules.push(module);
         } else {
@@ -363,6 +362,17 @@ export class PatchLoader {
         // ⭐ Применяем сохранённые параметры (Knob/Slider/Button*)
         if (moduleDef.parameters) {
             this.applyParameters(module, moduleDef.parameters);
+        }
+
+        // ⭐ MIDI-маппинги
+        if (Array.isArray(moduleDef.midiMappings)) {
+            for (const m of moduleDef.midiMappings) {
+                const comp = module.components.find(
+                    c => String(c.id) === String(m.componentId),
+                );
+                if (!comp) continue;
+                comp.midiMapping = { cc: m.cc, channel: m.channel };
+            }
         }
 
         if (moduleDef.customColor) {

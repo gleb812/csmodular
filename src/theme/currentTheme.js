@@ -20,7 +20,6 @@ let currentTheme = new Theme({});
 export async function initCurrentTheme() {
     const settings = await themeStore.load();
     currentTheme = new Theme(settings);
-    console.log('[currentTheme] initialized:', currentTheme.preset);
     return currentTheme;
 }
 
@@ -29,7 +28,6 @@ export async function initCurrentTheme() {
  */
 export function setCurrentTheme(theme) {
     currentTheme = theme;
-    console.log('[currentTheme] updated:', theme.preset);
 }
 
 /**

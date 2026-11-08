@@ -185,11 +185,10 @@ export class BottomBar {
         `;
         wrap.appendChild(label);
 
-        // --- Кнопка EXT (заглушка, этап 2) ---
+        // --- Кнопка EXT (external tempo via MIDI Clock) ---
         this._extBtn = document.createElement('button');
         this._extBtn.textContent = 'EXT';
-        this._extBtn.title = 'External tempo (MIDI clock) — coming soon';
-        this._extBtn.disabled = true;
+        this._extBtn.title = 'External tempo (MIDI Clock)';
         this._extBtn.style.cssText = `
             height: 26px;
             padding: 0 8px;
@@ -201,9 +200,30 @@ export class BottomBar {
             font-weight: 600;
             font-family: 'JetBrains Mono', 'Consolas', monospace;
             letter-spacing: 0.5px;
-            cursor: not-allowed;
-            opacity: 0.5;
+            cursor: pointer;
+            transition: all 0.15s;
         `;
+        this._extBtn.onclick = (e) => {
+            e.stopPropagation();
+            const cur = this.system.getBpmSource?.() ?? 'internal';
+            const next = cur === 'external' ? 'internal' : 'external';
+
+            // ⭐ проверим, что MIDI clock реально идёт, прежде чем включать EXT
+            if (next === 'external') {
+                const midi = this.system.midiManager;
+                const hasClock = midi?.isMidiClockActive?.();
+                if (!hasClock) {
+                    this.system.showNotification?.(
+                        '⚠️ No MIDI Clock detected — start your master device',
+                    );
+                    // всё равно переключаем? — нет, не переключаем
+                    return;
+                }
+            }
+
+            this.system.setBpmSource?.(next);
+            this.refreshState();
+        };
         wrap.appendChild(this._extBtn);
 
         this._rowBottom.appendChild(wrap);
@@ -791,9 +811,8 @@ export class BottomBar {
 
     _tick() {
 
-        if (this._bpmDisplay) {
-            const bpm = this._clampBpm(this.system.getBPM?.() ?? 120);
-            this._bpmDisplay.setText(String(bpm));
+        if (this._bpmDisplay && !this._bpmDragging) {
+            this._updateBpmDisplay();
         }
 
         // zoom % (кнопка «100%» показывает текущий)
@@ -919,6 +938,43 @@ export class BottomBar {
                     s === 'ready' ? 'ok' : s === 'error' ? 'error' : 'idle',
                 );
             });
+        }
+    }
+
+    _updateBpmDisplay() {
+        if (!this._bpmDisplay) return;
+
+        const source = this.system.getBpmSource?.() ?? 'internal';
+        const isExt = source === 'external';
+
+        // --- кнопка EXT ---
+        if (this._extBtn) {
+            const theme = getCurrentTheme();
+            const accent = theme.isLcd
+                ? (theme.getAccentColor() || '#8fbc8f')
+                : '#0af';
+
+            if (isExt) {
+                this._extBtn.style.background = this._rgba(accent, 0.15);
+                this._extBtn.style.color = accent;
+                this._extBtn.style.borderColor = this._rgba(accent, 0.5);
+            } else {
+                this._extBtn.style.background = 'transparent';
+                this._extBtn.style.color = '#888';
+                this._extBtn.style.borderColor = 'rgba(255,255,255,0.15)';
+            }
+        }
+
+        // --- дисплей ---
+        if (isExt) {
+            const midi = this.system.midiManager;
+            const hasClock = midi?.isMidiClockActive?.();
+            this._bpmDisplay.setText(hasClock ? 'EXT' : '---');
+            this._bpmDisplay.element.style.cursor = 'default';
+        } else {
+            const bpm = this._clampBpm(this.system.getBPM?.() ?? 120);
+            this._bpmDisplay.setText(String(bpm));
+            this._bpmDisplay.element.style.cursor = 'ns-resize';
         }
     }
 

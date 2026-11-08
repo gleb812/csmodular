@@ -79,9 +79,27 @@ export class Slider extends BaseComponent {
             this.drawSimpleTooltip(ctx, thumbY);
         }
 
+        // ⭐ Индикатор MIDI Learn
+        if (this.midiMapping) {
+            ctx.save();
+            ctx.translate(this.x + this.width - 2, this.y + 2);
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.arc(0, 0, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
         ctx.restore();
     }
-    
+
+    applyMidiValue(ccValue) {
+        const clamped = Math.max(0, Math.min(127, Number(ccValue) || 0));
+        const range = this.max - this.min;
+        const value = this.min + (clamped / 127) * range;
+        this.setValue(value);
+    }
+
     drawSimpleTooltip(ctx, thumbY) {
         const theme = getCurrentTheme();
         const isLcd = theme.isLcd;

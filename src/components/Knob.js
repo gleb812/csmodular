@@ -108,6 +108,17 @@ export class Knob extends BaseComponent {
         ctx.stroke();
         theme.clearGlow(ctx);
 
+        // ⭐ Индикатор MIDI Learn
+        if (this.midiMapping) {
+            ctx.save();
+            ctx.translate(this.x + this.width - 2, this.y + 2);
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.arc(0, 0, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
         ctx.restore();
 
         // === ИНДИКАТОР НУЛЯ ===
@@ -219,6 +230,17 @@ export class Knob extends BaseComponent {
             };
         }
         return false;
+    }
+
+    /**
+     * Применить значение MIDI CC (0..127) к knob.
+     * @param {number} ccValue — 0..127
+     */
+    applyMidiValue(ccValue) {
+        const clamped = Math.max(0, Math.min(127, Number(ccValue) || 0));
+        const range = this.max - this.min;
+        const value = this.min + (clamped / 127) * range;
+        this.setValue(value);   // setValue уже шлёт в Csound и зовёт onChange/_changeListeners
     }
 
     // Улучшенный метод начала перетаскивания

@@ -13,6 +13,7 @@ export class BaseComponent {
         this.index = undefined;
         // Порядок отрисовки (по умолчанию 0, Line должен быть -1)
         this.zIndex = 0;
+        this.midiMapping = null;  
 
         // Сохраняем оригинальные значения для масштабирования
         this.originalX = x;
@@ -69,6 +70,11 @@ export class BaseComponent {
             return false;
         }
         return false;
+    }
+
+    applyMidiValue(ccValue) {
+        // no-op для компонентов без параметра
+        // Knob/Slider переопределяют
     }
 
     // Метод для старых компонентов

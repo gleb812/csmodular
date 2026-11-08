@@ -25,9 +25,33 @@ export class MidiManager {
         this._sendListeners = [];
         this._midiOut = null;            // MIDIOutput | null
         this.outputs = new Map();        // id -> MIDIOutput
+
+        this._midiClockTimes = [];       // timestamps последних N тиков
+        this._midiClockBpm = null;       // последний посчитанный BPM
+        this._midiClockActive = false;   // идёт ли поток
+        this._midiClockTimeout = null;   // таймер «поток остановился»
+
+        this._learnTarget = null;   // { component, onDone }
     }
 
     // ---------- подписки ----------
+
+    /**
+     * Войти в режим «выучить следующий CC».
+     * @param {object} component — Knob | Slider
+     * @param {(mapping: {cc:number, channel:number}) => void} onDone
+     */
+    startLearn(component, onDone) {
+        this._learnTarget = { component, onDone };
+    }
+
+    cancelLearn() {
+        this._learnTarget = null;
+    }
+
+    isLearning() {
+        return this._learnTarget !== null;
+    }
 
     onStateChange(cb) {
         this._stateListeners.push(cb);
@@ -187,8 +211,6 @@ export class MidiManager {
         });
     }
 
-    // --- замени _refreshInputs() полностью на: ---
-
     _refreshInputs() {
         if (!this.access) return;
 
@@ -243,6 +265,28 @@ export class MidiManager {
         const data1 = data.length > 1 ? data[1] : 0;
         const data2 = data.length > 2 ? data[2] : 0;
 
+        // ⭐ MIDI Clock tick (0xF8) — считаем BPM
+        if (status === 0xF8) {
+            this._handleMidiClockTick();
+        }
+
+        // ⭐ MIDI Learn: перехватываем CC (0xB0)
+        const statusType = status & 0xF0;
+        if (statusType === 0xB0 && this._learnTarget) {
+            const cc = data1;
+            const channel = (status & 0x0F) + 1;
+            const target = this._learnTarget;
+            this._learnTarget = null;
+
+            try {
+                target.onDone({ cc, channel });
+            } catch (e) {
+                console.error('[MidiManager] learn callback error:', e);
+            }
+            // Не отдаём это CC в onMessage — оно ушло в learn
+            return;
+        }
+
         const evt = {
             time: performance.now(),
             status,
@@ -252,19 +296,67 @@ export class MidiManager {
             raw: Array.from(data),
         };
 
-        // История (ограниченная)
         this.history.push(evt);
         if (this.history.length > MAX_HISTORY) this.history.shift();
 
         this._lastMessage = evt;
         this._lastMessageTime = performance.now();
 
-        this._emitMessage(evt);
+        this._emitMessage(evt);   // ← 0xF8 тоже уйдёт в подписчики
     }
 
     /**
-     * Человекочитаемое описание для лога.
+     * MIDI Clock tick (0xF8) — 24 тика на четверть.
+     * Считаем средний интервал по последним N тикам → BPM.
      */
+    _handleMidiClockTick() {
+        const now = performance.now();
+
+        // Сброс, если был долгий перерыв (> 1 сек без тиков)
+        if (this._midiClockTimes.length > 0) {
+            const last = this._midiClockTimes[this._midiClockTimes.length - 1];
+            if (now - last > 1000) {
+                this._midiClockTimes = [];
+            }
+        }
+
+        this._midiClockTimes.push(now);
+
+        // Держим окно 48 тиков (2 четверти) — сглаживает джиттер
+        if (this._midiClockTimes.length > 48) {
+            this._midiClockTimes.shift();
+        }
+
+        // Нужно минимум 2 тика для интервала
+        if (this._midiClockTimes.length >= 2) {
+            const first = this._midiClockTimes[0];
+            const last  = this._midiClockTimes[this._midiClockTimes.length - 1];
+            const nIntervals = this._midiClockTimes.length - 1;
+            const avgMs = (last - first) / nIntervals;
+
+            if (avgMs > 0) {
+                // 24 тика = 1 четверть → BPM = 60000 / (avgMs * 24)
+                this._midiClockBpm = Math.round(60000 / (avgMs * 24));
+                this._midiClockActive = true;
+            }
+        }
+
+        // Таймаут: если 500 мс нет тиков — поток остановился
+        if (this._midiClockTimeout) clearTimeout(this._midiClockTimeout);
+        this._midiClockTimeout = setTimeout(() => {
+            this._midiClockActive = false;
+            this._midiClockTimeout = null;
+        }, 500);
+    }
+
+    getMidiClockBpm() {
+        return this._midiClockActive ? this._midiClockBpm : null;
+    }
+
+    isMidiClockActive() {
+        return this._midiClockActive;
+    }
+
     _describe(status, data1, data2) {
         const type = status & 0xf0;
         const channel = (status & 0x0f) + 1;
