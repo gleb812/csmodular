@@ -7,6 +7,12 @@
       "status": "passable"
     },
     {
+      "name": "CLK",
+      "displayName": "CLK",
+      "category": "custom",
+      "status": "dev"
+    },
+    {
       "name": "FdbkDel",
       "displayName": "FdbkDel",
       "category": "custom",

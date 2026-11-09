@@ -21,7 +21,8 @@ export const Outs2Module = {
                 "width": 20,
                 "height": 11,
                 "text": "M",
-                "initialState": true
+                "initialState": true,
+                "csoundName": "Param3"
         },
         {
                 "componentType": "Input",

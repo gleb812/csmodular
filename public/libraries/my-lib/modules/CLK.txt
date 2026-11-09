@@ -1,0 +1,10 @@
+opcode CLK, 0, kk
+kON, kOut1 xin
+
+; --- module body ---
+; Add your DSP code here
+kTemp = gkBPM / 60
+kout1 metro kTemp
+kout1 *= kON
+zkw kout1, kOut1
+endop
