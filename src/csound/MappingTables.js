@@ -35,7 +35,6 @@ export class MappingTables {
                 this.tables = await response.json();
                 this._loaded = true;
                 const count = Object.keys(this.tables).length;
-                console.log(`📊 Loaded ${count} mapping tables`);
                 return true;
             } catch (error) {
                 console.error('❌ Failed to load value_maps.json:', error);

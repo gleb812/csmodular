@@ -435,7 +435,6 @@ export class ModuleContextMenu {
       if (!this.currentModule) return;
 
       this.system.removeModule(this.currentModule);
-      this.system.showNotification(`🗑️ Module deleted`);
   }
 
   // ============================================================

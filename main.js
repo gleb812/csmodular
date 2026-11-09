@@ -34,6 +34,7 @@ import { OscSettingsPanel } from './src/ui/OscSettingsPanel.js';
 import { Minimap } from './src/ui/Minimap.js';
 import { Splash } from './src/ui/Splash.js'; 
 
+const DYNAMIC_COMPONENT_TYPES = new Set(['LED', 'MiniVU', 'Graph']);
 
 // Глобальный обработчик ошибок
 window.addEventListener('error', (event) => {
@@ -227,7 +228,6 @@ class ModularSystem {
     if (this._bpm === v) return;
     this._bpm = v;
     this.csoundEngine?.setChannel?.('bpm', v);
-    // без showNotification — вызывается на каждый пиксель drag
   }
 
   getBPM() {
@@ -332,45 +332,41 @@ class ModularSystem {
           `translate3d(${this.parallaxCurrentX}px, ${this.parallaxCurrentY}px, 0)`;
   }
 
+  _renderDynamic() {
+      const ctx = this.dynamicCtx;
+      if (!ctx) return;
 
-_renderDynamic() {
-    const ctx = this.dynamicCtx;
-    if (!ctx) return;
+      ctx.clearRect(0, 0, this.dynamicCanvas.width, this.dynamicCanvas.height);
 
-    // Очищаем весь динамический слой
-    ctx.clearRect(0, 0, this.dynamicCanvas.width, this.dynamicCanvas.height);
+      ctx.save();
+      ctx.translate(this.offsetX, this.offsetY);
+      ctx.scale(this.scale, this.scale);
 
-    ctx.save();
-    ctx.translate(this.offsetX, this.offsetY);
-    ctx.scale(this.scale, this.scale);
+      const layers = this.layerManager.layers;
 
-    const layers = this.layerManager.layers;
+      for (const layerName of ['voice', 'fx']) {
+          const layer = layers[layerName];
+          if (!layer) continue;
 
-    // ⭐ Типы компонентов, которые рисуются на динамическом слое
-    const DYNAMIC_TYPES = ['LED', 'MiniVU', 'Graph'];
+          for (const module of layer.modules) {
+              if (module.pixelX == null || module.pixelY == null) continue;
 
-    ['voice', 'fx'].forEach(layerName => {
-        const layer = layers[layerName];
-        if (!layer) return;
+              // ⭐ Кэш: пересобирается при refreshPanel/removeModule/addModule.
+              let comps = module._dynamicComps;
+              if (comps === undefined) {
+                  comps = (module.components || []).filter(
+                      c => DYNAMIC_COMPONENT_TYPES.has(c.constructor.name)
+                  );
+                  module._dynamicComps = comps;   // может быть []
+              }
+              if (comps.length === 0) continue;
 
-        layer.modules.forEach(module => {
-            if (!module.components) return;
-            if (module.pixelX === null || module.pixelY === null) return;
+              for (const comp of comps) comp.draw(ctx);
+          }
+      }
 
-            const dynamicComps = module.components.filter(
-                c => DYNAMIC_TYPES.includes(c.constructor.name)
-            );
-            if (dynamicComps.length === 0) return;
-
-            // this.x / this.y — мировые координаты
-            dynamicComps.forEach(comp => {
-                comp.draw(ctx);
-            });
-        });
-    });
-
-    ctx.restore();
-}
+      ctx.restore();
+  }
 
   _csoundStateLabel(state) {
       return {
@@ -429,7 +425,6 @@ _renderDynamic() {
 
       releaseSvg(sticker.id);
       this.forceRedraw();
-      this.showNotification('🗑️ Sticker deleted');
   }
 
   selectSticker(sticker) {
@@ -541,42 +536,62 @@ _renderDynamic() {
    * 
    * Вызывается после addCable / removeCable.
    */
-  async recomputeVariantUI() {
+/**
+ * Пересчитать активные варианты для модулей патча и применить к UI.
+ *
+ * @param {Panel[]|null} affectedPanels — если задано, обрабатываются только
+ *   эти панели (и перекрашиваются только их выходные кабели). Если null —
+ *   полный проход (используется после load / hot-reload / изменения вариантов).
+ */
+  async recomputeVariantUI(affectedPanels = null) {
       if (!this.csoundGen) return;
-      
-      // 1. Убедиться, что variants загружены и активный вариант посчитан
+
+      // 1. variants — нужны всегда: _prepareVariants решает, кто на самом деле
+      //    сменил вариант. Это дешёвая операция (кэш внутри CsoundGenerator).
       await this.csoundGen._loadVariantsForModules();
       this.csoundGen._prepareVariants();
-      
-      // 2. Пройти по всем панелям и применить _activeVariant
-      const panels = this.components.filter(c => c.constructor.name === 'Panel');
-      
+
+      // 2. Кого проверяем
+      const panels = affectedPanels
+          ? affectedPanels.filter(p => p && p.components)
+          : this.components.filter(c => c instanceof Panel);
+
+      // 3. Индекс: instanceId → panel (только для затронутых)
+      //    CsoundGenerator.modules — Map<key, moduleData>. Строим reverse-карту
+      //    один раз, а не find() внутри цикла (было O(n²)).
+      const panelsById = new Map();
+      for (const p of panels) panelsById.set(String(p.jsonId), p);
+
+      const moduleDataByInstance = new Map();
+      for (const md of this.csoundGen.modules.values()) {
+          moduleDataByInstance.set(String(md.instanceId), md);
+      }
+
+      let touched = false;
+
       for (const panel of panels) {
-          // Найти соответствующий moduleData в CsoundGenerator
-          const moduleData = [...this.csoundGen.modules.values()]
-              .find(m => m.instanceId === panel.jsonId);
+          const moduleData = moduleDataByInstance.get(String(panel.jsonId));
           if (!moduleData) continue;
-          
+
           const moduleDef = this.moduleFactory?.moduleRegistry?.[moduleData.typeId];
           if (!moduleDef?.variants || moduleDef.variants.length < 2) continue;
-          
+
           const activeSuffix = moduleData._activeVariant;
           if (!activeSuffix) continue;
-          
-          // Сравниваем с тем, что уже применено
+
           if (panel._lastAppliedVariant === activeSuffix) continue;
-          
-          // Найти активный вариант
+
           const activeVariant = moduleDef.variants.find(v => v.suffix === activeSuffix);
           if (!activeVariant) continue;
-          
-          // Применяем к компонентам панели
+
           this._applyVariantToPanel(panel, activeVariant);
-          
           panel._lastAppliedVariant = activeSuffix;
+          touched = true;
       }
-      
-      // 3. Force redraw
+
+      if (!touched) return;   // ⭐ ничего не изменилось — не дёргаем redraw/recompile
+
+      // 4. Force redraw
       this._voiceDirty = true;
       this._fxDirty = true;
       this._cablesDirty = true;
@@ -586,48 +601,35 @@ _renderDynamic() {
   _applyVariantToPanel(panel, variant) {
       const moduleDef = this.moduleFactory?.moduleRegistry?.[panel.jsonName];
       if (!moduleDef) return;
-      
-      const inputIds = moduleDef.inputs || [];
+
+      const inputIds  = moduleDef.inputs  || [];
       const outputIds = moduleDef.outputs || [];
-      
-      // ⭐ Обновляем типы Input (из variant.ins), с учётом originalType
-      for (let i = 0; i < inputIds.length; i++) {
-          const id = inputIds[i];
-          const comp = panel.components.find(c => String(c.id) === String(id));
-          if (!comp) continue;
 
-          const newType = this._typeFromSuffix(variant.ins[i], comp.originalType);
-          if (comp.type !== newType) {
-              comp.type = newType;
+      // ⭐ Слитый проход Input/Output
+      const applyRates = (ids, suffixes) => {
+          for (let i = 0; i < ids.length; i++) {
+              const comp = panel.components.find(c => String(c.id) === String(ids[i]));
+              if (!comp) continue;
+              const newType = this._typeFromSuffix(suffixes[i], comp.originalType);
+              if (comp.type !== newType) comp.type = newType;
+              comp.updateCenterColor(comp.getEffectiveColor());
           }
-          // ⭐ перекрасить центр по типу
-          comp.updateCenterColor(comp.getEffectiveColor());
-      }
-      
-      // ⭐ Обновляем типы Output (из variant.outs)
-      for (let i = 0; i < outputIds.length; i++) {
-          const id = outputIds[i];
-          const comp = panel.components.find(c => String(c.id) === String(id));
-          if (!comp) continue;
+      };
+      applyRates(inputIds,  variant.ins  || []);
+      applyRates(outputIds, variant.outs || []);
 
-          const newType = this._typeFromSuffix(variant.outs[i], comp.originalType);
-          if (comp.type !== newType) {
-              comp.type = newType;
+      // ⭐ Перекрашиваем ТОЛЬКО выходные кабели этой панели.
+      //    Используем jack.cables (уже ведётся в BaseJack) вместо скана
+      //    this.patchManager.cables.
+      for (const comp of panel.components) {
+          if (comp.constructor.name !== 'Output' || !comp.cables?.length) continue;
+          for (const cable of comp.cables) {
+              const sourceType = comp.type;
+              cable.typeColor = CABLE_COLORS[sourceType] || CABLE_COLORS.other;
           }
-          comp.updateCenterColor(comp.getEffectiveColor());
       }
-      
-      // ⭐ Перекрашиваем ВЫХОДНЫЕ кабели (их цвет = тип источника)
-      for (const cable of this.patchManager.cables) {
-          const fromPanel = cable.fromJack?.parentModule;
-          if (fromPanel !== panel) continue;
-          
-          const sourceType = cable.fromJack.type;
-          cable.typeColor = CABLE_COLORS[sourceType] || CABLE_COLORS.other;
-          // ⭐ НЕ трогаем cable.toJack — его цвет от его собственного типа
-      }
-      
-      // ⭐ Обновляем connected-флаг
+
+      // ⭐ connected-флаг
       panel.components.forEach(comp => {
           if (comp.constructor.name === 'Input' || comp.constructor.name === 'Output') {
               comp.connected = comp.cables.length > 0;
@@ -780,9 +782,6 @@ _renderDynamic() {
 
     this.selectedModule = module;
     module.setSelected(true);
-
-    //console.log(`🔘 Selected: ${module.title}`);
-    //this.showNotification(`Selected: ${module.title} (Press Del to delete)`);
   }
 
   deselectModule() {
@@ -801,15 +800,9 @@ _renderDynamic() {
     const moduleName = this.selectedModule.title;
     const moduleId = this.selectedModule.moduleId;
 
-    //console.log(`🗑️ Deleting module: ${moduleName} (${moduleId})`);
-
-    // Удаляем модуль
     this.removeModule(this.selectedModule);
-
-    // Сбрасываем выделение
     this.selectedModule = null;
 
-    //this.showNotification(`Deleted: ${moduleName}`);
   }
 
   setupCanvas() {
@@ -1046,7 +1039,7 @@ _renderDynamic() {
 
     // Фильтруем только панели (модули)
     const panels = this.components.filter(
-      (c) => c.constructor.name === 'Panel',
+      (c) => c instanceof Panel,
     );
 
     return panels.map((module) => {
@@ -1201,15 +1194,16 @@ _renderDynamic() {
   }
 
   generateJsonId(module) {
-    // Найти максимальный существующий jsonId
-    const existingIds = this.components
-      .filter((c) => c.jsonId && c !== module) // исключаем текущий модуль
-      .map((c) => c.jsonId);
+      const existingIds = this.components
+          .filter(c => c.jsonId && c !== module)
+          .map(c => c.jsonId);
 
-    const maxId = existingIds.length > 0 ? Math.max(...existingIds) : 0;
-    const newId = maxId + 1;
-    //console.log(`Generate JSON ID: max=${maxId}, new=${newId}`);
-    return newId;
+      // ⭐ reduce вместо spread — безопасно на любом количестве модулей
+      let maxId = 0;
+      for (const id of existingIds) {
+          if (id > maxId) maxId = id;
+      }
+      return maxId + 1;
   }
 
   savePatch(filename = null) {
@@ -1345,9 +1339,6 @@ _renderDynamic() {
         this.scopeWindow._renderChannelBar();
         this.scopeWindow.hide();
     }
-
-    console.log('System reset complete');
-    this.showNotification('🆕 New patch created');
   }
 
   generateModuleId() {
@@ -1415,7 +1406,7 @@ _renderDynamic() {
           leds.forEach(led => {
               if (led.sourceChannel) {
                   this.csoundEngine.unregisterLedChannel(led.sourceChannel);
-                  console.log(`💡 Unregistered LED channel: ${led.sourceChannel}`);
+                  //console.log(`💡 Unregistered LED channel: ${led.sourceChannel}`);
               }
           });
 
@@ -1423,7 +1414,7 @@ _renderDynamic() {
           mvus.forEach(mvu => {
               if (mvu.sourceChannel) {
                   this.csoundEngine.unregisterLedChannel(mvu.sourceChannel);
-                  console.log(`📊 Unregistered MiniVU channel: ${mvu.sourceChannel}`);
+                  //console.log(`📊 Unregistered MiniVU channel: ${mvu.sourceChannel}`);
               }
           });
       }
@@ -1488,6 +1479,7 @@ _renderDynamic() {
       if (this.selectedModule === module) {
           this.deselectModule();
       }
+      this.minimap?._markDirty(); 
   }
 
   bringModuleToFront(module) {
@@ -1838,7 +1830,7 @@ _renderDynamic() {
 
 
   async addNewModuleAtPosition(moduleType, layerName, gridX, gridY, opts = {}) {
-      console.log('🔍 addNewModuleAtPosition:', { moduleType, layerName, gridX, gridY });
+      //console.log('🔍 addNewModuleAtPosition:', { moduleType, layerName, gridX, gridY });
       try {
         // 1. Проверяем слой
         if (!layerName || !this.layerManager.layers[layerName]) {
@@ -1853,7 +1845,7 @@ _renderDynamic() {
                 gridY * BASE_STEP_Y,
             );
             if (snapped.gridX !== gridX || snapped.gridY !== gridY) {
-                console.log(`📐 Snapped: (${gridX}, ${gridY}) → (${snapped.gridX}, ${snapped.gridY})`);
+                //console.log(`📐 Snapped: (${gridX}, ${gridY}) → (${snapped.gridX}, ${snapped.gridY})`);
                 gridX = snapped.gridX;
                 gridY = snapped.gridY;
             }
@@ -2009,7 +2001,7 @@ _renderDynamic() {
                   const channelName = `led_${moduleType}_${newModule.jsonId}_${led.id}`;
                   led.sourceChannel = channelName;
                   this.csoundEngine.registerLedChannel(channelName);
-                  console.log(`💡 Registered LED channel: ${channelName}`);
+                  //console.log(`💡 Registered LED channel: ${channelName}`);
               });
 
               const mvus = newModule.components.filter(c => c.constructor.name === 'MiniVU');
@@ -2018,14 +2010,12 @@ _renderDynamic() {
                   const channelName = `mvu_${moduleType}_${newModule.jsonId}_${mvu.id}`;
                   mvu.sourceChannel = channelName;
                   this.csoundEngine.registerLedChannel(channelName);
-                  console.log(`📊 Registered MiniVU channel: ${channelName}`);
+                  //console.log(`📊 Registered MiniVU channel: ${channelName}`);
               });
           }
 
           this.sortComponentsByZIndex();
-          this.showNotification(
-            `✅ ${moduleDef.displayName || moduleType} добавлен в (${gridX}, ${gridY})`,
-          );
+          this.minimap?._markDirty(); 
           if (layerName === 'voice') this._voiceDirty = true;
           else this._fxDirty = true;
           this._cablesDirty = true;
@@ -2055,7 +2045,7 @@ _renderDynamic() {
       libraryStore.invalidateCache?.();
       // 1. Собрать user-модули, стоящие в патче
       const panels = this.components.filter(
-          c => c.constructor.name === 'Panel' && c.library && c.library !== 'builtin'
+          c => c instanceof Panel && c.library && c.library !== 'builtin'
       );
       if (panels.length === 0) {
           this.showNotification?.('📭 No user modules in patch');
@@ -2165,6 +2155,7 @@ _renderDynamic() {
       this._fxDirty = true;
       this._cablesDirty = true;
       this.forceRedraw?.();
+      this.minimap?._markDirty();  
 
       // ⭐ recomputeVariantUI сам триггерит recompile (см. AI Context.md)
       if (typeof this.recomputeVariantUI === 'function') {
@@ -2213,7 +2204,7 @@ _renderDynamic() {
    * Обработать входящий MIDI CC: применить ко всем выученным контролам.
    */
   _handleMidiCC(cc, value, channel) {
-      const panels = this.components.filter(c => c.constructor.name === 'Panel');
+      const panels = this.components.filter(c => c instanceof Panel);
       for (const panel of panels) {
           if (!panel.components) continue;
           for (const comp of panel.components) {
@@ -2501,7 +2492,7 @@ window.debugFactory = () => {
 document.addEventListener('DOMContentLoaded', async () => {
     // ⭐ Инициализируем тему ДО создания системы
     await initCurrentTheme();
-    console.log('✅ Theme initialized');
+    //console.log('✅ Theme initialized');
 
     // ⭐ BUILD: читаем манифест shipped-библиотек и модулей
     if (import.meta.env.PROD) {
@@ -2667,7 +2658,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Проверка целостности
     console.log('\n=== INTEGRITY CHECK ===');
     const panels = modularSystem.components.filter(
-      (c) => c.constructor.name === 'Panel',
+      (c) => c instanceof Panel,
     );
     console.log(`Panels in components: ${panels.length}`);
 
@@ -2681,7 +2672,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.debugModules = () => {
     console.log('=== MODULES ===');
     modularSystem.components.forEach((comp, i) => {
-      if (comp.constructor.name === 'Panel') {
+      if (comp instanceof Panel) {
         console.log(
           `[${i}] ${comp.title} (id: ${comp.moduleId}, jsonId: ${comp.jsonId})`,
         );

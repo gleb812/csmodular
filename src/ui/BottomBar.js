@@ -18,8 +18,8 @@ import { SevenSegmentDisplay } from './SevenSegmentDisplay.js';
 //  CONFIG — sizes and persistence
 // ============================================================
 const CONFIG = {
-    colWidths:  [44, 288, 16, 44, 44, 16],
-    rowHeights: [32, 32, 32, 30],
+    colWidths:  [40, 288, 16, 40, 40, 16],
+    rowHeights: [24, 24, 24, 22],
     gap: 0,
     storageKey: 'csmodular:bottombar',
     bpmMin: 20,
@@ -47,10 +47,11 @@ export class BottomBar {
         this._gridWrap = null;
         this._collapsedBar = null;
 
-        // Volume
+        // Volume (UI 0..1, 0.5 = unity gain / 0 dB)
         this._faderFill = null;
         this._faderThumb = null;
-        this._volume = 0.4;
+        this._faderUnityMark = null;
+        this._volume = this._dbToUi(0);   // unity (0 dB) by default
 
         // sizes (loaded from storage)
         this._colWidths  = this._loadJSON('cols')  || CONFIG.colWidths.slice();
@@ -120,7 +121,7 @@ export class BottomBar {
     background: transparent;
     border: var(--bb-accent-06, rgba(255,255,255,0.06));
     border-radius: 6px;
-    color: #0af;
+    color: var(--bb-accent, #0af);
     font-family: inherit;
     font-size: 13px;
     font-weight: 700;
@@ -128,9 +129,41 @@ export class BottomBar {
     flex: 0 0 auto;
     transition: background 0.1s, border-color 0.1s;
 }
+#bottom-bar .bb-collapsed-run {
+    width: 28px; height: 28px;
+    background: transparent;
+    border: 1px solid var(--bb-accent-30, rgba(0,170,255,0.3));
+    border-radius: 6px;
+    color: #888;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    flex: 0 0 auto;
+    transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+
+#bottom-bar .bb-collapsed-bpm {
+    flex: 0 0 auto;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--bb-bpm-color, #ff3b30);
+    text-shadow: 0 0 6px var(--bb-bpm-color, #ff3b30);
+    padding: 0 4px;
+    min-width: 32px;
+    text-align: center;
+    user-select: none;
+}
+
+#bottom-bar .bb-collapsed-run:hover {
+    background: var(--bb-accent-12, rgba(0,170,255,0.12));
+    border-color: var(--bb-accent, #0af);
+}            
 #bottom-bar .bb-expand-btn:hover {
-    background: rgba(0,170,255,0.12);
-    border-color: #0af;
+    background: var(--bb-accent-12, rgba(0,170,255,0.12));
+    border-color: var(--bb-accent, #0af);
 }
 #bottom-bar .bb-drag-handle {
     flex: 1 1 auto;
@@ -187,13 +220,14 @@ export class BottomBar {
     line-height: 1;
     padding: 0;
 }
+
 #bottom-bar .bb-btn:hover {
-    background: rgba(255,255,255,0.06);
-    color: #0af;
+    background: var(--bb-accent-06, rgba(255,255,255,0.06));
+    color: var(--bb-accent, #0af);
 }
 #bottom-bar .bb-btn.active {
-    background: rgba(0,170,255,0.15);
-    color: #0af;
+    background: var(--bb-accent-15, rgba(0,170,255,0.15));
+    color: var(--bb-accent, #0af);
 }
 
 /* ---- A1: collapse button ---- */
@@ -209,8 +243,8 @@ export class BottomBar {
     transition: background 0.1s, color 0.1s;
 }
 #bottom-bar .bb-collapse-btn:hover {
-    background: rgba(0,170,255,0.12);
-    color: #0af;
+    background: var(--bb-accent-12, rgba(0,170,255,0.12));
+    color: var(--bb-accent, #0af);
 }
 
 /* ---- A2: BPM panel ---- */
@@ -257,17 +291,36 @@ export class BottomBar {
 #bottom-bar .bb-bpm-bottom {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding-top: 2px;
+    gap: 0;
+    padding: 2px 0 0;
     border-top: 1px solid rgba(255,255,255,0.05);
     flex: 0 0 auto;
+    width: 100%;
 }
 #bottom-bar .bb-bpm-modes {
     display: flex;
     flex: 1 1 auto;
     justify-content: space-between;
-    gap: 4px;
+    gap: 0;
+    min-width: 0;
 }
+#bottom-bar .bb-bpm-mode {
+    flex: 1 1 0;
+    text-align: center;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #333;
+    padding: 3px 2px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    transition: color 0.12s, text-shadow 0.12s;
+    min-width: 0;
+    white-space: nowrap;
+}
+
 #bottom-bar .bb-zoom-label {
     flex: 0 0 auto;
     font-size: 9px;
@@ -277,7 +330,13 @@ export class BottomBar {
     padding: 0 2px;
     min-width: 28px;
     text-align: right;
+    transition: color 0.12s, text-shadow 0.12s;
 }
+#bottom-bar .bb-zoom-label.active {
+    color: var(--bb-bpm-color, #ff3b30);
+    text-shadow: 0 0 6px var(--bb-bpm-color, #ff3b30);
+}
+
 #bottom-bar .bb-bpm-mode {
     flex: 1 1 0;
     text-align: center;
@@ -312,7 +371,7 @@ export class BottomBar {
     justify-content: center;
     background: transparent;
     border: none;
-    color: #0af;
+    color: var(--bb-accent, #0af); 
     font-family: inherit;
     font-size: 13px;
     font-weight: 700;
@@ -320,6 +379,7 @@ export class BottomBar {
     transition: background 0.1s;
     padding: 0;
 }
+
 #bottom-bar .bb-zoom-btn:hover { background: var(--bb-accent-12, rgba(0,170,255,0.12)); }
 #bottom-bar .bb-zoom-btn:active { background: var(--bb-accent-25, rgba(0,170,255,0.25)); }
 #bottom-bar .bb-zoom-btn + .bb-zoom-btn {
@@ -329,24 +389,41 @@ export class BottomBar {
 /* ---- A6: volume column ---- */
 #bottom-bar .bb-volume-col {
     background: transparent;
-    border: var(--bb-accent-30, rgba(0,170,255,0.3));
+    border: 1px solid var(--bb-accent-30, rgba(0,170,255,0.3));
     display: flex;
-    align-items: stretch;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    padding: 5px 0;
+    padding: 6px 0;
     overflow: hidden;
 }
 #bottom-bar .bb-fader-track {
     position: relative;
     width: 5px;
     flex: 1 1 auto;
+    min-height: 24px;
     background: #1a1a22;
     border-radius: 3px;
     border: 1px solid rgba(255,255,255,0.06);
     cursor: ns-resize;
-    max-height: calc(100% - 8px);
-    align-self: center;
+    align-self: stretch;
+    margin: 0 auto;
 }
+
+#bottom-bar .bb-fader-unity {
+    position: absolute;
+    left: -4px;
+    right: -4px;
+    height: 1px;
+    background: var(--bb-accent-70, rgba(0,170,255,0.7));
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+#bottom-bar .bb-fader-thumb {
+    /* твоё существующее; убедись что bottom ставится из JS */
+}
+
 #bottom-bar .bb-fader-fill {
     position: absolute;
     left: 0; right: 0; bottom: 0;
@@ -406,7 +483,7 @@ export class BottomBar {
         this._grid.className = 'bb-grid';
         this._gridWrap.appendChild(this._grid);
 
-        // Collapsed bar (only expand + drag handle)
+        // Collapsed bar: [▶ expand] [■/▶ run] [────── drag handle ──────]
         this._collapsedBar = document.createElement('div');
         this._collapsedBar.className = 'bb-collapsed-bar';
 
@@ -419,6 +496,26 @@ export class BottomBar {
             this.setCollapsed(false);
         });
         this._collapsedBar.appendChild(expandBtn);
+
+        // run/stop in collapsed mode
+        const runBtn = document.createElement('button');
+        runBtn.className = 'bb-collapsed-run';
+        runBtn.textContent = '▶';
+        runBtn.title = 'Run / Stop Csound';
+        runBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this._toggleCsound();
+        });
+        this._collapsedBar.appendChild(runBtn);
+        this._collapsedRunBtn = runBtn;
+
+        // BPM integer indicator
+        const bpmLbl = document.createElement('span');
+        bpmLbl.className = 'bb-collapsed-bpm';
+        bpmLbl.textContent = '120';
+        bpmLbl.title = 'Current BPM (integer)';
+        this._collapsedBar.appendChild(bpmLbl);
+        this._collapsedBpm = bpmLbl;
 
         const dragHandle = document.createElement('div');
         dragHandle.className = 'bb-drag-handle';
@@ -697,6 +794,16 @@ export class BottomBar {
         this._setModeActive('ext',  this._isExternalBpm());
         this._setModeActive('midi', midiReady);
         this._setModeActive('osc',  oscReady);
+
+        // collapsed-bar BPM indicator (integer only)
+        if (this._collapsedBpm) {
+            if (this._isExternalBpm()) {
+                this._collapsedBpm.textContent = '---';
+            } else {
+                const bpm = this._clampBpm(this.system.getBPM?.() ?? 120);
+                this._collapsedBpm.textContent = String(Math.floor(bpm));
+            }
+        }
     }
 
     _setModeActive(mode, on) {
@@ -748,6 +855,7 @@ export class BottomBar {
         col.appendChild(mk('+', 'Zoom in',       () => this.system.zoom(0.2)));
         col.appendChild(mk('·', 'Reset to 100%', () => this.system.resetZoom?.()));
         col.appendChild(mk('−', 'Zoom out',      () => this.system.zoom(-0.2)));
+
         this._grid.appendChild(col);
     }
 
@@ -762,6 +870,14 @@ export class BottomBar {
         const track = document.createElement('div');
         track.className = 'bb-fader-track';
 
+        // unity marker at 0 dB (UI = 0.5)
+        const unityMark = document.createElement('div');
+        unityMark.style.bottom = `${this._dbToUi(0) * 100}%`;
+        unityMark.className = 'bb-fader-unity';
+        unityMark.title = '0 dB (unity)';
+        track.appendChild(unityMark);
+        this._faderUnityMark = unityMark;
+
         this._faderFill = document.createElement('div');
         this._faderFill.className = 'bb-fader-fill';
         track.appendChild(this._faderFill);
@@ -772,14 +888,18 @@ export class BottomBar {
 
         col.appendChild(track);
 
-        // load initial volume from csound channel if available
-        this._volume = this._readVolumeFromEngine() ?? 0.4;
+        // initial value from engine, else unity
+        this._volume = this._readVolumeFromEngine() ?? this._dbToUi(0);
         this._refreshFader();
 
         let dragging = false;
+        const UNITY = this._dbToUi(0);   // ≈ 0.941 for cubic curve
+        const SNAP_RADIUS = 0.02;
         const update = (e) => {
             const rect = track.getBoundingClientRect();
-            const y = Math.max(0, Math.min(1, 1 - (e.clientY - rect.top) / rect.height));
+            let y = Math.max(0, Math.min(1, 1 - (e.clientY - rect.top) / rect.height));
+            // snap to unity
+            if (Math.abs(y - UNITY) < SNAP_RADIUS) y = UNITY;
             this._volume = y;
             this._refreshFader();
             this._pushVolumeToEngine();
@@ -798,6 +918,13 @@ export class BottomBar {
             dragging = false;
             document.body.style.cursor = '';
         });
+        // double-click → reset to unity (0 dB)
+        track.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            this._volume = this._dbToUi(0);
+            this._refreshFader();
+            this._pushVolumeToEngine();
+        });
 
         this._grid.appendChild(col);
     }
@@ -808,12 +935,44 @@ export class BottomBar {
         this._faderThumb.style.bottom = `calc(${this._volume * 100}% - 3px)`;
     }
 
+    // Volume range: 0..2 linear gain (+12 dB max). Internally we store a
+    // normalized 0..1 UI value; mvol is the linear gain (0..2).
+    static VOL_DB_MIN = -60;    // anything below → silence
+    static VOL_DB_MAX = +12;
+
+    _uiToDb(ui) {
+        // UI 0..1 → dB -60..+12, cubic curve for finer control near unity
+        const dbMin = BottomBar.VOL_DB_MIN;
+        const dbMax = BottomBar.VOL_DB_MAX;
+        const t = Math.max(0, Math.min(1, ui));
+        // Cubic ease: more resolution near the top (0 dB region)
+        return dbMin + (dbMax - dbMin) * (t * t * t);
+    }
+    _dbToUi(db) {
+        const dbMin = BottomBar.VOL_DB_MIN;
+        const dbMax = BottomBar.VOL_DB_MAX;
+        const t = (db - dbMin) / (dbMax - dbMin);
+        return Math.cbrt(Math.max(0, Math.min(1, t)));
+    }
+    _uiToMvol(ui) {
+        const db = this._uiToDb(ui);
+        if (db <= BottomBar.VOL_DB_MIN) return 0;
+        return Math.pow(10, db / 20);
+    }
+    _mvolToUi(mvol) {
+        if (!mvol || mvol <= 0) return 0;
+        const db = 20 * Math.log10(mvol);
+        return this._dbToUi(db);
+    }
+
     _readVolumeFromEngine() {
         const eng = this.system?.csoundEngine;
         if (!eng?.getChannel) return null;
         try {
-            const v = eng.getChannel('volume');
-            if (typeof v === 'number' && v >= 0 && v <= 1) return v;
+            const mvol = eng.getChannel('mvol');
+            if (typeof mvol === 'number' && mvol >= 0) {
+                return this._mvolToUi(mvol);
+            }
         } catch {}
         return null;
     }
@@ -822,7 +981,7 @@ export class BottomBar {
         const eng = this.system?.csoundEngine;
         if (!eng?.setChannel) return;
         try {
-            eng.setChannel('volume', this._volume);
+            eng.setChannel('mvol', this._uiToMvol(this._volume));
         } catch (e) {
             // engine may not be running — ignore
         }
@@ -864,6 +1023,13 @@ export class BottomBar {
         cell._btn.textContent = m.icon;
         cell._btn.title = m.title;
         cell._btn.style.color = m.color;
+
+        // mirror to collapsed bar
+        if (this._collapsedRunBtn) {
+            this._collapsedRunBtn.textContent = m.icon;
+            this._collapsedRunBtn.title = m.title;
+            this._collapsedRunBtn.style.color = m.color;
+        }
     }
 
     // ============================================================
@@ -1145,28 +1311,39 @@ export class BottomBar {
     // ============================================================
     _tick() {
         if (!this._bpmDragging) this._refreshBpm();
+        this._updateZoomLabel();
 
         if (this._sysInfoOpen) this._updateSysInfoContent();
 
-        // run cell may change externally
+        // Refresh stateful buttons (run icon, active highlights) —
+        // some state changes (e.g. Design toggled via hotkey 'D')
+        // do not go through BottomBar actions.
         if (this._statefulCells) {
             for (const cell of this._statefulCells) {
-                if (cell._isRun) this._updateRunCell(cell);
+                if (cell._isRun) {
+                    this._updateRunCell(cell);
+                } else if (cell._isActive) {
+                    const on = !!cell._isActive();
+                    cell._btn.classList.toggle('active', on);
+                }
             }
         }
 
         if (this._midiInLamp)  this._midiInLamp.draw();
         if (this._midiOutLamp) this._midiOutLamp.draw();
         if (this._oscLamp)     this._oscLamp.draw();
-        this._updateZoomLabel();
     }
 
     _updateZoomLabel() {
         if (!this._zoomLabel) return;
-        const pct = `${Math.round((this.system.scale || 1) * 100)}%`;
+        const scale = this.system.scale || 1;
+        const pct = `${Math.round(scale * 100)}%`;
         if (this._zoomLabel.textContent !== pct) {
             this._zoomLabel.textContent = pct;
         }
+        // Highlight the label when zoom is at 100%
+        const atReset = Math.abs(scale - 1.0) < 0.001;
+        this._zoomLabel.classList.toggle('active', atReset);
     }
 
     // ============================================================
@@ -1175,9 +1352,15 @@ export class BottomBar {
     setupCsoundListener() {
         const engine = this.system?.csoundEngine;
         if (!engine || typeof engine.onStateChange !== 'function') return;
-        engine.onStateChange(() => {
+        engine.onStateChange((state) => {
             this.refreshState();
             if (this._sysInfoOpen) this._updateSysInfoContent();
+
+            // Push mvol whenever Csound (re)starts — instr 5 reads chnget "mvol",
+            // which is 0 until set, muting the output.
+            if (state === 'running') {
+                this._pushVolumeToEngine();
+            }
         });
     }
 

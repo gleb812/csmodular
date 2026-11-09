@@ -234,14 +234,19 @@ export class Minimap {
 
     draw() {
         if (!this.visible) return;
+
+        if (this._dirty || !this._bounds) {
+            this._bounds = this._computeWorldBounds();
+            this._dirty = false;
+        }
+
+        const bounds = this._bounds;
+        if (!bounds) return;
+
         const ctx = this.ctx;
         const theme = getCurrentTheme();
 
         ctx.clearRect(0, 0, this.width, this.height);
-
-        // Фон уже в CSS (background); здесь только контент
-        const bounds = this._computeWorldBounds();
-        if (!bounds) return;
 
         const t = this._makeTransform(bounds);
         const modules = this._allModules();
@@ -273,10 +278,6 @@ export class Minimap {
         // 3. Стрелки-outlier-ы
         this._drawOutlierArrows(ctx, bounds, t);
 
-        // 4. Тонкая сетка-крестики (опционально, для стиля)
-        // не рисуем — перегружает
-
-        this._dirty = false;
     }
 
     _drawViewport(ctx, t, theme) {
@@ -323,7 +324,6 @@ export class Minimap {
     _arrowAnchor(oct, inner) {
         const cx = inner.x + inner.w / 2;
         const cy = inner.y + inner.h / 2;
-        const r = 0.5; // насколько близко к краю (0.5 = ровно у края)
         const off = 10; // отступ от края
 
         const pos = {
@@ -409,7 +409,7 @@ export class Minimap {
         e.stopPropagation();
 
         const pos = this._localPos(e);
-        const bounds = this._computeWorldBounds();
+        const bounds = this._bounds;
         if (!bounds) return;
         const t = this._makeTransform(bounds);
 
@@ -470,12 +470,11 @@ export class Minimap {
             this.system.offsetX = this._dragStartOffset.x - dWorldX * this.system.scale;
             this.system.offsetY = this._dragStartOffset.y - dWorldY * this.system.scale;
             this.system.forceRedraw?.();
-            this._markDirty();
             return;
         }
 
         // Hover над стрелкой — только когда не drag
-        const bounds = this._computeWorldBounds();
+        const bounds = this._bounds;
         if (!bounds) return;
         const t = this._makeTransform(bounds);
 
@@ -494,7 +493,6 @@ export class Minimap {
         }
         if (hoverOct !== this._hoverArrowOctant) {
             this._hoverArrowOctant = hoverOct;
-            this._markDirty();
         }
         this.canvas.style.cursor = hoverOct ? 'pointer' : 'grab';
     }

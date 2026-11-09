@@ -1,8 +1,9 @@
+import { Panel } from './components/Panel.js';
 export class PatchDebugger {
     static logSystemState(system) {
         console.log('=== SYSTEM STATE ===');
         console.log(`Components: ${system.components.length}`);
-        console.log(`Modules (Panels): ${system.components.filter(c => c.constructor.name === 'Panel').length}`);
+        console.log(`Modules (Panels): ${system.components.filter(c => c instanceof Panel).length}`);
         console.log(`Cables: ${system.patchManager?.cables?.length || 0}`);
         
         if (system.layerManager) {

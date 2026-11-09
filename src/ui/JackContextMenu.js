@@ -19,7 +19,7 @@ export class JackContextMenu {
         this.menuElement.id = 'jack-context-menu';
         this.menuElement.style.cssText = `
             position: fixed;
-            min-width: 180px;
+            min-width: 140px;
             background: #2a2a2a;
             border: 1px solid #444;
             border-radius: 6px;
@@ -33,8 +33,6 @@ export class JackContextMenu {
         
         document.body.appendChild(this.menuElement);
     }
-    
-// В JackContextMenu.js - добавь этот метод
 
     createInfoSection() {
         const infoSection = document.createElement('div');
@@ -50,7 +48,6 @@ export class JackContextMenu {
             <div>📌 ConnectorIndex: <strong>${this.currentJack?.ConnectorIndex !== undefined ? this.currentJack.ConnectorIndex : 'N/A'}</strong></div>
             <div>🆔 Component ID: <strong>${this.currentJack?.id || 'N/A'}</strong></div>
             <div style="margin-top: 4px; color: #555;">
-                <em>Visual color affects appearance only</em>
             </div>
         `;
         
@@ -75,8 +72,6 @@ export class JackContextMenu {
         if (this.system.contextMenu && this.system.contextMenu.hide) {
             this.system.contextMenu.hide();
         }
-        
-        //console.log(`Jack menu shown for ${jack.label || jack.id}`);
     }
     
     hide() {
@@ -94,35 +89,30 @@ export class JackContextMenu {
         
         this.menuElement.innerHTML = '';
         
-        // Заголовок
         this.menuElement.appendChild(this.createHeader());
         
-        // 1. Отключить все
         if (cableCount > 0) {
             this.menuElement.appendChild(this.createMenuItem(
-                `🔌 Disconnect all (${cableCount})`,
+                `Disconnect all`,
                 () => this.disconnectAll()
             ));
             this.menuElement.appendChild(this.createSeparator());
         }
 
-        // ⭐ SHAKE для джека
         if (cableCount > 0) {
             this.menuElement.appendChild(this.createMenuItem(
-                `🌀 Shake cables (${cableCount})`,
+                `Shake cable`,
                 () => this.shakeCables()
             ));
         }
 
-        // ⭐ Send to Scope
         if (cableCount > 0) {
             this.menuElement.appendChild(this.createMenuItem(
-                `📊 Send to Scope (${cableCount})`,
+                `Send to Scope`,
                 () => this.sendToScope()
             ));
         }
 
-        // 2. СЕКЦИЯ ЦВЕТОВ
         if (cableCount > 0) {
             const colorSection = document.createElement('div');
             colorSection.style.cssText = `
@@ -135,10 +125,9 @@ export class JackContextMenu {
                 color: #aaa;
                 font-size: 11px;
             `;
-            colorTitle.textContent = 'Cable color:';
+            colorTitle.textContent = 'Cable custom color:';
             colorSection.appendChild(colorTitle);
             
-            // ✨ СОЗДАЕМ COLOR PICKER (ТОЛЬКО ОДИН РАЗ!)
             if (!this.colorPicker) {
                 this.colorPicker = new ColorPicker({
                     columns: 8,
@@ -163,10 +152,8 @@ export class JackContextMenu {
             this.menuElement.appendChild(this.createSeparator());
         }
         
-        // 3. Инфо секция
         this.menuElement.appendChild(this.createInfoSection());
     }
-    // ДОБАВИМ ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ В КЛАСС:
 
     createSeparator() {
         const separator = document.createElement('div');
@@ -181,7 +168,6 @@ export class JackContextMenu {
     shakeCables() {
         if (!this.currentJack) return;
         const count = this.system.patchManager.shakeJackCables(this.currentJack, 80);
-        this.system.showNotification(`🌀 Shaking ${count} cable(s)`);
     }
 
     sendToScope() {
@@ -283,24 +269,18 @@ export class JackContextMenu {
     // ОБНОВЛЕННЫЕ МЕТОДЫ ДЕЙСТВИЙ:
 
     disconnectAll() {
-        if (!this.currentJack) return;
-        
+        if (!this.currentJack) return;        
         const disconnected = this.system.patchManager.disconnectJack(this.currentJack);
-        this.system.showNotification(`🔌 Disconnected ${disconnected} cable(s)`);
     }
 
     changeColor(colorHex) {
         if (!this.currentJack) return;
-        
         const changed = this.system.patchManager.changeCableColor(this.currentJack, colorHex, true);
-        this.system.showNotification(`🎨 Changed visual color of ${changed} cable(s)`);
     }
 
     resetColors() {
         if (!this.currentJack) return;
-        
         const reset = this.system.patchManager.resetCableColors(this.currentJack);
-        this.system.showNotification(`↺ Reset color of ${reset} cable(s) to default`);
     }
     
     createMenuItem(text, onClick) {

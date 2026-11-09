@@ -3,7 +3,7 @@ import { libraryStore } from '../api/index.js';
 import { PANEL_GRID_WIDTH } from '../constants.js';
 import { ratingStore, getEffectiveRating } from '../api/moduleRatingStore.js';
 import { getModuleStatus, getStatusMeta, IS_DEV } from '../api/moduleStatusStore.js';
-
+import { Panel } from '../components/Panel.js';
 export class ContextMenu {
     constructor(system) {
         this.system = system;
@@ -445,7 +445,7 @@ export class ContextMenu {
         // Обновить runtime cache на существующем panel, если есть
         const panels = this.system?.components || [];
         for (const p of panels) {
-            if (p.constructor.name === 'Panel' && (p.jsonName === moduleName || p.type === moduleName)) {
+            if (p instanceof Panel && (p.jsonName === moduleName || p.type === moduleName)) {
                 p.rating = value;
             }
         }

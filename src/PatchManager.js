@@ -32,7 +32,7 @@ export class PatchManager {
 
       // ⭐ Один кабель на ВХОД. Выход может fan-out на много входов.
       const existingTo = this.cables.find(c => c.toJack === actualTo);
-      if (existingTo) this.removeCable(existingTo);
+      if (existingTo) this.removeCable(existingTo, { silent: true });
 
       const cableColor = this.determineCableColor(actualFrom);
 
@@ -45,9 +45,17 @@ export class PatchManager {
       console.log(`✅ Cable added (color: ${cableColor}). Total: ${this.cables.length}`);
 
       if (this.system) this.system._cablesDirty = true;
-      if (this.system && this.system.csoundGen) this.system.csoundGen.addCable(cable);
-      if (this.system?.csoundEngine?.state === 'running') this.system._recompileDebounced();
-      if (this.system?.recomputeVariantUI) this.system.recomputeVariantUI();
+      if (this.system?.csoundGen) this.system.csoundGen.addCable(cable);
+
+      // ⭐ variants влияют на ORC (K2A/A2K, ins/outs) — пересчитать ДО recompile,
+      //    но без второго recompile внутри.
+      if (this.system?.recomputeVariantUI) {
+          this.system.recomputeVariantUI([actualFrom.parentModule, actualTo.parentModule]);
+      }
+
+      if (this.system?.csoundEngine?.state === 'running') {
+          this.system._recompileDebounced();
+      }
 
       return cable;
   }
@@ -107,64 +115,63 @@ export class PatchManager {
       jack.updateCenterColor(jack.getEffectiveColor());
   }
 
-  removeCable(cable) {
+  /**
+   * @param {Cable} cable
+   * @param {{ silent?: boolean }} [opts] — silent: не триггерить recompute/recompile
+   *                                          (для внутреннего вызова из addCable)
+   */
+  removeCable(cable, opts = {}) {
       const index = this.cables.indexOf(cable);
-      if (index > -1) {
-          const fromJack = cable.fromJack;
-          const toJack = cable.toJack;
+      if (index === -1) return;
 
-          if (fromJack) fromJack.removeCable(cable);
-          if (toJack) toJack.removeCable(cable);
+      const fromJack = cable.fromJack;
+      const toJack = cable.toJack;
 
-          cable.disconnect();
-          this.cables.splice(index, 1);
+      if (fromJack) fromJack.removeCable(cable);
+      if (toJack) toJack.removeCable(cable);
 
-          // ⭐ сразу вернуть цвета джеков к их текущему типу
-          if (fromJack) fromJack.updateCenterColor(fromJack.getEffectiveColor());
-          if (toJack) toJack.updateCenterColor(toJack.getEffectiveColor());
-          
-          if (this.system) {
-              this.system._cablesDirty = true;
-              if (this.system.forceRedraw) this.system.forceRedraw();
-          }
-          
-          if (this.system && this.system.csoundGen) {
-              this.system.csoundGen.removeCable(cable);
-          }
-          
-          if (this.system?.csoundEngine?.state === 'running') {
-              this.system._recompileDebounced();
-          }
+      cable.disconnect();
+      this.cables.splice(index, 1);
 
-          if (this.system?.recomputeVariantUI) {
-              this.system.recomputeVariantUI();
-          }
+      if (fromJack) fromJack.updateCenterColor(fromJack.getEffectiveColor());
+      if (toJack) toJack.updateCenterColor(toJack.getEffectiveColor());
+
+      if (this.system) {
+          this.system._cablesDirty = true;
+          if (this.system.forceRedraw) this.system.forceRedraw();
+      }
+      if (this.system?.csoundGen) {
+          this.system.csoundGen.removeCable(cable);
+      }
+
+      // ⭐ Внутренний вызов из addCable — не дёргаем вариант/recompile,
+      //    addCable сделает это один раз в конце с учётом ОБОИХ изменений.
+      if (opts.silent) return;
+
+      if (this.system?.recomputeVariantUI) {
+          this.system.recomputeVariantUI(
+              [fromJack?.parentModule, toJack?.parentModule].filter(Boolean)
+          );
+      }
+      if (this.system?.csoundEngine?.state === 'running') {
+          this.system._recompileDebounced();
       }
   }
 
   clear() {
-      // Отключаем все кабели от джеков
       this.cables.forEach(cable => {
           if (cable.fromJack) cable.fromJack.removeCable(cable);
           if (cable.toJack) cable.toJack.removeCable(cable);
           cable.disconnect();
       });
-
       this.cables = [];
-      
       if (this.system) {
           this.system._cablesDirty = true;
-          if (this.system.forceRedraw) {
-              this.system.forceRedraw();
-          }
+          if (this.system.forceRedraw) this.system.forceRedraw();
       }
-      
-      // ⭐ Очищаем кабели в CsoundGenerator
-      if (this.system && this.system.csoundGen) {
-          this.system.csoundGen.clearCables();
-          //this.system.csoundGen.showFullCsd();
-      }
-      
+      if (this.system?.csoundGen) this.system.csoundGen.clearCables();
+      // ⭐ один recompute на весь clear
+      if (this.system?.recomputeVariantUI) this.system.recomputeVariantUI();
       if (this.system?.csoundEngine?.state === 'running') {
           this.system._recompileDebounced();
       }
@@ -172,6 +179,12 @@ export class PatchManager {
 
   // === ПРОВЕРКИ СОЕДИНЕНИЙ ===
   canConnect(jack1, jack2) {
+    if (!jack1 || !jack2) return false;
+    if (!jack1.parentModule || !jack2.parentModule) {
+        console.error('❌ Jacks must have parent modules');
+        return false;
+    }
+
     // Нельзя подключить к самому себе
     if (jack1 === jack2) {
       console.log('❌ Cannot connect to itself');
@@ -187,12 +200,6 @@ export class PatchManager {
     // Нельзя подключить выход к выходу
     if (jack1.direction === 'output' && jack2.direction === 'output') {
       console.log('❌ Cannot connect output to output');
-      return false;
-    }
-
-    // Проверяем что джеки имеют родительские модули
-    if (!jack1.parentModule || !jack2.parentModule) {
-      console.error('❌ Jacks must have parent modules');
       return false;
     }
 

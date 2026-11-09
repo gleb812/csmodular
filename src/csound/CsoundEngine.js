@@ -144,6 +144,7 @@ export class CsoundEngine {
             // ⭐ Resync control-каналов при первом запуске
             await this._resyncAllControls();
             await this.setChannel('bpm', this.system?.getBPM?.() ?? 120);
+            await this.setChannel('mvol', this.system?.bottomBar?._uiToMvol?.(this.system.bottomBar._volume) ?? 1.0);
             // ⭐ Перезапускаем поллинг LED после recompile
             if (this._ledChannels.size > 0) {
                 if (this._ledPollInterval) {
@@ -246,6 +247,7 @@ export class CsoundEngine {
             // 7. ⭐ Resync control-каналов
             await this._resyncAllControls();
             await this.setChannel('bpm', this.system?.getBPM?.() ?? 120);
+            await this.setChannel('mvol', this.system?.bottomBar?._uiToMvol?.(this.system.bottomBar._volume) ?? 1.0);
             // 8. Перезапуск поллинга LED
             if (this._ledChannels.size > 0) {
                 if (this._ledPollInterval) {

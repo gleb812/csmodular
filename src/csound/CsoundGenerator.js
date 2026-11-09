@@ -149,6 +149,7 @@ export class CsoundGenerator {
     0dbfs = 1.0
 
     gkBPM init 120
+    gkMVOL init 1
     gaFX1 init 0
     gaFX2 init 0
     gaFX3 init 0
@@ -256,7 +257,10 @@ export class CsoundGenerator {
     instr 5
         kBPM chnget "bpm"
         kBPM limit kBPM, 1, 300
-        gkBPM = kBPM         
+        gkBPM = kBPM
+        kMasterVol chnget "mvol"
+        kMasterVol portk kMasterVol, 0.1
+        gkMVOL = kMasterVol         
     endin
     `;
     }

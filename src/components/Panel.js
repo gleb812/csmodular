@@ -358,10 +358,12 @@ export class Panel {
           this.lastValidGridX = targetGridX;
           this.lastValidGridY = targetGridY;
           this.setDirty(true);
+          systemRef.minimap?._markDirty();  
       } else {
           this.gridX = targetGridX;
           this.gridY = targetGridY;
           this.setDirty(true);
+          systemRef.minimap?._markDirty();  
       }
   }
 

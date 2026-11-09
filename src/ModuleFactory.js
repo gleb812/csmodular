@@ -156,7 +156,7 @@ export class ModuleFactory {
     }
 
     createModule(type, gridX, gridY, layer = null) {
-        console.log('🔍 createModule:', { type, gridX, gridY, layer });
+        //console.log('🔍 createModule:', { type, gridX, gridY, layer });
         const definition = this.moduleRegistry[type];
         
         if (!definition) {
@@ -537,7 +537,7 @@ export class ModuleFactory {
 
         panel.components = newComponents;
         panel.sortComponentsByZIndex?.();
-
+        panel._dynamicComps = undefined;  
         return { added, removed, updated };
     }
 

@@ -3,6 +3,9 @@ import { PANEL_GRID_WIDTH } from './constants.js';
 import { createFileInput, triggerFileInput } from './utils/fileInput.js';
 import { Sticker } from './stickers/Sticker.js';
 import { libraryStore } from './api/index.js';
+import { Panel } from './components/Panel.js';
+const DEBUG_LOAD = false;
+const dlog = (...a) => { if (DEBUG_LOAD) dlog(...a); };
 export class PatchLoader {
     constructor(system) {
         this.system = system;
@@ -32,7 +35,7 @@ export class PatchLoader {
             throw new Error('Patch data missing modules array');
         }
         
-        console.log(`📦 Found ${patchData.modules.length} modules, ${patchData.cables?.length || 0} cables`);
+        dlog(`📦 Found ${patchData.modules.length} modules, ${patchData.cables?.length || 0} cables`);
         
         this.clearCurrentPatch();
 
@@ -54,7 +57,7 @@ export class PatchLoader {
         const moduleLoadResults = [];
         for (let i = 0; i < patchData.modules.length; i++) {
             const moduleDef = patchData.modules[i];
-            console.log(`\n📦 Module ${i + 1}/${patchData.modules.length}:`, {
+            dlog(`\n📦 Module ${i + 1}/${patchData.modules.length}:`, {
                 name: moduleDef.name,
                 id: moduleDef.id,
                 area: moduleDef.area,
@@ -84,22 +87,22 @@ export class PatchLoader {
         }
         
         // Отчет о загрузке модулей
-        console.log('\n📊 MODULE LOAD REPORT:');
+        dlog('\n📊 MODULE LOAD REPORT:');
         const successful = moduleLoadResults.filter(r => r.success).length;
         const failed = moduleLoadResults.filter(r => !r.success).length;
-        console.log(`✅ Successful: ${successful}, ❌ Failed: ${failed}`);
+        dlog(`✅ Successful: ${successful}, ❌ Failed: ${failed}`);
         
         // Шаг 2: Создаем кабели
         if (patchData.cables && patchData.cables.length > 0) {
-            console.log(`\n🔌 Creating ${patchData.cables.length} cables...`);
+            dlog(`\n🔌 Creating ${patchData.cables.length} cables...`);
             this.createCables(patchData.cables);
         } else {
-            console.log('📭 No cables to create');
+            dlog('📭 No cables to create');
         }
 
         // ⭐ Шаг 3: Стикеры
         if (Array.isArray(patchData.stickers) && patchData.stickers.length > 0) {
-            console.log(`\n📌 Loading ${patchData.stickers.length} stickers...`);
+            dlog(`\n📌 Loading ${patchData.stickers.length} stickers...`);
             this.loadStickers(patchData.stickers);
         }
 
@@ -118,6 +121,7 @@ export class PatchLoader {
             this.system.resetZoom();
         }
         this.system.forceRedraw?.();
+        this.system.minimap?._markDirty?.(); 
         // ⭐ Пересобираем ORC, если Csound запущен
         if (this.system.csoundEngine?.state === 'running') {
             this.system._recompileDebounced?.();
@@ -130,14 +134,14 @@ export class PatchLoader {
         if (!Array.isArray(stickersData)) return;
         this.system.stickers = stickersData.map(data => new Sticker(data));
         this.system.forceRedraw();
-        console.log(`✅ Loaded ${this.system.stickers.length} stickers`);
+        dlog(`✅ Loaded ${this.system.stickers.length} stickers`);
     }
 
 
     clearCurrentPatch() {
         // Удаляем все модули из системы
         const modulesToRemove = this.system.components.filter(comp => 
-            comp.constructor.name === 'Panel'
+            comp instanceof Panel
         );
         
         modulesToRemove.forEach(module => {
@@ -161,6 +165,7 @@ export class PatchLoader {
                 fx: []
             }
         };
+        this.system.minimap?._markDirty?.();
     }
     
     // === СОЗДАНИЕ МОДУЛЕЙ ===
@@ -199,7 +204,7 @@ export class PatchLoader {
         
         if (!module) {
             console.error(`❌ ModuleFactory failed to create module ${moduleName}`);
-            console.log('ModuleFactory registry keys:', Object.keys(this.moduleFactory.moduleRegistry));
+            dlog('ModuleFactory registry keys:', Object.keys(this.moduleFactory.moduleRegistry));
             return null;
         }
         
@@ -209,7 +214,7 @@ export class PatchLoader {
         // Настраиваем модуль
         this.configureModule(module, moduleDef, moduleId);
         
-        console.log(`✅ Module ${moduleName} created successfully`);
+        dlog(`✅ Module ${moduleName} created successfully`);
         return module;
     }
     
@@ -287,7 +292,7 @@ export class PatchLoader {
         
         const freeSpace = this.system.findFreeSpace(layerName, PANEL_GRID_WIDTH, 1, preferredX, preferredY);
         if (freeSpace) {
-            console.log(`Position occupied, moving to [${freeSpace.gridX}, ${freeSpace.gridY}]`);
+            dlog(`Position occupied, moving to [${freeSpace.gridX}, ${freeSpace.gridY}]`);
             return freeSpace;
         }
         
@@ -299,9 +304,9 @@ export class PatchLoader {
         module.jsonId = moduleId;
         module.jsonName = moduleDef.name;
         module.parentSystem = this.system;
-        module.library = moduleDef.library || registryDef?.library || null;
-
+        
         const registryDef = this.system.moduleFactory.moduleRegistry[moduleDef.name];
+        module.library = moduleDef.library || registryDef?.library || null;
         const typeId = registryDef?.type || moduleDef.name;
         if (this.system.csoundGen) {
             this.system.csoundGen.addModule({
@@ -378,7 +383,7 @@ export class PatchLoader {
         if (moduleDef.customColor) {
             // ⭐ Новый формат: отдельное поле
             module.customColor = moduleDef.customColor;
-            //console.log(`🎨 Loaded color from customColor field: ${moduleDef.customColor}`);
+            //dlog(`🎨 Loaded color from customColor field: ${moduleDef.customColor}`);
         } else if (moduleDef.parameters) {
             // Fallback: старый формат — цвет в конце parameters
             try {
@@ -391,7 +396,7 @@ export class PatchLoader {
                     lastParam.startsWith('rgb')
                 )) {
                     module.customColor = lastParam;
-                    //console.log(`🎨 Loaded color from parameters: ${lastParam}`);
+                    //dlog(`🎨 Loaded color from parameters: ${lastParam}`);
                 }
             } catch (error) {}
         }
@@ -469,127 +474,67 @@ export class PatchLoader {
             }
         }
         
-        console.log(`Cables: ${success} created, ${fail} failed`);
+        dlog(`Cables: ${success} created, ${fail} failed`);
     }
 
     debugModuleMap() {
-        
         console.log('\n--- DETAILED BY ID ---');
         Object.entries(this.moduleMap.byId).forEach(([id, module]) => {
             console.log(`  ${id}: ${module.jsonName || module.title} (layer: ${module.layer})`);
         });
-        
+
         console.log('\n--- DETAILED BY LAYER ---');
         console.log('Voice:');
         this.moduleMap.byLayer.voice.forEach(module => {
             console.log(`  ${module.jsonId}: ${module.jsonName || module.title}`);
         });
-        
+
         console.log('\nFX:');
         this.moduleMap.byLayer.fx.forEach(module => {
             console.log(`  ${module.jsonId}: ${module.jsonName || module.title}`);
         });
     }
 
-    // Создает карту соответствия: индекс джека -> реальный компонент
-    buildJackIndexMap(module, direction) {
-        // Собираем джеки нужного направления
-        const jacks = [];
-        
-        module.components.forEach(component => {
-            const compType = component.constructor?.name;
-            const isInput = compType === 'Input';
-            const isOutput = compType === 'Output';
-            
-            if ((direction === 'input' && isInput) ||
-                (direction === 'output' && isOutput)) {
-                jacks.push(component);
-            }
-        });
-        
-        // Сортируем по ID компонента (как в оригинальной системе)
-        jacks.sort((a, b) => {
-            // Сначала пробуем по числовому ID
-            const idA = parseInt(a.id || a.originalID || '0');
-            const idB = parseInt(b.id || b.originalID || '0');
-            return idA - idB;
-        });
-        
-        // Создаем карту: индекс -> компонент
-        const indexMap = {};
-        jacks.forEach((jack, index) => {
-            indexMap[index] = jack;
-        });
-        
-        return indexMap;
+    /**
+     * Jack components of a module in the given direction, sorted by id.
+     * Single source of jack ordering for createCable.
+     * @param {Panel} module
+     * @param {'in'|'out'} direction
+     * @returns {Array<Input|Output>}
+     */
+    _sortedJacks(module, direction) {
+        const targetType = direction === 'out' ? 'Output' : 'Input';
+        const jacks = (module.components || []).filter(
+            c => c.constructor?.name === targetType
+        );
+        jacks.sort((a, b) =>
+            parseInt(a.id || a.originalID || '0') -
+            parseInt(b.id || b.originalID || '0')
+        );
+        return jacks;
     }
-
-    findJackByIndex(module, jackIndex, direction) {
-        
-        // Создаем карту индексов для этого модуля
-        const indexMap = this.buildJackIndexMap(module, direction);
-        
-        if (indexMap[jackIndex]) {
-            const jack = indexMap[jackIndex];
-            console.log(`✅ Found: ${jack.label || 'unnamed'} (Component ID: ${jack.id}, Index: ${jackIndex})`);
-            return jack;
-        }
-        
-        console.error(`❌ Jack index ${jackIndex} not found. Available ${direction} jacks: ${Object.keys(indexMap).length}`);
-        return null;
-    }
-
-    // PatchLoader.js - ТОЧНЫЙ ПОИСК:
-    // PatchLoader.js - ЗАМЕНИ существующий метод findJackByPin на этот:
 
     findJackByPin(module, connectorIndex, pin) {
-    
-        // Определяем тип компонента по pin
-        const targetType = pin === 'out' ? 'Output' : 'Input';
-        
-        // Собираем ВСЕ джеки нужного типа
-        const allJacks = [];
-        module.components.forEach(component => {
-            const compType = component.constructor?.name;
-            if (compType === targetType) {
-                allJacks.push(component);
-            }
-        });
-        
-        // Сортируем по ID (как в оригинальной системе)
-        const sortedJacks = [...allJacks];
-        sortedJacks.sort((a, b) => {
-            const idA = parseInt(a.id || a.originalID || '0');
-            const idB = parseInt(b.id || b.originalID || '0');
-            return idA - idB;
-        });
-        
-        
-        // Ищем по индексу в ОТСОРТИРОВАННОМ массиве
+        const sortedJacks = this._sortedJacks(module, pin);
         const targetIndex = parseInt(connectorIndex);
-        
+
         if (targetIndex >= 0 && targetIndex < sortedJacks.length) {
             const foundJack = sortedJacks[targetIndex];
-
-            // Убедимся, что джек ссылается на модуль
             if (!foundJack.parentModule) {
                 foundJack.parentModule = module;
                 foundJack.module = module;
             }
-            
             return foundJack;
         }
-        
-        // Если не нашли
-        console.error(`   ❌ ДЖЕК НЕ НАЙДЕН! Индекс ${targetIndex} вне диапазона 0-${sortedJacks.length - 1}`);
-        console.log(`   Доступные индексы: ${sortedJacks.length > 0 ? `0..${sortedJacks.length - 1}` : 'нет джеков'}`);
-        console.log(`🔍 === ПОИСК ЗАВЕРШЕН НЕУДАЧНО ===\n`);
-        
+
+        console.error(
+            `❌ Jack index ${targetIndex} out of range 0..${sortedJacks.length - 1}`
+        );
         return null;
     }
 
     createCable(cableDef) {
-        console.log(`🔗 createCable:`, {
+        dlog(`🔗 createCable:`, {
             fromId: cableDef.from?.id,
             toId: cableDef.to?.id,
             fromJack: cableDef.from?.jack,
@@ -616,7 +561,7 @@ export class PatchLoader {
             
             // Покажем какие модули есть
             Object.entries(this.moduleMap.byId).forEach(([id, module]) => {
-                console.log(`     ${id}: ${module.jsonName || module.title} (layer: ${module.layer})`);
+                dlog(`     ${id}: ${module.jsonName || module.title} (layer: ${module.layer})`);
             });
             
             return false;
@@ -655,162 +600,6 @@ export class PatchLoader {
     }
     
 
-    findJackById(module, jackId, direction) {
-        
-        // jackId - число из JSON, нужно преобразовать в строку
-        const targetId = jackId.toString();
-        
-        let foundJack = null;
-        
-        module.components.forEach(component => {
-            const compType = component.constructor?.name;
-            const isInput = compType === 'Input';
-            const isOutput = compType === 'Output';
-            
-            const isRightType = (direction === 'input' && isInput) ||
-                               (direction === 'output' && isOutput);
-            
-            if (isRightType && component.id === targetId) {
-                foundJack = component;
-                console.log(`✅ Нашли: ${compType} id=${component.id}`);
-            }
-        });
-        
-        if (foundJack) {
-            // Убедимся, что джек ссылается на модуль
-            if (!foundJack.parentModule) {
-                foundJack.parentModule = module;
-                foundJack.module = module;
-            }
-            return foundJack;
-        }
-        
-        // Если не нашли, покажем какие джеки есть
-        console.error(`❌ Джек с ID ${jackId} (как строка: "${targetId}") не найден`);
-        console.log(`Доступные джеки в модуле:`);
-        
-        module.components.forEach(component => {
-            const compType = component.constructor?.name;
-            if (compType === 'Input' || compType === 'Output') {
-                console.log(`  ${compType}: id="${component.id}", type=${component.type}`);
-            }
-        });
-        
-        return null;
-    }
-
-    findJackInModule(module, jackIndex, direction) {
-        
-        // Ищем джек по свойству index
-        let targetJack = null;
-        
-        module.components.forEach((component, idx) => {
-            const compType = component.constructor?.name;
-            const isInput = compType === 'Input';
-            const isOutput = compType === 'Output';
-            
-            // Проверяем тип
-            const isRightType = (direction === 'input' && isInput) ||
-                               (direction === 'output' && isOutput);
-            
-            if (isRightType) {
-                // Сравниваем индекс (оба как числа для надежности)
-                if (component.index !== undefined && 
-                    parseInt(component.index) === parseInt(jackIndex)) {
-                    targetJack = component;
-                }
-            }
-        });
-        
-        if (targetJack) {
-            // УБЕДИМСЯ ЧТО ДЖЕК ИМЕЕТ ССЫЛКУ НА МОДУЛЬ
-            if (!targetJack.parentModule) {
-                console.log(`   ⚠️ Jack has no parentModule reference, setting to: ${module.title || module.jsonName}`);
-                targetJack.parentModule = module;
-                targetJack.module = module;
-            }
-            return targetJack;
-        }
-        
-        // Если не нашли по index, покажем какие джеки есть
-        console.error(`   ❌ Jack with index ${jackIndex} not found in ${module.title || module.jsonName}`);
-        console.log(`   Available ${direction} jacks:`);
-        
-        module.components.forEach((component, idx) => {
-            const compType = component.constructor?.name;
-            const isInput = compType === 'Input';
-            const isOutput = compType === 'Output';
-            
-            const isRightType = (direction === 'input' && isInput) ||
-                               (direction === 'output' && isOutput);
-            
-            if (isRightType) {
-                console.log(`      [${idx}] ${compType}: index=${component.index}, id=${component.id}, type=${component.type || component.jackType}`);
-            }
-        });
-        
-        return null;
-    }
-
-
-    findJackByConnectorIndex(module, connectorIndex, direction) {
-        // Ищем джек с нужным ConnectorIndex
-        let targetJack = null;
-        
-        module.components.forEach(component => {
-            const compType = component.constructor?.name;
-            const isInput = compType === 'Input';
-            const isOutput = compType === 'Output';
-            
-            const isRightType = (direction === 'input' && isInput) ||
-                               (direction === 'output' && isOutput);
-            
-            if (isRightType && component.index !== undefined) {
-                // Сравниваем ConnectorIndex (оба как числа)
-                const compIndex = parseInt(component.index);
-                const targetIndex = parseInt(connectorIndex);
-                
-                console.log(`   Checking ${compType}: ConnectorIndex=${component.index} (as number: ${compIndex}), ID=${component.id}`);
-                
-                if (compIndex === targetIndex) {
-                    targetJack = component;
-                    console.log(`   ✅ Found! ${compType} with ConnectorIndex ${component.index}`);
-                }
-            }
-        });
-        
-        if (targetJack) {
-            // Убедимся что джек имеет ссылку на модуль
-            if (!targetJack.parentModule) {
-                targetJack.parentModule = module;
-                targetJack.module = module;
-            }
-            
-            console.log(`   ✅ Found jack: ${targetJack.label || 'unnamed'} (ConnectorIndex: ${targetJack.index}, Type: ${targetJack.type})`);
-            return targetJack;
-        }
-        
-        // Если не нашли, покажем какие джеки есть
-        console.error(`   ❌ Jack with ConnectorIndex ${connectorIndex} not found`);
-        console.log(`   Available ${direction} jacks with ConnectorIndex:`);
-        
-        module.components.forEach(component => {
-            const compType = component.constructor?.name;
-            const isInput = compType === 'Input';
-            const isOutput = compType === 'Output';
-            
-            const isRightType = (direction === 'input' && isInput) ||
-                               (direction === 'output' && isOutput);
-            
-            if (isRightType) {
-                console.log(`      ${compType}: ConnectorIndex=${component.index}, ID=${component.id}, Type=${component.type}`);
-            }
-        });
-        
-        return null;
-    }
-
-  
     // === УТИЛИТЫ ===
     
     mapColor(colorName) {
