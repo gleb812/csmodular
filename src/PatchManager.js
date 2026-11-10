@@ -18,6 +18,10 @@ export class PatchManager {
   // === ОСНОВНЫЕ ОПЕРАЦИИ С КАБЕЛЯМИ ===
 
   addCable(fromJack, toJack) {
+      if (this.system?.locked) {
+          this.system.showNotification?.('🔒 Patch is locked');
+          return null;
+      }
       if (!this.canConnect(fromJack, toJack)) {
           return null;
       }
@@ -121,6 +125,10 @@ export class PatchManager {
    *                                          (для внутреннего вызова из addCable)
    */
   removeCable(cable, opts = {}) {
+      if (this.system?.locked && !opts.force) {
+          this.system.showNotification?.('🔒 Patch is locked');
+          return null;
+      }
       const index = this.cables.indexOf(cable);
       if (index === -1) return;
 

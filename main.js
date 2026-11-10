@@ -99,6 +99,7 @@ class ModularSystem {
     this.components = [];
     this.draggingComponent = null;
     this.scale = 1.0;
+    this.locked = false;
     this.offsetX = 0;
     this.offsetY = 0;
     this.isPanning = false;
@@ -332,6 +333,16 @@ class ModularSystem {
           `translate3d(${this.parallaxCurrentX}px, ${this.parallaxCurrentY}px, 0)`;
   }
 
+  setLocked(value) {
+      this.locked = !!value;
+      this.showNotification?.(this.locked ? '🔒 Patch locked' : '🔓 Patch unlocked');
+      this.bottomBar?.refreshState?.();
+  }
+
+  isLocked() {
+      return !!this.locked;
+  }
+
   _renderDynamic() {
       const ctx = this.dynamicCtx;
       if (!ctx) return;
@@ -416,6 +427,10 @@ class ModularSystem {
   }
 
   removeSticker(sticker) {
+      if (this.locked && !opts.force) {
+          this.showNotification?.('🔒 Patch is locked');
+          return;
+      }
       const idx = this.stickers.indexOf(sticker);
       if (idx === -1) return;
       this.stickers.splice(idx, 1);
@@ -738,6 +753,10 @@ class ModularSystem {
       switch (e.key) {
         case 'Delete':
         case 'Del':
+            if (this.locked) {
+                this.showNotification?.('🔒 Patch is locked');
+                return;
+            }
             if (this.selectedSticker) {
                 this.removeSticker(this.selectedSticker);
             } else {
@@ -1432,7 +1451,7 @@ class ModularSystem {
       );
 
       cablesToRemove.forEach((cable) => {
-          this.patchManager.removeCable(cable);
+          this.patchManager.removeCable(cable, { force: true });
       });
 
       // 2. Удаляем из слоя через LayerManager
@@ -1829,7 +1848,11 @@ class ModularSystem {
 
 
   async addNewModuleAtPosition(moduleType, layerName, gridX, gridY, opts = {}) {
-      //console.log('🔍 addNewModuleAtPosition:', { moduleType, layerName, gridX, gridY });
+      if (this.locked) {
+          this.showNotification?.('🔒 Patch is locked');
+          return null;
+      }
+
       try {
         // 1. Проверяем слой
         if (!layerName || !this.layerManager.layers[layerName]) {

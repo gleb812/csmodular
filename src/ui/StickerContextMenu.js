@@ -52,6 +52,10 @@ export class StickerContextMenu {
      * @param {number} screenY
      */
     show(sticker, screenX, screenY) {
+        if (this.system?.locked) {
+            this.system.showNotification?.('🔒 Patch is locked');
+            return;
+        }
         this.currentSticker = sticker;
         this.menuElement.innerHTML = '';
         this._buildMenu(sticker);

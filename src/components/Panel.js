@@ -304,6 +304,8 @@ export class Panel {
   }
 
   handlePanelDrag(x, y, systemRef = null) {
+      const sys = systemRef || this.parentSystem;
+      if (sys?.locked) return;  
       if (!this.isDragging) return;
       const grid = systemRef?.grid;
       if (!grid) return;

@@ -584,8 +584,12 @@ export class BottomBar {
         // D4 — editor
         this._put(3, 3, this._buildButtonCell(3, 3, 'Ed', 'Module editor', () => this._openEditor()));
 
-        // D5 — reserved (empty cell, no border)
-        this._put(3, 4, this._buildEmptyCell(3, 4));
+        // D5 — Lock patch
+        this._put(3, 4, this._buildButtonCell(
+            3, 4, '#', 'Lock patch (no structural edits)',
+            () => this.system.setLocked?.(!this.system.locked),
+            () => !!this.system.locked,
+        ));
 
         // refresh visuals
         this._refreshBpm();
@@ -1063,6 +1067,10 @@ export class BottomBar {
     }
 
     async _reloadUserModules() {
+        if (this.system?.locked) {
+            this.system.showNotification?.('🔒 Patch is locked');
+            return;
+        }
         if (typeof this.system.reloadUserModules !== 'function') {
             this.system.showNotification?.('❌ Hot-reload not available');
             return;

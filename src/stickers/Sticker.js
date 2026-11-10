@@ -91,6 +91,7 @@ export class Sticker {
     // === Drag (использует system.grid) ===
 
     startDrag(startX, startY, systemRef) {
+        if (systemRef?.locked || this.system?.locked) return;
         if (!this.hitTest(startX, startY)) return null;
         this.isDragging = true;
 
@@ -110,6 +111,7 @@ export class Sticker {
     }
 
     handleDrag(x, y, systemRef) {
+        if (systemRef?.locked || this.system?.locked) return;
         if (!this.isDragging) return;
         const grid = systemRef?.grid;
         if (!grid) return;

@@ -41,6 +41,10 @@ export class EventManager {
             || this.system.getStickerAtPosition(worldX, worldY, 'behind');
 
         if (sticker) {
+            if (this.system.locked) {
+                this.system.showNotification?.('🔒 Patch is locked');
+                return;
+            }
             this.system.selectSticker(sticker);
             this.system.stickerProperties?.show(sticker);
             e.preventDefault();
@@ -113,6 +117,10 @@ export class EventManager {
     // ⭐ 1. FRONT-стикеры (они визуально над модулями)
     const frontSticker = this.system.getStickerAtPosition(worldX, worldY, 'front');
     if (frontSticker && !e.shiftKey && e.button === 0) {
+        if (this.system.locked) {
+            this.system.showNotification?.('🔒 Patch is locked');
+            return;
+        }
         this.system.deselectModule();
         this.system.selectSticker(frontSticker);
         const dragResult = frontSticker.startDrag(worldX, worldY, this.system);
@@ -120,7 +128,6 @@ export class EventManager {
         e.preventDefault();
         return;
     }
-
     // 1C. Удаление кабелей (Shift+клик)
     if (e.shiftKey) {
       const clickedCable = this.system.patchManager.checkCableClick(
@@ -191,6 +198,10 @@ export class EventManager {
     // ⭐ 2. BEHIND-стикеры (клик мимо модулей, но в область подложки)
     const behindSticker = this.system.getStickerAtPosition(worldX, worldY, 'behind');
     if (behindSticker && !e.shiftKey && e.button === 0) {
+        if (this.system.locked) {
+            this.system.showNotification?.('🔒 Patch is locked');
+            return;
+        }
         this.system.deselectModule();
         this.system.selectSticker(behindSticker);
         const dragResult = behindSticker.startDrag(worldX, worldY, this.system);

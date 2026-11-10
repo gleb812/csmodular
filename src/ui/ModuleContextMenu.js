@@ -1,7 +1,7 @@
 // src/ui/ModuleContextMenu.js
 import { ColorPicker } from './ColorPicker.js';
 import { injectColorPickerStyles } from './ColorPickerStyles.js';
-
+const IS_DEV = import.meta.env.DEV;
 export class ModuleContextMenu {
   constructor(system) {
     this.system = system;
@@ -36,6 +36,10 @@ export class ModuleContextMenu {
   }
 
   show(module, x, y) {
+    if (this.system?.locked) {
+      this.system.showNotification?.('🔒 Patch is locked');
+      return;
+    }
     this.currentModule = module;
     this.updateMenuContent();
 
@@ -155,43 +159,45 @@ export class ModuleContextMenu {
     layerSection.appendChild(layerButtons);
     this.menuElement.appendChild(layerSection);
 
-    // === PANEL COLOR ===
-    const colorSection = document.createElement('div');
-    colorSection.style.cssText = `
-            padding: 4px 8px;
-            border-bottom: 1px solid #333;
-        `;
+    // === PANEL COLOR (dev only — legacy Classic feature) ===
+    if (IS_DEV) {
+        const colorSection = document.createElement('div');
+        colorSection.style.cssText = `
+                padding: 4px 8px;
+                border-bottom: 1px solid #333;
+            `;
 
-    const colorTitle = document.createElement('div');
-    colorTitle.style.cssText = `
-            padding: 6px 8px;
-            color: #aaa;
-            font-size: 10px;
-        `;
-    colorTitle.textContent = 'Panel color:';
-    colorSection.appendChild(colorTitle);
+        const colorTitle = document.createElement('div');
+        colorTitle.style.cssText = `
+                padding: 6px 8px;
+                color: #aaa;
+                font-size: 10px;
+            `;
+        colorTitle.textContent = 'Panel color:';
+        colorSection.appendChild(colorTitle);
 
-    if (!this.colorPicker) {
-      this.colorPicker = new ColorPicker({
-        columns: 8,
-        rows: 4,
-        cellSize: 14,
-        showReset: true,
-        resetText: '↺ Default Gray',
-        onSelect: (color) => this.changePanelColor(color),
-        onReset: () => this.resetPanelColor(),
-      });
+        if (!this.colorPicker) {
+            this.colorPicker = new ColorPicker({
+                columns: 8,
+                rows: 4,
+                cellSize: 14,
+                showReset: true,
+                resetText: '↺ Default Gray',
+                onSelect: (color) => this.changePanelColor(color),
+                onReset: () => this.resetPanelColor(),
+            });
 
-      const pickerElement = this.colorPicker.create();
-      colorSection.appendChild(pickerElement);
-    } else {
-      colorSection.appendChild(this.colorPicker.element);
+            const pickerElement = this.colorPicker.create();
+            colorSection.appendChild(pickerElement);
+        } else {
+            colorSection.appendChild(this.colorPicker.element);
 
-      const currentColor = this.currentModule.customColor || '#606060';
-      this.colorPicker.setColor(currentColor);
+            const currentColor = this.currentModule.customColor || '#606060';
+            this.colorPicker.setColor(currentColor);
+        }
+
+        this.menuElement.appendChild(colorSection);
     }
-
-    this.menuElement.appendChild(colorSection);
 
     // === DELETE ===
     this.menuElement.appendChild(this.createSeparator());
@@ -296,6 +302,10 @@ export class ModuleContextMenu {
   // ============================================================
 
   setLayer(newLayer) {
+    if (this.system?.locked) {
+      this.system.showNotification?.('🔒 Patch is locked');
+      return;
+    }
     if (!this.currentModule) return;
 
     const currentLayer = this.currentModule.layer || 'voice';
@@ -429,6 +439,10 @@ export class ModuleContextMenu {
   // ============================================================
 
   deleteModule() {
+      if (this.system?.locked) {
+          this.system.showNotification?.('🔒 Patch is locked');
+          return;
+      }
       if (!this.currentModule) return;
 
       this.system.removeModule(this.currentModule);

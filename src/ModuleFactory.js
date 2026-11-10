@@ -156,7 +156,10 @@ export class ModuleFactory {
     }
 
     createModule(type, gridX, gridY, layer = null) {
-        //console.log('🔍 createModule:', { type, gridX, gridY, layer });
+        if (this.system?.locked) {
+            this.showNotification?.('🔒 Patch is locked');
+            return null;
+        }
         const definition = this.moduleRegistry[type];
         
         if (!definition) {

@@ -84,6 +84,10 @@ export class StickerPropertiesPanel {
      * @param {Sticker} sticker
      */
     show(sticker) {
+        if (this.system?.locked) {
+            this.system.showNotification?.('🔒 Patch is locked');
+            return;
+        }
         this.currentSticker = sticker;
         this.renderContent();
         this.windowElement.style.display = 'block';
