@@ -32,15 +32,18 @@ class ThemeStore {
         this._listeners = [];
     }
 
-    /**
-     * Загрузить тему из хранилища.
-     * Если нет сохранённой — вернуть DEFAULT_THEME.
-     */
     async load() {
         try {
             const raw = localStorage.getItem(STORAGE_KEY);
             if (raw) {
                 const parsed = JSON.parse(raw);
+                // ⭐ Fallback: classic unavailable in build
+                if (parsed.preset === 'classic' && !__APP_IS_DEV__) {
+                    console.warn('[themeStore] classic preset not available in this build, falling back to lcd');
+                    parsed.preset = 'lcd';
+                    // ⭐ Persist the fallback so we don't warn every reload
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+                }
                 this._theme = deepMerge(DEFAULT_THEME, parsed);
                 console.log('[themeStore] loaded theme from localStorage');
             } else {

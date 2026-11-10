@@ -195,7 +195,7 @@ export class ContextMenu {
             height: 100%;
         `;
         
-        // ЛЕВАЯ КОЛОНКА - Два уровня (NM2 и User)
+        // ЛЕВАЯ КОЛОНКА 
         const leftPanel = document.createElement('div');
         leftPanel.id = 'left-panel';
         leftPanel.style.cssText = `

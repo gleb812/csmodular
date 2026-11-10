@@ -1,5 +1,6 @@
 // src/constants.js
-import { MODULE_GROUP_OF, isValidCategory } from './moduleCategories.js';
+import { isValidCategory } from './moduleCategories.js';
+
 export const PANEL_WIDTH = 260;
 export const BASE_STEP_X = 20;
 export const BASE_STEP_Y = 15;
@@ -33,17 +34,14 @@ export function csoundRateOf(jackType) {
     return (jackType === 'audio' || jackType === 'logicAudio') ? 'audio' : 'control';
 }
 
-// ⭐ Минимальная дистанция (в базовых клетках), дальше которой модуль
-//    считается «убежавшим» от группы. Soft limit: блокируем drag и
-//    редиректим создание в свободное место рядом.
-//    Chebyshev по прямоугольникам, ~1 пустой экран по X (80*20=1600px).
+// ⭐ Soft limit: минимальная дистанция (в базовых клетках)
 export const MAX_SANE_DISTANCE_GRID = 80;
 
-// ⭐ Цвета minimap (фиксированные — читаются в обеих темах)
+// ⭐ Цвета minimap
 export const MINIMAP_COLORS = {
-    voice:        '#3b82f6',   // синий — Voice
-    fx:           '#f59e0b',   // янтарный — FX
-    output:       '#3ecf6e',   // зелёный — модуль с Output-джеком
+    voice:        '#3b82f6',
+    fx:           '#f59e0b',
+    output:       '#3ecf6e',
     viewport:     'rgba(255, 255, 255, 0.08)',
     viewportEdge: 'rgba(255, 255, 255, 0.55)',
     background:   'rgba(18, 18, 22, 0.78)',
@@ -59,6 +57,7 @@ export const MINIMAP_MARGIN = 16;
 
 export const MIN_SCALE = 0.5;
 export const MAX_SCALE = 1.5;
+
 // ============================================================
 //  MODULE CATEGORIES (Minimap colors)
 // ============================================================
@@ -66,79 +65,41 @@ export const MAX_SCALE = 1.5;
 // Категория берётся ТОЛЬКО из JS-описания модуля: `category: 'osc'`.
 // Нет категории / неизвестная → серый (`unknown`).
 
-// Соответствие: группа в ALL_NM2 → ключ в MODULE_CATEGORY_COLORS
-export const GROUP_TO_CATEGORY = {
-    'In/Out': 'io',
-    'Logic':  'logic',
-    'Osc':    'osc',
-    'FX':     'fx',
-    'Switch': 'switch',
-    'Mixer':  'mixer',
-    'Env':    'env',
-    'Note':   'control',     // Note — это скорее control, чем отдельная
-    'LFO':    'lfo',
-    'Shaper': 'fx',          // Shaper — тоже fx-семейство (или отдельный 'shaper', добавь если хочешь)
-    'Filter': 'filter',
-    'Level':  'dynamics',    // Level — компрессоры/громкость → dynamics (или 'level', отдельный)
-    'MIDI':   'midi',
-    'Seq':    'control',
-    'Delay':  'fx',
-    'Rnd':    'util',
-    'Test':   'unknown',     // тестовые модули — серые
-};
-
 export const MODULE_CATEGORY_COLORS = {
-    // Генераторы / источники
-    osc:        '#f97316',   // оранжевый — осцилляторы
-    noise:      '#fb923c',   // светло-оранжевый — шум
-    sample:     '#fbbf24',   // янтарный — сэмплы / плееры
+    osc:        '#f97316',
+    noise:      '#fb923c',
+    sample:     '#fbbf24',
 
-    // Модуляторы
-    lfo:        '#a855f7',   // фиолетовый — LFO
-    env:        '#c084fc',   // светло-фиолетовый — огибающие
+    lfo:        '#a855f7',
+    env:        '#c084fc',
 
-    // Фильтры / обработка
-    filter:     '#06b6d4',   // циан — фильтры
-    fx:         '#0ea5e9',   // голубой — эффекты
-    dynamics:   '#22d3ee',   // светло-циан — компрессоры / гейты
+    filter:     '#06b6d4',
+    fx:         '#0ea5e9',
+    dynamics:   '#22d3ee',
 
-    // Утилиты / роутинг
-    mixer:      '#14b8a6',   // бирюза — микшеры
-    switch:     '#10b981',   // зелёный — свитчи / роутинг
-    logic:      '#84cc16',   // лайм — логика
-    math:       '#eab308',   // жёлтый — математика
-    util:       '#94a3b8',   // серый-синий — прочее
+    mixer:      '#14b8a6',
+    switch:     '#10b981',
+    logic:      '#84cc16',
+    math:       '#eab308',
+    util:       '#94a3b8',
 
-    // Ввод / вывод / MIDI
-    io:         '#3ecf6e',   // зелёный — Input/Output
-    midi:       '#f472b6',   // розовый — MIDI
-    control:    '#60a5fa',   // синий — управление
+    io:         '#3ecf6e',
+    midi:       '#f472b6',
+    control:    '#60a5fa',
 
-    // Прочее
-    custom:     '#a78bfa',   // лаванда — пользовательские
-    unknown:    '#64748b',   // серый — без категории
+    custom:     '#a78bfa',
+    unknown:    '#64748b',
 };
-
 
 export function getModuleCategoryColor(module) {
-    const name = module?.jsonName || module?.type || module?.title;
-    if (!name) return MODULE_CATEGORY_COLORS.unknown;
-
-    // 1. Явная категория — только если валидна (из CATEGORIES)
+    // 1. Явная валидная категория
     if (isValidCategory(module?.category)) {
-        return MODULE_CATEGORY_COLORS[module.category];
+        return MODULE_CATEGORY_COLORS[module.category] ?? MODULE_CATEGORY_COLORS.unknown;
     }
 
-    // 2. Группа из ALL_NM2 (ContextMenu — источник правды)
-    const group = MODULE_GROUP_OF[name];
-    if (group) {
-        // Группа → ключ цвета. Можно мапить 1:1 или переименовать.
-        const cat = GROUP_TO_CATEGORY[group] || group.toLowerCase();
-        return MODULE_CATEGORY_COLORS[cat] || MODULE_CATEGORY_COLORS.unknown;
-    }
-
-    // 3. User-модули без категории → custom
+    // 2. User-модули без категории → custom
     if (module?.isUser) return MODULE_CATEGORY_COLORS.custom;
 
+    // 3. Всё остальное → unknown
     return MODULE_CATEGORY_COLORS.unknown;
 }

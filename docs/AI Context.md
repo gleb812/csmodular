@@ -88,6 +88,12 @@ Only sends **UI commands** — never touches `CsoundEngine` directly. Full API �
 **`layer`** — `'voice'` (default) / `'fx'`. Cables only within same layer.
 **`category`** — required, must be in `CATEGORIES` (`src/moduleCategories.js`). `normalizeCategory` falls back to `'custom'`.
 - **`midiMappings[]`** — runtime-only mapping (`{cc, channel}`) for Knob/Slider. Lives on `BaseComponent.midiMapping`; serialized only if set. Not a Csound concern.
+- **ConnectorIndex** — 0-based position of a jack in `inputs[]` / `outputs[]`.
+  Derived by `ModuleFactory._assignConnectorIndices()` on every `createModule()`.
+  **Never persisted** in module JS (`ComponentRegistry.serialize` omits it).
+  The ONLY stable jack address used by `PatchLoader.findJackByPin()`.
+  Not to be confused with `component.id` (local, per-module) or `module.jsonId`
+  (unique instance id).
 
 ## Module status (DEV / BUILD)
 
@@ -120,7 +126,7 @@ Dots hidden in BUILD (`IS_DEV = false`), stars shown.
 | `logic` | yellow `#fde047` | `k` | logic/logicAudio |
 | `logicAudio` | orange `#f97316` | `a` | logic/logicAudio |
 
-`logic`/`logicAudio` — NM2 visual only, both `control` in Csound.
+`logic`/`logicAudio` — both `control` in Csound.
 `bandwidth: 'static' | 'dynamic'` — corresponds to UDO `;@ strict 0|1`.
 
 **Jack color = its own `type`** (`CABLE_COLORS[this.type]`, `BaseJack.getEffectiveColor()`).
@@ -203,6 +209,9 @@ Tables loaded via `/tables/<name>.json` (flat array), HTML-fallback detection, c
 ### Recompile
 `reset()` + `setOption('-odac')` + `compileOrc` + `readScore` + `start`.
 After: `_resyncAllControls()` pushes UI values back.
+`CsoundGenerator.reset()` clears `modules`, `includes`, cables. **Base UDOs
+(`led_rms.txt`, `mVU_rms.txt`) must be re-added after `includes.clear()`** —
+they are not module-bound.
 
 ### Hot-reload module (main app, user only)
 `BottomBar ⟳` → `ModularSystem.reloadUserModules()` →
@@ -210,6 +219,25 @@ After: `_resyncAllControls()` pushes UI values back.
 `moduleFactory.refreshPanel(panel, newDef)` →
 `csoundGen.removeModule` + `addModule` → `recomputeVariantUI()` (recompile).
 Full pipeline + ограничения → *Module Editor* → *Hot-reload*.
+
+### Create module
+1. `ModuleFactory.createModule(type, gridX, gridY, layer)` → `Panel`
+2. `_assignConnectorIndices(panel, definition)` — set `ConnectorIndex` on all
+   Input/Output by position in `definition.inputs[]` / `outputs[]`
+3. `CsoundGenerator.addModule(...)`
+4. `recomputeVariantUI()`
+5. Recompile
+
+## Jack addressing (cables in patch JSON)
+
+Cable endpoint: `{ module, id, jack, pin }`
+- `module` — type name (readable)
+- `id` — `module.jsonId` (unique instance)
+- `jack` — `jack.ConnectorIndex` (position in `inputs[]`/`outputs[]`)
+- `pin` — `in` | `out`
+
+`PatchLoader._sortedJacks()` sorts jacks by `ConnectorIndex` (fallback to `id`).
+`findJackByPin(module, jack, pin)` → `_sortedJacks(module, pin)[jack]`.
 
 ## Oscilloscope
 
@@ -287,6 +315,20 @@ Figma-style, right-top, `MINIMAP_WIDTH=220`, `MINIMAP_HEIGHT=160`. Toggle: hotke
 
 `MODULE_CATEGORY_COLORS` — `osc`, `noise`, `sample`, `lfo`, `env`, `filter`, `fx`, `dynamics`, `mixer`, `switch`, `logic`, `math`, `util`, `io`, `midi`, `control`, `custom`, `unknown`.
 
+## Splash / Start patch
+
+`Splash.maybeShowOnStartup()` shows once per session; resets when
+`__APP_VERSION__` changes (localStorage `csmodular:splash-version`).
+Returns a Promise resolved on close — `main.js` **awaits** it before deciding
+whether to load the start patch.
+
+Checkbox «Open demo patch on launch» — `localStorage csmodular:startPatch-pref`
+(`'open'` | `'closed'`, default `'open'`). `getStartPatchPref()` /
+`setStartPatchPref()` exported from `Splash.js`.
+
+Start patch: `public/patches/startup.json` → `PatchLoader.loadBuiltinPatch(name)`
+(fetches `/patches/<name>.json`, SPA-fallback guard).
+
 ## MIDI
 
 **Chain:** Web MIDI API → `MidiManager.onMessage` → `CsoundEngine.midiMessage(status, d1, d2)` → Csound `instr 3` → `gkGate`/`gkNote`.
@@ -308,7 +350,7 @@ Figma-style, right-top, `MINIMAP_WIDTH=220`, `MINIMAP_HEIGHT=160`. Toggle: hotke
 | `ModularSystem` | `main.js` | Coordinator (canvas, layers, animation, grid, minimap, reloadUserModules |
 | `ModuleFactory` | `src/ModuleFactory.js` | `loadModule(lib, name)`, `createModule(type, ...)` |
 | `PatchManager` | `src/PatchManager.js` | Cables, jack coloring |
-| `PatchLoader` | `src/PatchLoader.js` | Load/save patches |
+| `PatchLoader` | `src/PatchLoader.js` | Load/save patches, `loadBuiltinPatch(name)` |
 | `LayerManager` | `src/managers/LayerManager.js` | Voice/fx arrays, collisions, `findFreeSpace`, `checkSaneDistance` |
 | `Grid` | `src/grid/Grid.js` | Step, snap, crosses |
 | `EventManager` | `src/managers/EventManager.js` | Mouse events, pan, zoom |
@@ -326,7 +368,7 @@ Figma-style, right-top, `MINIMAP_WIDTH=220`, `MINIMAP_HEIGHT=160`. Toggle: hotke
 | `Cable` | `src/Cable.js` | `typeColor` = source jack color |
 | `libraryStore` | `src/api/libraryStore.js` | Module libraries |
 | `moduleStatusStore` | `src/api/moduleStatusStore.js` | Status + colors + `IS_DEV` |
-| `moduleCategories` | `src/moduleCategories.js` | `ALL_NM2`, `MODULE_GROUP_OF` |
+| `moduleCategories` | `src/moduleCategories.js` |
 | `spatial` | `src/utils/spatial.js` | `median`, `bboxNearModules`, `groupByOctant`, `isOutputModule` |
 | `Theme`, `themeStore`, `currentTheme` | `src/theme/*.js` | Classic / LCD |
 | `MidiManager` | `src/midi/MidiManager.js` | Web MIDI API receiver |
@@ -491,7 +533,9 @@ Pipeline:
 - `Theme.js` — getters (`isLcd`, `getAccentColor`, `applyGlow`, `lineWidth`, `getCableWidth`, `getJackStyle`, `getGridStyle`, ...)
 - `currentTheme.js` — singleton + `window.__theme__`
 
-Presets: **classic** / **lcd**. Deep merge for `lcd`, `cables`, `background`, `grid`.
+Presets: **lcd** (public, default) / **classic** (dev only, `__APP_IS_DEV__`).
+`DEFAULT_THEME.preset = 'lcd'`. `themeStore.load()` falls back `classic → lcd`
+in build. `DesignSettingsPanel` hides preset switcher when only one is available.
 
 **All `draw()` use `getCurrentTheme()`.** Jack colors in Classic = `CABLE_COLORS[type]` (never from theme). MiniVU LCD = single accent fill.
 
@@ -509,6 +553,9 @@ Presets: **classic** / **lcd**. Deep merge for `lcd`, `cables`, `background`, `g
 - `resolve.alias` — `@` → `src`, `@editor` → `editor`
 - `build.rollupOptions.input` — `main` + `editor`
 - **`plugins: [stableModulesOnly()]`** — build filter (see *Module status*)
+- **`public/_redirects`** → `/editor /editor/editor.html 200` (Cloudflare Pages
+  rewrite for `/editor`, mirrors dev middleware). `rollupOptions.input` must
+  include `editor` for `dist/editor/editor.html` to exist.
 
 ## Keyboard shortcuts
 
@@ -569,6 +616,15 @@ Only non-obvious rules that are easy to violate. Full list → `ARCHITECTURE.md`
 36. **BPM channel name is `"bpm"`** (literal) — `setChannel('bpm', v)` ↔ `chnget "bpm"` in `instr 5`. No constants on either side.
 37. **`instr 5` (BPM poller)** must be scheduled via `generateSco()` — never hardcode `sco` in `CsoundEngine`. Otherwise `i5` silently never starts.
 38. **MIDI Learn:** `BaseComponent.midiMapping` (default `null`); `Knob`/`Slider` override `applyMidiValue(0..127)`. `_handleMidiCC` must set `_voiceDirty`/`_fxDirty` after applying (setValue does NOT redraw by itself).
+39. **`ConnectorIndex` is assigned ONLY by `ModuleFactory._assignConnectorIndices()`**
+    from `definition.inputs` / `definition.outputs` position. Never read it from
+    module JS (`ComponentRegistry.serialize` must NOT write it). Never sort jacks
+    by `id` in `PatchLoader` — sort by `ConnectorIndex` (fallback `id` for legacy).
+40. **`getComponentJsonId()` must use `=== undefined || === null`**, not `!value`
+    (`ConnectorIndex = 0` is valid and must not be treated as missing).
+41. **`CsoundGenerator.reset()` must re-add base UDOs** (`led_rms.txt`,
+    `mVU_rms.txt`) after `includes.clear()`. Otherwise indicators silently lose
+    their opcodes after New/Load.
 
 ## Style
 

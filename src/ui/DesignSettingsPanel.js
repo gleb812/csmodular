@@ -92,13 +92,16 @@ export class DesignSettingsPanel {
         const settings = theme.settings;
 
         // === PRESET ===
-        content.appendChild(this.buildSection('Preset', [
-            this.buildRadioGroup('preset', settings.preset, [
-                { value: 'classic', label: '🎛 Classic' },
-                { value: 'lcd', label: '📺 LCD' },
-            ]),
-        ]));
+        const presetOptions = [
+            { value: 'classic', label: '🎛 Classic' },
+            { value: 'lcd', label: '📺 LCD' },
+        ].filter(opt => opt.value !== 'classic' || __APP_IS_DEV__);
 
+        if (presetOptions.length > 1) {
+            content.appendChild(this.buildSection('Preset', [
+                this.buildRadioGroup('preset', settings.preset, presetOptions),
+            ]));
+        }
         // === LCD (показывается только в LCD) ===
         if (settings.preset === 'lcd') {
             content.appendChild(this.buildSection('Color', [

@@ -11,7 +11,6 @@ export class MiniVU extends BaseComponent {
         this.sourceChannel = null;   // Csound-канал (генерируется)
 
         // ⭐ Пороги зон (0..1 по уровню RMS)
-        // TODO: сопоставить с NM2
         this.thresholdGreen = 0.5;   // ниже — зелёная
         this.thresholdYellow = 0.8;  // ниже — жёлтая, выше — красная
 

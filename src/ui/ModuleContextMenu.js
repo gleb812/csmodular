@@ -1,7 +1,6 @@
 // src/ui/ModuleContextMenu.js
 import { ColorPicker } from './ColorPicker.js';
 import { injectColorPickerStyles } from './ColorPickerStyles.js';
-import { MODULE_GROUP_OF } from '../moduleCategories.js';
 
 export class ModuleContextMenu {
   constructor(system) {
@@ -244,17 +243,15 @@ export class ModuleContextMenu {
     return header;
   }
 
-  // ⭐ Группа NM2 для текущего модуля
   _getModuleCategoryLabel() {
-    const m = this.currentModule;
-    if (!m) return '';
+      const m = this.currentModule;
+      if (!m) return '';
 
-    const name = m.jsonName || m.type || m.title;
-    const group = MODULE_GROUP_OF[name];
-    if (group) return group;
-
-    if (m.isUser) return 'User';
-    return 'Unknown';
+      if (m.category) {
+          return m.category.charAt(0).toUpperCase() + m.category.slice(1);
+      }
+      if (m.isUser) return 'User';
+      return 'Unknown';
   }
 
   // ============================================================

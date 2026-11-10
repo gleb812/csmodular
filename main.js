@@ -32,7 +32,7 @@ import { MidiManager } from './src/midi/MidiManager.js';
 import { OscManager } from './src/midi/OscManager.js';
 import { OscSettingsPanel } from './src/ui/OscSettingsPanel.js';
 import { Minimap } from './src/ui/Minimap.js';
-import { Splash } from './src/ui/Splash.js'; 
+import { Splash, getStartPatchPref } from './src/ui/Splash.js'; 
 
 const DYNAMIC_COMPONENT_TYPES = new Set(['LED', 'MiniVU', 'Graph']);
 
@@ -1168,14 +1168,13 @@ class ModularSystem {
   }
 
   getComponentJsonId(component) {
-    // component.id - строка ("114"), а нам нужен ConnectorIndex!
-    if (!component || !component.ConnectorIndex) {
-      console.warn(`Компонент не имеет ConnectorIndex:`, component);
-      return 0;
-    }
-
-    // Возвращаем ConnectorIndex (число)
-    return parseInt(component.ConnectorIndex) || 0;
+      if (!component ||
+          component.ConnectorIndex === undefined ||
+          component.ConnectorIndex === null) {
+          console.warn(`Компонент не имеет ConnectorIndex:`, component);
+          return 0;
+      }
+      return parseInt(component.ConnectorIndex) || 0;
   }
 
   getColorName(colorHex) {
@@ -2512,7 +2511,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     modularSystem = new ModularSystem();
     window.modularSystem = modularSystem;
     window.system = modularSystem;  
-    modularSystem.splash.maybeShowOnStartup();
+
+    // ⭐ Show splash (if needed) and WAIT for user to close it
+    // — the checkbox inside splash may change the start-patch preference,
+    //   so we must read it only AFTER splash closes.
+    const splashPromise = modularSystem.splash.maybeShowOnStartup();
+    if (splashPromise) await splashPromise;
+
+    if (getStartPatchPref() === 'open') {
+        const result = await modularSystem.patchLoader.loadBuiltinPatch('startup');
+        if (result.success) {
+            modularSystem.currentPatchFilename = result.filename;
+            modularSystem.showNotification(`✅ Demo patch loaded`);
+        } else {
+            console.warn('[startup] demo patch not loaded:', result.error);
+        }
+    }
 
     // ⭐ MIDI: не автостартуем — браузер требует клик пользователя для разрешения.
     // Запуск — через кнопку MIDI в BottomBar.

@@ -195,12 +195,46 @@ export class ModuleFactory {
 
         // Создаем компоненты 
         this._addComponentsToPanel(panel, definition.components);
-        
+        this._assignConnectorIndices(panel, definition);
         // Сохраняем оригинальные размеры для масштабирования
         panel.originalPixelWidth = definition.width || PANEL_WIDTH;
         panel.originalPixelHeight = definition.height || (gridHeight * BASE_STEP_Y);
         
         return panel;
+    }
+
+    /**
+     * Assign ConnectorIndex to jacks based on their position in
+     * definition.inputs / definition.outputs.
+     *
+     * ConnectorIndex is the ONLY stable jack address used by PatchLoader
+     * to restore cables. It matches the UDO's xin order and is independent
+     * of component.id and of components[] order.
+     *
+     * @param {Panel} panel
+     * @param {object} definition
+     */
+    _assignConnectorIndices(panel, definition) {
+        const assign = (ids, targetType) => {
+            if (!Array.isArray(ids)) return;
+            ids.forEach((id, idx) => {
+                const comp = panel.components.find(c =>
+                    String(c.id) === String(id) &&
+                    c.constructor.name === targetType
+                );
+                if (comp) {
+                    comp.ConnectorIndex = idx;
+                } else {
+                    console.warn(
+                        `[ModuleFactory] ${targetType} id=${id} declared in ` +
+                        `${targetType === 'Input' ? 'inputs' : 'outputs'} ` +
+                        `but not found in components`
+                    );
+                }
+            });
+        };
+        assign(definition.inputs, 'Input');
+        assign(definition.outputs, 'Output');
     }
 
     _addComponentsToPanel(panel, components) {

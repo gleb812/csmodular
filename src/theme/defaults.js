@@ -4,7 +4,7 @@
 // Используются при первом запуске и при сбросе.
 
 export const DEFAULT_THEME = {
-    preset: 'classic',
+    preset: 'lcd',
 
     lcd: {
         color: '#4ec9c9',

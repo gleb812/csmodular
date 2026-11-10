@@ -1,5 +1,6 @@
 // src/csound/CsoundGenerator.js
 import { libraryStore } from '../api/index.js';
+const BASE_UDOS = ['led_rms.txt', 'mVU_rms.txt'];
 export class CsoundGenerator {
     constructor() {
         // Множество инклудов (typeId)
@@ -24,8 +25,7 @@ export class CsoundGenerator {
         this._availableAudioBuses = [];   // освободившиеся audio номера
         this._availableControlBuses = []; // освободившиеся control номера
         // Шаблон Csound (будет обновляться динамически)      
-        this.includes.add('led_rms.txt');
-        this.includes.add('mVU_rms.txt');  
+        for (const udo of BASE_UDOS) this.includes.add(udo); 
         // ⭐ Scope tables
         this._scopeTables = new Map();      // cableId -> { tableNum, bus, isAudio }
         this._scopeTableCounter = 9000;
@@ -1365,6 +1365,7 @@ export class CsoundGenerator {
     
     reset() {
         this.includes.clear();
+        for (const udo of BASE_UDOS) this.includes.add(udo);
         this.modules.clear();
         this._activeCables = [];
         this._cableBusMap = {};

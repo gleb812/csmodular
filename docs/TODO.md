@@ -2,7 +2,6 @@
 # TODO — CsModular
 
 Roadmap for the alpha and beyond. Done items are removed, not struck through.
-NM2 legacy is gone — no `patch_params.py`, no `moduleStore`, no `typeID`.
 
 ## 🔥 Now (alpha blockers)
 

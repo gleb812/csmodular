@@ -507,10 +507,16 @@ export class PatchLoader {
         const jacks = (module.components || []).filter(
             c => c.constructor?.name === targetType
         );
-        jacks.sort((a, b) =>
-            parseInt(a.id || a.originalID || '0') -
-            parseInt(b.id || b.originalID || '0')
-        );
+        // ⭐ Sort by ConnectorIndex (positional index in definition.inputs/outputs).
+        //    Fallback to id for legacy modules without ConnectorIndex.
+        jacks.sort((a, b) => {
+            const ai = a.ConnectorIndex;
+            const bi = b.ConnectorIndex;
+            if (ai !== undefined && bi !== undefined) return ai - bi;
+            // Legacy fallback: sort by id
+            return parseInt(a.id || a.originalID || '0') -
+                   parseInt(b.id || b.originalID || '0');
+        });
         return jacks;
     }
 
@@ -619,6 +625,35 @@ export class PatchLoader {
     
     // === ЗАГРУЗКА ФАЙЛОВ JSON ===
 
+    /**
+     * Load a builtin patch from public/patches/<name>.json.
+     * Works both in web (fetch from served public/) and Tauri
+     * (public/ is bundled into the app).
+     * @param {string} name — patch name without .json
+     * @returns {Promise<{success: boolean, filename?: string, error?: string}>}
+     */
+    async loadBuiltinPatch(name) {
+        try {
+            const res = await fetch(`/patches/${name}.json`);
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status} for /patches/${name}.json`);
+            }
+            const text = await res.text();
+
+            // Vite SPA fallback guard — same check as libraryStore.looksLikeHtml
+            if (/^\s*<(!doctype|html)/i.test(text)) {
+                throw new Error(`/patches/${name}.json returned HTML (SPA fallback)`);
+            }
+
+            const patchData = JSON.parse(text);
+            await this.loadPatch(patchData);
+
+            return { success: true, filename: `${name}.json`, data: patchData };
+        } catch (error) {
+            console.error(`[PatchLoader] loadBuiltinPatch("${name}") failed:`, error);
+            return { success: false, error: error.message };
+        }
+    }
 
     async loadPatchFromFile() {
         return new Promise((resolve) => {

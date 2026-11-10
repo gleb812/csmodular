@@ -6,14 +6,13 @@ A next step of the [pch2csd](https://github.com/gleb812/pch2csd) project.
 
 ## Features
 
-- **Four jack types** — `audio` / `control` (Csound a/k) + `logic` / `logicAudio` (visual).
-- **Dynamic jacks** — auto-switch by connection; `static` jacks keep their type (converters inserted in ORC).
+- **Audio & control jacks** — auto-switch by connection; `static` jacks keep type (converters in ORC).
 - **Module variants** — `;@ variant k/a`, auto-promote on audio-rate cable.
 - **MIDI input** (Web MIDI API) → Csound.
 - **MIDI Learn** — right-click any knob/slider, move a CC, done.
 - **Tempo transport** — 7-segment BPM display, drag to change, or lock to external **MIDI Clock** (`EXT`).
 - **Oscilloscope** (multi-channel), **LED / MiniVU** indicators.
-- **Two themes** — Classic / LCD; live editor (`D`).
+- **Themeable UI** — LCD theme with live editor (`D`).
 - **Module Editor** (`editor.html`) — IDE-style, protected Csound structure, user module libraries.
 - **External control** — HTTP + OSC bridge (`CSP_API.md`) for scripting and remote patching.
 
@@ -73,7 +72,7 @@ User libraries (desktop) live in `~/Documents/CsModular/libraries/`.
 │   ├── csound/          # CsoundEngine, CsoundGenerator, MappingTables
 │   ├── components/      # UI components (Knob, Slider, LED, MiniVU, ...)
 │   ├── managers/        # EventManager, LayerManager, UIManager
-│   ├── theme/           # Classic / LCD themes
+│   ├── theme/           # LCD theme
 │   └── ui/              # ContextMenu, DesignSettingsPanel, ScopeWindow, ...
 ├── editor/              # Module Editor (separate HTML entry)
 │   ├── editor.html      # entry point
@@ -101,6 +100,7 @@ npx tauri dev       # verify Tauri-specific (fs, native windows)
 ```
 
 Don't run both — port 3000 is shared.
+
 
 ## Documentation
 

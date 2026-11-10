@@ -374,7 +374,7 @@ export class CsoundEngine {
 
     /**
      * Переслать MIDI-сообщение в Csound.
-     * Csound читает его через midiin в instr 3 (NM2-совместимый MIDI-фильтр),
+     * Csound читает его через midiin в instr 3,
      * который выставляет gkGate / gkNote.
      * @param {number} status
      * @param {number} data1

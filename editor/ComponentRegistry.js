@@ -353,7 +353,6 @@ export const ComponentRegistry = {
             jackType: c._jackType ?? c.type ?? 'audio',
             bandwidth: 'dynamic',
             ConnectorName: c.label ?? c.ConnectorName ?? 'In',
-            ConnectorIndex: c.ConnectorIndex ?? 0,
         }),
 
         deserialize: (d, ctx) => {
@@ -406,7 +405,6 @@ export const ComponentRegistry = {
             jackType: c._jackType ?? c.type ?? 'audio',
             bandwidth: 'dynamic',
             ConnectorName: c.label ?? c.ConnectorName ?? 'Out',
-            ConnectorIndex: c.ConnectorIndex ?? 0,
         }),
 
         deserialize: (d, ctx) => {
@@ -629,7 +627,6 @@ export const ComponentRegistry = {
 
     LevelShift: {
         // ⚠️ Конструктор игнорирует size/width/height, ставит 15×12.
-        //    В NM2 идёт в modes[], не в params[] — сейчас не сохраняем.
         label: 'Level',
         category: 'display',
         paletteSize: { width: 15, height: 12 },

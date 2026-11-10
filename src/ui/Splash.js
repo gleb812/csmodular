@@ -1,27 +1,28 @@
 // src/ui/Splash.js
 //
-// Splash / About — одно модальное окно, два режима вызова:
-//   • openSplash() — первый заход в сеансе (sessionStorage пуст)
-//   • openAbout()  — повторный вызов (кнопка «?» в BottomBar)
+// Splash / About — one modal, two entry modes:
+//   • openSplash() — first visit in session (sessionStorage empty)
+//   • openAbout()  — repeated call ("?" button in BottomBar)
 //
-// Картинка: public/splash/art.png (1200×680), показывается 600×340.
-// Текст — отдельный блок ПОВЕРХ картинки, координаты в TEXT_LAYOUT.
+// Image: public/splash/art.png (1200×680), displayed 600×340.
+// Text — separate block ON TOP of the image, coordinates in TEXT_LAYOUT.
 //
-// Закрытие: клик по картинке (в любом месте), Escape.
-// Enter не используется. Кнопки OK нет.
+// Close: click on the card (image), Escape.
+// Enter is not used. No OK button.
 
 const SESSION_KEY = 'csmodular:splash-seen';
+const VERSION_KEY = 'csmodular:splash-version';
+const START_PATCH_KEY = 'csmodular:startPatch-pref';
 
-// ⭐ ФИЗИЧЕСКИЙ размер PNG (для <img> srcset/width/height)
+// ⭐ Physical PNG size (for <img> srcset/width/height)
 const ART_WIDTH  = 1200;
 const ART_HEIGHT = 680;
 
-// ⭐ ОТОБРАЖАЕМЫЙ размер (CSS px). 600×340 = ровно половина → чётко на Retina.
-//    Хочешь 1:1 — поставь 1200/680, но тогда может не влезть на ноутбуке.
+// ⭐ Display size (CSS px). 600×340 = exactly half → crisp on Retina.
 const ART_DISPLAY_WIDTH  = 600;
 const ART_DISPLAY_HEIGHT = 340;
 
-// ⭐ ТЕКСТОВЫЙ БЛОК ПОВЕРХ КАРТИНКИ (версия/слоган/теглайн/автор)
+// ⭐ TEXT BLOCK ON TOP OF THE IMAGE (version/slogan/tagline/author)
 const TEXT_LAYOUT = {
     left: 40,
     top:  200,
@@ -38,17 +39,12 @@ const TEXT_LAYOUT = {
     shadow: '0 1px 2px rgba(0,0,0,0.85), 0 0 8px rgba(0,0,0,0.6)',
 };
 
-// ⭐ BUILD-СТРОКА — отдельный элемент, независимые координаты.
-//    Двигай left/top куда хочешь: правый нижний угол, левый верхний и т.д.
-//    Пример ниже — правый нижний угол карточки 600×340.
+// ⭐ BUILD STRING — separate element, independent coordinates.
 const BUILD_LAYOUT = {
-    left: null,        // null = прижать к правому краю (используется right)
-    right: 12,         // px от правого края
-    top: null,         // null = прижать к нижнему краю (используется bottom)
-    bottom: 8,         // px от нижнего края
-    // Если хочешь фиксированные координаты — поставь left/top числами,
-    // а right/bottom = null:
-    //   left: 40, top: 320, right: null, bottom: null,
+    left: null,        // null = pin to right edge (right is used)
+    right: 12,
+    top: null,         // null = pin to bottom edge (bottom is used)
+    bottom: 8,
 
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
     fontSize: 10,
@@ -56,8 +52,34 @@ const BUILD_LAYOUT = {
     opacity: 0.9,
     shadow: '0 1px 2px rgba(0,0,0,0.85), 0 0 6px rgba(0,0,0,0.6)',
     letterSpacing: 0.3,
-    align: 'right',    // 'left' | 'right' — для text-align
+    align: 'right',    // 'left' | 'right' — for text-align
 };
+
+// ⭐ Checkbox row, bottom-left of the card
+const CHECKBOX_LAYOUT = {
+    left: 12,
+    bottom: 8,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
+    fontSize: 10,
+    color: '#8a8a8a',
+    gap: 6,
+    shadow: '0 1px 2px rgba(0,0,0,0.85), 0 0 6px rgba(0,0,0,0.6)',
+};
+
+// ============================================================
+//  Public preference helpers (used by main.js)
+// ============================================================
+
+/** @returns {'open' | 'closed'} */
+export function getStartPatchPref() {
+    const v = localStorage.getItem(START_PATCH_KEY);
+    return v === 'closed' ? 'closed' : 'open';
+}
+
+/** @param {boolean} open */
+export function setStartPatchPref(open) {
+    localStorage.setItem(START_PATCH_KEY, open ? 'open' : 'closed');
+}
 
 export class Splash {
     constructor(system) {
@@ -72,14 +94,22 @@ export class Splash {
     // ============================================================
 
     maybeShowOnStartup() {
-        if (sessionStorage.getItem(SESSION_KEY)) return false;
+        const version = (typeof __APP_VERSION__ !== 'undefined') ? __APP_VERSION__ : '0.0.0';
+
+        // Reset session flag when app version changes
+        const lastSeen = localStorage.getItem(VERSION_KEY);
+        if (lastSeen !== version) {
+            sessionStorage.removeItem(SESSION_KEY);
+            localStorage.setItem(VERSION_KEY, version);
+        }
+
+        if (sessionStorage.getItem(SESSION_KEY)) return null;
         sessionStorage.setItem(SESSION_KEY, '1');
-        this.openSplash();
-        return true;
+        return this.openSplash();
     }
 
-    openSplash() { this._open(); }
-    openAbout()  { this._open(); }
+    openSplash() { return this._open(); }
+    openAbout()  { return this._open(); }
 
     close() {
         if (!this._root) return;
@@ -95,6 +125,13 @@ export class Splash {
 
         const canvas = document.getElementById('modularCanvas');
         if (canvas) canvas.focus?.();
+
+        if (this._closedPromiseResolve) {
+            this._closedPromiseResolve();
+            this._closedPromiseResolve = null;
+            this._closedPromise = null;
+        }
+
     }
 
     // ============================================================
@@ -102,7 +139,11 @@ export class Splash {
     // ============================================================
 
     _open() {
-        if (this._root) return;
+        if (this._root) return this._closedPromise;  
+
+        this._closedPromise = new Promise(resolve => {
+            this._closedPromiseResolve = resolve;
+        });
 
         const version = (typeof __APP_VERSION__ !== 'undefined') ? __APP_VERSION__ : '0.0.0';
         const isDev   = (typeof __APP_IS_DEV__ !== 'undefined') ? __APP_IS_DEV__ : false;
@@ -110,10 +151,10 @@ export class Splash {
         const rawBuild = (typeof __APP_BUILD__ !== 'undefined') ? __APP_BUILD__ : '';
         const buildLabel = this._formatBuild(rawBuild);
 
-        // ⭐ Правь этот блок под релиз. Пустые строки просто не рендерятся.
+        // ⭐ Edit this block for release. Empty lines are simply not rendered.
         const lines = {
-            version: versionLabel,                     // "0.1.2-dev"
-            slogan:  'Welcome to Panels!',        // "что нового" / пусто
+            version: versionLabel,
+            slogan:  'Welcome to Panels!',
             tagline: 'A Modular System with Csound inside',
             author:  'Gleb Rogoziński · 2026',
         };
@@ -137,7 +178,7 @@ export class Splash {
             font-family: ${TEXT_LAYOUT.fontFamily};
         `;
 
-        // ⭐ Карточка ровно по размеру отображаемой картинки
+        // ⭐ Card exactly the size of the displayed image
         const card = document.createElement('div');
         card.style.cssText = `
             position: relative;
@@ -152,12 +193,12 @@ export class Splash {
             background: #14141a;
         `;
 
-        // Картинка (заполняет карточку)
+        // Image (fills the card)
         const img = document.createElement('img');
         img.src = '/splash/art.png';
         img.alt = '';
-        img.width  = ART_WIDTH;   // физический
-        img.height = ART_HEIGHT;  // физический
+        img.width  = ART_WIDTH;
+        img.height = ART_HEIGHT;
         img.draggable = false;
         img.style.cssText = `
             position: absolute;
@@ -166,12 +207,12 @@ export class Splash {
             height: 100%;
             object-fit: cover;
             display: block;
-            pointer-events: none;   /* клик ловит карточка */
+            pointer-events: none;
             user-select: none;
         `;
         card.appendChild(img);
 
-        // ⭐ Текстовый блок ПОВЕРХ картинки
+        // ⭐ Text block ON TOP of the image
         const text = document.createElement('div');
         text.style.cssText = `
             position: absolute;
@@ -182,7 +223,7 @@ export class Splash {
             font-size: ${TEXT_LAYOUT.fontSize}px;
             line-height: ${TEXT_LAYOUT.lineHeight};
             text-align: left;
-            pointer-events: none;   /* клик идёт в карточку */
+            pointer-events: none;
             text-shadow: ${TEXT_LAYOUT.shadow};
         `;
 
@@ -208,11 +249,11 @@ export class Splash {
                 lines.author,
                 `color:${TEXT_LAYOUT.authorColor}; font-size:${TEXT_LAYOUT.fontSize - 1}px;`
             ),
-  
         ].join('');
 
         card.appendChild(text);
-        // ⭐ BUILD-СТРОКА — отдельный элемент поверх картинки, свои координаты
+
+        // ⭐ BUILD STRING — bottom-right
         if (buildLabel) {
             const buildEl = document.createElement('div');
             buildEl.textContent = buildLabel;
@@ -235,17 +276,49 @@ export class Splash {
             card.appendChild(buildEl);
         }
 
-        this._root.appendChild(card);
-        this._root.appendChild(card);
+        // ⭐ Start-patch checkbox — bottom-left
+        const cbWrap = document.createElement('label');
+        cbWrap.style.cssText = `
+            position: absolute;
+            left: ${CHECKBOX_LAYOUT.left}px;
+            bottom: ${CHECKBOX_LAYOUT.bottom}px;
+            display: flex;
+            align-items: center;
+            gap: ${CHECKBOX_LAYOUT.gap}px;
+            font-family: ${CHECKBOX_LAYOUT.fontFamily};
+            font-size: ${CHECKBOX_LAYOUT.fontSize}px;
+            color: ${CHECKBOX_LAYOUT.color};
+            text-shadow: ${CHECKBOX_LAYOUT.shadow};
+            pointer-events: auto;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        `;
+        // Do not close splash when clicking the checkbox
+        cbWrap.addEventListener('click', e => e.stopPropagation());
 
-        // ⭐ Клик в любом месте карточки (то есть по картинке) — закрыть
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = getStartPatchPref() === 'open';
+        cb.style.cssText = `cursor: pointer; margin: 0;`;
+        cb.addEventListener('change', () => setStartPatchPref(cb.checked));
+
+        cbWrap.appendChild(cb);
+        cbWrap.appendChild(document.createTextNode('Open demo patch on launch'));
+        card.appendChild(cbWrap);
+
+        // ⭐ Click anywhere on the card (i.e. the image) — close
         card.addEventListener('click', () => this.close());
+
+        this._root.appendChild(card);
 
         this._injectKeyframes();
         this._inertEverythingElse();
 
         document.addEventListener('keydown', this._onKeyDown, true);
         document.body.appendChild(this._root);
+
+        return this._closedPromise;
     }
 
     _formatBuild(iso) {
@@ -254,7 +327,6 @@ export class Splash {
             const d = new Date(iso);
             if (isNaN(d.getTime())) return '';
             const pad = n => String(n).padStart(2, '0');
-            // Локальное время, YYYY-MM-DD HH:MM
             const s = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ` +
                       `${pad(d.getHours())}:${pad(d.getMinutes())}`;
             return `build ${s}`;
@@ -266,7 +338,6 @@ export class Splash {
     _onKeyDown(e) {
         if (!this._root) return;
 
-        // Escape — закрыть
         if (e.key === 'Escape') {
             e.preventDefault();
             e.stopPropagation();
@@ -274,7 +345,7 @@ export class Splash {
             return;
         }
 
-        // Enter/Space/Tab — не пускаем наружу (нет фокусируемых элементов)
+        // Enter/Space/Tab — do not let them leak out
         if (e.key === 'Tab' || e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             e.stopPropagation();

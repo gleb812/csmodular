@@ -1,0 +1,160 @@
+{
+  "filename": "startup.json",
+  "modules": [
+    {
+      "name": "LEV",
+      "library": "my-lib",
+      "id": 1,
+      "type": 0,
+      "parameters": "[0,54.47499999999999,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 21,
+      "vpos": 8,
+      "customColor": null,
+      "midiMappings": []
+    },
+    {
+      "name": "Outs2",
+      "library": "my-lib",
+      "id": 2,
+      "type": 0,
+      "parameters": "[0,0,0,0,0,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 25,
+      "vpos": 22,
+      "customColor": null,
+      "midiMappings": []
+    },
+    {
+      "name": "VCO",
+      "library": "my-lib",
+      "id": 3,
+      "type": 0,
+      "parameters": "[0,0,64,64,0,0,0,64,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 35,
+      "vpos": 32,
+      "customColor": null,
+      "midiMappings": []
+    },
+    {
+      "name": "ADSR",
+      "library": "my-lib",
+      "id": 4,
+      "type": 0,
+      "parameters": "[0,0,0,0,0,64,0,0,0,0,0,0,0,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 44,
+      "vpos": 20,
+      "customColor": null,
+      "midiMappings": []
+    }
+  ],
+  "cables": [
+    {
+      "from": {
+        "module": "LEV",
+        "id": 1,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "ADSR",
+        "id": 4,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#3b82f6",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "VCO",
+        "id": 3,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "ADSR",
+        "id": 4,
+        "jack": 1,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "ADSR",
+        "id": 4,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "Outs2",
+        "id": 2,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "ADSR",
+        "id": 4,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "Outs2",
+        "id": 2,
+        "jack": 1,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    }
+  ],
+  "stickers": [
+    {
+      "id": "sticker_1_1794332898744",
+      "type": "text",
+      "z": "front",
+      "gridX": 23,
+      "gridY": 29,
+      "gridW": 21,
+      "gridH": 2,
+      "text": "Welcome to PANELS Modular System based on Csound ",
+      "fontSize": 17,
+      "fontFamily": "Verdana",
+      "textAlign": "left",
+      "lineHeight": 1.8,
+      "padding": 4,
+      "color": "#ffffff",
+      "colorMode": "accent",
+      "marquee": {
+        "enabled": false,
+        "speed": 15,
+        "gap": 115
+      },
+      "bgColor": null,
+      "bgOpacity": 1,
+      "svgString": null,
+      "payload": null
+    }
+  ],
+  "textpad": ""
+}
