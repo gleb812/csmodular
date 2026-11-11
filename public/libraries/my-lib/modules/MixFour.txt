@@ -1,4 +1,4 @@
-opcode Mix4, 0, kkkkk
+opcode MixFour, 0, kkkkk
 kIn1, kIn2, kIn3, kIn4, kOut1 xin
 ain1 zar kIn1
 ain2 zar kIn2

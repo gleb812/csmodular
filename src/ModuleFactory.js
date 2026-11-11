@@ -69,10 +69,16 @@ export class ModuleFactory {
             case 'ButtonIncDec':
                 initialValue = compDef.initialIndex || 0;
                 break;
-            case 'ButtonText':
-                initialValue = compDef.initialState !== undefined
-                    ? (compDef.initialState ? 1 : 0) : 0;
+            case 'ButtonText': {
+                const m = compDef.mode === 'momentary' ? 'momentary' : 'toggle';
+                if (m === 'momentary') {
+                    initialValue = compDef.returnState ? 1 : 0;
+                } else {
+                    initialValue = compDef.initialState !== undefined
+                        ? (compDef.initialState ? 1 : 0) : 0;
+                }
                 break;
+            }
             case 'PartSelector':                                    // ⭐ NEW
                 initialValue = compDef.selectedIndex
                     ?? compDef.menuOffset
@@ -289,14 +295,45 @@ export class ModuleFactory {
                 );
                 break;
 
-            case 'ButtonFlat':
+            case 'ButtonFlat': {
+                // ⭐ New schema: offLabel / onLabel (two-state toggle)
+                // ⭐ Legacy compatibility: positions / labels → first two entries
+                let offLabel = 'OFF';
+                let onLabel = 'ON';
+
+                if (typeof compDef.offLabel === 'string') offLabel = compDef.offLabel;
+                else if (typeof compDef.onLabel === 'string') { /* skip */ }
+
+                if (typeof compDef.onLabel === 'string') onLabel = compDef.onLabel;
+
+                // Legacy: positions / labels (array or string) → use first two
+                if (typeof compDef.offLabel !== 'string' && typeof compDef.onLabel !== 'string') {
+                    const raw = compDef.positions ?? compDef.labels;
+                    const arr = Array.isArray(raw) ? raw : (typeof raw === 'string' ? raw.split(',') : []);
+                    if (arr.length >= 2) {
+                        offLabel = arr[0];
+                        onLabel = arr[1];
+                    } else if (arr.length === 1) {
+                        offLabel = arr[0];
+                        onLabel = arr[0];
+                    }
+                }
+
+                const defaultIndex = compDef.selectedIndex
+                    ?? compDef.currentIndex
+                    ?? compDef.defaultIndex
+                    ?? 0;
+
                 component = new ButtonFlat(
                     tempX, tempY,
                     compDef.width || 36,
                     compDef.height || 12,
-                    compDef.labels ? compDef.labels.join(',') : ''
+                    offLabel,
+                    onLabel,
+                    (defaultIndex === 1) ? 1 : 0,
                 );
                 break;
+            }
 
             case 'ButtonRadio':
                 component = new ButtonRadio(
@@ -350,7 +387,9 @@ export class ModuleFactory {
                     compDef.width || 40,
                     compDef.text || 'M',
                     compDef.initialState !== undefined ? compDef.initialState : true,
-                    compDef.height
+                    compDef.height,
+                    compDef.mode,          // ⭐ 'toggle' | 'momentary'
+                    compDef.returnState,   // ⭐ used only in 'momentary'
                 );
                 break;
 
@@ -617,11 +656,26 @@ export class ModuleFactory {
                 if (compDef.mappingTable !== undefined) comp.mappingTable = compDef.mappingTable;
                 break;
 
-            case 'ButtonFlat':
+            case 'ButtonFlat': {
                 if (compDef.width !== undefined) comp.width = compDef.width;
                 if (compDef.height !== undefined) comp.height = compDef.height;
-                if (Array.isArray(compDef.labels)) comp.positions = compDef.labels.slice();
+
+                if (typeof compDef.offLabel === 'string') comp.offLabel = compDef.offLabel;
+                if (typeof compDef.onLabel === 'string') comp.onLabel = compDef.onLabel;
+
+                // Legacy positions/labels → first two
+                if (typeof compDef.offLabel !== 'string' && typeof compDef.onLabel !== 'string') {
+                    const raw = compDef.positions ?? compDef.labels;
+                    const arr = Array.isArray(raw) ? raw : (typeof raw === 'string' ? raw.split(',') : []);
+                    if (arr.length >= 2) {
+                        comp.offLabel = arr[0];
+                        comp.onLabel = arr[1];
+                    }
+                }
+
+                // selectedIndex НЕ трогаем — пользователь мог переключить
                 break;
+            }
 
             case 'ButtonRadio':
                 if (compDef.buttonCount !== undefined) comp.buttonCount = compDef.buttonCount;
@@ -639,7 +693,13 @@ export class ModuleFactory {
                 if (compDef.width !== undefined) comp.width = compDef.width;
                 if (compDef.height !== undefined) comp.height = compDef.height;
                 if (compDef.text !== undefined) comp.text = compDef.text;
-                // initialState НЕ применяем
+                if (compDef.mode !== undefined) {
+                    comp.mode = (compDef.mode === 'momentary') ? 'momentary' : 'toggle';
+                }
+                if (compDef.returnState !== undefined) {
+                    comp.returnState = Boolean(compDef.returnState);
+                }
+                // initialState / isActive НЕ применяем — пользователь мог переключить
                 break;
 
             case 'TextField':

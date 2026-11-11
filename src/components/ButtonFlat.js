@@ -1,31 +1,72 @@
 // components/ButtonFlat.js
+//
+// Two-state toggle: 0 = OFF, 1 = ON.
+// Click anywhere → toggles between OFF and ON.
+// Csound: sends 0 / 1 to `csoundChannel`.
+//
+// Editor schema: offLabel / onLabel (strings), selectedIndex (0 | 1).
+// Legacy compatibility: `positions: [...]` / `labels: [...]` — first two entries
+// are mapped to offLabel / onLabel; extra entries ignored.
+
 import { BaseComponent } from './BaseComponent.js';
 import { getCurrentTheme } from '../theme/currentTheme.js';
 
 export class ButtonFlat extends BaseComponent {
-    constructor(x, y, width = 80, height = 30, positionsString = 'Off,On') {
+    constructor(x, y, width = 80, height = 30, offLabel = 'OFF', onLabel = 'ON', defaultIndex = 0) {
         super(x, y, width, height);
-        
-        // МИНИМУМ свойств
-        this.positions = positionsString.split(',');
-        this.currentIndex = 0;
-        this.currentLabel = this.positions[this.currentIndex];
-        
-        // ТОЛЬКО базовые флаги
+
         this.isInteractive = true;
         this.supportsDrag = false;
-        
-        // Csound-канал (если нужно)
+
+        this.offLabel = offLabel;
+        this.onLabel = onLabel;
+        this.selectedIndex = (defaultIndex === 1) ? 1 : 0;   // 0 | 1
+
+        // Csound integration
         this.csoundChannel = null;
         this.onChange = null;
+
+        // Tooltip
+        this.showTooltip = false;
+        this.tooltipTimeout = null;
+        this.tooltipDelay = 300;
+
+        // Press animation (same as original)
+        this.isPressed = false;
     }
-    
+
+    // --- helpers ---
+
+    get label() {
+        return this.selectedIndex === 1 ? this.onLabel : this.offLabel;
+    }
+
+    get isOn() {
+        return this.selectedIndex === 1;
+    }
+
+    /** Virtual `positions` array — kept for legacy callers / old modules. */
+    get positions() {
+        return [this.offLabel, this.onLabel];
+    }
+
+    /** Virtual `currentIndex` — mirrors `selectedIndex`. */
+    get currentIndex() {
+        return this.selectedIndex;
+    }
+
+    get currentLabel() {
+        return this.label;
+    }
+
+    // --- draw ---
+
     draw(ctx) {
         const theme = getCurrentTheme();
         const isLcd = theme.isLcd;
         const accent = theme.getAccentColor();
 
-        // === ФОН ===
+        // === FILL ===
         if (isLcd) {
             ctx.fillStyle = this.isPressed
                 ? theme.getAccentAlpha(0.25)
@@ -35,7 +76,7 @@ export class ButtonFlat extends BaseComponent {
         }
         ctx.fillRect(this.x, this.y, this.width, this.height);
 
-        // === РАМКА ===
+        // === BORDER ===
         if (isLcd) {
             ctx.strokeStyle = accent;
             ctx.lineWidth = this.isPressed
@@ -43,13 +84,13 @@ export class ButtonFlat extends BaseComponent {
                 : theme.lineWidth(0.8);
             if (this.isPressed) theme.applyGlow(ctx);
         } else {
-            ctx.strokeStyle = '#666';
+            ctx.strokeStyle = this.isOn ? '#6366f1' : '#666';
             ctx.lineWidth = 1;
         }
         ctx.strokeRect(this.x, this.y, this.width, this.height);
         theme.clearGlow(ctx);
 
-        // === ТЕКСТ ===
+        // === LABEL ===
         if (isLcd) {
             ctx.fillStyle = accent;
             ctx.font = this.isPressed
@@ -63,165 +104,144 @@ export class ButtonFlat extends BaseComponent {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(
-            this.currentLabel,
+            this.label,
             this.x + this.width / 2,
             this.y + this.height / 2
         );
         theme.clearGlow(ctx);
 
-        // === ИНДИКАТОР ПОЗИЦИИ ===
-        if (this.positions.length > 1) {
-            const segmentWidth = this.width / this.positions.length;
-            if (isLcd) {
-                ctx.fillStyle = accent;
-                if (this.isPressed) theme.applyGlow(ctx);
-            } else {
-                ctx.fillStyle = '#4f46e5';
-            }
-            ctx.fillRect(
-                this.x + this.currentIndex * segmentWidth,
-                this.y + this.height - 3,
-                segmentWidth,
-                2
-            );
-            theme.clearGlow(ctx);
+        // === POSITION INDICATOR (bottom stripe, 2 segments) ===
+        const segmentWidth = this.width / 2;   // ⭐ always 2 segments
+        const segX = this.x + this.selectedIndex * segmentWidth;
+        if (isLcd) {
+            ctx.fillStyle = accent;
+            if (this.isPressed) theme.applyGlow(ctx);
+        } else {
+            ctx.fillStyle = '#4f46e5';
+        }
+        ctx.fillRect(segX, this.y + this.height - 3, segmentWidth, 2);
+        theme.clearGlow(ctx);
+
+        // === MIDI Learn indicator ===
+        if (this.midiMapping) {
+            ctx.save();
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.arc(this.x + this.width - 3, this.y + 3, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
         }
     }
-    
-    // ПРОСТОЙ обработчик клика
+
+    // --- click ---
+
     handleClick(x, y) {
-        if (this.isPointInside(x, y)) {
-            //console.log(`🟦 ButtonFlat.handleClick at (${x}, ${y})`);
-            
-            // Переключаем позицию
-            this.currentIndex = (this.currentIndex + 1) % this.positions.length;
-            this.currentLabel = this.positions[this.currentIndex];
-            
-            // Визуальная обратная связь
-            this.isPressed = true;
-            
-            // Сбрасываем через время (как в старой версии)
-            setTimeout(() => {
-                this.isPressed = false;
-            }, 150);
-            
-            // Отправляем в Csound
-            if (window.csound && this.csoundChannel) {
-                window.csound.setControlChannel(this.csoundChannel, this.currentIndex)
-                    .then(() => {}, () => {});
-            }
-            
-            // Вызываем обработчик
-            if (this.onChange) {
-                this.onChange(this.currentIndex, this.currentLabel);
-            }
-            
-            //console.log(`ButtonFlat clicked: ${this.currentLabel} (index: ${this.currentIndex})`);
-            
-            // Возвращаем результат
-            return {
-                type: 'component-click',
-                component: this,
-                componentType: 'button-flat'
-            };
-        }
-        return false;
-    }
-    
-    // ПРОСТОЙ обработчик мыши
-    handleMouseMove(x, y) {
-        // Базовая логика hover из BaseComponent
-        const wasHovered = this.isHovered;
-        this.isHovered = this.isPointInside(x, y);
-        
-        // Логируем только изменение состояния
-        // if (wasHovered !== this.isHovered) {
-        //     console.log(`🎯 ButtonFlat "${this.currentLabel}":`, {
-        //         state: this.isHovered ? 'HOVERED' : 'UNHOVERED',
-        //         coordinates: `(${this.x}, ${this.y})`,
-        //         mouse: `(${x}, ${y})`,
-        //         isInside: this.isPointInside(x, y) ? '✅' : '❌'
-        //     });
-        // }
-        
-        return wasHovered !== this.isHovered;
-    }
-    
-    // ПРОСТЫЕ методы управления состоянием
-    setState(state) {
-        const oldIndex = this.currentIndex;
-        
-        if (typeof state === 'number') {
-            this.currentIndex = Math.max(0, Math.min(this.positions.length - 1, state));
-        } else if (typeof state === 'string') {
-            const index = this.positions.indexOf(state);
-            if (index !== -1) {
-                this.currentIndex = index;
-            }
-        }
-        
-        this.currentLabel = this.positions[this.currentIndex];
-        
-        // Отправляем в Csound
+        if (!this.isPointInside(x, y)) return false;
+
+        const old = this.selectedIndex;
+        this.selectedIndex = (this.selectedIndex === 0) ? 1 : 0;
+
+        // Press animation (same as original)
+        this.isPressed = true;
+        setTimeout(() => { this.isPressed = false; }, 150);
+
+        // Csound
         if (window.csound && this.csoundChannel) {
-            window.csound.setControlChannel(this.csoundChannel, this.currentIndex)
+            window.csound.setControlChannel(this.csoundChannel, this.selectedIndex)
                 .then(() => {}, () => {});
         }
-        
-        // Вызываем обработчик
-        if (this.onChange && this.currentIndex !== oldIndex) {
-            this.onChange(this.currentIndex, this.currentLabel, oldIndex);
+
+        // onChange
+        if (this.onChange) {
+            this.onChange(this.selectedIndex, this.label, old);
         }
-    }
-    
-    // Для загрузки из JSON (без вызова onChange)
-    setStateDirect(state) {
-        if (typeof state === 'number') {
-            this.currentIndex = Math.max(0, Math.min(this.positions.length - 1, state));
-        } else if (typeof state === 'string') {
-            const index = this.positions.indexOf(state);
-            if (index !== -1) {
-                this.currentIndex = index;
-            }
-        }
-        this.currentLabel = this.positions[this.currentIndex];
-    }
-    
-    getState() {
+
         return {
-            index: this.currentIndex,
-            label: this.currentLabel,
-            positions: [...this.positions]
+            type: 'component-click',
+            component: this,
+            componentType: 'button-flat',
         };
     }
-    
-    // ПРОСТАЯ Csound-интеграция
+
+    handleMouseMove(x, y) {
+        const wasHovered = this.isHovered;
+        this.isHovered = this.isPointInside(x, y);
+        return wasHovered !== this.isHovered;
+    }
+
+    // --- state ---
+
+    setState(state) {
+        const old = this.selectedIndex;
+        const next = (typeof state === 'number')
+            ? (state === 1 ? 1 : 0)
+            : (typeof state === 'string' && (state.toLowerCase() === 'on' || state.toLowerCase() === '1') ? 1 : 0);
+
+        this.selectedIndex = next;
+
+        if (window.csound && this.csoundChannel) {
+            window.csound.setControlChannel(this.csoundChannel, this.selectedIndex)
+                .then(() => {}, () => {});
+        }
+        if (this.onChange && old !== next) {
+            this.onChange(next, this.label, old);
+        }
+    }
+
+    setStateDirect(state) {
+        this.selectedIndex = (typeof state === 'number')
+            ? (state === 1 ? 1 : 0)
+            : (typeof state === 'string' && (state.toLowerCase() === 'on' || state.toLowerCase() === '1') ? 1 : 0);
+    }
+
+    getState() {
+        return {
+            index: this.selectedIndex,
+            label: this.label,
+            offLabel: this.offLabel,
+            onLabel: this.onLabel,
+        };
+    }
+
+    // --- Csound ---
+
     setCsoundChannel(channel) {
         this.csoundChannel = channel;
     }
 
+    // --- MIDI ---
+
+    applyMidiValue(ccValue) {
+        // CC > 63 → ON, else OFF
+        const next = (Number(ccValue) > 63) ? 1 : 0;
+        if (next !== this.selectedIndex) this.setState(next);
+    }
+
+    // --- editor schema ---
+
     static getPropertySchema() {
         return [
             {
-                key: 'positions',
-                label: 'Positions (comma-separated)',
-                type: 'list',
-                afterChange: (comp, arr) => {
-                    if (comp.currentIndex >= arr.length) comp.currentIndex = 0;
-                    comp.currentLabel = comp.positions[comp.currentIndex];
-                },
+                key: 'offLabel',
+                label: 'OFF Label',
+                type: 'text',
+                afterChange: (comp, v) => { comp.offLabel = String(v ?? 'OFF'); },
             },
             {
-                key: 'currentIndex',
-                label: 'Default Index',
+                key: 'onLabel',
+                label: 'ON Label',
+                type: 'text',
+                afterChange: (comp, v) => { comp.onLabel = String(v ?? 'ON'); },
+            },
+            {
+                key: 'selectedIndex',
+                label: 'Default State',
                 type: 'number',
                 min: 0,
-                max: 16,
+                max: 1,
                 step: 1,
                 afterChange: (comp, v) => {
-                    const maxIdx = (comp.positions?.length ?? 1) - 1;
-                    comp.currentIndex = Math.max(0, Math.min(maxIdx, v));
-                    comp.currentLabel = comp.positions[comp.currentIndex];
+                    comp.selectedIndex = (v === 1) ? 1 : 0;
                 },
             },
         ];

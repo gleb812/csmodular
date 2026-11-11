@@ -399,6 +399,22 @@ export class EventManager {
     const worldX = (x - this.system.offsetX) / this.system.scale;
     const worldY = (y - this.system.offsetY) / this.system.scale;
 
+    // ⭐ Component-level mouseup (momentary buttons, etc.).
+    //    No-op for most components; only ButtonText (mode='momentary')
+    //    uses it to restore `returnState` after release.
+    for (const panel of this.system.components) {
+      if (!panel.components) continue;
+      for (const comp of panel.components) {
+        if (typeof comp.handleMouseUp === 'function') {
+          try {
+            comp.handleMouseUp(worldX, worldY);
+          } catch (err) {
+            console.warn('[EventManager] comp.handleMouseUp failed:', err);
+          }
+        }
+      }
+    }
+
     // Завершение перетаскивания кабеля
     if (
       this.system.patchManager.draggingCable ||

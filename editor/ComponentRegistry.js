@@ -293,29 +293,39 @@ export const ComponentRegistry = {
             opts.initialState !== undefined ? opts.initialState : true
         ),
 
-        serialize: (c) => ({
-            componentType: 'ButtonText',
-            id: String(c.id),
-            x: Math.round(c.relX ?? 0),
-            y: Math.round(c.relY ?? 0),
-            width: c.width ?? 40,
-            height: c.height ?? 13,  
-            text: c.text ?? 'M',
-            initialState: c.isActive !== undefined ? c.isActive : true,
-            ...(c.csoundName ? { csoundName: c.csoundName } : {}),   
-        }),
+        serialize: (c) => {
+            const out = {
+                componentType: 'ButtonText',
+                id: String(c.id),
+                x: Math.round(c.relX ?? 0),
+                y: Math.round(c.relY ?? 0),
+                width: c.width ?? 40,
+                height: c.height ?? 13,
+                text: c.text ?? 'M',
+                initialState: c.isActive !== undefined ? c.isActive : true,
+                mode: c.mode ?? 'toggle',                 // ⭐
+            };
+            if (out.mode === 'momentary') {
+                out.returnState = !!c.returnState;        // ⭐ only for momentary
+            }
+            if (c.csoundName) out.csoundName = c.csoundName;
+            return out;
+        },
 
         deserialize: (d, ctx) => {
+            const mode = (d.mode === 'momentary') ? 'momentary' : 'toggle';
             const c = new ButtonText(
                 ctx.module.x + d.x, ctx.module.y + d.y,
                 d.width ?? 40,
                 d.text ?? 'M',
                 d.initialState !== undefined ? d.initialState : true,
-                d.height ?? 13   
+                d.height ?? 13,
+                mode,
+                d.returnState ?? false,
             );
             c.relX = d.x;
             c.relY = d.y;
-            if (d.csoundName) c.csoundName = d.csoundName;  
+            if (d.csoundName) c.csoundName = d.csoundName;
             return c;
         },
 

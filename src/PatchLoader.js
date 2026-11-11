@@ -4,6 +4,9 @@ import { createFileInput, triggerFileInput } from './utils/fileInput.js';
 import { Sticker } from './stickers/Sticker.js';
 import { libraryStore } from './api/index.js';
 import { Panel } from './components/Panel.js';
+import { getCurrentTheme, setCurrentTheme } from './theme/currentTheme.js';
+import { Theme } from './theme/Theme.js';
+import { DEFAULT_THEME } from './theme/defaults.js';
 const DEBUG_LOAD = false;
 const dlog = (...a) => { if (DEBUG_LOAD) dlog(...a); };
 export class PatchLoader {
@@ -24,19 +27,24 @@ export class PatchLoader {
     // === ЗАГРУЗКА ПАТЧЕЙ ===
     
     async loadPatch(patchData) {
-        // Проверка структуры данных
         if (!patchData || typeof patchData !== 'object') {
             console.error('❌ Patch data is not an object:', patchData);
             throw new Error('Invalid patch data format');
         }
-        
+
         if (!patchData.modules || !Array.isArray(patchData.modules)) {
             console.error('❌ No modules array found in patch data');
             throw new Error('Patch data missing modules array');
         }
-        
-        dlog(`📦 Found ${patchData.modules.length} modules, ${patchData.cables?.length || 0} cables`);
-        
+
+        // ⭐ NEW — применить дизайн из патча ДО создания модулей
+        //    (grid.multX/multY влияет на snap при createModuleFromDef)
+        if (patchData.design) {
+            this.applyDesignFromPatch(patchData.design);
+        }
+
+        dlog(`📦 Found ${patchData.modules.length} modules, ...`);
+
         this.clearCurrentPatch();
 
         // ⭐ Предварительный проход: ищем самый нижний Voice
@@ -128,6 +136,45 @@ export class PatchLoader {
         }
 
         return this.moduleMap;
+    }
+
+    /**
+     * Применить дизайн из патча. Merge с текущей темой:
+     * чего нет в patchData.design — берётся из текущей темы пользователя.
+     * В localStorage НЕ пишем — дизайн патча живёт только в сессии.
+     */
+    applyDesignFromPatch(design) {
+        if (!design || typeof design !== 'object') return;
+
+        const current = getCurrentTheme().settings;
+
+        // Глубокая копия текущей темы, чтобы не мутировать оригинал
+        const merged = JSON.parse(JSON.stringify(current));
+
+        // preset — всегда lcd в публичной версии
+        merged.preset = 'lcd';
+
+        // Merge каждой секции: поля патча переопределяют текущие
+        for (const section of ['lcd', 'cables', 'background', 'grid']) {
+            if (!design[section] || typeof design[section] !== 'object') continue;
+            merged[section] = merged[section] || {};
+            for (const [k, v] of Object.entries(design[section])) {
+                if (v !== undefined) merged[section][k] = v;
+            }
+        }
+
+        // Применяем без save() — иначе затрём личную тему в localStorage
+        setCurrentTheme(new Theme(merged));
+
+        // Перерисовать всё, что зависит от темы
+        this.system.applyGridFromTheme?.();
+        this.system.applyBackgroundFromTheme?.();
+        this.system.forceRedraw?.();
+
+        // Обновить BottomBar и прочие подписчики (DesignSettingsPanel слушает)
+        document.dispatchEvent(new CustomEvent('csmodular:theme-changed'));
+
+        dlog('[PatchLoader] design applied from patch');
     }
 
     loadStickers(stickersData) {

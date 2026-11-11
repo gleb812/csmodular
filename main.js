@@ -1040,6 +1040,7 @@ class ModularSystem {
     }
   }
 
+
   exportPatchToJson() {
       const modulesData = this.collectModulesForExport();
       const cablesData = this.collectCablesForExport();
@@ -1048,8 +1049,38 @@ class ModularSystem {
           filename: this.currentPatchFilename || 'export.json',
           modules: modulesData,
           cables: cablesData,
-          stickers: this.stickers.map(s => s.toJSON()),   // ⭐ NEW
+          stickers: this.stickers.map(s => s.toJSON()),
+          design: this.collectDesignForExport(),   // ⭐ NEW
           textpad: '',
+      };
+  }
+
+  // ⭐ NEW — полная тема (кроме preset) для сохранения в патч
+  collectDesignForExport() {
+      const s = getCurrentTheme().settings;
+      return {
+          lcd: {
+              color:           s.lcd?.color           ?? DEFAULT_THEME.lcd.color,
+              glow:            s.lcd?.glow            ?? DEFAULT_THEME.lcd.glow,
+              panelOpacity:    s.lcd?.panelOpacity    ?? DEFAULT_THEME.lcd.panelOpacity,
+              lineWeight:      s.lcd?.lineWeight      ?? DEFAULT_THEME.lcd.lineWeight,
+          },
+          cables: {
+              audioWidth:      s.cables?.audioWidth   ?? DEFAULT_THEME.cables.audioWidth,
+              controlWidth:    s.cables?.controlWidth ?? DEFAULT_THEME.cables.controlWidth,
+              glow:            s.cables?.glow         ?? DEFAULT_THEME.cables.glow,
+          },
+          background: {
+              image:           s.background?.image           ?? null,
+              parallax:        s.background?.parallax        ?? true,
+              parallaxStrength:s.background?.parallaxStrength ?? 20,
+          },
+          grid: {
+              multX:           s.grid?.multX ?? 1,
+              multY:           s.grid?.multY ?? 1,
+              snap:            s.grid?.snap  ?? true,
+              size:            s.grid?.size  ?? 4,
+          },
       };
   }
 

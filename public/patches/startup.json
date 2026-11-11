@@ -2,15 +2,15 @@
   "filename": "startup.json",
   "modules": [
     {
-      "name": "LEV",
+      "name": "ADSR",
       "library": "my-lib",
       "id": 1,
       "type": 0,
-      "parameters": "[0,54.47499999999999,0]",
+      "parameters": "[0,0,0,0,0,33.04374999999998,0,0,0,0,0,0,0,0]",
       "modes": [],
       "area": "VOICE",
-      "hpos": 21,
-      "vpos": 8,
+      "hpos": 14,
+      "vpos": 6,
       "customColor": null,
       "midiMappings": []
     },
@@ -22,8 +22,8 @@
       "parameters": "[0,0,0,0,0,0]",
       "modes": [],
       "area": "VOICE",
-      "hpos": 25,
-      "vpos": 22,
+      "hpos": 34,
+      "vpos": 30,
       "customColor": null,
       "midiMappings": []
     },
@@ -35,21 +35,73 @@
       "parameters": "[0,0,64,64,0,0,0,64,0]",
       "modes": [],
       "area": "VOICE",
-      "hpos": 35,
-      "vpos": 32,
+      "hpos": 32,
+      "vpos": 5,
       "customColor": null,
       "midiMappings": []
     },
     {
-      "name": "ADSR",
+      "name": "TouchMe",
       "library": "my-lib",
       "id": 4,
       "type": 0,
-      "parameters": "[0,0,0,0,0,64,0,0,0,0,0,0,0,0]",
+      "parameters": "[0,0,0]",
       "modes": [],
       "area": "VOICE",
-      "hpos": 44,
-      "vpos": 20,
+      "hpos": 8,
+      "vpos": 13,
+      "customColor": null,
+      "midiMappings": []
+    },
+    {
+      "name": "PingPong",
+      "library": "my-lib",
+      "id": 5,
+      "type": 0,
+      "parameters": "[0,0,0,34.47249999999998,64,64,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 25,
+      "vpos": 13,
+      "customColor": null,
+      "midiMappings": []
+    },
+    {
+      "name": "MOOG",
+      "library": "my-lib",
+      "id": 8,
+      "type": 0,
+      "parameters": "[0,0,0,98.76624999999987,0,97.81374999999996,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 47,
+      "vpos": 9,
+      "customColor": null,
+      "midiMappings": []
+    },
+    {
+      "name": "MixFour",
+      "library": "user",
+      "id": 9,
+      "type": "MixFour",
+      "parameters": "[0,0,0,0,0,0,0,0,0,0,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 25,
+      "vpos": 16,
+      "customColor": null,
+      "midiMappings": []
+    },
+    {
+      "name": "MixFour",
+      "library": "user",
+      "id": 10,
+      "type": "MixFour",
+      "parameters": "[0,0,0,0,0,0,0,0,0,0,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 38,
+      "vpos": 16,
       "customColor": null,
       "midiMappings": []
     }
@@ -57,18 +109,36 @@
   "cables": [
     {
       "from": {
-        "module": "LEV",
-        "id": 1,
+        "module": "TouchMe",
+        "id": 4,
         "jack": 0,
         "pin": "out"
       },
       "to": {
         "module": "ADSR",
-        "id": 4,
+        "id": 1,
         "jack": 0,
         "pin": "in"
       },
       "color": "#3b82f6",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "ADSR",
+        "id": 1,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "PingPong",
+        "id": 5,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#ef4444",
       "customColor": null,
       "type": "out-in",
       "area": "VOICE"
@@ -81,8 +151,26 @@
         "pin": "out"
       },
       "to": {
+        "module": "MOOG",
+        "id": 8,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "MOOG",
+        "id": 8,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
         "module": "ADSR",
-        "id": 4,
+        "id": 1,
         "jack": 1,
         "pin": "in"
       },
@@ -93,8 +181,26 @@
     },
     {
       "from": {
-        "module": "ADSR",
-        "id": 4,
+        "module": "MixFour",
+        "id": 10,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "Outs2",
+        "id": 2,
+        "jack": 1,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "MixFour",
+        "id": 9,
         "jack": 0,
         "pin": "out"
       },
@@ -112,14 +218,68 @@
     {
       "from": {
         "module": "ADSR",
-        "id": 4,
+        "id": 1,
         "jack": 0,
         "pin": "out"
       },
       "to": {
-        "module": "Outs2",
-        "id": 2,
+        "module": "MixFour",
+        "id": 9,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "ADSR",
+        "id": 1,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "MixFour",
+        "id": 10,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "PingPong",
+        "id": 5,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "MixFour",
+        "id": 9,
+        "jack": 2,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "PingPong",
+        "id": 5,
         "jack": 1,
+        "pin": "out"
+      },
+      "to": {
+        "module": "MixFour",
+        "id": 10,
+        "jack": 2,
         "pin": "in"
       },
       "color": "#ef4444",
@@ -130,25 +290,77 @@
   ],
   "stickers": [
     {
-      "id": "sticker_1_1794332898744",
+      "id": "sticker_1_1794404763418",
       "type": "text",
       "z": "front",
-      "gridX": 23,
-      "gridY": 29,
-      "gridW": 21,
-      "gridH": 2,
-      "text": "Welcome to PANELS Modular System based on Csound ",
-      "fontSize": 17,
-      "fontFamily": "Verdana",
+      "gridX": 11,
+      "gridY": 19,
+      "gridW": 15,
+      "gridH": 3,
+      "text": "Welcome to PANELS Modular!\nA Csound-based modular system",
+      "fontSize": 16,
+      "fontFamily": "monospace",
       "textAlign": "left",
-      "lineHeight": 1.8,
+      "lineHeight": 1.3,
       "padding": 4,
       "color": "#ffffff",
       "colorMode": "accent",
       "marquee": {
         "enabled": false,
-        "speed": 15,
-        "gap": 115
+        "speed": 30,
+        "gap": 40
+      },
+      "bgColor": null,
+      "bgOpacity": 1,
+      "svgString": null,
+      "payload": null
+    },
+    {
+      "id": "sticker_2_1794404858342",
+      "type": "text",
+      "z": "front",
+      "gridX": 35,
+      "gridY": 22,
+      "gridW": 29,
+      "gridH": 2,
+      "text": "More info https://github.com/gleb812/csmodular",
+      "fontSize": 16,
+      "fontFamily": "monospace",
+      "textAlign": "left",
+      "lineHeight": 1.3,
+      "padding": 4,
+      "color": "#ffffff",
+      "colorMode": "accent",
+      "marquee": {
+        "enabled": false,
+        "speed": 30,
+        "gap": 40
+      },
+      "bgColor": null,
+      "bgOpacity": 1,
+      "svgString": null,
+      "payload": null
+    },
+    {
+      "id": "sticker_3_1794404935470",
+      "type": "text",
+      "z": "front",
+      "gridX": 12,
+      "gridY": 27,
+      "gridW": 22,
+      "gridH": 7,
+      "text": "Press 'D' & try different design settings\n'M' for patch map\n'Space' to browse units\nYou can also shake cables and zoom!",
+      "fontSize": 16,
+      "fontFamily": "monospace",
+      "textAlign": "left",
+      "lineHeight": 1.55,
+      "padding": 4,
+      "color": "#ffffff",
+      "colorMode": "accent",
+      "marquee": {
+        "enabled": false,
+        "speed": 30,
+        "gap": 40
       },
       "bgColor": null,
       "bgOpacity": 1,
@@ -156,5 +368,29 @@
       "payload": null
     }
   ],
+  "design": {
+    "lcd": {
+      "color": "#1a1a1a",
+      "glow": 0.9,
+      "panelOpacity": 0.25,
+      "lineWeight": 1.75
+    },
+    "cables": {
+      "audioWidth": 3,
+      "controlWidth": 1.5,
+      "glow": false
+    },
+    "background": {
+      "image": null,
+      "parallax": true,
+      "parallaxStrength": 20
+    },
+    "grid": {
+      "multX": 1,
+      "multY": 1,
+      "snap": false,
+      "size": 4
+    }
+  },
   "textpad": ""
 }

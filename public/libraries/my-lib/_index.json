@@ -37,8 +37,8 @@
       "status": "passable"
     },
     {
-      "name": "Mix4",
-      "displayName": "Mix4",
+      "name": "MixFour",
+      "displayName": "MixFour",
       "category": "mixer",
       "status": "stable"
     },
