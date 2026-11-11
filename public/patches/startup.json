@@ -81,7 +81,7 @@
     },
     {
       "name": "MixFour",
-      "library": "user",
+      "library": "my-lib",
       "id": 9,
       "type": "MixFour",
       "parameters": "[0,0,0,0,0,0,0,0,0,0,0]",
@@ -94,7 +94,7 @@
     },
     {
       "name": "MixFour",
-      "library": "user",
+      "library": "my-lib",
       "id": 10,
       "type": "MixFour",
       "parameters": "[0,0,0,0,0,0,0,0,0,0,0]",

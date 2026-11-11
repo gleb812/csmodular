@@ -536,11 +536,11 @@ export class ModuleFactory {
 
         // csoundChannel + начальное значение — только для интерактивных
         if (compDef.id !== undefined) {
-            component.parameterId = compDef.id;
             component.moduleId = panel.moduleId;
 
             const isInteractive = this._isInteractiveComponent(compDef.componentType);
             if (isInteractive) {
+                component.parameterId = compDef.id;   // ⭐ только интерактивным
                 const csoundChannel = `module_${panel.moduleId}_${compDef.id}`;
                 component.csoundChannel = csoundChannel;
                 this._initializeCsoundValue(component, compDef);

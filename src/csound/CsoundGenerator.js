@@ -1139,13 +1139,18 @@ export class CsoundGenerator {
         }
 
         // ⭐ 4. chnget для параметров
-        const paramIds = moduleDef?.params || [];
+        const hasParamsField = Array.isArray(moduleDef?.params);
+        const paramIds = hasParamsField ? moduleDef.params : [];
+
         const chngetLines = [];
-        const paramArgs = [];
+        const paramArgs = [];   // ⭐ объявлены ОДИН РАЗ до всех ветвей
 
         if (paramIds.length > 0) {
+            // chnget-путь: новые модули с параметрами
             paramIds.forEach(compId => {
-                const comp = panel?.components.find(c => String(c.id) === String(compId));
+                const comp = panel?.components.find(
+                    c => String(c.id) === String(compId)
+                );
                 if (!comp) {
                     console.warn(`  ⚠️ Param id=${compId} not found in panel`);
                     paramArgs.push('0');
@@ -1156,7 +1161,11 @@ export class CsoundGenerator {
                 chngetLines.push(`${varName} chnget "${channelName}"`);
                 paramArgs.push(varName);
             });
+        } else if (hasParamsField) {
+            // ⭐ params: [] — явно нет параметров. НЕ fallback.
+            // paramArgs остаётся [] — в вызов уйдут только inlets + outlets.
         } else {
+            // legacy: у модуля нет поля params вообще
             const paramsToUse = parameters.length > 0 ? parameters : defaultParams;
             paramsToUse.forEach(p => paramArgs.push(String(p)));
         }

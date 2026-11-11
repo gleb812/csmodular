@@ -1136,34 +1136,32 @@ class ModularSystem {
   collectModuleParameters(module) {
     const params = [];
 
+    // ⭐ Только параметрические компоненты (Knob / Slider / Button* / PartSelector / TextEdit).
+    //    TextLabel, Input, Output, LED, MiniVU, TextField — не параметры.
+    const INTERACTIVE_TYPES = new Set([
+      'Knob', 'Slider',
+      'ButtonFlat', 'ButtonRadio', 'ButtonIncDec', 'ButtonText',
+      'PartSelector', 'TextEdit',
+    ]);
+
     module.components.forEach((component) => {
-      // Используем parameterId для индексации
-      if (component.parameterId !== undefined) {
-        const index = component.parameterId;
+      const type = component.constructor?.name;
+      if (!INTERACTIVE_TYPES.has(type)) return;
+      if (component.parameterId === undefined) return;
 
-        // Получаем значение компонента
-        let value = 0;
+      const index = component.parameterId;
+      let value = 0;
+      if (component.getValue) value = component.getValue();
+      else if (component.value !== undefined) value = component.value;
+      else if (component.currentValue !== undefined) value = component.currentValue;
+      else if (component.selectedIndex !== undefined) value = component.selectedIndex;
 
-        if (component.getValue) {
-          value = component.getValue();
-        } else if (component.value !== undefined) {
-          value = component.value;
-        } else if (component.currentValue !== undefined) {
-          value = component.currentValue;
-        } else if (component.selectedIndex !== undefined) {
-          value = component.selectedIndex;
-        }
-
-        // Сохраняем по правильному индексу
-        params[index] = value;
-      }
+      params[index] = value;
     });
 
     // Заполняем пропуски нулями
     for (let i = 0; i < params.length; i++) {
-      if (params[i] === undefined) {
-        params[i] = 0;
-      }
+      if (params[i] === undefined) params[i] = 0;
     }
 
     return params;
