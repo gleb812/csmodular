@@ -29,6 +29,12 @@ export class CsoundGenerator {
         // ⭐ Scope tables
         this._scopeTables = new Map();      // cableId -> { tableNum, bus, isAudio }
         this._scopeTableCounter = 9000;
+
+        // ⭐ UDO text cache (invalidation via invalidateUdoCache())
+        this._udoTextCache = new Map();     // udoPath -> text | null
+
+        // ⭐ Diagnostic counters (reset per generateOrc)
+        this._fetchStats = { count: 0, ms: 0, byPath: {} };
         }
     /**
      * Загрузить UDO по пути, как он хранится в this.includes.
@@ -37,10 +43,36 @@ export class CsoundGenerator {
      *
      * Возвращает строку UDO или null.
      */
+    /**
+     * Load a UDO by its stored path.
+     * Caches text in-memory; use invalidateUdoCache() on hot-reload.
+     *  - "library/<lib>/<Name>.txt"  → libraryStore.loadUdo()
+     *  - "led_rms.txt", "mVU_rms.txt" → fetch('/csound/modules/...')
+     */
     async _loadUdoByPath(udoPath) {
         if (!udoPath) return null;
 
-       // 1. Библиотечный модуль: "library/<lib>/<Name>.txt"
+        if (this._udoTextCache.has(udoPath)) {
+            return this._udoTextCache.get(udoPath);
+        }
+
+        const t0 = performance.now();
+        let text = null;
+        try {
+            text = await this._loadUdoByPathUncached(udoPath);
+        } finally {
+            const dt = performance.now() - t0;
+            this._fetchStats.count++;
+            this._fetchStats.ms += dt;
+            this._fetchStats.byPath[udoPath] = (this._fetchStats.byPath[udoPath] || 0) + dt;
+        }
+
+        this._udoTextCache.set(udoPath, text);
+        return text;
+    }
+
+    async _loadUdoByPathUncached(udoPath) {
+        // 1. Library module: "library/<lib>/<Name>.txt"
         const mLib = udoPath.match(/^library\/([^/]+)\/(.+)\.txt$/);
         if (mLib) {
             const [, lib, name] = mLib;
@@ -56,14 +88,13 @@ export class CsoundGenerator {
             }
         }
 
-        // 3. Встроенный UDO из public/csound/modules/ (led_rms, mVU_rms и т.п.)
+        // 2. Built-in UDO from public/csound/modules/
         try {
             const response = await fetch(`/csound/modules/${udoPath}`);
             if (!response.ok) return null;
 
             const text = await response.text();
 
-            // Если Vite отдал index.html — считаем, что файла нет
             if (/<!DOCTYPE|<html[\s>]/i.test(text.slice(0, 200))) {
                 console.warn(`⚠️ Got HTML instead of UDO for ${udoPath} — file missing`);
                 return null;
@@ -76,6 +107,25 @@ export class CsoundGenerator {
         }
     }
 
+    /**
+     * Invalidate cached UDO text and parsed variants.
+     * @param {RegExp} [pattern] — only paths matching pattern; omit to clear all
+     */
+    invalidateUdoCache(pattern) {
+        if (!pattern) {
+            this._udoTextCache.clear();
+            this._variantsCache = {};
+            return;
+        }
+        for (const k of [...this._udoTextCache.keys()]) {
+            if (pattern.test(k)) this._udoTextCache.delete(k);
+        }
+        if (this._variantsCache) {
+            for (const k of Object.keys(this._variantsCache)) {
+                if (pattern.test(k)) delete this._variantsCache[k];
+            }
+        }
+    }
     async loadUdoContent(pathOrTypeId) {
         let path = String(pathOrTypeId);
         if (!path.endsWith('.txt')) path += '.txt';
@@ -100,26 +150,36 @@ export class CsoundGenerator {
         // ⭐ 0. Собираем mapping ftgen (перед остальным)
         const mappingFtgens = await this._collectMappingFtgens();
         
-        const udoContents = [];
-        const includesList = Array.from(this.includes).sort();
+        this._fetchStats = { count: 0, ms: 0, byPath: {} };
 
-        for (const filename of includesList) {
-            const content = await this._loadUdoByPath(filename);
-            if (content) {
-                udoContents.push(content);
-            } else {
-                console.warn(`⚠️ UDO not available: ${filename}`);
-                // Заглушка с правильным именем opcode (без user/ и без .txt)
-                const opcodeName = filename.replace(/^.*\//, '').replace(/\.txt$/, '');
-                udoContents.push(
-                    `; UDO ${filename} not found\n` +
-                    `opcode ${opcodeName}, 0, 0\n` +
-                    `; empty\nendop`
-                );
-            }
-        }
+        const includesList = Array.from(this.includes).sort();
+        const udoTexts = await Promise.all(
+            includesList.map(p => this._loadUdoByPath(p))
+        );
+
+        const udoContents = udoTexts.map((content, i) => {
+            if (content) return content;
+            const filename = includesList[i];
+            console.warn(`⚠️ UDO not available: ${filename}`);
+            const opcodeName = filename.replace(/^.*\//, '').replace(/\.txt$/, '');
+            return (
+                `; UDO ${filename} not found\n` +
+                `opcode ${opcodeName}, 0, 0\n` +
+                `; empty\nendop`
+            );
+        });
 
         const udoString = udoContents.join('\n\n');
+
+        const fs = this._fetchStats;
+        console.log('[generateOrc] fetchStats:', {
+            count: fs.count,
+            totalMs: Math.round(fs.ms),
+            slowest: Object.entries(fs.byPath)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .map(([p, ms]) => `${p} — ${Math.round(ms)}ms`),
+        });
         
         // ⭐ 2. Собираем модули из патча (voice и fx)
         const voiceModules = Array.from(this.modules.values())

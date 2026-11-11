@@ -2065,6 +2065,7 @@ class ModularSystem {
   async reloadUserModules() {
       const { libraryStore } = await import('./src/api/index.js');
       libraryStore.invalidateCache?.();
+      this.csoundGen.invalidateUdoCache();
       // 1. Собрать user-модули, стоящие в патче
       const panels = this.components.filter(
           c => c instanceof Panel && c.library && c.library !== 'builtin'
