@@ -1,0 +1,12 @@
+opcode ToggleMe, 0, kk
+kParam1, kOut1 xin
+
+; --- module body ---
+; Add your DSP code here
+if kParam1 == 0 then
+kout1 = 0 
+else
+kout1 = 1
+endif
+zkw kout1, kOut1
+endop

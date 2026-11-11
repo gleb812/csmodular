@@ -8,6 +8,5 @@ kParam1, kOut1 xin
 kout1 init 0
 ; --- module body ---
 kout1 = kParam1 - 0.5
-printk2 kout1
 zkw kout1, kOut1
 endop

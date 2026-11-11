@@ -1,0 +1,8 @@
+opcode TouchMe, 0, kk
+kParam1, kOut1 xin
+
+; --- module body ---
+; Add your DSP code here
+kout1 = kParam1
+zkw kout1, kOut1
+endop

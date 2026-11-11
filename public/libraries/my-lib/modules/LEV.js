@@ -31,8 +31,7 @@ export const LEVModule = {
                 "y": 20,
                 "jackType": "control",
                 "bandwidth": "dynamic",
-                "ConnectorName": "",
-                "ConnectorIndex": 0
+                "ConnectorName": ""
         }
 ]
 };

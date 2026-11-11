@@ -4,7 +4,7 @@ export const CLKModule = {
     defaultParams: [],
     displayName: 'CLK',
     category: 'custom',
-    status: 'dev',
+    status: 'passable',
     gridHeight: 3,
     originalName: 'CLK',
     tooltip: 'CLK',
@@ -20,8 +20,7 @@ export const CLKModule = {
                 "y": 15,
                 "jackType": "control",
                 "bandwidth": "dynamic",
-                "ConnectorName": "",
-                "ConnectorIndex": 0
+                "ConnectorName": ""
         },
         {
                 "componentType": "ButtonText",
@@ -32,6 +31,7 @@ export const CLKModule = {
                 "height": 16,
                 "text": "ON",
                 "initialState": true,
+                "mode": "toggle",
                 "csoundName": "ON"
         }
 ]

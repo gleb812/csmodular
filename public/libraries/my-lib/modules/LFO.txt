@@ -1,0 +1,18 @@
+;@ map LFOlow
+opcode LFO, 0, kkk
+kParam2, kParam5, kOut1 xin
+
+    ; --- mapping tables ---
+    kParam2 table kParam2, giLFOlow
+    ; ----------------------
+
+kout1 init 0
+if changed(kParam5) == 1 then
+    reinit REINIT
+endif
+
+REINIT:
+itype = i(kParam5) 
+kout1 lfo 1, kParam2, itype
+zkw kout1, kOut1
+endop

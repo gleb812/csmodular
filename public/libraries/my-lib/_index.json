@@ -10,7 +10,7 @@
       "name": "CLK",
       "displayName": "CLK",
       "category": "custom",
-      "status": "dev"
+      "status": "passable"
     },
     {
       "name": "FdbkDel",
@@ -23,6 +23,12 @@
       "displayName": "LEV",
       "category": "control",
       "status": "stable"
+    },
+    {
+      "name": "LFO",
+      "displayName": "LFO",
+      "category": "custom",
+      "status": "passable"
     },
     {
       "name": "MOOG",
@@ -70,6 +76,18 @@
       "name": "SW",
       "displayName": "SW",
       "category": "custom",
+      "status": "stable"
+    },
+    {
+      "name": "ToggleMe",
+      "displayName": "ToggleMe",
+      "category": "control",
+      "status": "stable"
+    },
+    {
+      "name": "TouchMe",
+      "displayName": "TouchMe",
+      "category": "control",
       "status": "stable"
     },
     {
