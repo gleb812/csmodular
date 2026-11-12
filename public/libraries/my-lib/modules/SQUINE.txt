@@ -1,0 +1,16 @@
+;@ map CLA000 CLA001 OSCfrq
+opcode SQUINE, 0, kkkkk
+kKnob1, kKnob2, kKnob3, kIn1, kOut1 xin
+
+    ; --- mapping tables ---
+    kKnob1 table kKnob1, giCLA000
+    kKnob2 table kKnob2, giCLA001
+    kKnob3 table kKnob3, giOSCfrq
+    ; ----------------------
+
+ain1 zar kIn1
+aout1 init 0
+
+aout1 squinewave a(kKnob3),a(kKnob1), a(kKnob2), ain1
+zaw aout1, kOut1
+endop

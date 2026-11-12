@@ -1,0 +1,14 @@
+opcode ROUTE2, 0, kkkk
+kParam3, kIn1, kIn2, kOut1 xin
+ain1 zar kIn1
+ain2 zar kIn2
+
+; --- module body ---
+; Add your DSP code here
+if kParam3 == 0 then
+aout1 = ain1
+else 
+aout1 = ain2
+endif
+zaw aout1, kOut1
+endop

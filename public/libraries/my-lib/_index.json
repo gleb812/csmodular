@@ -31,6 +31,12 @@
       "status": "passable"
     },
     {
+      "name": "LPF18",
+      "displayName": "LPF18",
+      "category": "custom",
+      "status": "passable"
+    },
+    {
       "name": "MOOG",
       "displayName": "MOOG",
       "category": "custom",
@@ -41,6 +47,12 @@
       "displayName": "MixFour",
       "category": "mixer",
       "status": "stable"
+    },
+    {
+      "name": "MultiSaw",
+      "displayName": "MultiSaw",
+      "category": "custom",
+      "status": "passable"
     },
     {
       "name": "Noise",
@@ -69,6 +81,18 @@
     {
       "name": "REV",
       "displayName": "REV",
+      "category": "custom",
+      "status": "passable"
+    },
+    {
+      "name": "ROUTE2",
+      "displayName": "ROUTE2",
+      "category": "custom",
+      "status": "stable"
+    },
+    {
+      "name": "SQUINE",
+      "displayName": "SQUINE",
       "category": "custom",
       "status": "passable"
     },

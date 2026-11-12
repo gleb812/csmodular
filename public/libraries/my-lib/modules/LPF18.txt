@@ -1,0 +1,22 @@
+;@ map FLTfrq CLA001
+opcode LPF18, 0, kkkkkkk
+kFreq, kQ, kDist, kMod, kIn1, kIn2, kOut1 xin
+
+    ; --- mapping tables ---
+    kFreq table kFreq, giFLTfrq
+    kQ table kQ, giCLA001
+    kDist table kDist, giCLA001
+    kMod table kMod, giCLA001
+    ; ----------------------
+
+ain1 zar kIn1
+kin2 zkr kIn2
+
+; --- module body ---
+; Add your DSP code here
+kCut = kFreq + 5000*kin2*kMod
+kCut limit kCut, 10, sr/2
+
+aout1 lpf18 ain1, kCut, kQ, kDist
+zaw aout1, kOut1
+endop

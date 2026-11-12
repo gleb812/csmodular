@@ -1,0 +1,25 @@
+;@ map OSCfrq CLA000 CLA001
+opcode MultiSaw, 0, kkkkk
+kFreq, kVol, kDetune, kOut1, kOut2 xin
+
+    ; --- mapping tables ---
+    kFreq table kFreq, giOSCfrq
+    kVol table kVol, giCLA000
+    kDetune table kDetune, giCLA001
+    ; ----------------------
+
+; --- module body ---
+; Add your DSP code here
+kX = kDetune * 0.01
+a1 vco2 1, kFreq
+a2 vco2 1, kFreq*(1+kX*0.99)
+a3 vco2 1, kFreq*(1-kX)
+a4 vco2 1, kFreq*(1+2.123*kX*0.99)
+a5 vco2 1, kFreq*(1-2.321*kX)
+a6 vco2 1, kFreq*(1+3.567*kX*0.99)
+a7 vco2 1, kFreq*(1-3.765*kX)
+aout1 = kVol*(a1*0.5 + a2*0.7 + a3*0.3 + a4*0.8 + a5*0.2 + a6*0.6 + a7*0.4) 
+aout2 = kVol*(a1*0.5 + a2*0.3 + a3*0.7 + a4*0.2 + a5*0.8 + a6*0.4 + a7*0.6) 
+zaw aout1, kOut1
+zaw aout2, kOut2
+endop
