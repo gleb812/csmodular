@@ -66,6 +66,20 @@ const CHECKBOX_LAYOUT = {
     shadow: '0 1px 2px rgba(0,0,0,0.85), 0 0 6px rgba(0,0,0,0.6)',
 };
 
+// ⭐ Progress bar, bottom of the card (above checkbox row)
+const PROGRESS_LAYOUT = {
+    left: 12,
+    right: 12,
+    bottom: 26,
+    height: 3,
+    track: 'rgba(255,255,255,0.15)',
+    fill:  '#0af',
+    textSize: 10,
+    textColor: '#c8c8c8',
+    gap: 6,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
+};
+
 // ============================================================
 //  Public preference helpers (used by main.js)
 // ============================================================
@@ -87,6 +101,12 @@ export class Splash {
         this._root = null;
         this._inerted = null;
         this._onKeyDown = this._onKeyDown.bind(this);
+
+        // ⭐ Progress / lock state
+        this._progressEl    = null;   // fill element
+        this._progressText  = null;   // stage label
+        this._progressPct   = null;
+        this._readyForClose = false;  // false → click/Escape ignored
     }
 
     // ============================================================
@@ -111,6 +131,33 @@ export class Splash {
     openSplash() { return this._open(); }
     openAbout()  { return this._open(); }
 
+    /**
+     * Update splash progress bar.
+     * @param {number} pct   0..1
+     * @param {string} [text] optional stage label
+     */
+    setProgress(pct, text) {
+        this._progressPct = Math.max(0, Math.min(1, Number(pct) || 0));
+        if (this._progressEl) {
+            this._progressEl.style.width = `${(this._progressPct * 100).toFixed(1)}%`;
+        }
+        if (text !== undefined && this._progressText) {
+            this._progressText.textContent = text;
+        }
+    }
+
+    /**
+     * Allow (true) or forbid (false) closing.
+     * While locked, card click / Escape do nothing and the progress bar is shown.
+     * @param {boolean} ready
+     */
+    setReadyToClose(ready) {
+        this._readyForClose = !!ready;
+        if (this._readyForClose) {
+            this.setProgress(1, 'Ready');
+        }
+    }
+
     close() {
         if (!this._root) return;
 
@@ -123,6 +170,12 @@ export class Splash {
         this._root.remove();
         this._root = null;
 
+        // ⭐ reset progress/lock
+        this._progressEl    = null;
+        this._progressText  = null;
+        this._progressPct   = null;
+        this._readyForClose = false;
+
         const canvas = document.getElementById('modularCanvas');
         if (canvas) canvas.focus?.();
 
@@ -131,7 +184,6 @@ export class Splash {
             this._closedPromiseResolve = null;
             this._closedPromise = null;
         }
-
     }
 
     // ============================================================
@@ -139,7 +191,7 @@ export class Splash {
     // ============================================================
 
     _open() {
-        if (this._root) return this._closedPromise;  
+        if (this._root) return this._closedPromise;
 
         this._closedPromise = new Promise(resolve => {
             this._closedPromiseResolve = resolve;
@@ -294,7 +346,7 @@ export class Splash {
             user-select: none;
             white-space: nowrap;
         `;
-        // Do not close splash when clicking the checkbox
+        // ⭐ Do not close splash when clicking the checkbox
         cbWrap.addEventListener('click', e => e.stopPropagation());
 
         const cb = document.createElement('input');
@@ -307,8 +359,61 @@ export class Splash {
         cbWrap.appendChild(document.createTextNode('Open demo patch on launch'));
         card.appendChild(cbWrap);
 
-        // ⭐ Click anywhere on the card (i.e. the image) — close
-        card.addEventListener('click', () => this.close());
+        // ⭐ Progress bar — above checkbox row
+        const progressWrap = document.createElement('div');
+        progressWrap.style.cssText = `
+            position: absolute;
+            left: ${PROGRESS_LAYOUT.left}px;
+            right: ${PROGRESS_LAYOUT.right}px;
+            bottom: ${PROGRESS_LAYOUT.bottom}px;
+            display: flex;
+            align-items: center;
+            gap: ${PROGRESS_LAYOUT.gap}px;
+            pointer-events: none;
+            font-family: ${PROGRESS_LAYOUT.fontFamily};
+            font-size: ${PROGRESS_LAYOUT.textSize}px;
+            color: ${PROGRESS_LAYOUT.textColor};
+            text-shadow: ${TEXT_LAYOUT.shadow};
+        `;
+
+        const track = document.createElement('div');
+        track.style.cssText = `
+            flex: 1;
+            height: ${PROGRESS_LAYOUT.height}px;
+            background: ${PROGRESS_LAYOUT.track};
+            border-radius: 2px;
+            overflow: hidden;
+        `;
+
+        const fill = document.createElement('div');
+        fill.style.cssText = `
+            height: 100%;
+            width: 0%;
+            background: ${PROGRESS_LAYOUT.fill};
+            transition: width 180ms ease-out;
+        `;
+        track.appendChild(fill);
+
+        const label = document.createElement('div');
+        label.textContent = 'Loading…';
+        label.style.cssText = `white-space: nowrap;`;
+
+        progressWrap.appendChild(track);
+        progressWrap.appendChild(label);
+        card.appendChild(progressWrap);
+
+        this._progressEl   = fill;
+        this._progressText = label;
+
+        // ⭐ Reset lock; main.js will call setReadyToClose(true) after loading
+        this._readyForClose = false;
+        this.setProgress(0, 'Loading…');
+
+        // ⭐ THE ONLY click handler on card — respects lock
+        card.addEventListener('click', () => {
+            if (!this._readyForClose) return;
+            this.close();
+        });
 
         this._root.appendChild(card);
 
@@ -341,11 +446,10 @@ export class Splash {
         if (e.key === 'Escape') {
             e.preventDefault();
             e.stopPropagation();
-            this.close();
+            if (this._readyForClose) this.close();
             return;
         }
 
-        // Enter/Space/Tab — do not let them leak out
         if (e.key === 'Tab' || e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             e.stopPropagation();

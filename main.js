@@ -2560,25 +2560,72 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.warn('[build] failed to load libraries manifest:', e);
         }
     }
+
+    try {
+        const img = new Image();
+        img.src = '/splash/art.png';
+    } catch {}
     
     modularSystem = new ModularSystem();
     window.modularSystem = modularSystem;
     window.system = modularSystem;  
 
     // ⭐ Show splash (if needed) and WAIT for user to close it
-    // — the checkbox inside splash may change the start-patch preference,
-    //   so we must read it only AFTER splash closes.
-    const splashPromise = modularSystem.splash.maybeShowOnStartup();
-    if (splashPromise) await splashPromise;
+    // было:
+    // const splashPromise = modularSystem.splash.maybeShowOnStartup();
+    // if (splashPromise) await splashPromise;
+    // if (getStartPatchPref() === 'open') { const result = await ... }
 
-    if (getStartPatchPref() === 'open') {
-        const result = await modularSystem.patchLoader.loadBuiltinPatch('startup');
-        if (result.success) {
-            modularSystem.currentPatchFilename = result.filename;
-            modularSystem.showNotification(`✅ Demo patch loaded`);
-        } else {
-            console.warn('[startup] demo patch not loaded:', result.error);
+    // ⭐ NEW — splash as loading screen
+    const splash = modularSystem.splash;
+
+    // 1. Показываем splash (locked). Promise резолвится при закрытии — ждём позже.
+    const splashClosed = splash.maybeShowOnStartup();
+    const splashShown  = !!splashClosed;
+
+    // 2. Читаем pref СРАЗУ. Семантика «Open demo patch on launch» —
+    //    решение на следующий запуск, поэтому читаем текущее значение.
+    const wantStartPatch = getStartPatchPref() === 'open';
+
+    let startPatchResult = null;
+
+    if (wantStartPatch) {
+        try {
+            if (splashShown) {
+                splash.setProgress(0.02, 'Fetching start patch…');
+            }
+
+            startPatchResult = await modularSystem.patchLoader.loadBuiltinPatch('startup', {
+                onProgress: (pct, label) => {
+                    if (splashShown) splash.setProgress(0.05 + pct * 0.9, label);
+                },
+            });
+
+            if (startPatchResult.success) {
+                modularSystem.currentPatchFilename = startPatchResult.filename;
+            } else {
+                console.warn('[startup] demo patch not loaded:', startPatchResult.error);
+                if (splashShown) {
+                    splash.setProgress(1, 'Start patch failed — click to continue');
+                }
+            }
+        } catch (err) {
+            console.error('[startup] start patch exception:', err);
+            if (splashShown) {
+                splash.setProgress(1, 'Start patch failed — click to continue');
+            }
         }
+    }
+
+    // 3. Разрешаем закрытие и ждём клика
+    if (splashShown) {
+        splash.setReadyToClose(true);
+        await splashClosed;
+    }
+
+    // 4. Тост — после закрытия splash (иначе он под inert-слоем и не виден)
+    if (startPatchResult?.success) {
+        modularSystem.showNotification(`✅ Demo patch loaded`);
     }
 
     // ⭐ MIDI: не автостартуем — браузер требует клик пользователя для разрешения.

@@ -26,7 +26,7 @@ export class PatchLoader {
 
     // === ЗАГРУЗКА ПАТЧЕЙ ===
     
-    async loadPatch(patchData) {
+    async loadPatch(patchData, opts = {}) {
         if (!patchData || typeof patchData !== 'object') {
             console.error('❌ Patch data is not an object:', patchData);
             throw new Error('Invalid patch data format');
@@ -36,6 +36,14 @@ export class PatchLoader {
             console.error('❌ No modules array found in patch data');
             throw new Error('Patch data missing modules array');
         }
+
+        const onProgress = (typeof opts.onProgress === 'function') ? opts.onProgress : null;
+        const total = patchData.modules.length;
+        let done = 0;
+        const tick = (label) => {
+            if (!onProgress) return;
+            onProgress(total ? done / total : 0, label);
+        };
 
         // ⭐ NEW — применить дизайн из патча ДО создания модулей
         //    (grid.multX/multY влияет на snap при createModuleFromDef)
@@ -52,14 +60,14 @@ export class PatchLoader {
         for (const moduleDef of patchData.modules) {
             const isVoice = (moduleDef.area || 'VOICE').toUpperCase() !== 'FX';
             if (isVoice) {
-                const bottom = (moduleDef.vpos || 0) + 2;   // +2 — примерная высота
+                const bottom = (moduleDef.vpos || 0) + 2;
                 if (bottom > maxVoiceY) maxVoiceY = bottom;
             }
         }
-          
+
         // ⭐ Куда класть FX: после самого нижнего Voice + gap
         const FX_START_Y = maxVoiceY + 10;
-        this._fxStartY = FX_START_Y;   // сохраняем для createModuleFromDef
+        this._fxStartY = FX_START_Y;
 
         // Шаг 1: Загружаем модули
         const moduleLoadResults = [];
@@ -72,12 +80,12 @@ export class PatchLoader {
                 hpos: moduleDef.hpos,
                 vpos: moduleDef.vpos
             });
-            
+
             try {
                 const startTime = performance.now();
                 const module = await this.createModuleFromDef(moduleDef);
                 const endTime = performance.now();
-                
+
                 moduleLoadResults.push({
                     success: !!module,
                     name: moduleDef.name,
@@ -92,16 +100,21 @@ export class PatchLoader {
                     error: error.message
                 });
             }
+
+            // ⭐ progress tick (module done, success or fail)
+            done++;
+            tick(`Module ${done}/${total}: ${moduleDef.name}`);
         }
-        
+
         // Отчет о загрузке модулей
         dlog('\n📊 MODULE LOAD REPORT:');
         const successful = moduleLoadResults.filter(r => r.success).length;
         const failed = moduleLoadResults.filter(r => !r.success).length;
         dlog(`✅ Successful: ${successful}, ❌ Failed: ${failed}`);
-        
+
         // Шаг 2: Создаем кабели
         if (patchData.cables && patchData.cables.length > 0) {
+            if (onProgress) onProgress(0.99, 'Connecting cables…');
             dlog(`\n🔌 Creating ${patchData.cables.length} cables...`);
             this.createCables(patchData.cables);
         } else {
@@ -110,13 +123,14 @@ export class PatchLoader {
 
         // ⭐ Шаг 3: Стикеры
         if (Array.isArray(patchData.stickers) && patchData.stickers.length > 0) {
+            if (onProgress) onProgress(0.99, 'Loading stickers…');
             dlog(`\n📌 Loading ${patchData.stickers.length} stickers...`);
             this.loadStickers(patchData.stickers);
         }
 
-        // ⭐ Шаг 4: применить варианты ко всем модулям (перекраска джеков
-        //          без ожидания первого кабеля)
+        // ⭐ Шаг 4: применить варианты ко всем модулям
         if (this.system.recomputeVariantUI) {
+            if (onProgress) onProgress(0.99, 'Applying variants…');
             try {
                 await this.system.recomputeVariantUI();
             } catch (e) {
@@ -129,11 +143,15 @@ export class PatchLoader {
             this.system.resetZoom();
         }
         this.system.forceRedraw?.();
-        this.system.minimap?._markDirty?.(); 
+        this.system.minimap?._markDirty?.();
+
         // ⭐ Пересобираем ORC, если Csound запущен
         if (this.system.csoundEngine?.state === 'running') {
             this.system._recompileDebounced?.();
         }
+
+        // ⭐ финальный тик
+        if (onProgress) onProgress(1, 'Ready');
 
         return this.moduleMap;
     }
@@ -679,7 +697,7 @@ export class PatchLoader {
      * @param {string} name — patch name without .json
      * @returns {Promise<{success: boolean, filename?: string, error?: string}>}
      */
-    async loadBuiltinPatch(name) {
+    async loadBuiltinPatch(name, opts = {}) {
         try {
             const res = await fetch(`/patches/${name}.json`);
             if (!res.ok) {
@@ -687,13 +705,12 @@ export class PatchLoader {
             }
             const text = await res.text();
 
-            // Vite SPA fallback guard — same check as libraryStore.looksLikeHtml
             if (/^\s*<(!doctype|html)/i.test(text)) {
                 throw new Error(`/patches/${name}.json returned HTML (SPA fallback)`);
             }
 
             const patchData = JSON.parse(text);
-            await this.loadPatch(patchData);
+            await this.loadPatch(patchData, opts);   // ⭐ проброс
 
             return { success: true, filename: `${name}.json`, data: patchData };
         } catch (error) {
