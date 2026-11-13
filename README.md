@@ -13,6 +13,7 @@ A next step of the [pch2csd](https://github.com/gleb812/pch2csd) project.
 - **Tempo transport** — 7-segment BPM display, drag to change, or lock to external **MIDI Clock** (`EXT`).
 - **Oscilloscope** (multi-channel), **LED / MiniVU** indicators.
 - **Themeable UI** — LCD theme with live editor (`D`).
+- **Module browser with category tree** — `Space` opens a two-pane menu: libraries expand into categories, filter chips at the top.
 - **Module Editor** (`editor.html`) — IDE-style, protected Csound structure, user module libraries.
 - **External control** — HTTP + OSC bridge (`CSP_API.md`) for scripting and remote patching.
 
@@ -78,6 +79,7 @@ User libraries (desktop) live in `~/Documents/CsModular/libraries/`.
 │   ├── editor.html      # entry point
 │   ├── ComponentRegistry.js   # single source of truth for components
 │   └── ui/              # DockLayout, Toolbar, PropertiesPanel, TerminalPanel, ...
+├── bridge/ # Node.js process: HTTP + OSC → WebSocket (external control)
 ├── public/              # Static assets (libraries, csound modules, tables, backgrounds)
 ├── src-tauri/           # Tauri (Rust) shell
 └── scripts/             # Python utility scripts
@@ -85,8 +87,8 @@ User libraries (desktop) live in `~/Documents/CsModular/libraries/`.
 
 ## Adding Custom Modules
 
-Open the **Module Editor** (`Space → Editor`, or `editor.html`), design the panel,
-pick a **category**, write the DSP body, save.
+Open the **Module Editor** (`Ed` button in the transport, or `editor.html`),
+design the panel, pick a **category**, write the DSP body, save.
 Modules appear in `Space → Add Module → 👤 user` immediately.
 
 For **release** (builtin library, in git) and **sharing** (export/import `.js` + `.txt`) —
@@ -109,7 +111,7 @@ Don't run both — port 3000 is shared.
 - **[EDITOR.md](EDITOR.md)** — module editor internals
 - **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** — known issues, workarounds
 - **[TODO.md](TODO.md)** — roadmap
-- **[AI Context.md](AI Context.md)** — full AI-facing context
+- **[AI_Context.md](AI_Context.md)** — full AI-facing context
 - **[CSP_API.md](CSP_API.md)** — HTTP + OSC bridge for external control (OSC, Python, curl)
 
 ## Contributing

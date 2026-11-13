@@ -9,14 +9,11 @@ Roadmap for the alpha and beyond. Done items are removed, not struck through.
 - [ ] **Reinit problem** — adding a module with controllers (repro + fix)
 - [ ] **Save confirmation** — `saveModule` overwrites silently; check `loadModule` first, `confirm()` if exists
 - [ ] **`ConfirmDialog`** — replace `window.confirm()` (Tauri macOS WKWebView unreliable)
-- [ ] **MIDI dies after recompile** — `@csound/browser` IPC bug; try 7.0.0-beta or 6.18.5; document workaround
 - [ ] **HiDPI (`dpr > 1`)** — modules don't drag on macOS Retina / Windows 125–150%; `resizeCanvasToWindow` hardcodes `dpr = 1`
 
 ## 📦 Alpha release prep
 
-- [ ] **`stableModulesOnly`** — extend `passable` in build filter (currently only `stable`)
 - [ ] **All modules have `status`** — audit `public/libraries/*/modules/*.js`
-- [ ] **Demo library** — `test-lib` with 2–3 modules, `_meta.json`, `_index.json`
 - [ ] **2–3 demo patches** — save as `.json`, include in repo (`public/patches/`)
 - [ ] **Screenshots / preview** — README + GitHub repo
 - [ ] **Remove stars** (legacy rating) once `status` is complete
@@ -121,10 +118,10 @@ Roadmap for the alpha and beyond. Done items are removed, not struck through.
 - [ ] **Remove fallback download** from `ModulePropertiesWindow.saveModule()`
 - [ ] **Rebuild exe** after design updates
 - [ ] Android / iOS targets (later)
-- **Auto hot-reload** — `BroadcastChannel('csmodular-library')` из
-  `saveService`/`libraryStore.saveModule` → `ModularSystem.reloadUserModules()`
-  без кнопки. Web: работает между вкладками. Tauri: тот же `BroadcastChannel`
-  в WebView (проверить).
+- [ ] **Auto hot-reload** — `BroadcastChannel('csmodular-library')` from
+  `saveService` / `libraryStore.saveModule` → `ModularSystem.reloadUserModules()`
+  without the button. Web: works across tabs. Tauri: same `BroadcastChannel`
+  in WebView (verify).
 
 
 ## 🔌 Bridge / External API
@@ -163,12 +160,11 @@ Roadmap for the alpha and beyond. Done items are removed, not struck through.
 - [ ] **Terminal autocomplete** on Tab
 - [ ] **Terminal `history` command**, `!!` repeat, `!N` repeat by index
 - [ ] **Terminal `snapshot`** — save / restore module state in session
-- [ ] **Terminal `export json` / `export dsp` / `export csd`**
+- [ ] **Terminal `export json` / `export dsp` **
 - [ ] **Terminal richer output coloring** (`id=3` → clickable to select)
 - [ ] **Terminal `find <pattern>` / `props <id>` / `id free`**
 - [ ] **`add N type row` / `add N type col`** — batch add with spacing
 - [ ] **`clone <id>`** — duplicate component
-- [ ] **`macro <name>`** — user-defined macro commands
 
 ### Later
 - [ ] **CodeMirror 5 or 6** — undo/redo, search, autocomplete, Csound mode, protected ranges as `readOnly`
@@ -217,7 +213,6 @@ Roadmap for the alpha and beyond. Done items are removed, not struck through.
 - [ ] Remove duplicates in `CsoundGenerator` (double `_findCablesForOutput`)
 - [ ] Split `Panel` from `src/components/` into `Model` / `View`
 - [ ] `Panel.draw` — move FX stripe to separate method
-- [ ] `Theme.js` — split into `ThemeClassic` / `ThemeLcd` (strategy pattern)
 - [ ] **Unify save service** — `TerminalPanel._cmdSave`, `PropertiesPanel`, `Toolbar._onSave`
 - [ ] **`ModuleFactory` keyed by `<lib>/<type>`** — proper collision handling (currently first-wins)
 

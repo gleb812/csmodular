@@ -306,6 +306,7 @@ Figma-style, right-top, `MINIMAP_WIDTH=220`, `MINIMAP_HEIGHT=160`. Toggle: hotke
 ## Module categories
 
 `src/moduleCategories.js` — single source of truth.
+`CATEGORIES` — array of valid categories; `isValidCategory(c)`.
 
 `getModuleCategoryColor(module)` (`src/constants.js`) priority:
 1. `module.category` (if `isValidCategory`) → `MODULE_CATEGORY_COLORS[category]`
@@ -313,21 +314,90 @@ Figma-style, right-top, `MINIMAP_WIDTH=220`, `MINIMAP_HEIGHT=160`. Toggle: hotke
 3. `module.isUser` → `custom`
 4. else → `unknown` (#64748b)
 
-`MODULE_CATEGORY_COLORS` — `osc`, `noise`, `sample`, `lfo`, `env`, `filter`, `fx`, `dynamics`, `mixer`, `switch`, `logic`, `math`, `util`, `io`, `midi`, `control`, `custom`, `unknown`.
+`MODULE_CATEGORY_COLORS` — `osc`, `noise`, `sample`, `lfo`, `env`, `filter`, `fx`,
+`dynamics`, `mixer`, `switch`, `logic`, `math`, `util`, `io`, `midi`, `control`,
+`custom`, `unknown`.
+
+### ContextMenu — category tree + global filter
+
+`src/ui/ContextMenu.js` (`Space`) — two-pane menu: library/category tree on the
+left, module list + global filter chips on top of the right pane.
+
+**Data:** `refreshLibraryGroups()` builds
+`this.libraryGroups = { libName: { source, modules: [], byCategory: { cat: [...] } } }`.
+`byCategory` groups modules: `isValidCategory(m.category) ? m.category : 'other'`.
+Re-read on every `show()` (fresh libraries).
+
+**Tree (`_renderGroupList`):**
+- Root — library (`👤` user / `📦` builtin), module count on the right.
+- Categories under the root — **hidden by default** (`display: none`), expanded
+  by clicking the root. First library is expanded on open.
+- **No colored dots** on categories — text + count only.
+- `hover` → soft highlight `#252525` (cleared on `mouseleave`);
+  `click` → "active" `#2a2a2a` + `border-left: 2px solid #0af` (cleared from
+  the previous one via `_activeTreeEl`).
+- Hover on root → `showModulesForGroup(libName)` (all modules of the library).
+- Hover on category → `showModulesForCategory(libName, cat)`.
+
+**Top filter (`createCategoryFilterBar` / `_renderCategoryFilterBar`):**
+- Chips: `All` + categories actually present in any library.
+- `_applyGlobalCategoryFilter(cat)` — "All" shows all modules from all libraries
+  with a library badge; a category shows only that category's modules from all
+  libraries.
+- `_syncCategoryChips(cat)` — highlights the active chip. `showModulesForGroup`
+  calls `_syncCategoryChips('all')`; `showModulesForCategory` —
+  `_syncCategoryChips(cat)`.
+
+**Removed (do not reintroduce):** `createPatchSection`, `createCompactPatchSection`,
+`handlePatchAction`, `openModuleEditor` (moved to `BottomBar._openEditor`).
+Patch actions (`Load/Save/New/CSD/Sticker/Editor`) — **only** through BottomBar.
+
+**Search (`searchAllModules`):** matches name and `displayName` across all
+libraries, results carry a library badge. Synced with the right pane.
 
 ## Splash / Start patch
 
-`Splash.maybeShowOnStartup()` shows once per session; resets when
-`__APP_VERSION__` changes (localStorage `csmodular:splash-version`).
-Returns a Promise resolved on close — `main.js` **awaits** it before deciding
-whether to load the start patch.
+`Splash` (`src/ui/Splash.js`) — one modal, two modes via `_open({ mode })`:
+
+| Mode | Trigger | Progress bar | `_readyForClose` |
+|---|---|---|---|
+| `startup` | `maybeShowOnStartup()` (once per session) | ✅ yes | `false` → waits for `setReadyToClose(true)` |
+| `about` | `openAbout()` (`?` button in `BottomBar`) | ❌ no | `true` immediately |
+
+**`maybeShowOnStartup()`:** shown once per session; reset when
+`__APP_VERSION__` changes (localStorage `csmodular:splash-version`). Returns a
+Promise (resolved on `close()`) or `null` if splash was already shown this session.
+
+**Startup flow (main.js):**
+1. `const splashClosed = splash.maybeShowOnStartup();` — **do not await** yet.
+2. If `getStartPatchPref() === 'open'` — `patchLoader.loadBuiltinPatch('startup', { onProgress })`.
+3. `onProgress(pct, label)` → `splash.setProgress(0.05 + pct * 0.9, label)`.
+4. `splash.setReadyToClose(true)` — unlocks, `setProgress(1, 'Ready')`.
+5. `await splashClosed;` — waits for click / Escape.
+
+**About flow:** `?` → `splash.openAbout()` → no progress bar, `_readyForClose = true`
+immediately, click / Escape closes.
+
+**Progress API:**
+- `setProgress(pct, text)` — `0..1` + optional label. In `about` mode
+  `_progressEl === null` → no-op.
+- `setReadyToClose(ready)` — on `true` calls `setProgress(1, 'Ready')`.
+- `close()` — resets `_progressEl` / `_progressText` / `_readyForClose`.
+
+**Close:** click on the card (not the checkbox!) / Escape. `Enter` / `Tab` /
+`Space` are blocked in `_onKeyDown`. Checkbox handles `click` via `stopPropagation`.
 
 Checkbox «Open demo patch on launch» — `localStorage csmodular:startPatch-pref`
 (`'open'` | `'closed'`, default `'open'`). `getStartPatchPref()` /
 `setStartPatchPref()` exported from `Splash.js`.
 
-Start patch: `public/patches/startup.json` → `PatchLoader.loadBuiltinPatch(name)`
-(fetches `/patches/<name>.json`, SPA-fallback guard).
+Start patch: `public/patches/startup.json` → `PatchLoader.loadBuiltinPatch(name, opts)`.
+`loadPatch(patchData, opts)` accepts `opts.onProgress(pct, label)`; ticks
+`done/total` after each module (including failed) + intermediate
+`'Connecting cables…'` / `'Loading stickers…'` / `'Applying variants…'` / `'Ready'`.
+
+⭐ **Every `loadPatch` call must forward `opts`** — `loadBuiltinPatch`,
+`loadPatchFromFile` (optional), `ModularSystem.loadPatchFromJson`.
 
 ## MIDI
 
@@ -355,7 +425,7 @@ Start patch: `public/patches/startup.json` → `PatchLoader.loadBuiltinPatch(nam
 | `Grid` | `src/grid/Grid.js` | Step, snap, crosses |
 | `EventManager` | `src/managers/EventManager.js` | Mouse events, pan, zoom |
 | `UIManager` | `src/managers/UIManager.js` | Left control panel |
-| `BottomBar` | `src/ui/BottomBar.js` | Bottom actions, `Mp` toggle minimap |
+| `BottomBar` | `src/ui/BottomBar.js` | Transport: BPM/MIDI/OSC, run, zoom, volume, `Mp`, `De`, `Sh`, `⟳`, `?` (About), `i` (SysInfo), `Ed`, `#` (lock). **`Sa` = long-press → Save menu** (Save / Save As / Export CSD) |
 | `Minimap` | `src/ui/Minimap.js` | World overview |
 | `Splash` | `src/ui/Splash.js` | Splash / About (session-once) |
 | `DesignSettingsPanel` | `src/ui/DesignSettingsPanel.js` | Theme editor (`D`) |
@@ -625,11 +695,28 @@ Only non-obvious rules that are easy to violate. Full list → `ARCHITECTURE.md`
 41. **`CsoundGenerator.reset()` must re-add base UDOs** (`led_rms.txt`,
     `mVU_rms.txt`) after `includes.clear()`. Otherwise indicators silently lose
     their opcodes after New/Load.
+42. **`Splash.openAbout()` ≠ `openSplash()`** — `openAbout` uses
+    `{ mode: 'about' }`: no progress bar, `_readyForClose = true` immediately.
+    `openSplash` uses `{ mode: 'startup' }`: progress bar, `_readyForClose = false`
+    until `setReadyToClose(true)` from `main.js`. Do not break the split — otherwise
+    the About splash will hang forever on "Loading…".
+43. **`PatchLoader.loadPatch(patchData, opts)` — `opts.onProgress(pct, label)`**
+    required for the start patch. Tick after each module (including failed),
+    intermediate ticks before cables/stickers/variants, final `(1, 'Ready')`.
+    `loadBuiltinPatch(name, opts)` forwards `opts` into `loadPatch`.
+44. **`ContextMenu` tree — categories hidden (`display:none`), expanded by
+    clicking the root.** No colored dots on categories. Highlight: `hover`
+    (#252525, cleared) / `active` (#2a2a2a + border-left #0af, single one via
+    `_activeTreeEl`). Patch actions (Load/Save/New/CSD) — **only** in
+    `BottomBar`, not in ContextMenu.
 
 ## Style
 
-- **Russian for user, English for public docs and code comments.**
-- **⭐ Code comments — always English** (inline `//`, JSDoc `/** */`, `;` in Csound). Applies to every file, every commit. No Russian in code comments even if user is Russian.
+- **All `.md` documentation is English-only.** No Russian text in `AI Context.md`,
+  `ARCHITECTURE.md`, `CONTRIBUTING.md`, `EDITOR.md`, `TROUBLESHOOTING.md`,
+  `TODO.md`, `CSP_API.md`, `README.md`. Code comments are also English-only
+  (already covered in *Style*). Russian is only for user-facing chat, never in
+  the repo.
 - **No "let's try"** — concrete edits. Show diff or full methods.
 - **Do not change what wasn't asked about.**
 - **Minimal patch.** Ask about goal → clarify files → check `TODO.md` for related issues → propose.

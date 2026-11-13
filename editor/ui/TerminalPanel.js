@@ -323,6 +323,13 @@ export class TerminalPanel {
                 case 'clear': case 'cls': this.output.innerHTML = ''; return;
                 case 'ls': case 'list':   return this._cmdLs(args);
                 case 'add':               return this._cmdAdd(args);
+                // ⭐ Direct-type shortcuts: `knob`, `label`, `toggle` → add <type> ...
+                //    Jacks (ina/ink/outa/outk) already handled below.
+                case 'knob': case 'k':
+                case 'slider': case 's': case 'sl':
+                case 'label': case 'textlabel':
+                case 'toggle': case 'buttontext':
+                    return this._cmdAdd([cmd, ...args]);
                 case 'in': case 'out':
                 case 'ina': case 'ink': case 'outa': case 'outk':
                     return this._cmdAdd([cmd, ...args]);
@@ -1022,6 +1029,7 @@ export class TerminalPanel {
         this._printInfo('Commands:');
         this._print('  add <type> [x y]       add component');
         this._print('  ina / ink / outa / outk add input/output');
+        this._print('  knob|slider|label|toggle [args]  shortcut for add <type>');
         this._print('  ls [type] [-l]         list components');
         this._print('  del <id|type|range>... delete components');
         this._print('  mv <id> <x> <y>        move (absolute or +dx +dy)');

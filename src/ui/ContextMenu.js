@@ -4,6 +4,8 @@ import { PANEL_GRID_WIDTH } from '../constants.js';
 import { ratingStore, getEffectiveRating } from '../api/moduleRatingStore.js';
 import { getModuleStatus, getStatusMeta, IS_DEV } from '../api/moduleStatusStore.js';
 import { Panel } from '../components/Panel.js';
+import { CATEGORIES, isValidCategory } from '../moduleCategories.js';
+
 export class ContextMenu {
     constructor(system) {
         this.system = system;
@@ -40,9 +42,15 @@ export class ContextMenu {
             try {
                 const mods = await libraryStore.listModules(entry.name);
                 if (mods.length > 0) {
+                    const byCategory = {};
+                    for (const m of mods) {
+                        const cat = isValidCategory(m.category) ? m.category : 'other';
+                        (byCategory[cat] ||= []).push(m);
+                    }
                     groups[entry.name] = {
                         source: entry.source,
                         modules: mods,
+                        byCategory,
                     };
                     for (const m of mods) {
                         this.allModules[m.name] = entry.name;
@@ -55,13 +63,144 @@ export class ContextMenu {
 
         this.libraryGroups = groups;
         this._renderGroupList();
+        this._renderCategoryFilterBar();   // ⭐ обновить чипсы
+    }
+
+    createCategoryFilterBar() {
+        this._categoryFilterBar = document.createElement('div');
+        this._categoryFilterBar.id = 'category-filter-bar';
+        this._categoryFilterBar.style.cssText = `
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            padding: 6px 12px;
+            background: #252525;
+            border-bottom: 1px solid #333;
+            flex-shrink: 0;
+        `;
+        return this._categoryFilterBar;
+    }
+
+    _renderCategoryFilterBar() {
+        const bar = this._categoryFilterBar;
+        if (!bar) return;
+        bar.innerHTML = '';
+
+        const presentCats = new Set();
+        for (const entry of Object.values(this.libraryGroups)) {
+            for (const c of Object.keys(entry.byCategory)) presentCats.add(c);
+        }
+
+        const chips = ['all', ...[...CATEGORIES, 'other'].filter(c => presentCats.has(c))];
+
+        for (const cat of chips) {
+            const chip = document.createElement('button');
+            chip.dataset.category = cat;
+            chip.textContent = cat === 'all' ? 'All' : (cat === 'other' ? 'Other' : cat);
+            chip.style.cssText = `
+                padding: 2px 8px;
+                background: transparent;
+                border: 1px solid #333;
+                border-radius: 10px;
+                color: #888;
+                cursor: pointer;
+                font-size: 10px;
+                font-family: inherit;
+            `;
+            chip.onmouseenter = () => { chip.style.background = '#333'; chip.style.color = '#fff'; };
+            chip.onmouseleave = () => { chip.style.background = 'transparent'; chip.style.color = '#888'; };
+            chip.onclick = () => this._applyGlobalCategoryFilter(cat);
+            bar.appendChild(chip);
+        }
+        this._syncCategoryChips('all');
+    }
+
+    _applyGlobalCategoryFilter(cat) {
+        // Сброс подсветки дерева
+        this.menuElement.querySelectorAll('.group-item, .category-item').forEach(el => {
+            el.style.background = 'transparent';
+            el.style.borderLeftColor = 'transparent';
+            el.style.color = el.classList.contains('category-item') ? '#888' : '#aaa';
+        });
+
+        const modulesContainer = this.menuElement.querySelector('#modules-container');
+        if (!modulesContainer) return;
+        modulesContainer.innerHTML = '';
+
+        this._syncCategoryChips(cat);
+
+        if (cat === 'all') {
+            // Показать всё
+            this._showAllModulesFromAllLibs();
+            return;
+        }
+
+        // Собрать модули по категории из ВСЕХ библиотек
+        const results = [];
+        for (const [libName, entry] of Object.entries(this.libraryGroups)) {
+            const mods = entry.byCategory[cat] || [];
+            for (const m of mods) results.push({ m, libName });
+        }
+
+        if (results.length === 0) {
+            const msg = document.createElement('div');
+            msg.style.cssText = 'padding:20px;text-align:center;color:#666;font-size:11px;font-style:italic;';
+            msg.textContent = `No modules in category "${cat}"`;
+            modulesContainer.appendChild(msg);
+            return;
+        }
+
+        const header = document.createElement('div');
+        header.style.cssText = 'padding:6px 12px;font-size:10px;color:#666;border-bottom:1px solid #333;margin-bottom:4px;';
+        header.textContent = `Category: ${cat} — ${results.length} module(s)`;
+        modulesContainer.appendChild(header);
+
+        for (const { m, libName } of results) {
+            const row = this._createModuleRow(m, libName);
+            const chip = document.createElement('span');
+            chip.textContent = libName;
+            chip.style.cssText = 'font-size:9px;color:#555;font-style:italic;margin-right:6px;flex:0 0 auto;';
+            const stars = row.querySelector('.rating-stars');
+            if (stars) row.insertBefore(chip, stars);
+            else row.appendChild(chip);
+            modulesContainer.appendChild(row);
+        }
+    }
+
+    _showAllModulesFromAllLibs() {
+        const modulesContainer = this.menuElement.querySelector('#modules-container');
+        if (!modulesContainer) return;
+        modulesContainer.innerHTML = '';
+
+        const results = [];
+        for (const [libName, entry] of Object.entries(this.libraryGroups)) {
+            for (const m of entry.modules) results.push({ m, libName });
+        }
+
+        if (results.length === 0) return;
+
+        const header = document.createElement('div');
+        header.style.cssText = 'padding:6px 12px;font-size:10px;color:#666;border-bottom:1px solid #333;margin-bottom:4px;';
+        header.textContent = `All modules — ${results.length}`;
+        modulesContainer.appendChild(header);
+
+        for (const { m, libName } of results) {
+            const row = this._createModuleRow(m, libName);
+            const chip = document.createElement('span');
+            chip.textContent = libName;
+            chip.style.cssText = 'font-size:9px;color:#555;font-style:italic;margin-right:6px;flex:0 0 auto;';
+            const stars = row.querySelector('.rating-stars');
+            if (stars) row.insertBefore(chip, stars);
+            else row.appendChild(chip);
+            modulesContainer.appendChild(row);
+        }
     }
 
     _renderGroupList() {
         const leftPanel = this.menuElement.querySelector('#left-panel');
         if (!leftPanel) return;
         leftPanel.innerHTML = '';
-        this._groupListEl = leftPanel;
+        this._activeTreeEl = null;   // ⭐ трекинг активного элемента
 
         const libNames = Object.keys(this.libraryGroups);
         if (libNames.length === 0) {
@@ -76,10 +215,12 @@ export class ContextMenu {
         libNames.forEach((libName, idx) => {
             const entry = this.libraryGroups[libName];
             const icon = entry.source === 'user' ? '👤' : '📦';
-            const item = document.createElement('div');
-            item.className = 'group-item';
-            item.dataset.group = libName;
-            item.style.cssText = `
+
+            // ── Корень: библиотека
+            const root = document.createElement('div');
+            root.className = 'group-item';
+            root.dataset.group = libName;
+            root.style.cssText = `
                 padding: 5px 12px;
                 font-size: 11px;
                 color: #aaa;
@@ -92,23 +233,163 @@ export class ContextMenu {
                 justify-content: space-between;
                 align-items: center;
             `;
-            item.innerHTML = `<span>${icon} ${libName}</span><span style="color:#555;font-size:10px;">${entry.modules.length}</span>`;
+            root.innerHTML = `<span>${icon} ${libName}</span><span style="color:#555;font-size:10px;">${entry.modules.length}</span>`;
 
-            item.onmouseenter = () => {
-                this._highlightGroup(item);
+            root.addEventListener('mouseenter', () => {
+                this._setTreeHover(root);
                 this.showModulesForGroup(libName);
-            };
-            item.onclick = () => this.showModulesForGroup(libName);
+            });
+            root.addEventListener('mouseleave', () => {
+                this._clearTreeHover(root);
+            });
+            root.addEventListener('click', () => {
+                this._setTreeActive(root);
+                this.showModulesForGroup(libName);
+            });
 
-            leftPanel.appendChild(item);
+            leftPanel.appendChild(root);
 
+            // ── Категории (скрыты, пока библиотека не раскрыта)
+            const catOrder = [...CATEGORIES, 'other'];
+            const cats = catOrder.filter(c => entry.byCategory[c]?.length > 0);
+            const catEls = [];
+            for (const cat of cats) {
+                const mods = entry.byCategory[cat];
+                const label = cat === 'other' ? 'Other' : cat;
+
+                const catEl = document.createElement('div');
+                catEl.className = 'category-item';
+                catEl.dataset.group = libName;
+                catEl.dataset.category = cat;
+                catEl.style.cssText = `
+                    padding: 3px 12px 3px 28px;
+                    font-size: 10px;
+                    color: #888;
+                    cursor: pointer;
+                    user-select: none;
+                    border-left: 2px solid transparent;
+                    display: none;   /* ⭐ скрыто по умолчанию */
+                    justify-content: space-between;
+                    align-items: center;
+                `;
+                catEl.innerHTML = `
+                    <span>${label}</span>
+                    <span style="color:#555;">${mods.length}</span>
+                `;
+
+                catEl.addEventListener('mouseenter', () => {
+                    this._setTreeHover(catEl);
+                    this.showModulesForCategory(libName, cat);
+                });
+                catEl.addEventListener('mouseleave', () => {
+                    this._clearTreeHover(catEl);
+                });
+                catEl.addEventListener('click', () => {
+                    this._setTreeActive(catEl);
+                    this.showModulesForCategory(libName, cat);
+                });
+
+                leftPanel.appendChild(catEl);
+                catEls.push(catEl);
+            }
+
+            // ⭐ Раскрытие/закрытие категорий — по клику на корень
+            //    (плюс шеврон справа, но проще без него)
+            root.addEventListener('click', () => {
+                const isOpen = catEls.length > 0 && catEls[0].style.display !== 'none';
+                if (isOpen) {
+                    for (const ce of catEls) ce.style.display = 'none';
+                    root.dataset.open = '0';
+                } else {
+                    for (const ce of catEls) ce.style.display = 'flex';
+                    root.dataset.open = '1';
+                }
+            });
+
+            // Стартовое состояние: первая библиотека раскрыта, остальные свёрнуты
             if (idx === 0) {
-                this._highlightGroup(item);
+                for (const ce of catEls) ce.style.display = 'flex';
+                root.dataset.open = '1';
+                this._setTreeActive(root);
                 this.showModulesForGroup(libName);
+            } else {
+                root.dataset.open = '0';
             }
         });
     }
 
+    /** Hover: подсветить элемент, НЕ трогая активный */
+    _setTreeHover(el) {
+        // Если это активный — не трогаем (активный цвет важнее)
+        if (el === this._activeTreeEl) return;
+        el.style.background = '#252525';
+        el.style.color = '#fff';
+    }
+
+    /** Убрать hover */
+    _clearTreeHover(el) {
+        if (el === this._activeTreeEl) return;
+        el.style.background = 'transparent';
+        el.style.color = el.classList.contains('category-item') ? '#888' : '#aaa';
+    }
+
+    /** Сделать элемент активным (снять с предыдущего) */
+    _setTreeActive(el) {
+        const prev = this._activeTreeEl;
+        if (prev && prev !== el) {
+            prev.style.background = 'transparent';
+            prev.style.borderLeftColor = 'transparent';
+            prev.style.color = prev.classList.contains('category-item') ? '#888' : '#aaa';
+        }
+        this._activeTreeEl = el;
+        el.style.background = '#2a2a2a';
+        el.style.borderLeftColor = '#0af';
+        el.style.color = '#fff';
+    }
+
+    showModulesForCategory(libName, cat) {
+        const modulesContainer = this.menuElement.querySelector('#modules-container');
+        if (!modulesContainer) return;
+        modulesContainer.innerHTML = '';
+
+        const entry = this.libraryGroups[libName];
+        const modules = entry?.byCategory?.[cat] || [];
+
+        const searchTerm = (this.searchInput?.value || '').toLowerCase().trim();
+        const filtered = searchTerm
+            ? modules.filter(m =>
+                m.name.toLowerCase().includes(searchTerm) ||
+                (m.displayName || m.description?.displayName || '').toLowerCase().includes(searchTerm))
+            : modules;
+
+        if (filtered.length === 0) {
+            const msg = document.createElement('div');
+            msg.style.cssText = 'padding:20px;text-align:center;color:#666;font-size:11px;font-style:italic;';
+            msg.textContent = searchTerm ? 'No modules match' : 'No modules in this category';
+            modulesContainer.appendChild(msg);
+            return;
+        }
+
+        for (const m of filtered) {
+            modulesContainer.appendChild(this._createModuleRow(m, libName));
+        }
+
+    }
+
+    _highlightGroup(activeItem) {
+        this.menuElement.querySelectorAll('.group-item, .category-item').forEach(el => {
+            el.style.background = 'transparent';
+            el.style.borderLeftColor = 'transparent';
+            el.style.color = el.classList.contains('category-item') ? '#888' : '#aaa';
+        });
+        activeItem.style.background = '#2a2a2a';
+        activeItem.style.borderLeftColor = '#0af';
+        activeItem.style.color = '#fff';
+    }
+
+    _highlightCategory(activeItem) {
+        this._highlightGroup(activeItem);
+    }
     _highlightGroup(activeItem) {
         this.menuElement.querySelectorAll('.group-item').forEach(el => {
             el.style.background = 'transparent';
@@ -251,11 +532,11 @@ export class ContextMenu {
             padding: 8px 0;
         `;
         
-        // Патч меню
-        const patchSection = this.createCompactPatchSection();
-        
+        // ⭐ Category filter bar (глобальный фильтр по категориям)
+        const filterBar = this.createCategoryFilterBar();
+
         rightPanel.appendChild(searchContainer);
-        rightPanel.appendChild(patchSection);
+        rightPanel.appendChild(filterBar);
         rightPanel.appendChild(modulesContainer);
         
         container.appendChild(leftPanel);
@@ -305,6 +586,7 @@ export class ContextMenu {
             msg.style.cssText = 'padding:20px;text-align:center;color:#666;font-size:11px;font-style:italic;';
             msg.textContent = 'No library selected';
             modulesContainer.appendChild(msg);
+            this._syncCategoryChips(null);   // сброс чипсов
             return;
         }
 
@@ -315,7 +597,7 @@ export class ContextMenu {
         const filtered = searchTerm
             ? modules.filter(m =>
                 m.name.toLowerCase().includes(searchTerm) ||
-                (m.description?.displayName || '').toLowerCase().includes(searchTerm))
+                (m.displayName || m.description?.displayName || '').toLowerCase().includes(searchTerm))
             : modules;
 
         if (filtered.length === 0) {
@@ -323,12 +605,64 @@ export class ContextMenu {
             msg.style.cssText = 'padding:20px;text-align:center;color:#666;font-size:11px;font-style:italic;';
             msg.textContent = searchTerm ? 'No modules match' : 'No modules in this library';
             modulesContainer.appendChild(msg);
+            this._syncCategoryChips(null);
             return;
         }
 
         for (const m of filtered) {
             modulesContainer.appendChild(this._createModuleRow(m, libName));
         }
+
+        // Библиотека целиком → подсветить "All"
+        this._syncCategoryChips('all');
+    }
+
+    showModulesForCategory(libName, cat) {
+        const modulesContainer = this.menuElement.querySelector('#modules-container');
+        if (!modulesContainer) return;
+
+        modulesContainer.innerHTML = '';
+
+        const entry = this.libraryGroups[libName];
+        const modules = entry?.byCategory?.[cat] || [];
+
+        const searchTerm = (this.searchInput?.value || '').toLowerCase().trim();
+        const filtered = searchTerm
+            ? modules.filter(m =>
+                m.name.toLowerCase().includes(searchTerm) ||
+                (m.displayName || m.description?.displayName || '').toLowerCase().includes(searchTerm))
+            : modules;
+
+        if (filtered.length === 0) {
+            const msg = document.createElement('div');
+            msg.style.cssText = 'padding:20px;text-align:center;color:#666;font-size:11px;font-style:italic;';
+            msg.textContent = searchTerm ? 'No modules match' : 'No modules in this category';
+            modulesContainer.appendChild(msg);
+            this._syncCategoryChips(cat);
+            return;
+        }
+
+        for (const m of filtered) {
+            modulesContainer.appendChild(this._createModuleRow(m, libName));
+        }
+
+        this._syncCategoryChips(cat);
+    }
+
+    /**
+     * Подсветить чипс выбранной категории (или 'all').
+     * @param {string|null} cat — 'all' | category | 'other' | null (сброс)
+     */
+    _syncCategoryChips(cat) {
+        if (!this._categoryFilterBar) return;
+        const buttons = this._categoryFilterBar.querySelectorAll('button');
+        buttons.forEach(b => {
+            const on = (b.dataset.category === cat) ||
+                       (cat === null && b.dataset.category === 'all');
+            b.style.background = on ? '#0af' : 'transparent';
+            b.style.color      = on ? '#fff' : '#888';
+            b.style.borderColor = on ? '#0af' : '#333';
+        });
     }
 
     _createModuleRow(moduleEntry, libName) {
@@ -490,114 +824,6 @@ export class ContextMenu {
         this.menuElement.style.top = `${top}px`;
     }
    
-    createPatchSection() {
-        const section = document.createElement('div');
-        section.style.cssText = `
-            border-bottom: 1px solid #333;
-            padding: 8px 0;
-        `;
-        
-        const patchItems = [
-            { text: '📂 Load patch', action: 'load-patch' },
-            { text: '💾 Save patch', action: 'save-patch' },
-            { text: '📄 Save patch as...', action: 'save-patch-as' },
-            { text: '🆕 New patch', action: 'new-patch' }
-        ];
-        
-        patchItems.forEach(item => {
-            const button = document.createElement('button');
-            button.textContent = item.text;
-            button.style.cssText = `
-                width: 100%;
-                padding: 10px 16px;
-                background: transparent;
-                border: none;
-                color: #ddd;
-                text-align: left;
-                cursor: pointer;
-                font-size: 13px;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            `;
-            
-            button.onmouseenter = () => {
-                button.style.background = '#2a2a2a';
-            };
-            button.onmouseleave = () => {
-                button.style.background = 'transparent';
-            };
-            
-            button.onclick = () => this.handlePatchAction(item.action);
-            
-            section.appendChild(button);
-        });
-        
-        return section;
-    }
-
-    createCompactPatchSection() {
-        const section = document.createElement('div');
-        section.style.cssText = `
-            background: #252525;
-            border-bottom: 1px solid #333;
-            padding: 0;
-        `;
-        
-        const patchItems = [
-            { text: 'Load', action: 'load-patch' },
-            { text: 'Save', action: 'save-patch' },
-            { text: 'Save As', action: 'save-patch-as' },
-            { text: 'New', action: 'new-patch' },
-            { text: '+ Sticker', action: 'add-sticker' },      // ⭐ NEW
-            { text: 'To CSD', action: 'export-csd' },
-            { text: 'Editor', action: 'open-editor' },
-        ];
-        
-        const container = document.createElement('div');
-        container.style.cssText = `
-            display: flex;
-            font-size: 11px;
-            color: #888;
-            padding: 4px 12px;
-        `;
-        
-        patchItems.forEach((item, index) => {
-            const button = document.createElement('button');
-            button.textContent = item.text;
-            button.title = item.action.replace('-', ' ') + ' patch';
-            button.style.cssText = `
-                background: transparent;
-                border: none;
-                color: #aaa;
-                cursor: pointer;
-                font-size: 11px;
-                padding: 2px 8px;
-                margin-right: 12px;
-                border-radius: 2px;
-            `;
-            
-            button.onmouseenter = () => {
-                button.style.background = '#333';
-                button.style.color = '#fff';
-            };
-            button.onmouseleave = () => {
-                button.style.background = 'transparent';
-                button.style.color = '#aaa';
-            };
-            
-            button.onclick = (e) => {
-                e.stopPropagation();
-                this.handlePatchAction(item.action);
-            };
-            
-            container.appendChild(button);
-        });
-        
-        section.appendChild(container);
-        return section;
-    }
-    
     setupEventListeners() {
         // Запоминаем позицию мыши для открытия меню рядом с курсором
         let lastMouseX = window.innerWidth / 2;
@@ -913,82 +1139,6 @@ export class ContextMenu {
         this.hide();
     }
     
-    handlePatchAction(action) {
-        
-        switch(action) {
-            case 'load-patch':
-                if (this.system && this.system.loadJsonPatch) {
-                    // Добавляем задержку для отслеживания
-                    setTimeout(async () => {
-                        try {
-                            const result = await this.system.loadJsonPatch();
-                        } catch (error) {
-                            console.error('💥 loadJsonPatch error:', error);
-                        }
-                    }, 100);
-                } else {
-                    console.error('❌ system.loadJsonPatch not available!');
-                }
-                break;
-                
-            case 'save-patch':
-                if (this.system && this.system.exportPatch) {
-                    this.system.exportPatch();
-                }
-                break;
-                
-            case 'save-patch-as':
-                if (this.system && this.system.savePatchAs) {
-                    this.system.savePatchAs();
-                }
-                break;
-                
-            case 'new-patch':
-                if (this.system && this.system.resetEverything) {
-                    this.system.resetEverything();
-                }
-                break;
-
-            case 'export-csd': 
-                if (this.system && this.system.csoundGen) {
-                    this.system.exportCsd();
-                } else {
-                    console.error('❌ csoundGen not available!');
-                }
-                break;
-
-            case 'add-sticker': {
-                // Позиция — там, где последний раз открывалось меню,
-                // иначе — в центре видимой области
-                let worldX, worldY;
-                if (this.lastOpenMouseX !== null && this.lastOpenMouseY !== null) {
-                    const rect = this.system.canvas.getBoundingClientRect();
-                    const canvasX = this.lastOpenMouseX - rect.left;
-                    const canvasY = this.lastOpenMouseY - rect.top;
-                    const world = this.system.eventManager.getWorldPosition(canvasX, canvasY);
-                    worldX = world.x;
-                    worldY = world.y;
-                } else {
-                    worldX = (window.innerWidth / 2 - this.system.offsetX) / this.system.scale;
-                    worldY = (window.innerHeight / 2 - this.system.offsetY) / this.system.scale;
-                }
-                const sticker = this.system.addStickerAtPosition(worldX, worldY, {
-                    text: 'New sticker',
-                    gridW: 8,
-                    gridH: 2,
-                });
-                if (sticker) this.system.selectSticker(sticker);
-                break;
-            }
-
-            case 'open-editor': // ← НОВЫЙ КЕЙС
-                this.openModuleEditor();
-                break;
-        }
-        
-        this.hide();
-    }
-
     injectStyles() {
         if (document.getElementById('context-menu-styles')) return;
         

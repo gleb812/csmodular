@@ -2,7 +2,7 @@
 # Architecture
 
 High-level overview of CsModular. For AI-facing context (every class, every rule,
-every known issue) — see [`AI Context.md`](AI Context.md). For editor internals —
+every known issue) — see [`AI Context.md`](AI_Context.md). For editor internals —
 [`EDITOR.md`](EDITOR.md). For module creation — [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Overview
@@ -44,7 +44,7 @@ Cables only within one layer. Change via right-click → Layer.
 A module is **two files**:
 
 - `<Name>.js` — UI description (components, `params`, `inputs`, `outputs`,
-  `category`, `status`, `gridHeight`, `customColor`).
+  `category`, `status`, `gridHeight`, `customColor`, `midiMappings`).
 - `<Name>.txt` — Csound UDO (`opcode <Name>, ... endop`).
 
 Both live in `public/libraries/<lib>/modules/` (builtin) or in
@@ -169,6 +169,8 @@ CsoundEngine.compileOrc() + start()
 | `LED`, `MiniVU` | level indicators |
 | `TextLabel` | text label (theme-colored, no `color` override) |
 | `SVG`, `Line`, `Graph` | graphics |
+| `TextEdit` | inline text input (editable label) |
+| `LevelShift` | level converter (In+Out, scales signal) |
 
 `BaseJack` (base for `Input`/`Output`) — `getEffectiveColor()`, `getCsoundRate()`,
 `originalType` (immutable), `type` (mutable, variant-applied),
@@ -178,7 +180,7 @@ CsoundEngine.compileOrc() + start()
 
 ## MIDI
 
-`src/midi/MidiManager.js` — Web MIDI API receiver. Enable from a user click (`MI` in BottomBar) — required by the browser gesture policy. States: `idle | requesting | ready | denied | unsupported`.
+`src/midi/MidiManager.js` — Web MIDI API receiver. Enable from a user click (`MIDI` in BottomBar) — required by the browser gesture policy. States: `idle | requesting | ready | denied | unsupported`.
 
 **Notes → Csound:** `0x90` / `0x80` → `CsoundEngine.midiMessage()` → `instr 3` (`gkGate`, `gkNote`).
 
@@ -249,26 +251,30 @@ See **[CSP_API.md](CSP_API.md)**.
 
 ## Themes
 
-`src/theme/` — Classic / LCD. `Theme` class wraps settings:
+`src/theme/` `Theme` class wraps settings:
 
 ```js
 theme.isLcd, theme.getTextColor(), theme.getAccentColor(), theme.applyGlow(ctx), ...
 ```
 
-**All `draw()` use `getCurrentTheme()`**. Jack colors in Classic = `CABLE_COLORS[type]`
-(never from theme). LCD — single accent fill.
+**All `draw()` use `getCurrentTheme()`**. LCD — single accent fill.
 
 ## Patch format
 
 ```json
 {
-  "version": 1,
+  "filename": "my_patch.json",
   "modules": [
-    { "type": "Zgen", "library": "test-lib", "gridX": 5, "gridY": 10,
-      "layer": "voice", "components": [...],
+    { "name": "Zgen", "library": "test-lib", "id": 1, "type": 0,
+      "parameters": "[0,0,0]", "modes": [],
+      "area": "VOICE", "hpos": 5, "vpos": 10,
+      "customColor": null,
       "midiMappings": [{ "componentId": "1", "cc": 74, "channel": 1 }] }
   ],
-  "cables": [...]
+  "cables": [...],
+  "stickers": [...],
+  "design": { "lcd": {...}, "cables": {...}, "background": {...}, "grid": {...} },
+  "textpad": ""
 }
 ```
 
@@ -308,7 +314,6 @@ See [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) (user-facing) and
 13. **Code comments — always English** (inline `//`, JSDoc, Csound `;`), regardless
     of user language.
 
-Full rules: [`AI Context.md`](AI Context.md) → *Development rules*.
+Full rules: [`AI Context.md`](AI_Context.md) → *Development rules*.
 
-Full rules: [`AI Context.md`](AI Context.md) → *Development rules*.
 ```

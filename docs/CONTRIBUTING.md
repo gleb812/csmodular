@@ -17,15 +17,16 @@ The module is listed in `public/libraries/<lib>/_index.json`.
 
 ## Step 1 — Create the module in the editor
 
-1. Open the editor: `Space` → **Editor** (or `/editor/editor.html`).
+1. Open the editor: **`Ed`** button in the transport (or `/editor/editor.html`).
 2. Build the panel:
-   - Right-click canvas → **Add Component** → add knobs, sliders, buttons, jacks.
+   - Add components via the **palette** (left side) or the **Terminal**
+     (`add knob`, `add label "text"`, …).
    - Set the module name: **Properties → Module → Name** (Csound-safe identifier: `[a-zA-Z0-9_]`, no spaces).
    - Set **Height** (grid cells), **Category**, **Status** (`stable` / `passable` / `dev`).
 3. Write the Csound UDO in the **Csound Code** panel.
    - The `opcode`, `xin`, `zar`/`zkr`, `zaw`/`zkw`, `endop` lines are **protected** — they are regenerated from the panel.
    - You edit only the **body** between input-jack reads and output-jack writes.
-4. `Ctrl+S` (or wait for autosave) — code is synced.
+4. `Ctrl+S` in the code panel — syncs the code with the model (does not save to disk).
 5. **💾 Save** → Name: `<Name>`, Library: `user` → Save.
    (This writes to IndexedDB — local only, not in git. Good for iteration.)
 

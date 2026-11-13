@@ -128,8 +128,8 @@ export class Splash {
         return this.openSplash();
     }
 
-    openSplash() { return this._open(); }
-    openAbout()  { return this._open(); }
+    openSplash() { return this._open({ mode: 'startup' }); }
+    openAbout()  { return this._open({ mode: 'about' });   }
 
     /**
      * Update splash progress bar.
@@ -190,8 +190,10 @@ export class Splash {
     //  INTERNAL
     // ============================================================
 
-    _open() {
+    _open(opts = {}) {
         if (this._root) return this._closedPromise;
+
+        const isAbout = opts.mode === 'about';
 
         this._closedPromise = new Promise(resolve => {
             this._closedPromiseResolve = resolve;
@@ -359,55 +361,57 @@ export class Splash {
         cbWrap.appendChild(document.createTextNode('Open demo patch on launch'));
         card.appendChild(cbWrap);
 
-        // ⭐ Progress bar — above checkbox row
-        const progressWrap = document.createElement('div');
-        progressWrap.style.cssText = `
-            position: absolute;
-            left: ${PROGRESS_LAYOUT.left}px;
-            right: ${PROGRESS_LAYOUT.right}px;
-            bottom: ${PROGRESS_LAYOUT.bottom}px;
-            display: flex;
-            align-items: center;
-            gap: ${PROGRESS_LAYOUT.gap}px;
-            pointer-events: none;
-            font-family: ${PROGRESS_LAYOUT.fontFamily};
-            font-size: ${PROGRESS_LAYOUT.textSize}px;
-            color: ${PROGRESS_LAYOUT.textColor};
-            text-shadow: ${TEXT_LAYOUT.shadow};
-        `;
+        // ⭐ Progress bar — ONLY for startup mode
+        if (!isAbout) {
+            const progressWrap = document.createElement('div');
+            progressWrap.style.cssText = `
+                position: absolute;
+                left: ${PROGRESS_LAYOUT.left}px;
+                right: ${PROGRESS_LAYOUT.right}px;
+                bottom: ${PROGRESS_LAYOUT.bottom}px;
+                display: flex;
+                align-items: center;
+                gap: ${PROGRESS_LAYOUT.gap}px;
+                pointer-events: none;
+                font-family: ${PROGRESS_LAYOUT.fontFamily};
+                font-size: ${PROGRESS_LAYOUT.textSize}px;
+                color: ${PROGRESS_LAYOUT.textColor};
+                text-shadow: ${TEXT_LAYOUT.shadow};
+            `;
 
-        const track = document.createElement('div');
-        track.style.cssText = `
-            flex: 1;
-            height: ${PROGRESS_LAYOUT.height}px;
-            background: ${PROGRESS_LAYOUT.track};
-            border-radius: 2px;
-            overflow: hidden;
-        `;
+            const track = document.createElement('div');
+            track.style.cssText = `
+                flex: 1;
+                height: ${PROGRESS_LAYOUT.height}px;
+                background: ${PROGRESS_LAYOUT.track};
+                border-radius: 2px;
+                overflow: hidden;
+            `;
 
-        const fill = document.createElement('div');
-        fill.style.cssText = `
-            height: 100%;
-            width: 0%;
-            background: ${PROGRESS_LAYOUT.fill};
-            transition: width 180ms ease-out;
-        `;
-        track.appendChild(fill);
+            const fill = document.createElement('div');
+            fill.style.cssText = `
+                height: 100%;
+                width: 0%;
+                background: ${PROGRESS_LAYOUT.fill};
+                transition: width 180ms ease-out;
+            `;
+            track.appendChild(fill);
 
-        const label = document.createElement('div');
-        label.textContent = 'Loading…';
-        label.style.cssText = `white-space: nowrap;`;
+            const label = document.createElement('div');
+            label.textContent = 'Loading…';
+            label.style.cssText = `white-space: nowrap;`;
 
-        progressWrap.appendChild(track);
-        progressWrap.appendChild(label);
-        card.appendChild(progressWrap);
+            progressWrap.appendChild(track);
+            progressWrap.appendChild(label);
+            card.appendChild(progressWrap);
 
-        this._progressEl   = fill;
-        this._progressText = label;
+            this._progressEl   = fill;
+            this._progressText = label;
+            this.setProgress(0, 'Loading…');
+        }
 
-        // ⭐ Reset lock; main.js will call setReadyToClose(true) after loading
-        this._readyForClose = false;
-        this.setProgress(0, 'Loading…');
+        // ⭐ Lock: startup — ждёт main.js; about — сразу готов к закрытию
+        this._readyForClose = isAbout;
 
         // ⭐ THE ONLY click handler on card — respects lock
         card.addEventListener('click', () => {

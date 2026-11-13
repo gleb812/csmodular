@@ -564,7 +564,7 @@ export class BottomBar {
         // Left column (Ne/Lo/Sa)
         this._put(1, 0, this._buildButtonCell(1, 0, 'Ne', 'New patch', () => this.system.resetEverything?.()));
         this._put(2, 0, this._buildButtonCell(2, 0, 'Lo', 'Load patch', () => this.system.loadJsonPatch?.()));
-        this._put(3, 0, this._buildButtonCell(3, 0, 'Sa', 'Save patch', () => this.system.exportPatch?.()));
+        this._put(3, 0, this._buildSaveCell());
 
         // A4 / A5
         this._put(0, 3, this._buildButtonCell(0, 3, 'Mp', 'Toggle minimap (M)', () => this._toggleMinimap(), () => !!this.system.minimap?.visible));
@@ -593,6 +593,25 @@ export class BottomBar {
 
         // refresh visuals
         this._refreshBpm();
+    }
+
+    _buildSaveCell() {
+        const cell = this._cellBase(3, 0, 'filled');
+        const btn = document.createElement('button');
+        btn.className = 'bb-btn';
+        btn.textContent = 'Sa';
+        btn.title = 'Save patch (long-press for Save As / Export CSD)';
+
+        this._attachLongPress(btn, {
+            onTap: () => this.system.exportPatch?.(),
+            onLongPress: () => this._showSaveMenu(btn),
+            delay: 500,
+        });
+
+        cell.appendChild(btn);
+        cell._btn = btn;
+        // Нет _isActive — Sa не имеет состояния active
+        return cell;
     }
 
     _put(row, col, el) {
@@ -1450,6 +1469,106 @@ export class BottomBar {
     }
     _saveJSON(k, v) {
         localStorage.setItem(`${CONFIG.storageKey}:${k}`, JSON.stringify(v));
+    }
+
+    // ============================================================
+    //  LONG-PRESS (для Sa → Save menu)
+    // ============================================================
+
+    _attachLongPress(el, { onTap, onLongPress, delay = 500 }) {
+        let timer = null;
+        let longFired = false;
+
+        const down = (e) => {
+            if (e.button !== 0) return;
+            longFired = false;
+            timer = setTimeout(() => {
+                longFired = true;
+                try { onLongPress(e); } catch (err) {
+                    console.error('[BottomBar] long-press action failed:', err);
+                }
+            }, delay);
+        };
+        const up = (e) => {
+            if (timer) { clearTimeout(timer); timer = null; }
+            if (!longFired) {
+                try { onTap(e); } catch (err) {
+                    console.error('[BottomBar] tap action failed:', err);
+                }
+            }
+        };
+        const cancel = () => {
+            if (timer) { clearTimeout(timer); timer = null; }
+            longFired = false;
+        };
+
+        el.addEventListener('pointerdown', down);
+        el.addEventListener('pointerup', up);
+        el.addEventListener('pointerleave', cancel);
+        el.addEventListener('pointercancel', cancel);
+        // Не даём браузеру показать context menu на долгом тапе
+        el.addEventListener('contextmenu', (e) => e.preventDefault());
+    }
+
+    _showSaveMenu(anchorEl) {
+        // Закрыть предыдущее
+        document.getElementById('save-menu-popup')?.remove();
+
+        const menu = document.createElement('div');
+        menu.id = 'save-menu-popup';
+        const r = anchorEl.getBoundingClientRect();
+        const menuWidth = 200;
+        const left = Math.max(8, Math.min(r.left, window.innerWidth - menuWidth - 8));
+
+        menu.style.cssText = `
+            position: fixed;
+            left: ${left}px;
+            bottom: ${window.innerHeight - r.top + 6}px;
+            width: ${menuWidth}px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            z-index: 25000;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 12px;
+            color: #ccc;
+            overflow: hidden;
+            user-select: none;
+        `;
+
+        const items = [
+            { label: '💾 Save patch',   action: () => this.system.exportPatch?.() },
+            { label: '💾 Save As…',     action: () => this.system.savePatchAs?.() },
+            { label: '📄 Export to CSD', action: () => this.system.exportCsd?.() },
+        ];
+
+        for (const it of items) {
+            const row = document.createElement('div');
+            row.textContent = it.label;
+            row.style.cssText = `padding: 8px 14px; cursor: pointer;`;
+            row.onmouseenter = () => { row.style.background = '#2a2a2a'; };
+            row.onmouseleave = () => { row.style.background = 'transparent'; };
+            row.onclick = () => {
+                menu.remove();
+                try { it.action(); } catch (err) {
+                    console.error('[BottomBar] save-menu action failed:', err);
+                }
+                this.refreshState();
+            };
+            menu.appendChild(row);
+        }
+
+        document.body.appendChild(menu);
+
+        // Закрытие по клику мимо
+        const close = (e) => {
+            if (menu.contains(e.target)) return;
+            menu.remove();
+            document.removeEventListener('pointerdown', close, true);
+        };
+        // setTimeout(0) — чтобы текущий pointerdown не закрыл меню сразу
+        setTimeout(() => document.addEventListener('pointerdown', close, true), 0);
     }
 
     // ============================================================
