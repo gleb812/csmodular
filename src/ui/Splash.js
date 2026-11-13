@@ -249,7 +249,7 @@ export class Splash {
 
         // Image (fills the card)
         const img = document.createElement('img');
-        img.src = '/splash/art.png';
+        img.src = '/splash/art.webp';
         img.alt = '';
         img.width  = ART_WIDTH;
         img.height = ART_HEIGHT;
