@@ -111,10 +111,34 @@ function stableModulesOnly() {
           fs.copyFileSync(metaSrc, path.join(DST, libName, 'meta.json'))
         }
 
-        // Переписываем <lib>/_index.json с отфильтрованным списком
+        // ⭐ Переписываем <lib>/_index.json — сохраняем ОБЪЕКТЫ модулей
+        //    (name/displayName/category/status), а не массив имён.
+        const libIndexSrc = path.join(libSrc, '_index.json');
+        let libIndexData = { modules: [] };
+
+        if (fs.existsSync(libIndexSrc)) {
+          try {
+            const parsed = JSON.parse(fs.readFileSync(libIndexSrc, 'utf-8'));
+            if (Array.isArray(parsed?.modules)) {
+              libIndexData = parsed;
+            } else {
+              console.warn(`[stable-modules] "${libName}/_index.json" has no modules[] — fallback to empty`);
+            }
+          } catch (e) {
+            console.warn(`[stable-modules] "${libName}/_index.json" parse error: ${e.message}`);
+          }
+        } else {
+          console.warn(`[stable-modules] "${libName}/_index.json" not found — writing empty list`);
+        }
+
+        const keptSet = new Set(kept);   // kept — массив имён (строк)
+        const filteredModules = (libIndexData.modules || []).filter(
+          m => m && keptSet.has(m.name)
+        );
+
         fs.writeFileSync(
           path.join(DST, libName, '_index.json'),
-          JSON.stringify({ modules: kept }, null, 2)
+          JSON.stringify({ modules: filteredModules }, null, 2)
         )
 
         shippedLibs.push(libName)
