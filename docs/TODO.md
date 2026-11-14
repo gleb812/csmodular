@@ -5,6 +5,7 @@ Roadmap for the alpha and beyond. Done items are removed, not struck through.
 
 ## 🔥 Now (alpha blockers)
 
+- [ ] ButtonText in OFF mode still shows M, even if M is erased
 - [ ] **`libraryStore` round-trip** — save → reload → ORC identical (regression test)
 - [ ] **Reinit problem** — adding a module with controllers (repro + fix)
 - [ ] **Save confirmation** — `saveModule` overwrites silently; check `loadModule` first, `confirm()` if exists
@@ -16,7 +17,6 @@ Roadmap for the alpha and beyond. Done items are removed, not struck through.
 - [ ] **All modules have `status`** — audit `public/libraries/*/modules/*.js`
 - [ ] **2–3 demo patches** — save as `.json`, include in repo (`public/patches/`)
 - [ ] **Screenshots / preview** — README + GitHub repo
-- [ ] **Remove stars** (legacy rating) once `status` is complete
 - [ ] **App icon** — replace default Tauri icon
 
 ## 🎛 Csound / Engine
@@ -70,15 +70,6 @@ Roadmap for the alpha and beyond. Done items are removed, not struck through.
 - [ ] Parallax toggle in the panel
 - [ ] Line weight per type (panel border, cable, jack)
 - [ ] **`logicAudio` LCD style** — currently same as `logic`
-
-## 🕸 Grid system
-
-- [ ] **HiDPI `dpr > 1`** — see 🔥 Now
-- [ ] Auto-align on drag after multipliers change
-- [ ] Grid visual styles — minor / major crosses
-- [ ] Crosses size LOD — reduce density when zoomed out
-- [ ] Highlight nearest grid node under cursor
-- [ ] Grid toggle in main UI (not only via theme settings)
 
 ## 🌍 Infinite world / Layers
 
@@ -151,6 +142,8 @@ Roadmap for the alpha and beyond. Done items are removed, not struck through.
 ## 📐 Module Editor
 
 ### In progress / near term
+- [ ] Unlock area after zaw/zkw to set off some flags
+- [ ] Delete with spaces before causes trouble - bad for copying code from outside!
 - [ ] Remove `Change Color` from context menu (color in Properties)
 - [ ] **`PropertiesPanel._render()`** — replace `style.cssText +=` with `cssText = ''` + base + active/inactive
 - [ ] **`TerminalPanel._cmdSet(mappingTable)`** calls `updateCode()`, `PropertiesPanel` mapping-select doesn't — unify
@@ -165,6 +158,8 @@ Roadmap for the alpha and beyond. Done items are removed, not struck through.
 - [ ] **Terminal `find <pattern>` / `props <id>` / `id free`**
 - [ ] **`add N type row` / `add N type col`** — batch add with spacing
 - [ ] **`clone <id>`** — duplicate component
+- [ ] Csound comments should be gray
+- [ ] Labels (Label:) should be with different color 
 
 ### Later
 - [ ] **CodeMirror 5 or 6** — undo/redo, search, autocomplete, Csound mode, protected ranges as `readOnly`

@@ -36,16 +36,27 @@ export class CsoundGenerator {
         // ⭐ Diagnostic counters (reset per generateOrc)
         this._fetchStats = { count: 0, ms: 0, byPath: {} };
         }
+
+    // ════════════════════════════════════════════════════════════
+    //  ⭐ ZAK/SIZE INVARIANT
+    //  ────────────────────────────────────────────────────────────
+    //  _audioBusCounter / _controlBusCounter — «следующий свободный».
+    //  _audioBusCount  / _controlBusCount   — «сколько объявить в zakinit».
+    //
+    //  Инвариант: _count >= _counter  ВСЕГДА.
+    //
+    //  Каждый, кто двигает _counter, ОБЯЗАН синхронизировать _count.
+    //  Места:
+    //    • _assignBusNumberToCable  (новый кабель)
+    //    • _allocateBus             (tap-шины индикаторов)
+    //    • _prepareConverters       (K2A / A2K)
+    //
+    //  _updateZakInit() — только страховка: _count = max(_count, _counter).
+    //  Не пересчитывает по кабелям (это ломало инвариант).
+    // ════════════════════════════════════════════════════════════
+
     /**
      * Загрузить UDO по пути, как он хранится в this.includes.
-     *  - "user/MultiOsc.txt"     → moduleStore (localStorage / Tauri fs)
-     *  - "9.txt", "led_rms.txt"  → fetch из public/csound/modules/
-     *
-     * Возвращает строку UDO или null.
-     */
-    /**
-     * Load a UDO by its stored path.
-     * Caches text in-memory; use invalidateUdoCache() on hot-reload.
      *  - "library/<lib>/<Name>.txt"  → libraryStore.loadUdo()
      *  - "led_rms.txt", "mVU_rms.txt" → fetch('/csound/modules/...')
      */
@@ -504,9 +515,9 @@ export class CsoundGenerator {
     _prepareConverters() {
         this._converterBuses = {};
         
-        // Защита: счётчики не должны отставать от count
-        this._audioBusCounter = Math.max(this._audioBusCounter, this._audioBusCount);
-        this._controlBusCounter = Math.max(this._controlBusCounter, this._controlBusCount);
+        // ⭐ Убрана бесполезная «страховка» Math.max(_counter, _count) —
+        //    инвариант _count >= _counter держится явно во всех местах,
+        //    где двигается _counter.
         
         let found = 0;
         
@@ -557,10 +568,10 @@ export class CsoundGenerator {
                 let newBus;
                 if (inputRate === 'audio') {
                     newBus = this._audioBusCounter++;
-                    this._audioBusCount = this._audioBusCounter;
+                    this._audioBusCount = this._audioBusCounter;    // ⭐ синхронизация
                 } else {
                     newBus = this._controlBusCounter++;
-                    this._controlBusCount = this._controlBusCounter;
+                    this._controlBusCount = this._controlBusCounter; // ⭐ синхронизация
                 }
                 
                 const key = `${cable.id}_${inputId}`;
@@ -579,7 +590,8 @@ export class CsoundGenerator {
     }
     
     /**
-     * Назначить номер шины кабелю
+     * Назначить номер шины кабелю.
+     * ⭐ Синхронизирует _audioBusCount / _controlBusCount при выдаче нового номера.
      */
     _assignBusNumberToCable(cable) {
         if (this._cableBusMap[cable.id] !== undefined) {
@@ -612,6 +624,7 @@ export class CsoundGenerator {
                 busNumber = this._availableAudioBuses.shift();
             } else {
                 busNumber = this._audioBusCounter++;
+                this._audioBusCount = this._audioBusCounter;   // ⭐ синхронизация
             }
         } else {
             if (this._availableControlBuses.length > 0) {
@@ -619,6 +632,7 @@ export class CsoundGenerator {
                 busNumber = this._availableControlBuses.shift();
             } else {
                 busNumber = this._controlBusCounter++;
+                this._controlBusCount = this._controlBusCounter; // ⭐ синхронизация
             }
         }
         
@@ -668,37 +682,29 @@ export class CsoundGenerator {
     }
     
     /**
-     * Очистить все кабели
+     * Очистить все кабели.
+     * ⭐ Сбрасывает счётчики и _available* (иначе «залипшие» номера).
      */
     clearCables() {
         this._activeCables = [];
         this._cableBusMap = {};
+        this._availableAudioBuses = [];
+        this._availableControlBuses = [];
         this._audioBusCounter = 2;
         this._controlBusCounter = 2;
+        this._audioBusCount = 2;
+        this._controlBusCount = 2;
         this._updateZakInit();
         this.log(`🔌 All cables cleared, zakinit reset`);
     }
     
     /**
-     * Обновить zakinit на основе кабелей
+     * Страховка инварианта: _count = max(_count, _counter).
+     * ⭐ НЕ пересчитывает по кабелям — это и ломало инвариант.
      */
     _updateZakInit() {
-        let audioCount = 0;
-        let controlCount = 0;
-        
-        for (const cable of this._activeCables) {
-            const cableType = this._getCableType(cable);
-            if (cableType === 'audio') {
-                audioCount++;
-            } else if (cableType === 'control') {
-                controlCount++;
-            }
-        }
-        
-        this._audioBusCount = 2 + audioCount;
-        this._controlBusCount = 2 + controlCount;
-        
-        //console.log(`🎛️ zakinit: audio=${this._audioBusCount} (2 + ${audioCount}), control=${this._controlBusCount} (2 + ${controlCount})`);
+        this._audioBusCount   = Math.max(this._audioBusCount,   this._audioBusCounter);
+        this._controlBusCount = Math.max(this._controlBusCount, this._controlBusCounter);
     }
     
     _getCableType(cable) {
@@ -1438,6 +1444,8 @@ export class CsoundGenerator {
         this.modules.clear();
         this._activeCables = [];
         this._cableBusMap = {};
+        this._availableAudioBuses = [];     // ⭐ NEW
+        this._availableControlBuses = [];   // ⭐ NEW
         this._audioBusCounter = 2;
         this._controlBusCounter = 2;
         this._audioBusCount = 2;

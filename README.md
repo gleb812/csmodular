@@ -103,6 +103,13 @@ npx tauri dev       # verify Tauri-specific (fs, native windows)
 
 Don't run both — port 3000 is shared.
 
+## Console commands
+
+To see compiled Csound code type in browser console:
+```
+const orc = modularSystem.csoundGen.generateOrc();
+console.log(orc);
+```
 
 ## Documentation
 

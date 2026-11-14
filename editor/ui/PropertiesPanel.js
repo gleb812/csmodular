@@ -174,7 +174,7 @@ export class PropertiesPanel {
         this._inlineField('Height', heightInput);
 
         // ── Color ──
-        this._field('Panel Color', this._makeColorSection(module));
+        //this._field('Panel Color', this._makeColorSection(module));
 
         // ── Category ──
         const cat = isValidCategory(module.category) ? module.category : 'custom';
