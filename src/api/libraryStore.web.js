@@ -266,6 +266,13 @@ class WebLibraryStore {
     // ---------- Сохранение / удаление  ----------
 
     async saveModule(lib, name, jsCode, dspCode = null) {
+        if (await this._isBuiltinLibrary(lib)) {
+            console.warn(
+                `[libraryStore/web] saveModule("${lib}/${name}") refused: ` +
+                `"${lib}" is builtin (read-only)`
+            );
+            return false;
+        }
         try {
             await this._idbSet(`${lib}/${name}.js`, jsCode);
             if (dspCode !== null && dspCode !== undefined) {
@@ -443,6 +450,20 @@ class WebLibraryStore {
     }
 
     // ---------- Утилиты ----------
+
+    async _isBuiltinLibrary(lib) {
+        try {
+            const res = await fetch(BUILTIN_INDEX_URL, { cache: 'no-cache' });
+            if (!res.ok) return false;
+            const text = await res.text();
+            if (looksLikeHtml(text)) return false;
+            const data = JSON.parse(text);
+            const names = Array.isArray(data?.libraries) ? data.libraries : [];
+            return names.includes(lib);
+        } catch {
+            return false;
+        }
+    }
 
     async _fetchText(url) {
         try {

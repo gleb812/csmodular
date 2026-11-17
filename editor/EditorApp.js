@@ -684,6 +684,34 @@ export class EditorApp {
         showCanvasContextMenu(this, e.clientX, e.clientY);
     }
 
+    /**
+     * Переименовать opcode в DSP-коде, чтобы он совпадал с module.title.
+     * Патчит ТОЛЬКО первую строку `opcode <name>, …` (m-флаг, без g).
+     * Не трогает xin / zaw / zkw / endop — они не содержат имени opcode.
+     *
+     * @param {string} dspCode
+     * @param {string} newName — обычно module.title (уже санитайзнутый)
+     * @returns {string}
+     */
+    _syncOpcodeName(dspCode, newName) {
+        if (!dspCode || !newName) return dspCode;
+
+        // Уже совпадает?
+        const m = dspCode.match(/^\s*opcode\s+([A-Za-z_][A-Za-z0-9_]*)\s*,/m);
+        if (!m) return dspCode;              // нет opcode — нечего менять
+        if (m[1] === newName) return dspCode; // уже правильно
+
+        // Санитайз: Csound-идентификатор
+        let safe = String(newName).replace(/[^a-zA-Z0-9_]/g, '_');
+        if (/^[0-9]/.test(safe)) safe = '_' + safe;
+        if (!safe) return dspCode;
+
+        return dspCode.replace(
+            /^(\s*opcode\s+)([A-Za-z_][A-Za-z0-9_]*)(\s*,)/m,
+            `$1${safe}$3`
+        );
+    }
+
     restoreModuleFromData(moduleData, dspCode) {
         
         // ⭐ 1. Очищаем текущее состояние
@@ -733,8 +761,9 @@ export class EditorApp {
 
             let code;
             if (dspCode) {
-                this.module._userCsoundCode = dspCode;
-                code = dspCode;
+                // ⭐ Синхронизировать имя opcode с module.title
+                code = this._syncOpcodeName(dspCode, this.module.title);
+                this.module._userCsoundCode = code;
             } else {
                 code = cv.generateCsoundCode();
             }

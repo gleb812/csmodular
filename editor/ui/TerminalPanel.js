@@ -1742,34 +1742,52 @@ export class TerminalPanel {
         try {
             const { saveModule, sanitizeName } = await import('../saveService.js');
 
-            // Текущая библиотека
-            let lib = this.app._sourceLibrary || 'user';
+            // ⭐ Терминальный `save` ВСЕГДА пишет в user.
+            //    built-in read-only, чужие user-lib — не трогаем без явного указания.
+            //    Исключение: `save <lib>/<name>` — явный выбор пользователя.
+            let lib = 'user';
             let name = null;
+            let explicitLib = false;
 
-            // Разбор аргументов:
-            //   save                     → текущая lib, текущее имя
-            //   save as <name>           → текущая lib, новое имя
-            //   save <lib> <name>        → lib + name
-            //   save <lib>/<name>        → то же
             if (args.length > 0) {
                 const a0 = args[0];
                 if (a0.toLowerCase() === 'as' && args[1]) {
+                    // save as <name> — текущее имя, но новый
                     name = sanitizeName(args.slice(1).join(' '));
                     if (!name) { this._printError('Invalid name for "save as"'); return; }
                 } else if (a0.includes('/')) {
+                    // save <lib>/<name> — явный выбор
                     const [l, n] = a0.split('/', 2);
-                    lib = l;
+                    lib = l || 'user';
                     name = sanitizeName(n);
+                    explicitLib = true;
                     if (!name) { this._printError('Invalid name'); return; }
                 } else if (args.length >= 2) {
-                    lib = a0;
+                    // save <lib> <name> — явный выбор (space-separated)
+                    lib = a0 || 'user';
                     name = sanitizeName(args.slice(1).join(' '));
+                    explicitLib = true;
                     if (!name) { this._printError('Invalid name'); return; }
                 } else {
-                    // save <something> — считаем это именем в текущей lib
+                    // save <name> — имя, lib остаётся user
                     name = sanitizeName(a0);
                     if (!name) { this._printError('Invalid name'); return; }
                 }
+            }
+
+            // ⭐ Если явно указана built-in — предупредить и переключиться на user
+            if (explicitLib) {
+                try {
+                    const libs = await libraryStore.listLibraries();
+                    const entry = libs.find(l => l.name === lib);
+                    if (entry?.source === 'builtin') {
+                        this._print(
+                            `⚠️ "${lib}" is builtin (read-only) — saving to "user" instead`,
+                            '#f90'
+                        );
+                        lib = 'user';
+                    }
+                } catch { /* ignore */ }
             }
 
             const result = await saveModule(this.app, { lib, name });
@@ -1783,6 +1801,7 @@ export class TerminalPanel {
             this._printError(`Save error: ${e.message}`);
         }
     }
+
     // ─────────────────────────── LOAD ───────────────────────────────
 
     async _cmdLoad(args) {

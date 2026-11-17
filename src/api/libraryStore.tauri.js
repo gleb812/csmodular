@@ -57,6 +57,16 @@ class TauriLibraryStore {
         return `${ROOT_FOLDER}/${LIBS_SUBFOLDER}/${lib}`;
     }
 
+    async _isBuiltinLibrary(lib) {
+        try {
+            const builtinDir = await this._getBuiltinDir();
+            const path = `${builtinDir}/${lib}/_meta.json`;
+            return await this._exists(path, BaseDirectory.Resource);
+        } catch {
+            return false;
+        }
+    }
+
     // ---------- Список библиотек ----------
 
     async listLibraries() {
@@ -263,6 +273,13 @@ class TauriLibraryStore {
     // ---------- Сохранение / удаление (только user) ----------
 
     async saveModule(lib, name, jsCode, dspCode = null) {
+        if (await this._isBuiltinLibrary(lib)) {
+            console.warn(
+                `[libraryStore/tauri] saveModule("${lib}/${name}") refused: ` +
+                `"${lib}" is builtin (read-only)`
+            );
+            return false;
+        }
         try {
             await this._ensureUserRoot();
 

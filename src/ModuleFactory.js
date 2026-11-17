@@ -193,6 +193,10 @@ export class ModuleFactory {
         panel.rating = getEffectiveRating(type, definition);
         panel.status = getModuleStatus(definition);
 
+        panel.category = definition.category || 'custom';
+        panel.tooltip      = definition.tooltip || '';
+        panel.originalName = definition.originalName || definition.type || type;
+
         // ⭐ Читаем цвет из definition
         if (definition.customColor) {
             panel.customColor = definition.customColor;
