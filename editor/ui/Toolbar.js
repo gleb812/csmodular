@@ -201,7 +201,10 @@ export class Toolbar {
         } else {
             // Web: Blob download
             this._download(`${name}.js`, jsCode, 'application/javascript');
-            this._download(`${name}.txt`, dspCode, 'text/plain');
+
+            setTimeout(() => {
+                this._download(`${name}.txt`, dspCode, 'text/plain');
+            }, 300); // 300 ms delay for safari
             this.app.uiManager.showNotification(`⬇ Exported ${name}.js + ${name}.txt`);
         }
     }
