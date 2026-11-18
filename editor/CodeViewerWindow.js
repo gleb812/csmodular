@@ -59,8 +59,8 @@ export class CodeViewerWindow {
                     🎵 Csound Code
                 </span>
                 <div style="display: flex; gap: 6px; align-items: center;">
-                    <button id="font-smaller-btn" style="background: transparent; border: 1px solid #555; color: #aaa; border-radius: 3px; cursor: pointer; font-size: 11px; padding: 1px 6px; font-weight: bold;" title="Smaller font">A</button>
-                    <button id="font-larger-btn" style="background: transparent; border: 1px solid #555; color: #aaa; border-radius: 3px; cursor: pointer; font-size: 13px; padding: 1px 6px; font-weight: bold;" title="Larger font">A</button>
+                    <button id="font-smaller-btn" style="padding: 1px 6px; background: #2a2a2a; border: 1px solid #444; color: #ccc; border-radius: 3px; cursor: pointer; font-size: 10px;" title="Smaller font">A−</button>
+                    <button id="font-larger-btn"  style="padding: 1px 6px; background: #2a2a2a; border: 1px solid #444; color: #ccc; border-radius: 3px; cursor: pointer; font-size: 10px;" title="Larger font">A+</button>
                     <span id="font-size-display" style="color: #555; font-size: 9px; min-width: 30px; text-align: center; font-family: Arial;">12px</span>
                     <span id="code-status" style="color: #4a4; font-size: 9px; font-family: Arial;">● Saved</span>
                     <button id="refresh-code-btn" style="background: transparent; border: 1px solid #555; color: #aaa; border-radius: 3px; cursor: pointer; font-size: 11px; padding: 1px 8px;" title="Reset structure and body from module">⟳</button>
@@ -579,10 +579,21 @@ export class CodeViewerWindow {
         const escapeHtml = (s) => this._escapeHtml(s);
         const s = this._structureCache;
 
+        // ⭐ 1. Вырезаем комментарии `;` в плейсхолдеры ДО токенизации.
+        //    Исключение: `;@ map ...` — это директива, не комментарий,
+        //    её подсветим отдельно (уже есть в tokenRe).
+        //    Плейсхолдер \u0000C{i}\u0000 гарантированно не пересечётся
+        //    с Csound-кодом (NUL-символа в коде нет).
+        const comments = [];
+        const codeNoComments = code.replace(/^([^;\n]*?);(?!@\s*map)(.*)$/gm, (m, before, after) => {
+            const i = comments.length;
+            comments.push({ before, after });
+            return `${before}\u0000C${i}\u0000`;
+        });
+
         const tokenRe = new RegExp(
             [
                 '^(;@\\s*map)(.*)$',
-                //'(;.*)$',
                 '("[^"\\n]*")',
                 '\\b(opcode|endop|instr|endin|xin|init|ftgen|zar|zkr|zaw|zkw|table|goto|if|then|endif|else|while|do|od)\\b',
                 '\\b(\\d+(?:\\.\\d+)?)\\b',
@@ -591,7 +602,7 @@ export class CodeViewerWindow {
             'gm'
         );
 
-        const lines = code.split('\n');
+        const lines = codeNoComments.split('\n');
         const out = [];
 
         for (let i = 0; i < lines.length; i++) {
@@ -619,7 +630,6 @@ export class CodeViewerWindow {
                     return `<span style="color:#4a9eff;">${mString}</span>`;
                 }
                 if (mKeyword !== undefined) {
-                    // Запрещённое слово в теле — красный фон (страховка)
                     const kw = mKeyword;
                     if (FORBIDDEN_KEYWORDS_RE.test(kw)) {
                         return `<span style="background:#3a1a1a;color:#f66;">${kw}</span>`;
@@ -638,12 +648,22 @@ export class CodeViewerWindow {
             out.push(result);
         }
 
-        return out.join('\n');
+        let html = out.join('\n');
+
+        // ⭐ 2. Восстанавливаем комментарии с цветом
+        html = html.replace(/\u0000C(\d+)\u0000/g, (_, idx) => {
+            const c = comments[parseInt(idx, 10)];
+            if (!c) return '';
+            return `<span style="color:#8a8a8a;font-style:italic;">${escapeHtml(';' + c.after)}</span>`;
+        });
+
+        return html;
     }
 
     _updateHighlight() {
         if (!this.highlightEnabled) {
-            this.highlightLayer.textContent = '';
+            this.highlightLayer.textContent = this.editor.value;   // ⭐ вместо ''
+            this._syncScroll();
             return;
         }
         this.highlightLayer.innerHTML = this._highlightCsound(this.editor.value) + '\n';
@@ -737,6 +757,20 @@ export class CodeViewerWindow {
         let inputIndex = 0;
         let outputIndex = 0;
 
+        // ⭐ Уникализация Csound-имён джеков:
+        //    по умолчанию In / Out, при csoundName — берём его.
+        //    Если два джека имеют одинаковый csoundName — добавляем суффикс.
+        const usedJackNames = new Set();
+        const uniqueJackName = (base) => {
+            let name = base;
+            let n = 2;
+            while (usedJackNames.has(name)) {
+                name = `${base}${n++}`;
+            }
+            usedJackNames.add(name);
+            return name;
+        };
+
         const paramComponents = [];
 
         for (const comp of components) {
@@ -744,12 +778,22 @@ export class CodeViewerWindow {
             if (port) {
                 if (port.dir === 'in') {
                     inputIndex++;
-                    const entry = { param: `kIn${inputIndex}`, varName: `in${inputIndex}` };
+                    // ⭐ base — ВСЕГДА с большой (In1, Ins, Name)
+                    let rawBase = comp.csoundName || `In${inputIndex}`;
+                    rawBase = rawBase.charAt(0).toUpperCase() + rawBase.slice(1);
+                    const base = uniqueJackName(rawBase);
+                    // varName — ВСЕГДА с маленькой (in1, ins, name)
+                    const varName = base.charAt(0).toLowerCase() + base.slice(1);
+                    const entry = { param: `k${base}`, varName };
                     if (port.kind === 'audio') audioInputs.push(entry);
                     else controlInputs.push(entry);
                 } else if (port.dir === 'out') {
                     outputIndex++;
-                    const entry = { param: `kOut${outputIndex}`, varName: `out${outputIndex}` };
+                    let rawBase = comp.csoundName || `Out${outputIndex}`;
+                    rawBase = rawBase.charAt(0).toUpperCase() + rawBase.slice(1);
+                    const base = uniqueJackName(rawBase);
+                    const varName = base.charAt(0).toLowerCase() + base.slice(1);
+                    const entry = { param: `k${base}`, varName };
                     if (port.kind === 'audio') audioOutputs.push(entry);
                     else controlOutputs.push(entry);
                 }
@@ -767,11 +811,12 @@ export class CodeViewerWindow {
         const allParams = [];
         paramComponents.forEach(({ paramName }) => allParams.push(paramName));
 
-        const totalInputs = audioInputs.length + controlInputs.length;
-        for (let i = 1; i <= totalInputs; i++) allParams.push(`kIn${i}`);
-
-        const totalOutputs = audioOutputs.length + controlOutputs.length;
-        for (let i = 1; i <= totalOutputs; i++) allParams.push(`kOut${i}`);
+        // ⭐ Xin-параметры джеков — из уже собранных массивов
+        //    (учитывают csoundName через uniqueJackName)
+        for (const inp of audioInputs)    allParams.push(inp.param);
+        for (const inp of controlInputs)  allParams.push(inp.param);
+        for (const out of audioOutputs)   allParams.push(out.param);
+        for (const out of controlOutputs) allParams.push(out.param);
 
         const paramStr = 'k'.repeat(allParams.length);
         const xinStr = allParams.join(', ');

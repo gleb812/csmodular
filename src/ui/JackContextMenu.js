@@ -93,7 +93,7 @@ export class JackContextMenu {
         
         if (cableCount > 0) {
             this.menuElement.appendChild(this.createMenuItem(
-                `Disconnect all`,
+                `Disconnect cable`,
                 () => this.disconnectAll()
             ));
             this.menuElement.appendChild(this.createSeparator());

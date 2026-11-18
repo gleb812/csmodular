@@ -142,14 +142,16 @@ export class PropertiesPanel {
             module.title || 'New Module',
             (v) => {
                 let name = v.replace(/\s/g, '');
-                if (/^[0-9]/.test(name)) name = 'M' + name;
                 name = name.replace(/[^a-zA-Z0-9_]/g, '');
+
+                // ⭐ Имя модуля не может начинаться с цифры — отбрасываем ведущие цифры
+                name = name.replace(/^[0-9]+/, '');
+
                 if (!name) name = 'NewModule';
 
                 module.title = name;
                 nameInput.value = name;   // показываем санитайзнутое
 
-                // Перегенерация структуры (opcode-строка обновится, тело сохранится)
                 if (this.app.codeViewerWindow) {
                     this.app.codeViewerWindow.updateCode();
                 }
@@ -326,7 +328,9 @@ export class PropertiesPanel {
         header.textContent = `${compType} (id=${comp.id || '?'})`;
         this.body.appendChild(header);
 
-
+        // ─────────────────────────────────────────────────────────
+        //  PARAMETRIC: Csound Name
+        // ─────────────────────────────────────────────────────────
         if (isParametric(comp)) {
             const wrapper = document.createElement('div');
             wrapper.style.marginBottom = '12px';
@@ -356,11 +360,13 @@ export class PropertiesPanel {
                 const oldName = getCsoundParamName(comp);
                 let raw = input.value.trim().replace(/\s/g, '');
                 if (!raw) raw = `Param${comp.id}`;
-                if (/^[0-9]/.test(raw)) raw = 'M' + raw;
+
+                // ⭐ Csound-переменная начинается с k / a / S / w.
+                //    base (без префикса) может быть "1" → в коде будет "k1" — валидно.
+                //    Префикс M НЕ добавляем.
                 raw = raw.replace(/[^a-zA-Z0-9_]/g, '');
                 if (!raw) raw = `Param${comp.id}`;
 
-                // Проверка уникальности
                 const others = this.app.components.filter(c => c !== comp);
                 const conflict = others.some(c =>
                     isParametric(c) && getCsoundParamName(c) === raw
@@ -376,7 +382,6 @@ export class PropertiesPanel {
                 comp.csoundName = raw;
                 input.value = raw;
 
-                // ⭐ Переписать тело UDO: \bkOLD\b → kNEW
                 if (this.app.codeViewerWindow) {
                     this.app.codeViewerWindow.renameParamInBody(oldName, raw);
                 }
@@ -390,7 +395,131 @@ export class PropertiesPanel {
             this.body.appendChild(wrapper);
         }
 
-        // Schema-based поля
+        // ─────────────────────────────────────────────────────────
+        //  JACKS: Csound Name + Jack Label
+        //  ⭐ ВНЕ if (isParametric) — джеки не параметрические,
+        //    но у них есть своё Csound-имя (in1 / out1 / ...)
+        // ─────────────────────────────────────────────────────────
+        if (compType === 'Input' || compType === 'Output') {
+            const isIn = compType === 'Input';
+            const prefix = isIn ? 'k' : 'k';   // для Input — kIn, для Output — kOut
+            const defaultBase = isIn ? 'In' : 'Out';
+
+            // — Csound Name —
+            const csWrapper = document.createElement('div');
+            csWrapper.style.marginBottom = '12px';
+            csWrapper.appendChild(this._label('Csound Name'));
+
+            const csRow = document.createElement('div');
+            csRow.style.cssText = 'display: flex; align-items: center; gap: 4px;';
+
+            const csPrefix = document.createElement('span');
+            csPrefix.textContent = prefix;
+            csPrefix.style.cssText = 'color: #0af; font-family: monospace; font-size: 12px;';
+
+            const csInput = document.createElement('input');
+            csInput.type = 'text';
+            // в блоке Jacks, вместо:
+            // csInput.value = comp.csoundName || defaultBase;
+
+            // ⭐ Base как в generateCsoundCode:
+            let displayBase;
+            if (comp.csoundName) {
+                displayBase = comp.csoundName;
+                // нормализация: первая буква большая
+                displayBase = displayBase.charAt(0).toUpperCase() + displayBase.slice(1);
+            } else {
+                const sameType = this.app.components.filter(c =>
+                    c.constructor.name === comp.constructor.name && !c._isNewDragging
+                );
+                const idx = sameType.indexOf(comp) + 1;
+                displayBase = `${compType === 'Input' ? 'In' : 'Out'}${idx}`;
+            }
+            csInput.value = displayBase;
+            csInput.placeholder = defaultBase;
+            csInput.style.cssText = `
+                flex: 1; padding: 4px 8px; background: #1a1a1a;
+                border: 1px solid #444; border-radius: 3px; color: white;
+                font-size: 12px; font-family: monospace; box-sizing: border-box;
+            `;
+
+            const csHint = document.createElement('div');
+            csHint.style.cssText = 'color: #555; font-size: 9px; margin-top: 3px;';
+            csHint.textContent = isIn
+                ? 'Base name (without prefix). Code uses k<name> / a<name>.'
+                : 'Base name (without prefix). Code uses k<name> / a<name>.';
+
+            csInput.onchange = () => {
+                const oldName = comp.csoundName || defaultBase;
+                let raw = csInput.value.trim().replace(/\s/g, '');
+                if (!raw) raw = defaultBase;
+
+                // ⭐ Нормализация: первая буква большая
+                raw = raw.charAt(0).toUpperCase() + raw.slice(1);
+                raw = raw.replace(/[^a-zA-Z0-9_]/g, '');
+                if (!raw) raw = defaultBase;
+
+                // Проверка уникальности
+                const others = this.app.components.filter(c =>
+                    c !== comp && (c.constructor.name === 'Input' || c.constructor.name === 'Output')
+                );
+                const conflict = others.some(c => {
+                    const otherBase = c.csoundName
+                        ? c.csoundName.charAt(0).toUpperCase() + c.csoundName.slice(1)
+                        : null;
+                    return otherBase === raw;
+                });
+                if (conflict) {
+                    alert(`Csound name "${raw}" already used by another jack`);
+                    csInput.value = oldName;
+                    return;
+                }
+
+                if (raw === oldName) { csInput.value = raw; return; }
+
+                comp.csoundName = raw;
+                csInput.value = raw;   // ⭐ показываем нормализованное (Ins, не ins)
+
+                if (this.app.codeViewerWindow) {
+                    this.app.codeViewerWindow.updateCode();
+                }
+                this._onSchemaChange();
+            };
+
+            csRow.appendChild(csPrefix);
+            csRow.appendChild(csInput);
+            csWrapper.appendChild(csRow);
+            csWrapper.appendChild(csHint);
+            this.body.appendChild(csWrapper);
+
+            // — Jack Label (UI-подпись) —
+            const jlWrapper = document.createElement('div');
+            jlWrapper.style.marginBottom = '12px';
+            jlWrapper.appendChild(this._label('Jack Label'));
+
+            const jlInput = document.createElement('input');
+            jlInput.type = 'text';
+            jlInput.value = comp.label || comp.ConnectorName || '';
+            jlInput.placeholder = isIn ? 'In' : 'Out';
+            jlInput.style.cssText = `
+                width: 100%; padding: 4px 8px; background: #1a1a1a;
+                border: 1px solid #444; border-radius: 3px; color: white;
+                font-size: 12px; box-sizing: border-box;
+            `;
+            jlInput.onchange = () => {
+                const v = jlInput.value.trim();
+                comp.label = v;
+                comp.ConnectorName = v;
+                this._onSchemaChange();
+            };
+
+            jlWrapper.appendChild(jlInput);
+            this.body.appendChild(jlWrapper);
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  SCHEMA-BASED поля
+        // ─────────────────────────────────────────────────────────
         const schema = this._getSchemaForComponent(comp);
         if (!schema || schema.length === 0) {
             const empty = document.createElement('div');

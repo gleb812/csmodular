@@ -361,8 +361,10 @@ export const ComponentRegistry = {
             x: Math.round(c.relX ?? 0),
             y: Math.round(c.relY ?? 0),
             jackType: c._jackType ?? c.type ?? 'audio',
-            bandwidth: 'dynamic',
+            bandwidth: c.bandwidth ?? 'dynamic',     
             ConnectorName: c.label ?? c.ConnectorName ?? 'In',
+            ConnectorIndex: c.ConnectorIndex ?? 0,
+            ...(c.csoundName ? { csoundName: c.csoundName } : {}),    
         }),
 
         deserialize: (d, ctx) => {
@@ -377,6 +379,7 @@ export const ComponentRegistry = {
             c._isAudioJack = jackType === 'audio';
             c.ConnectorIndex = d.ConnectorIndex ?? 0;
             c.label = d.ConnectorName ?? (jackType === 'audio' ? 'In' : 'In(C)');
+            if (d.csoundName) c.csoundName = d.csoundName; 
             return c;
         },
 
@@ -413,8 +416,10 @@ export const ComponentRegistry = {
             x: Math.round(c.relX ?? 0),
             y: Math.round(c.relY ?? 0),
             jackType: c._jackType ?? c.type ?? 'audio',
-            bandwidth: 'dynamic',
+            bandwidth: c.bandwidth ?? 'dynamic',   
             ConnectorName: c.label ?? c.ConnectorName ?? 'Out',
+            ConnectorIndex: c.ConnectorIndex ?? 0,  
+            ...(c.csoundName ? { csoundName: c.csoundName } : {}),
         }),
 
         deserialize: (d, ctx) => {
@@ -429,6 +434,7 @@ export const ComponentRegistry = {
             c._isAudioJack = jackType === 'audio';
             c.ConnectorIndex = d.ConnectorIndex ?? 0;
             c.label = d.ConnectorName ?? (jackType === 'audio' ? 'Out' : 'Out(C)');
+            if (d.csoundName) c.csoundName = d.csoundName; 
             return c;
         },
 
