@@ -208,14 +208,12 @@ export class CsoundGenerator {
         
 
         // ⭐ 4. ПОЛЬЗОВАТЕЛЬСКИЕ МОДУЛИ
-        // Управляются через this.includes (user/*.txt), а не через this.userModules.
-        // this.userModules остаётся как реестр метаданных, но НЕ вставляется в ORC.
         const userModulesCode = '';
-        
-        // ⭐ 5. Формируем полный ORC
+        const ksmps = this.system?.csoundEngine?.audioOptions?.ksmps ?? 4;
+        // ⭐ 5.Full ORC
         return `
     sr = 48000
-    ksmps = 4
+    ksmps = ${ksmps}
     nchnls = 2
     0dbfs = 1.0
 

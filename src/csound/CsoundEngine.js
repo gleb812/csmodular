@@ -100,13 +100,27 @@ export class CsoundEngine {
             const { Csound } = await import(/* @vite-ignore */ CSOUND_CDN);
             mark('import');
 
-            this.instance = await Csound();             mark('createInstance');
+            //this.instance = await Csound();             mark('createInstance');
+            const audioOpts = this.audioOptions || {};
+            this.instance = await Csound({
+                buffer_frames: audioOpts.softwareBuffer || 1024,
+                hardware_buffer_frames: audioOpts.hardwareBuffer || 2048,
+            });
             window.csound = this.instance;
 
             this._attachCsoundListeners();
 
             await this.instance.setOption('-odac');
             await this.instance.setOption('-M0');       mark('setOptions');
+            // ⭐ Audio buffers (software / hardware)
+            //const audioOpts = this.audioOptions || {};
+            // if (audioOpts.softwareBuffer) {
+            //    await this.instance.setOption('-b', String(audioOpts.softwareBuffer));
+            // }
+            // if (audioOpts.hardwareBuffer) {
+            //     await this.instance.setOption('-B', String(audioOpts.hardwareBuffer));
+            // }
+            // ksmps goes through ORC template
 
             const orc = await this.system.csoundGen.generateOrc(); mark('generateOrc');
 
@@ -205,6 +219,16 @@ export class CsoundEngine {
 
             await this.instance.setOption('-odac');
             await this.instance.setOption('-M0');       mark('setOptions');
+            // ⭐ Audio buffers (software / hardware)
+            const audioOpts = this.audioOptions || {};
+            if (audioOpts.softwareBuffer) {
+                //await this.instance.setOption('-b', String(audioOpts.softwareBuffer));
+                await this.instance.setOption(`-b=${audioOpts.softwareBuffer}`);
+            }
+            if (audioOpts.hardwareBuffer) {
+                //await this.instance.setOption('-B', String(audioOpts.hardwareBuffer));
+                await this.instance.setOption(`-B=${audioOpts.hardwareBuffer}`);
+            }
 
             const orc = await this.system.csoundGen.generateOrc(); mark('generateOrc');
 

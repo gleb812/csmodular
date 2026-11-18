@@ -18,7 +18,7 @@ import { SevenSegmentDisplay } from './SevenSegmentDisplay.js';
 //  CONFIG — sizes and persistence
 // ============================================================
 const CONFIG = {
-    colWidths:  [40, 288, 16, 40, 40, 16],
+    colWidths:  [32, 288, 16, 32, 32, 32, 16],
     rowHeights: [24, 24, 24, 22],
     gap: 0,
     storageKey: 'csmodular:bottombar',
@@ -37,6 +37,7 @@ export class BottomBar {
         this._midiOutLamp = null;
         this._oscLamp     = null;
         this._oscSettings = null;
+        this._audioSettings = null;
 
         // DOM refs for BPM panel
         this._bpmDisplay = null;     // SevenSegmentDisplay instance
@@ -561,6 +562,19 @@ export class BottomBar {
         // A6 — volume fader (span rows 1..4)
         this._buildVolumeCol();
 
+        // ⭐ Новая колонка (5): Se / St / TBD / TBD
+        this._put(0, 5, this._buildButtonCell(
+            0, 5, 'Se', 'Audio settings (buffers, ksmps)',
+            () => this._toggleAudioSettings(),
+            () => !!this._audioSettings?.isVisible,
+        ));
+        this._put(1, 5, this._buildButtonCell(
+            1, 5, 'St', 'Add sticker',
+            () => this._addSticker(),
+        ));
+        this._put(2, 5, this._buildEmptyCell(2, 5));   // TBD
+        this._put(3, 5, this._buildEmptyCell(3, 5));   // TBD
+
         // Left column (Ne/Lo/Sa)
         this._put(1, 0, this._buildButtonCell(1, 0, 'Ne', 'New patch', () => this.system.resetEverything?.()));
         this._put(2, 0, this._buildButtonCell(2, 0, 'Lo', 'Load patch', () => this.system.loadJsonPatch?.()));
@@ -887,7 +901,7 @@ export class BottomBar {
     // ============================================================
     _buildVolumeCol() {
         const col = this._cellBase(0, 5, 'bb-volume-col');
-        col.style.gridColumn = '6';
+        col.style.gridColumn = '7';
         col.style.gridRow = '1 / span 4';
 
         const track = document.createElement('div');
@@ -1053,6 +1067,34 @@ export class BottomBar {
             this._collapsedRunBtn.title = m.title;
             this._collapsedRunBtn.style.color = m.color;
         }
+    }
+
+    _toggleAudioSettings() {
+        if (!this._audioSettings) {
+            import('./AudioSettingsPanel.js').then(({ AudioSettingsPanel }) => {
+                this._audioSettings = new AudioSettingsPanel(this.system);
+                this._audioSettings.toggle();
+                this.refreshState();
+            });
+            return;
+        }
+        this._audioSettings.toggle();
+        this.refreshState();
+    }
+
+    _addSticker() {
+        const worldX = (window.innerWidth  / 2 - this.system.offsetX) / this.system.scale;
+        const worldY = (window.innerHeight / 2 - this.system.offsetY) / this.system.scale;
+        const sticker = this.system.addStickerAtPosition(worldX, worldY, {
+            text: 'New sticker',
+            gridW: 8,
+            gridH: 2,
+        });
+        if (sticker) {
+            this.system.selectSticker(sticker);
+            this.system.stickerProperties?.show?.(sticker);
+        }
+        this.system.showNotification?.('📌 Sticker added');
     }
 
     // ============================================================
