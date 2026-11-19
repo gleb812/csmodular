@@ -18,12 +18,13 @@ import { SevenSegmentDisplay } from './SevenSegmentDisplay.js';
 //  CONFIG — sizes and persistence
 // ============================================================
 const CONFIG = {
-    colWidths:  [32, 288, 16, 32, 32, 32, 16],
+    colWidths: [32, 288, 16, 'auto'],   
     rowHeights: [24, 24, 24, 22],
     gap: 0,
     storageKey: 'csmodular:bottombar',
     bpmMin: 20,
     bpmMax: 300,
+    slidePanelWidth: 104,   // ширина скрытой панели (2 колонки × 32 + gap)
 };
 
 export class BottomBar {
@@ -55,10 +56,17 @@ export class BottomBar {
         this._volume = this._dbToUi(0);   // unity (0 dB) by default
 
         // sizes (loaded from storage)
-        this._colWidths  = this._loadJSON('cols')  || CONFIG.colWidths.slice();
+        // Миграция: старый формат cols = 7 чисел. Если длина/тип не совпадают — сбрасываем.
+        const savedCols = this._loadJSON('cols');
+        const colsValid = Array.isArray(savedCols)
+            && savedCols.length === CONFIG.colWidths.length
+            && savedCols[savedCols.length - 1] === 'auto';
+        this._colWidths  = colsValid ? savedCols : CONFIG.colWidths.slice();
+
         this._rowHeights = this._loadJSON('rows')  || CONFIG.rowHeights.slice();
         this._gap        = this._loadJSON('gap')   ?? CONFIG.gap;
         this._collapsed  = this._loadJSON('collapsed') ?? false;
+        this._slideOpen  = this._loadJSON('slideOpen') ?? false;
 
         this._injectStyles();
         this.createBar();
@@ -83,7 +91,6 @@ export class BottomBar {
 #bottom-bar {
     position: fixed;
     bottom: 12px;
-    left: 50%;
     transform: translateX(-50%);
     display: flex;
     flex-direction: column;
@@ -445,6 +452,52 @@ export class BottomBar {
     pointer-events: none;
 }
 
+/* ---- Right dock: [slide-panel][toggle][fader] ---- */
+#bottom-bar .bb-right-dock {
+    display: flex;
+    align-items: stretch;
+    height: 100%;
+    min-height: 0;
+}
+#bottom-bar .bb-slide-panel {
+    width: 0;
+    overflow: hidden;
+    transition: width 0.22s ease;
+    display: flex;
+    align-items: stretch;
+    flex: 0 0 auto;
+}
+#bottom-bar .bb-right-dock.open .bb-slide-panel {
+    width: var(--bb-slide-w, 104px);
+}
+#bottom-bar .bb-slide-inner {
+    display: grid;
+    grid-template-columns: repeat(3, 32px);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 0;
+    width: var(--bb-slide-w, 104px);
+    flex: 0 0 auto;
+}
+#bottom-bar .bb-slide-toggle {
+    width: 16px;
+    flex: 0 0 16px;
+    background: transparent;
+    border: none;
+    border-left: 1px solid var(--bb-accent-15, rgba(255,255,255,0.06));
+    border-right: 1px solid var(--bb-accent-15, rgba(255,255,255,0.06));
+    color: var(--bb-accent, #0af);
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.1s;
+}
+#bottom-bar .bb-slide-toggle:hover  { background: var(--bb-accent-12, rgba(0,170,255,0.12)); }
+#bottom-bar .bb-slide-toggle:active { background: var(--bb-accent-25, rgba(0,170,255,0.25)); }
+
+/* ---- SysInfo popup ---- */
+
 /* ---- SysInfo popup ---- */
 #bottom-bar-sysinfo {
     position: fixed;
@@ -529,12 +582,39 @@ export class BottomBar {
         this.applySizes();
         this.renderGrid();
         this.makeDraggable();
+        this._initBarPosition();
+    }
+
+    // ============================================================
+    //  BAR POSITION — фиксированный левый край
+    // ============================================================
+    _initBarPosition() {
+        const savedLeft = this._loadJSON('left');
+        const savedTop  = this._loadJSON('top');
+
+        if (typeof savedLeft === 'number' && typeof savedTop === 'number') {
+            this.element.style.left = `${savedLeft}px`;
+            this.element.style.top  = `${savedTop}px`;
+            this.element.style.bottom = 'auto';
+            this.element.style.transform = 'none';
+        } else {
+            // первичное центрирование (после layout)
+            requestAnimationFrame(() => {
+                const r = this.element.getBoundingClientRect();
+                const left = Math.max(8, (window.innerWidth - r.width) / 2);
+                this.element.style.left = `${left}px`;
+                this.element.style.bottom = '12px';
+                this.element.style.transform = 'none';
+            });
+        }
     }
 
     applySizes() {
         if (!this._grid) return;
-        this._grid.style.gridTemplateColumns = this._colWidths.map(w => `${w}px`).join(' ');
-        this._grid.style.gridTemplateRows    = this._rowHeights.map(h => `${h}px`).join(' ');
+        this._grid.style.gridTemplateColumns = this._colWidths.map(w =>
+            typeof w === 'number' ? `${w}px` : w
+        ).join(' ');
+        this._grid.style.gridTemplateRows = this._rowHeights.map(h => `${h}px`).join(' ');
         this._grid.style.gap = `${this._gap}px`;
     }
 
@@ -544,66 +624,32 @@ export class BottomBar {
     renderGrid() {
         this._grid.innerHTML = '';
         this._bpmModeBtns = {};
+        this._statefulCells = [];
         this._bpmDot = null;
         this._bpmDisplay = null;
         this._bpmFracDisplay = null;
         this._faderFill = null;
         this._faderThumb = null;
 
-        // A1 — collapse button
+        // A1 — collapse (col 1, row 1)
         this._put(0, 0, this._buildCollapseCell());
 
-        // A2 — BPM panel (span rows 1..3)
+        // A2 — BPM panel (col 2, rows 1..3)
         this._buildBpmPanel();
 
-        // A3 — zoom column (span rows 1..4)
+        // A3 — zoom (col 3, rows 1..4)
         this._buildZoomCol();
 
-        // A6 — volume fader (span rows 1..4)
-        this._buildVolumeCol();
+        // A4..A6 — right dock (col 4, rows 1..4): [panel][toggle][fader]
+        this._buildRightDock();
 
-        // ⭐ Новая колонка (5): Se / St / TBD / TBD
-        this._put(0, 5, this._buildButtonCell(
-            0, 5, 'Se', 'Audio settings (buffers, ksmps)',
-            () => this._toggleAudioSettings(),
-            () => !!this._audioSettings?.isVisible,
-        ));
-        this._put(1, 5, this._buildButtonCell(
-            1, 5, 'St', 'Add sticker',
-            () => this._addSticker(),
-        ));
-        this._put(2, 5, this._buildEmptyCell(2, 5));   // TBD
-        this._put(3, 5, this._buildEmptyCell(3, 5));   // TBD
-
-        // Left column (Ne/Lo/Sa)
+        // Left column: Ne / Lo / Sa
         this._put(1, 0, this._buildButtonCell(1, 0, 'Ne', 'New patch', () => this.system.resetEverything?.()));
         this._put(2, 0, this._buildButtonCell(2, 0, 'Lo', 'Load patch', () => this.system.loadJsonPatch?.()));
         this._put(3, 0, this._buildSaveCell());
 
-        // A4 / A5
-        this._put(0, 3, this._buildButtonCell(0, 3, 'Mp', 'Toggle minimap (M)', () => this._toggleMinimap(), () => !!this.system.minimap?.visible));
-        this._put(0, 4, this._buildButtonCell(0, 4, 'De', 'Design settings', () => this.system.designSettings?.toggle(), () => !!this.system.designSettings?.isVisible));
-
-        // B4 / B5
-        this._put(1, 3, this._buildButtonCell(1, 3, 'Sh', 'Shake all cables', () => this.system.patchManager?.shakeAllCables?.(80)));
-        this._put(1, 4, this._buildButtonCell(1, 4, '⟳', 'Reload user modules (hot-reload)', () => this._reloadUserModules()));
-
-        // C4 / C5
-        this._put(2, 3, this._buildButtonCell(2, 3, '?', 'About', () => this.system.splash?.openAbout()));
-        this._put(2, 4, this._buildButtonCell(2, 4, 'i', 'System info', () => this._toggleSysInfo(), () => this._sysInfoOpen));
-
-        // D2 — run
+        // D2 — run (col 2, row 4)
         this._put(3, 1, this._buildRunCell());
-
-        // D4 — editor
-        this._put(3, 3, this._buildButtonCell(3, 3, 'Ed', 'Module editor', () => this._openEditor()));
-
-        // D5 — Lock patch
-        this._put(3, 4, this._buildButtonCell(
-            3, 4, '#', 'Lock patch (no structural edits)',
-            () => this.system.setLocked?.(!this.system.locked),
-            () => !!this.system.locked,
-        ));
 
         // refresh visuals
         this._refreshBpm();
@@ -626,6 +672,94 @@ export class BottomBar {
         cell._btn = btn;
         // Нет _isActive — Sa не имеет состояния active
         return cell;
+    }
+
+    // ============================================================
+    //  RIGHT DOCK — [slide-panel][toggle][fader]
+    // ============================================================
+    _buildRightDock() {
+        const dock = document.createElement('div');
+        dock.className = 'bb-right-dock';
+        dock.style.gridColumn = '4';
+        dock.style.gridRow = '1 / span 4';
+        dock.style.setProperty('--bb-slide-w', `${CONFIG.slidePanelWidth}px`);
+
+        // --- hidden panel (3 cols × 4 rows) ---
+        const panel = document.createElement('div');
+        panel.className = 'bb-slide-panel';
+
+        const inner = document.createElement('div');
+        inner.className = 'bb-slide-inner';
+        panel.appendChild(inner);
+
+        // 12 слотов: 10 кнопок + 2 пустых (место под будущее)
+        const layout = [
+            // row 0
+            ['Mp', 'Toggle minimap (M)',      () => this._toggleMinimap(),            () => !!this.system.minimap?.visible],
+            ['De', 'Design settings',          () => this.system.designSettings?.toggle(), () => !!this.system.designSettings?.isVisible],
+            ['Se', 'Audio settings (buffers, ksmps)', () => this._toggleAudioSettings(), () => !!this._audioSettings?.isVisible],
+            // row 1
+            ['Sh', 'Shake all cables',         () => this.system.patchManager?.shakeAllCables?.(80)],
+            ['⟳',  'Reload user modules (hot-reload)', () => this._reloadUserModules()],
+            ['St', 'Add sticker',              () => this._addSticker()],
+            // row 2
+            ['?',  'About',                    () => this.system.splash?.openAbout()],
+            ['i',  'System info',              () => this._toggleSysInfo(),              () => this._sysInfoOpen],
+            [null, null, null],   // пустой слот
+            // row 3
+            ['Ed', 'Module editor',            () => this._openEditor()],
+            ['#',  'Lock patch (no structural edits)', () => this.system.setLocked?.(!this.system.locked), () => !!this.system.locked],
+            [null, null, null],   // пустой слот
+        ];
+
+        layout.forEach(([label, title, action, isActive], i) => {
+            const row = Math.floor(i / 3);
+            const col = i % 3;
+            if (!label) {
+                const empty = this._buildEmptyCell(row, col);
+                empty.style.gridColumn = `${col + 1}`;
+                empty.style.gridRow = `${row + 1}`;
+                inner.appendChild(empty);
+                return;
+            }
+            const cell = this._buildButtonCell(row, col, label, title, action, isActive);
+            cell.style.gridColumn = `${col + 1}`;
+            cell.style.gridRow = `${row + 1}`;
+            inner.appendChild(cell);
+        });
+
+        dock.appendChild(panel);
+
+        // --- toggle arrow ---
+        const toggle = document.createElement('button');
+        toggle.className = 'bb-slide-toggle';
+        toggle.textContent = this._slideOpen ? '<' : '>';
+        toggle.title = this._slideOpen ? 'Hide extra buttons' : 'Show extra buttons';
+        toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.setSlideOpen(!this._slideOpen);
+        });
+        dock.appendChild(toggle);
+        this._slideToggle = toggle;
+
+        // --- fader (крайний правый, всегда) ---
+        const fader = this._buildVolumeCol();
+        dock.appendChild(fader);
+
+        dock.classList.toggle('open', !!this._slideOpen);
+        this._grid.appendChild(dock);
+        this._rightDock = dock;
+    }
+
+    setSlideOpen(v) {
+        this._slideOpen = !!v;
+        this._saveJSON('slideOpen', this._slideOpen);
+        if (!this._rightDock) return;
+        this._rightDock.classList.toggle('open', this._slideOpen);
+        if (this._slideToggle) {
+            this._slideToggle.textContent = this._slideOpen ? '<' : '>';
+            this._slideToggle.title = this._slideOpen ? 'Hide extra buttons' : 'Show extra buttons';
+        }
     }
 
     _put(row, col, el) {
@@ -900,9 +1034,7 @@ export class BottomBar {
     //  A6 — VOLUME FADER
     // ============================================================
     _buildVolumeCol() {
-        const col = this._cellBase(0, 5, 'bb-volume-col');
-        col.style.gridColumn = '7';
-        col.style.gridRow = '1 / span 4';
+        const col = this._cellBase(0, 0, 'bb-volume-col');
 
         const track = document.createElement('div');
         track.className = 'bb-fader-track';
@@ -963,7 +1095,7 @@ export class BottomBar {
             this._pushVolumeToEngine();
         });
 
-        this._grid.appendChild(col);
+        return col;
     }
 
     _refreshFader() {
@@ -1229,6 +1361,11 @@ export class BottomBar {
             if (!isDragging) return;
             isDragging = false;
             bar.style.cursor = '';
+            // persist position (левый/верхний край)
+            const left = parseFloat(bar.style.left);
+            const top  = parseFloat(bar.style.top);
+            if (Number.isFinite(left)) this._saveJSON('left', left);
+            if (Number.isFinite(top))  this._saveJSON('top',  top);
         });
     }
 

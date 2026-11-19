@@ -103,7 +103,7 @@ export class CsoundEngine {
             //this.instance = await Csound();             mark('createInstance');
             const audioOpts = this.audioOptions || {};
             this.instance = await Csound({
-                buffer_frames: audioOpts.softwareBuffer || 1024,
+                buffer_frames: audioOpts.softwareBuffer || 512,
                 hardware_buffer_frames: audioOpts.hardwareBuffer || 2048,
             });
             window.csound = this.instance;
@@ -112,6 +112,7 @@ export class CsoundEngine {
 
             await this.instance.setOption('-odac');
             await this.instance.setOption('-M0');       mark('setOptions');
+            await this.instance.setOption('-d');     
             // ⭐ Audio buffers (software / hardware)
             //const audioOpts = this.audioOptions || {};
             // if (audioOpts.softwareBuffer) {
