@@ -5,6 +5,7 @@ ain2 zar kIn2
 
 ; --- module body ---
 ; Add your DSP code here
-kVol = gkMVOL
-outs ain1*kButton1*kVol,ain2*kButton1*kVol
+
+gaL += ain1*kButton1
+gaR += ain2*kButton1
 endop

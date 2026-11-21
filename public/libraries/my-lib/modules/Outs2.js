@@ -5,6 +5,7 @@ export const Outs2Module = {
     displayName: 'Outs2',
     category: 'io',
     status: 'passable',
+    
     gridHeight: 2,
     originalName: 'Outs2',
     tooltip: 'Outs2',
@@ -22,7 +23,8 @@ export const Outs2Module = {
                 "height": 11,
                 "text": "M",
                 "initialState": true,
-                "csoundName": "Param3"
+                "mode": "toggle",
+                "csoundName": "Button1"
         },
         {
                 "componentType": "Input",

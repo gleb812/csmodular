@@ -3,14 +3,15 @@ export const MultiSawModule = {
     type: 'MultiSaw',
     defaultParams: [],
     displayName: 'MultiSaw',
-    category: 'custom',
+    category: 'osc',
     status: 'passable',
+    
     gridHeight: 3,
     originalName: 'MultiSaw',
     tooltip: 'MultiSaw',
     customColor: null,
     params: [2, 4, 6],
-    inputs: [],
+    inputs: [11],
     outputs: [1, 8],
     components: [
         {
@@ -20,7 +21,8 @@ export const MultiSawModule = {
                 "y": 5,
                 "jackType": "audio",
                 "bandwidth": "dynamic",
-                "ConnectorName": ""
+                "ConnectorName": "",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -86,7 +88,8 @@ export const MultiSawModule = {
                 "y": 25,
                 "jackType": "audio",
                 "bandwidth": "dynamic",
-                "ConnectorName": ""
+                "ConnectorName": "",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "TextLabel",
@@ -102,6 +105,24 @@ export const MultiSawModule = {
                 "x": 230,
                 "y": 27,
                 "text": "R",
+                "fontSize": 10
+        },
+        {
+                "componentType": "Input",
+                "id": "11",
+                "x": 10,
+                "y": 25,
+                "jackType": "control",
+                "bandwidth": "dynamic",
+                "ConnectorName": "",
+                "ConnectorIndex": 0
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "12",
+                "x": 25,
+                "y": 25,
+                "text": "Pch",
                 "fontSize": 10
         }
 ]

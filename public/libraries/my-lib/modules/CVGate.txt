@@ -1,0 +1,13 @@
+opcode CVGate, 0, kki
+kOut1, kOut2, iVoiceId xin
+
+; --- module body ---
+; Add your DSP code here
+SchanPitch sprintf "pch_%d", iVoiceId
+SchanGate  sprintf "gate_%d", iVoiceId
+kout1 chnget SchanPitch
+kout2  chnget SchanGate
+
+zkw kout1, kOut1
+zkw kout2, kOut2
+endop
