@@ -35,6 +35,8 @@ export class CsoundGenerator {
 
         // ⭐ Diagnostic counters (reset per generateOrc)
         this._fetchStats = { count: 0, ms: 0, byPath: {} };
+        // ⭐ Polyphony (пока константа, потом из настроек)
+        this._numVoices = 8;
         }
 
     // ════════════════════════════════════════════════════════════
@@ -192,17 +194,45 @@ export class CsoundGenerator {
                 .map(([p, ms]) => `${p} — ${Math.round(ms)}ms`),
         });
         
-        // ⭐ 2. Собираем модули из патча (voice и fx)
-        const voiceModules = Array.from(this.modules.values())
-            .filter(m => m.layer === 'voice')
-            .map(m => this.formatModuleLine(m))
-            .join('\n');
-        
+        // ⭐ 2. Voice-модули: N копий instr 100..100+N-1, каждая со своим voiceId
+        const numVoices = this._numVoices || 1;
+        const voiceModuleList = Array.from(this.modules.values())
+            .filter(m => m.layer === 'voice');
+
+        let voiceInstrs = '';
+        for (let v = 0; v < numVoices; v++) {
+            const voiceModulesCode = voiceModuleList
+                .map(m => this.formatModuleLine(m, v))
+                .join('\n');
+            // ⭐ scope — только для voice 0
+            const scopeTables = (v === 0)
+                ? scopeCode.voiceTables
+                : '; scope: voice 0 only';
+            voiceInstrs += `
+    ;---------------------------------
+    ; VOICE ${v}
+    instr ${100 + v}
+        ;ivId = ${v}
+        ; --- receiver: pch_X / gate_X / vel_X → local k-vars ---
+        ;SchanPitch sprintf "pch_%d", ivId
+        ;SchanGate  sprintf "gate_%d", ivId
+        ;SchanVel   sprintf "vel_%d",  ivId
+        ;kPitch chnget SchanPitch
+        ;kGate  chnget SchanGate
+        ;kVel   chnget SchanVel
+        ; --- voice modules ---
+        ${voiceModulesCode || '; no voice modules'}
+        ${scopeTables}
+    endin
+    `;
+        }
+
+        // ⭐ FX-модули (как раньше, один instr 2)
         const fxModules = Array.from(this.modules.values())
             .filter(m => m.layer === 'fx')
             .map(m => this.formatModuleLine(m))
             .join('\n');
-        
+
         // ⭐ 3. Zakinit
         const zakinitString = this.getZakInitString();
         
@@ -223,6 +253,8 @@ export class CsoundGenerator {
     gaFX2 init 0
     gaFX3 init 0
     gaFX4 init 0
+    gaL init 0
+    gaR init 0
 
     opcode K2Y, k, k
         kin xin
@@ -237,7 +269,6 @@ export class CsoundGenerator {
         kout = (kin > 0 ? 1 : 0)
         xout a(kout)
     endop
-
     ; -------- converters (strict inputs) --------
     opcode K2A, 0, kk
         kzkIn, kzaOut xin
@@ -258,6 +289,7 @@ export class CsoundGenerator {
     massign 2,0
     massign 3,0
     massign 4,0
+    massign 5,0
 
     giSin ftgen 1, 0, 16384, 10, 1
     giCos ftgen 11, 0, 16384, 11, 1, 1
@@ -279,74 +311,51 @@ export class CsoundGenerator {
     ;---------------------------------
     ; UDO section (inlined from /csound/modules/*.txt)
     ${udoString}
-
     ;---------------------------------
-    ; VOICE AREA
-    instr 1
-    ${voiceModules || '; no voice modules'}
-    ${scopeCode.voiceTables}
-    endin
-
+    ; VOICE AREA (instr 100..100+N-1)
+    ${voiceInstrs}
     ;---------------------------------
     ; FX AREA
     instr 2
     ${fxModules || '; no fx modules'}
     ${scopeCode.fxTables}
     endin
-
     ;---------------------------------
-    ; GLOBAL MIDI
-    gkstat init 0
-    gkchan init 0
-    gkdata1 init 0
-    gkdata2 init 0
-    instr 3
-      gkstat, gkchan, gkdata1, gkdata2 midiin
-      if gkstat != 144 goto Next
-        gkGate = 1
-        gkNote = gkdata1
-    Next:
-      if gkstat!=128 goto Over
-        gkGate = 0
-    Over:
-      if (gkdata1 != 0) && (gkdata2 == 0) then
-            gkGate = 0
-      endif 
-    ;printk2 gkGate
-    endin
-
-    ;---------------------------------
-    ; FOR OFFLINE RENDERING 
-    instr 4
-      xtratim 0.1
-      gkGate linsegr 1, p3, 1, 0, 0
-      gkNote = p4
-    endin
-    ;=================================
-    instr 5
+    instr 5  ; GLOBAL 
         kBPM chnget "bpm"
         kBPM limit kBPM, 1, 300
         gkBPM = kBPM
         kMasterVol chnget "mvol"
         kMasterVol portk kMasterVol, 0.1
-        gkMVOL = kMasterVol         
+        ; MASTER DSP
+        aL = gaL * kMasterVol
+        aR = gaR * kMasterVol
+        ; master limiter goes here
+        outs aL, aR
+        gaL = 0
+        gaR = 0         
+    endin
+
+    instr 6 
+        kndx init 0
+        if kndx < p4 then
+            event "i", 100 + kndx, 0, -1, kndx
+            kndx += 1
+        else
+            turnoff
+        endif
     endin
     `;
     }
 
     generateSco() {
-        // Пока пусто — ноты будут добавляться через inputMessage
-        // Но для инициализации можно оставить пустым или с тестовой нотой
+        const n = this._numVoices || 1;
         return `
-    i1 0 [60*60*24*7]
     i2 0 [60*60*24*7]
-    i3 0 [60*60*24*7]
-    ; use i4 to emulate MIDI commands if needed
-    ;i4 0 1 64
     i5 0 [60*60*24*7]
+    i6 0 [60*60*24*7] ${n}
     `;
     }
-
 
     /**
      * Извлечь имена mapping-таблиц из DSP-кода модуля.
@@ -498,10 +507,6 @@ export class CsoundGenerator {
         };
     }
 
-
-    /**
-     * Добавить кабель
-     */
     addCable(cable) {
         this._activeCables.push(cable);
         // ⭐ Назначаем номер шины
@@ -512,11 +517,7 @@ export class CsoundGenerator {
 
     _prepareConverters() {
         this._converterBuses = {};
-        
-        // ⭐ Убрана бесполезная «страховка» Math.max(_counter, _count) —
-        //    инвариант _count >= _counter держится явно во всех местах,
-        //    где двигается _counter.
-        
+    
         let found = 0;
         
         for (const moduleData of this.modules.values()) {
@@ -680,7 +681,6 @@ export class CsoundGenerator {
     }
     
     /**
-     * Очистить все кабели.
      * ⭐ Сбрасывает счётчики и _available* (иначе «залипшие» номера).
      */
     clearCables() {
@@ -730,12 +730,13 @@ export class CsoundGenerator {
     }
     
     /**
-     * Получить строку zakinit
+     * Получить строку zakinit.
+     * ⭐ При полифонии — умножаем число шин на количество голосов.
      */
     getZakInitString() {
-        return `zakinit ${this._audioBusCount}, ${this._controlBusCount}`;
+        const n = this._numVoices || 1;
+        return `zakinit ${this._audioBusCount * n}, ${this._controlBusCount * n}`;
     }
-
 
     /**
      * Для каждого модуля в патче — читает его UDO, парсит variants,
@@ -766,7 +767,7 @@ export class CsoundGenerator {
                     continue;
                 }
             }
-            
+         
             // Сохраняем в moduleDef
             const moduleDef = this.system?.moduleFactory?.moduleRegistry?.[typeId];
             if (moduleDef && variants) {
@@ -776,7 +777,6 @@ export class CsoundGenerator {
             }
         }
     }
-
 
     _prepareVariants() {
         // 1. Сброс — все модули в дефолт
@@ -887,10 +887,8 @@ export class CsoundGenerator {
                 return active === 'a' ? 'audio' : 'control';
             }
         }
-
         return 'control';
     }
-
 
 /**
  * Найти кабель, подключенный к порту (входу)
@@ -920,10 +918,7 @@ export class CsoundGenerator {
         return null;
     }
 
-
     addModule(moduleData) {
-        //console.log('🎯 addModule called with:', moduleData);
-        
         const { 
             typeId,           // ключ в moduleRegistry (уже не numericTypeId)
             instanceId,       
@@ -994,9 +989,6 @@ export class CsoundGenerator {
         return true;
     }
     
-/**
- * Сгенерировать полный CSD (для экспорта в файл) - НОВАЯ ВЕРСИЯ
- */
     async generateFullCsd() {
         const orc = await this.generateOrc();
         return `<CsoundSynthesizer>
@@ -1007,15 +999,14 @@ export class CsoundGenerator {
     ${orc}
     </CsInstruments>
     <CsScore>
-    i1 0 [60*60*24*7]
     i2 0 [60*60*24*7]
-    i3 0 [60*60*24*7]
     i5 0 [60*60*24*7]
+    i6 0 [60*60*24*7] ${this._numVoices || 1}
     </CsScore>
     </CsoundSynthesizer>`;
     }
     
-    formatModuleLine(module) {
+    formatModuleLine(module, voiceId = 0) {
         const {
             instanceName,
             instanceId,
@@ -1048,30 +1039,41 @@ export class CsoundGenerator {
         const inputIds = moduleDef?.inputs || [];
         const outputIds = moduleDef?.outputs || [];
 
-        // ⭐ 1. inletBuses (как раньше) — шины, которые читает opcode модуля
+        // ⭐ 1. inletBuses — { bus, type } для каждого входа
         const inletBuses = inputIds.map(id => {
             const cable = this._findCableForPort(instanceId, id, 'input');
-            if (!cable) return 1; // fallback: служебная шина (как было)
+            if (!cable) return { bus: 1, type: 'control' }; // fallback: служебная control-шина
 
             const sourceBus = this._cableBusMap[cable.id];
-            if (sourceBus === undefined) return 1;
+            if (sourceBus === undefined) return { bus: 1, type: 'control' };
 
             const convKey = `${cable.id}_${id}`;
             const conv = this._converterBuses[convKey];
-            if (conv) return conv.bus;
+            if (conv) {
+                // conv.bus — это шина результата конвертера.
+                // K2A: control → audio, значит результат audio.
+                // A2K: audio → control, значит результат control.
+                const resultType = (conv.type === 'K2A') ? 'audio' : 'control';
+                return { bus: conv.bus, type: resultType };
+            }
 
-            return sourceBus;
+            // Без конвертера — тип шины = тип источника (audio/control)
+            const cableType = this._getCableType(cable);
+            return { bus: sourceBus, type: cableType };
         });
 
-        // ⭐ 2. outletBuses (как раньше, но с tap-шинами для индикаторов на Output)
-        //    Сначала собираем tap-потребности, потом досоздаём шины.
-        const outletBuses = outputIds.map(id => {
+        // ⭐ 2. outletBuses — { bus, type } для каждого выхода
+        const outletBuses = outputIds.map((id, idx) => {
+            // Тип шины = тип выходного джека (audio/control)
+            const outComp = panel?.components.find(c => String(c.id) === String(id));
+            const outType = this._normalizeJackType(outComp);
+
             const cables = this._findCablesForOutput(instanceId, id);
             if (cables.length > 0) {
                 const busNumber = this._cableBusMap[cables[0].id];
-                if (busNumber !== undefined) return busNumber;
+                if (busNumber !== undefined) return { bus: busNumber, type: outType };
             }
-            return 0;
+            return { bus: 0, type: outType };
         });
 
         // ⭐ 3. Индикаторы: LED и MiniVU
@@ -1088,16 +1090,17 @@ export class CsoundGenerator {
             if (taps.has(key)) return taps.get(key);
 
             const outType = this._normalizeJackType(srcComp);
-            let bus = outletBuses[srcIndex];
+            let busInfo = outletBuses[srcIndex];
 
-            if (!bus || bus === 0) {
+            if (!busInfo || busInfo.bus === 0) {
                 // Нет кабеля — выделяем tap-шину того же типа, что Output
                 const busType = (outType === 'audio') ? 'audio' : 'control';
-                bus = this._allocateBus(busType);
-                outletBuses[srcIndex] = bus; // opcode теперь пишет в неё
+                const newBus = this._allocateBus(busType);
+                outletBuses[srcIndex] = { bus: newBus, type: busType };
+                busInfo = outletBuses[srcIndex];
             }
 
-            const tap = { bus, type: outType, a2kBus: null };
+            const tap = { bus: busInfo.bus, type: outType, a2kBus: null };
             taps.set(key, tap);
             return tap;
         };
@@ -1112,11 +1115,11 @@ export class CsoundGenerator {
             const cable = this._findCableForPort(instanceId, srcComp.id, 'input');
             if (!cable) return null; // нет кабеля — индикатор пропускаем
 
-            const bus = inletBuses[srcIndex];
-            if (!bus || bus === 1) return null; // fallback-шина — пропускаем
+            const busInfo = inletBuses[srcIndex];
+            if (!busInfo || busInfo.bus === 1) return null; // fallback-шина — пропускаем
 
             const inType = this._normalizeJackType(srcComp);
-            const tap = { bus, type: inType, a2kBus: null };
+            const tap = { bus: busInfo.bus, type: inType, a2kBus: null };
             taps.set(key, tap);
             return tap;
         };
@@ -1179,16 +1182,22 @@ export class CsoundGenerator {
         const modeToUse = mode.length > 0 ? mode : defaultMode;
         modeToUse.forEach(m => modeArgs.push(String(m)));
 
-        // ⭐ 6. Вызов opcode
+        // ⭐ 6. Вызов opcode — номера шин через _busNumber
+        // ⭐ если moduleDef.needsVoiceId — последним аргументом идёт voiceId
+        const extraArgs = (moduleDef?.needsVoiceId === true)
+            ? [String(voiceId)]
+            : [];
+
         const allArgs = [
             ...paramArgs,
             ...modeArgs,
-            ...inletBuses.map(String),
-            ...outletBuses.map(String),
+            ...inletBuses.map(b => String(this._busNumber(b.bus, b.type, voiceId))),
+            ...outletBuses.map(b => String(this._busNumber(b.bus, b.type, voiceId))),
+            ...extraArgs,
         ];
         const callLine = `${moduleName} ${allArgs.join(', ')}`;
 
-        // ⭐ 7. Конвертеры для обычных кабелей (как раньше)
+        // ⭐ 7. Конвертеры — sourceBus и bus со сдвигом по типу
         const converterLines = [];
         for (const id of inputIds) {
             const cable = this._findCableForPort(instanceId, id, 'input');
@@ -1196,7 +1205,13 @@ export class CsoundGenerator {
             const convKey = `${cable.id}_${id}`;
             const conv = this._converterBuses[convKey];
             if (!conv) continue;
-            converterLines.push(`${conv.type} ${conv.sourceBus}, ${conv.bus}`);
+            // K2A: source = control, result = audio
+            // A2K: source = audio,   result = control
+            const srcType    = (conv.type === 'K2A') ? 'control' : 'audio';
+            const resultType = (conv.type === 'K2A') ? 'audio'   : 'control';
+            const srcBus    = this._busNumber(conv.sourceBus, srcType,    voiceId);
+            const resultBus = this._busNumber(conv.bus,       resultType, voiceId);
+            converterLines.push(`${conv.type} ${srcBus}, ${resultBus}`);
         }
 
         // ⭐ 8. A2K для LED на Input (до callLine — сигнал уже в inletBuses)
@@ -1206,8 +1221,11 @@ export class CsoundGenerator {
             if (!src || src.dir !== 'input') continue;
             const tap = taps.get(`input:${src.comp.id}`);
             if (!tap || tap.type !== 'audio' || tap.a2kBus === null) continue;
-            if (!tapA2KInputLines.includes(`A2K ${tap.bus}, ${tap.a2kBus}`)) {
-                tapA2KInputLines.push(`A2K ${tap.bus}, ${tap.a2kBus}`);
+            const srcBus = this._busNumber(tap.bus, 'audio', voiceId);
+            const dstBus = this._busNumber(tap.a2kBus, 'control', voiceId);
+            const line = `A2K ${srcBus}, ${dstBus}`;
+            if (!tapA2KInputLines.includes(line)) {
+                tapA2KInputLines.push(line);
             }
         }
 
@@ -1218,8 +1236,11 @@ export class CsoundGenerator {
             if (!src || src.dir !== 'output') continue;
             const tap = taps.get(`output:${src.comp.id}`);
             if (!tap || tap.type !== 'audio' || tap.a2kBus === null) continue;
-            if (!tapA2KOutputLines.includes(`A2K ${tap.bus}, ${tap.a2kBus}`)) {
-                tapA2KOutputLines.push(`A2K ${tap.bus}, ${tap.a2kBus}`);
+            const srcBus = this._busNumber(tap.bus, 'audio', voiceId);
+            const dstBus = this._busNumber(tap.a2kBus, 'control', voiceId);
+            const line = `A2K ${srcBus}, ${dstBus}`;
+            if (!tapA2KOutputLines.includes(line)) {
+                tapA2KOutputLines.push(line);
             }
         }
 
@@ -1234,9 +1255,11 @@ export class CsoundGenerator {
             let bus;
             if (tap.type === 'audio') {
                 if (tap.a2kBus === null) continue;
-                bus = tap.a2kBus;
+                // a2kBus — control-шина (результат A2K)
+                bus = this._busNumber(tap.a2kBus, 'control', voiceId);
             } else {
-                bus = tap.bus;
+                // control-шина напрямую
+                bus = this._busNumber(tap.bus, 'control', voiceId);
             }
 
             const channelName = `led_${instanceName}_${instanceId}_${led.id}`;
@@ -1261,18 +1284,23 @@ export class CsoundGenerator {
             }
 
             const channelName = `mvu_${instanceName}_${instanceId}_${mvu.id}`;
-            mvuLines.push(`mVU_rms ${tap.bus}, "${channelName}"`);
+            const bus = this._busNumber(tap.bus, 'audio', voiceId);   // MiniVU — только audio
+            mvuLines.push(`mVU_rms ${bus}, "${channelName}"`);
         }
 
         // ⭐ 12. Финальная сборка
+        // LED/MiniVU — только для voice 0 (индикаторы не нужны в остальных голосах)
+        const finalLedLines = (voiceId === 0) ? ledLines : [];
+        const finalMvuLines = (voiceId === 0) ? mvuLines : [];
+
         const result = [
             ...chngetLines,
             ...converterLines,
             ...tapA2KInputLines,
             callLine,
             ...tapA2KOutputLines,
-            ...ledLines,
-            ...mvuLines,
+            ...finalLedLines,
+            ...finalMvuLines,
         ].join('\n');
 
         return result;
@@ -1498,6 +1526,20 @@ export class CsoundGenerator {
         const bus = this._controlBusCounter++;
         this._controlBusCount = this._controlBusCounter;
         return bus;
+    }
+
+    /**
+     * Convert a local bus number (per-voice) to the absolute zak bus.
+     * @param {number} localBus  — bus number within one voice (0..B-1 / 0..C-1)
+     * @param {'audio'|'control'} type
+     * @param {number} voiceId
+     * @returns {number}
+     */
+    _busNumber(localBus, type, voiceId = 0) {
+        if (type === 'audio') {
+            return localBus + voiceId * this._audioBusCount;
+        }
+        return localBus + voiceId * this._controlBusCount;
     }
 
     _normalizeJackType(jack) {

@@ -39,7 +39,9 @@ export class BottomBar {
         this._oscLamp     = null;
         this._oscSettings = null;
         this._audioSettings = null;
-
+        this._midiDot = null;   // ⭐ activity dot next to MIDI button
+        this._midiDotTimer = null;
+        this._voiceSettings = null;
         // DOM refs for BPM panel
         this._bpmDisplay = null;     // SevenSegmentDisplay instance
         this._bpmModeBtns = {};      // { ext, midi, osc }
@@ -312,21 +314,21 @@ export class BottomBar {
     gap: 0;
     min-width: 0;
 }
+
 #bottom-bar .bb-bpm-mode {
     flex: 1 1 0;
     text-align: center;
     font-size: 9px;
     font-weight: 700;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
     color: #333;
-    padding: 3px 2px;
+    padding: 3px 0;
     cursor: pointer;
     border: none;
     background: transparent;
     font-family: inherit;
     transition: color 0.12s, text-shadow 0.12s;
-    min-width: 0;
-    white-space: nowrap;
+    position: relative;   /* ⭐ для bb-midi-dot */
 }
 
 #bottom-bar .bb-zoom-label {
@@ -364,6 +366,28 @@ export class BottomBar {
     color: var(--bb-bpm-color, #ff3b30);
     text-shadow: 0 0 6px var(--bb-bpm-color, #ff3b30);
 }
+
+/* ---- MIDI activity dot (next to MIDI button) ---- */
+#bottom-bar .bb-midi-dot {
+    position: absolute;
+    top: 26%;
+    left: 2px;          /* ⭐ слева */
+    transform: translateY(-50%);   /* ⭐ вертикально по центру */
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    pointer-events: none;
+    transition: background 0.05s, box-shadow 0.05s;
+}
+#bottom-bar .bb-midi-dot.flash {
+    background: var(--bb-accent, #8fbc8f) !important;
+    border-color: var(--bb-accent, #8fbc8f) !important;
+    box-shadow: 0 0 6px var(--bb-accent, #8fbc8f),
+                0 0 10px var(--bb-accent-70, rgba(143,188,143,0.7)) !important;
+}
+
 /* ---- A3: zoom column ---- */
 #bottom-bar .bb-zoom-col {
     background:transparent;
@@ -495,8 +519,6 @@ export class BottomBar {
 }
 #bottom-bar .bb-slide-toggle:hover  { background: var(--bb-accent-12, rgba(0,170,255,0.12)); }
 #bottom-bar .bb-slide-toggle:active { background: var(--bb-accent-25, rgba(0,170,255,0.25)); }
-
-/* ---- SysInfo popup ---- */
 
 /* ---- SysInfo popup ---- */
 #bottom-bar-sysinfo {
@@ -705,7 +727,7 @@ export class BottomBar {
             // row 2
             ['?',  'About',                    () => this.system.splash?.openAbout()],
             ['i',  'System info',              () => this._toggleSysInfo(),              () => this._sysInfoOpen],
-            [null, null, null],   // пустой слот
+            ['Vc', 'Voice settings (polyphony)', () => this._toggleVoiceSettings(),       () => !!this._voiceSettings?.isVisible],
             // row 3
             ['Ed', 'Module editor',            () => this._openEditor()],
             ['#',  'Lock patch (no structural edits)', () => this.system.setLocked?.(!this.system.locked), () => !!this.system.locked],
@@ -890,6 +912,13 @@ export class BottomBar {
                 e.stopPropagation();
                 this._onBpmModeClick(id);
             });
+            // ⭐ Activity dot for MIDI
+            if (id === 'midi') {
+                const dot = document.createElement('span');
+                dot.className = 'bb-midi-dot';
+                b.appendChild(dot);
+                this._midiDot = dot;
+            }
             modes.appendChild(b);
             this._bpmModeBtns[id] = b;
         });
@@ -1211,6 +1240,19 @@ export class BottomBar {
             return;
         }
         this._audioSettings.toggle();
+        this.refreshState();
+    }
+
+    _toggleVoiceSettings() {
+        if (!this._voiceSettings) {
+            import('./VoiceSettingsPanel.js').then(({ VoiceSettingsPanel }) => {
+                this._voiceSettings = new VoiceSettingsPanel(this.system);
+                this._voiceSettings.toggle();
+                this.refreshState();
+            });
+            return;
+        }
+        this._voiceSettings.toggle();
         this.refreshState();
     }
 
@@ -1573,6 +1615,21 @@ export class BottomBar {
     // ============================================================
     //  EVENTS (theme, sysinfo dismiss, MIDI/OSC lamps)
     // ============================================================
+
+    /**
+     * Подписаться на MIDI-события (лениво — midiManager может быть создан позже).
+     * Идемпотентно.
+     */
+    attachMidi() {
+        const midi = this.system?.midiManager;
+        if (!midi) return false;
+        if (this._midiAttached) return true;
+        this._midiAttached = true;
+        midi.onStateChange(() => { this._refreshBpm(); this.refreshState(); });
+        midi.onMessage((evt) => { this._flashMidiLed(evt); });
+        return true;
+    }
+
     setupEvents() {
         document.addEventListener('csmodular:theme-changed', () => this.applyTheme());
 
@@ -1593,11 +1650,8 @@ export class BottomBar {
             }
         });
 
-        const midi = this.system?.midiManager;
-        if (midi) {
-            midi.onStateChange(() => { this._refreshBpm(); this.refreshState(); });
-            midi.onMessage(() => { this._flashMidiLed(); });
-        }
+        // ⭐ midiManager может быть создан позже BottomBar — подписка ленивая
+        this.attachMidi();
 
         const osc = this.system?.oscManager;
         if (osc) {
@@ -1606,17 +1660,14 @@ export class BottomBar {
     }
 
     _flashMidiLed() {
-        const midiBtn = this._bpmModeBtns.midi;
-        if (!midiBtn) return;
-        if (this._midiFlashTimer) clearTimeout(this._midiFlashTimer);
-        midiBtn.style.color = '#fff';
-        midiBtn.style.textShadow = '0 0 8px rgba(255,255,255,0.8)';
-        this._midiFlashTimer = setTimeout(() => {
-            this._midiFlashTimer = null;
-            midiBtn.style.color = '';
-            midiBtn.style.textShadow = '';
-            this._refreshBpm();
-        }, 120);
+        if (!this._midiDot) return;
+        // ⭐ дёргаем точку — визуально заметнее, чем перекраска кнопки
+        this._midiDot.classList.add('flash');
+        if (this._midiDotTimer) clearTimeout(this._midiDotTimer);
+        this._midiDotTimer = setTimeout(() => {
+            this._midiDotTimer = null;
+            this._midiDot.classList.remove('flash');
+        }, 80);
     }
 
     // ============================================================

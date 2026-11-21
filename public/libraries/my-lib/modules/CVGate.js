@@ -5,7 +5,7 @@ export const CVGateModule = {
     displayName: 'CVGate',
     category: 'midi',
     status: 'passable',
-    needsVoiceId: true
+    needsVoiceId: true,
     gridHeight: 3,
     originalName: 'CVGate',
     tooltip: 'CVGate',

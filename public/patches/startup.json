@@ -1,81 +1,107 @@
 {
-  "filename": "startup.json",
+  "filename": "export.json",
   "modules": [
-    {
-      "name": "ADSR",
-      "library": "my-lib",
-      "id": 1,
-      "type": 0,
-      "parameters": "[0,0,0,0,0,33.04374999999998,0,0,0,0,0,0,0,0]",
-      "modes": [],
-      "area": "VOICE",
-      "hpos": 14,
-      "vpos": 6,
-      "customColor": null,
-      "midiMappings": []
-    },
     {
       "name": "Outs2",
       "library": "my-lib",
-      "id": 2,
-      "type": 0,
-      "parameters": "[0,0,0,0,0,0]",
+      "id": 1,
+      "type": "Outs2",
+      "parameters": "[0,0,0,0]",
       "modes": [],
       "area": "VOICE",
-      "hpos": 34,
-      "vpos": 30,
+      "hpos": 29,
+      "vpos": 24,
       "customColor": null,
       "midiMappings": []
     },
     {
-      "name": "VCO",
+      "name": "MultiSaw",
       "library": "my-lib",
-      "id": 3,
-      "type": 0,
-      "parameters": "[0,0,64,64,0,0,0,64,0]",
+      "id": 2,
+      "type": "MultiSaw",
+      "parameters": "[0,0,64,0,64,0,64]",
       "modes": [],
       "area": "VOICE",
-      "hpos": 32,
-      "vpos": 5,
+      "hpos": 29,
+      "vpos": 10,
+      "customColor": null,
+      "midiMappings": []
+    },
+    {
+      "name": "ADSR",
+      "library": "my-lib",
+      "id": 3,
+      "type": "ADSR",
+      "parameters": "[0,0,0,0,1.42875,64,64,31.138749999999973,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 22,
+      "vpos": 13,
+      "customColor": null,
+      "midiMappings": []
+    },
+    {
+      "name": "ADSR",
+      "library": "my-lib",
+      "id": 4,
+      "type": "ADSR",
+      "parameters": "[0,0,0,0,0,64,64,37.80624999999998,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 35,
+      "vpos": 13,
       "customColor": null,
       "midiMappings": []
     },
     {
       "name": "TouchMe",
       "library": "my-lib",
-      "id": 4,
-      "type": 0,
-      "parameters": "[0,0,0]",
-      "modes": [],
-      "area": "VOICE",
-      "hpos": 8,
-      "vpos": 13,
-      "customColor": null,
-      "midiMappings": []
-    },
-    {
-      "name": "PingPong",
-      "library": "my-lib",
       "id": 5,
-      "type": 0,
-      "parameters": "[0,0,0,34.47249999999998,64,64,0]",
+      "type": "TouchMe",
+      "parameters": "[0,0]",
       "modes": [],
       "area": "VOICE",
-      "hpos": 25,
-      "vpos": 13,
+      "hpos": 5,
+      "vpos": 26,
       "customColor": null,
       "midiMappings": []
     },
     {
-      "name": "MOOG",
+      "name": "FdbkDel",
+      "library": "my-lib",
+      "id": 6,
+      "type": "FdbkDel",
+      "parameters": "[0,0,0,26.852499999999978,107.33874999999993,64]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 22,
+      "vpos": 16,
+      "customColor": null,
+      "midiMappings": []
+    },
+    {
+      "name": "FdbkDel",
+      "library": "my-lib",
+      "id": 7,
+      "type": "FdbkDel",
+      "parameters": "[0,0,0,34.47249999999999,100.67124999999992,64]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 35,
+      "vpos": 16,
+      "customColor": null,
+      "midiMappings": []
+    },
+    {
+      "name": "MixFour",
       "library": "my-lib",
       "id": 8,
-      "type": 0,
-      "parameters": "[0,0,0,98.76624999999987,0,97.81374999999996,0]",
+      "type": "MixFour",
+      "parameters": "[]",
       "modes": [],
       "area": "VOICE",
-      "hpos": 47,
-      "vpos": 9,
+      "hpos": 22,
+      "vpos": 19,
       "customColor": null,
       "midiMappings": []
     },
@@ -84,24 +110,11 @@
       "library": "my-lib",
       "id": 9,
       "type": "MixFour",
-      "parameters": "[0,0,0,0,0,0,0,0,0,0,0]",
+      "parameters": "[]",
       "modes": [],
       "area": "VOICE",
-      "hpos": 25,
-      "vpos": 16,
-      "customColor": null,
-      "midiMappings": []
-    },
-    {
-      "name": "MixFour",
-      "library": "my-lib",
-      "id": 10,
-      "type": "MixFour",
-      "parameters": "[0,0,0,0,0,0,0,0,0,0,0]",
-      "modes": [],
-      "area": "VOICE",
-      "hpos": 38,
-      "vpos": 16,
+      "hpos": 35,
+      "vpos": 19,
       "customColor": null,
       "midiMappings": []
     }
@@ -109,14 +122,68 @@
   "cables": [
     {
       "from": {
-        "module": "TouchMe",
-        "id": 4,
+        "module": "MultiSaw",
+        "id": 2,
         "jack": 0,
         "pin": "out"
       },
       "to": {
         "module": "ADSR",
-        "id": 1,
+        "id": 3,
+        "jack": 1,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "MultiSaw",
+        "id": 2,
+        "jack": 1,
+        "pin": "out"
+      },
+      "to": {
+        "module": "ADSR",
+        "id": 4,
+        "jack": 1,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "TouchMe",
+        "id": 5,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "ADSR",
+        "id": 3,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#3b82f6",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "TouchMe",
+        "id": 5,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "ADSR",
+        "id": 4,
         "jack": 0,
         "pin": "in"
       },
@@ -128,30 +195,84 @@
     {
       "from": {
         "module": "ADSR",
-        "id": 1,
-        "jack": 0,
-        "pin": "out"
-      },
-      "to": {
-        "module": "PingPong",
-        "id": 5,
-        "jack": 0,
-        "pin": "in"
-      },
-      "color": "#ef4444",
-      "customColor": null,
-      "type": "out-in",
-      "area": "VOICE"
-    },
-    {
-      "from": {
-        "module": "VCO",
         "id": 3,
         "jack": 0,
         "pin": "out"
       },
       "to": {
-        "module": "MOOG",
+        "module": "FdbkDel",
+        "id": 6,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "ADSR",
+        "id": 4,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "FdbkDel",
+        "id": 7,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "MixFour",
+        "id": 8,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "Outs2",
+        "id": 1,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "MixFour",
+        "id": 9,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "Outs2",
+        "id": 1,
+        "jack": 1,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "FdbkDel",
+        "id": 6,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "MixFour",
         "id": 8,
         "jack": 0,
         "pin": "in"
@@ -163,15 +284,15 @@
     },
     {
       "from": {
-        "module": "MOOG",
+        "module": "ADSR",
+        "id": 3,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "MixFour",
         "id": 8,
-        "jack": 0,
-        "pin": "out"
-      },
-      "to": {
-        "module": "ADSR",
-        "id": 1,
-        "jack": 1,
+        "jack": 3,
         "pin": "in"
       },
       "color": "#ef4444",
@@ -181,44 +302,8 @@
     },
     {
       "from": {
-        "module": "MixFour",
-        "id": 10,
-        "jack": 0,
-        "pin": "out"
-      },
-      "to": {
-        "module": "Outs2",
-        "id": 2,
-        "jack": 1,
-        "pin": "in"
-      },
-      "color": "#ef4444",
-      "customColor": null,
-      "type": "out-in",
-      "area": "VOICE"
-    },
-    {
-      "from": {
-        "module": "MixFour",
-        "id": 9,
-        "jack": 0,
-        "pin": "out"
-      },
-      "to": {
-        "module": "Outs2",
-        "id": 2,
-        "jack": 0,
-        "pin": "in"
-      },
-      "color": "#ef4444",
-      "customColor": null,
-      "type": "out-in",
-      "area": "VOICE"
-    },
-    {
-      "from": {
-        "module": "ADSR",
-        "id": 1,
+        "module": "FdbkDel",
+        "id": 7,
         "jack": 0,
         "pin": "out"
       },
@@ -236,50 +321,14 @@
     {
       "from": {
         "module": "ADSR",
-        "id": 1,
-        "jack": 0,
-        "pin": "out"
-      },
-      "to": {
-        "module": "MixFour",
-        "id": 10,
-        "jack": 0,
-        "pin": "in"
-      },
-      "color": "#ef4444",
-      "customColor": null,
-      "type": "out-in",
-      "area": "VOICE"
-    },
-    {
-      "from": {
-        "module": "PingPong",
-        "id": 5,
+        "id": 4,
         "jack": 0,
         "pin": "out"
       },
       "to": {
         "module": "MixFour",
         "id": 9,
-        "jack": 2,
-        "pin": "in"
-      },
-      "color": "#ef4444",
-      "customColor": null,
-      "type": "out-in",
-      "area": "VOICE"
-    },
-    {
-      "from": {
-        "module": "PingPong",
-        "id": 5,
-        "jack": 1,
-        "pin": "out"
-      },
-      "to": {
-        "module": "MixFour",
-        "id": 10,
-        "jack": 2,
+        "jack": 3,
         "pin": "in"
       },
       "color": "#ef4444",
@@ -290,40 +339,14 @@
   ],
   "stickers": [
     {
-      "id": "sticker_1_1794404763418",
+      "id": "sticker_1_1795284220134",
       "type": "text",
       "z": "front",
-      "gridX": 11,
-      "gridY": 19,
-      "gridW": 15,
-      "gridH": 3,
-      "text": "Welcome to PANELS Modular!\nA Csound-based modular system",
-      "fontSize": 16,
-      "fontFamily": "monospace",
-      "textAlign": "left",
-      "lineHeight": 1.3,
-      "padding": 4,
-      "color": "#ffffff",
-      "colorMode": "accent",
-      "marquee": {
-        "enabled": false,
-        "speed": 30,
-        "gap": 40
-      },
-      "bgColor": null,
-      "bgOpacity": 1,
-      "svgString": null,
-      "payload": null
-    },
-    {
-      "id": "sticker_2_1794404858342",
-      "type": "text",
-      "z": "front",
-      "gridX": 35,
-      "gridY": 22,
-      "gridW": 29,
+      "gridX": 5,
+      "gridY": 24,
+      "gridW": 17,
       "gridH": 2,
-      "text": "More info https://github.com/gleb812/csmodular",
+      "text": "2. Touch Button to trigger oscillator",
       "fontSize": 16,
       "fontFamily": "monospace",
       "textAlign": "left",
@@ -336,24 +359,50 @@
         "speed": 30,
         "gap": 40
       },
+      "bgColor": "#ffffff",
+      "bgOpacity": 0,
+      "svgString": null,
+      "payload": null
+    },
+    {
+      "id": "sticker_2_1795284320119",
+      "type": "text",
+      "z": "front",
+      "gridX": 23,
+      "gridY": 40,
+      "gridW": 11,
+      "gridH": 2,
+      "text": "1. Hit Play to run Csound ",
+      "fontSize": 16,
+      "fontFamily": "monospace",
+      "textAlign": "left",
+      "lineHeight": 1.3,
+      "padding": 4,
+      "color": "#ffffff",
+      "colorMode": "accent",
+      "marquee": {
+        "enabled": false,
+        "speed": 25,
+        "gap": 40
+      },
       "bgColor": null,
       "bgOpacity": 1,
       "svgString": null,
       "payload": null
     },
     {
-      "id": "sticker_3_1794404935470",
+      "id": "sticker_3_1795284398141",
       "type": "text",
       "z": "front",
-      "gridX": 12,
-      "gridY": 27,
-      "gridW": 22,
-      "gridH": 7,
-      "text": "Press 'D' & try different design settings\n'M' for patch map\n'Space' to browse units\nYou can also shake cables and zoom!",
+      "gridX": 42,
+      "gridY": 10,
+      "gridW": 17,
+      "gridH": 2,
+      "text": "3. Tweak some knobs!",
       "fontSize": 16,
       "fontFamily": "monospace",
       "textAlign": "left",
-      "lineHeight": 1.55,
+      "lineHeight": 1.3,
       "padding": 4,
       "color": "#ffffff",
       "colorMode": "accent",

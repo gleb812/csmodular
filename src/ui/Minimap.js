@@ -38,9 +38,30 @@ export class Minimap {
         this._isDragging = false;
         this._dragStartWorld = null; // { x, y } — мировые пиксели под курсором в момент старта
         this._hoverArrowOctant = null;
+        this._boundsDirty = true;      // modules/viewport size changed
+        this._viewportDirty = true;    // offset/scale changed
+        this._arrowsDirty = true;      // hover changed
+        this._cachedModules = null;
+        this._cachedTransform = null;
+        this._cachedOutliers = null;
+        this._bounds = null;
 
         this._createDOM();
         this._setupEvents();
+    }
+
+    _markDirty() {
+        this._boundsDirty = true;
+        this._viewportDirty = true;
+        this._arrowsDirty = true;
+    }
+
+    _markViewportDirty() {
+        this._viewportDirty = true;
+    }
+
+    _markArrowsDirty() {
+        this._arrowsDirty = true;
     }
 
     // ============================================================
@@ -105,23 +126,25 @@ export class Minimap {
         else this.show();
     }
 
-    /** Пометить minimap на перерисовку (вызывается из main.js). */
-    _markDirty() {
-        this._dirty = true;
-    }
-
     // ============================================================
     //  ГЕОМЕТРИЯ
     // ============================================================
 
     /** Все модули патча. */
     _allModules() {
+        if (this._cachedModules && !this._boundsDirty) {
+            return this._cachedModules;
+        }
         const lm = this.system.layerManager;
-        if (!lm) return [];
-        return [
+        if (!lm) {
+            this._cachedModules = [];
+            return this._cachedModules;
+        }
+        this._cachedModules = [
             ...(lm.layers.voice?.modules || []),
             ...(lm.layers.fx?.modules || []),
         ];
+        return this._cachedModules;
     }
 
     /** Viewport в grid-координатах. */
@@ -189,6 +212,9 @@ export class Minimap {
      * Возвращает функции scale/offset для повторного использования.
      */
     _makeTransform(bounds) {
+        if (this._cachedTransform && !this._boundsDirty) {
+            return this._cachedTransform;
+        }
         const inner = {
             x: 8,
             y: 8,
@@ -197,12 +223,12 @@ export class Minimap {
         };
         const worldW = bounds.maxX - bounds.minX || 1;
         const worldH = bounds.maxY - bounds.minY || 1;
-        // Сохраняем пропорции
         const scale = Math.min(inner.w / worldW, inner.h / worldH);
         const offsetX = inner.x + (inner.w - worldW * scale) / 2;
         const offsetY = inner.y + (inner.h - worldH * scale) / 2;
-
-        return {
+        
+        // ⭐ Кэшируем ПЕРЕД return
+        this._cachedTransform = {
             toCanvas: (gx, gy) => ({
                 x: offsetX + (gx - bounds.minX) * scale,
                 y: offsetY + (gy - bounds.minY) * scale,
@@ -214,104 +240,169 @@ export class Minimap {
             scale,
             inner,
         };
+        return this._cachedTransform;
     }
 
     /** Outlier-модули: центр дальше MAX от медианы. */
     _getOutliers(bounds) {
-        if (bounds.empty) return [];
+        if (this._cachedOutliers && !this._boundsDirty && !this._arrowsDirty) {
+            return this._cachedOutliers;
+        }
+        if (bounds.empty) {
+            this._cachedOutliers = [];
+            return this._cachedOutliers;
+        }
         const modules = this._allModules();
-        return modules.filter(m => {
+        this._cachedOutliers = modules.filter(m => {
             const mcx = m.gridX + m.gridWidth / 2;
             const mcy = m.gridY + m.gridHeight / 2;
             const d = Math.max(Math.abs(mcx - bounds.cx), Math.abs(mcy - bounds.cy));
             return d > MAX_SANE_DISTANCE_GRID;
         });
+        return this._cachedOutliers;
     }
 
-    // ============================================================
-    //  РЕНДЕР
-    // ============================================================
+// ============================================================
+//  РЕНДЕР
+// ============================================================
 
+    /**
+     * Главная функция отрисовки minimap.
+     * Использует dirty-флаги для оптимизации:
+     * - _boundsDirty: модули добавлены/удалены/перемещены → пересчитать bounds + перерисовать модули
+     * - _viewportDirty: pan/zoom → перерисовать viewport-рамку
+     * - _arrowsDirty: hover над стрелкой → перерисовать стрелки
+     * 
+     * Кэширует:
+     * - _bounds: результат _computeWorldBounds()
+     * - _cachedTransform: результат _makeTransform(bounds)
+     * - _cachedModules: результат _allModules()
+     * - _cachedOutliers: результат _getOutliers(bounds)
+     */
     draw() {
         if (!this.visible) return;
-
-        if (this._dirty || !this._bounds) {
-            this._bounds = this._computeWorldBounds();
-            this._dirty = false;
+        
+        // 1. Проверяем, нужно ли что-то рисовать
+        const needsBoundsRedraw = this._boundsDirty;
+        const needsViewportRedraw = this._viewportDirty || needsBoundsRedraw;
+        const needsArrowsRedraw = this._arrowsDirty || needsBoundsRedraw;
+        
+        // Ничего не изменилось — выходим
+        if (!needsBoundsRedraw && !needsViewportRedraw && !needsArrowsRedraw) {
+            return;
         }
-
+        
+        // 2. Вычисляем bounds (только если нужно)
+        if (needsBoundsRedraw || !this._bounds) {
+            this._bounds = this._computeWorldBounds();
+            this._cachedTransform = this._bounds ? this._makeTransform(this._bounds) : null;
+            this._cachedModules = this._bounds ? this._allModules() : [];
+            this._cachedOutliers = this._bounds ? this._getOutliers(this._bounds) : [];
+        }
+        
         const bounds = this._bounds;
         if (!bounds) return;
-
+        
+        const t = this._cachedTransform;
         const ctx = this.ctx;
-        const theme = getCurrentTheme();
-
+        
+        // 3. Очищаем canvas
         ctx.clearRect(0, 0, this.width, this.height);
+        
+        // 4. Рисуем модули (всегда, т.к. canvas очищен)
+        this._drawModules(ctx, t, bounds);
+        
+        // 5. Рисуем viewport-рамку (если нужно)
+        if (needsViewportRedraw) {
+            this._drawViewport(ctx, t, getCurrentTheme());
+        }
+        
+        // 6. Рисуем стрелки-outlier (если нужно)
+        if (needsArrowsRedraw) {
+            this._drawOutlierArrows(ctx, bounds, t);
+        }
+        
+        // 7. Сбрасываем dirty-флаги
+        this._boundsDirty = false;
+        this._viewportDirty = false;
+        this._arrowsDirty = false;
+    }
 
-        const t = this._makeTransform(bounds);
-        const modules = this._allModules();
-
-        // 1. Модули в пределах bbox
+    /**
+     * Отрисовка модулей на minimap.
+     * Модули внутри bbox — прямоугольники, outliers — пропускаются (рисуются как стрелки).
+     */
+    _drawModules(ctx, t, bounds) {
+        const modules = this._cachedModules;
+        
         for (const m of modules) {
             const mcx = m.gridX + m.gridWidth / 2;
             const mcy = m.gridY + m.gridHeight / 2;
             const d = Math.max(Math.abs(mcx - bounds.cx), Math.abs(mcy - bounds.cy));
-            if (d > MAX_SANE_DISTANCE_GRID) continue; // outlier
-
+            
+            // Outlier — пропускаем (будет нарисован как стрелка)
+            if (d > MAX_SANE_DISTANCE_GRID) continue;
+            
+            // Grid → canvas координаты
             const p = t.toCanvas(m.gridX, m.gridY);
             const w = Math.max(2, m.gridWidth * t.scale);
             const h = Math.max(2, m.gridHeight * t.scale);
-
-            // ⭐ Цвет по категории. Output-модули — акцентный зелёный.
-            //    Нет категории → серый (unknown). Layer НЕ учитывается.
+            
+            // Цвет: output-модули — зелёный, остальные — по категории
             const color = isOutputModule(m)
                 ? MINIMAP_COLORS.output
                 : getModuleCategoryColor(m);
-
+            
             ctx.fillStyle = color;
             ctx.fillRect(p.x, p.y, w, h);
         }
-
-        // 2. Viewport-рамка
-        this._drawViewport(ctx, t, theme);
-
-        // 3. Стрелки-outlier-ы
-        this._drawOutlierArrows(ctx, bounds, t);
-
     }
 
+    /**
+     * Отрисовка viewport-рамки (прямоугольник, показывающий текущую видимую область).
+     */
     _drawViewport(ctx, t, theme) {
         const vp = this._viewportGridBounds();
         const p1 = t.toCanvas(vp.minX, vp.minY);
         const p2 = t.toCanvas(vp.maxX, vp.maxY);
-
-        // Ограничиваем рамку inner-областью
+        
+        // Ограничиваем рамку inner-областью (чтобы не выходила за границы minimap)
         const x1 = Math.max(t.inner.x, p1.x);
         const y1 = Math.max(t.inner.y, p1.y);
         const x2 = Math.min(t.inner.x + t.inner.w, p2.x);
         const y2 = Math.min(t.inner.y + t.inner.h, p2.y);
-
+        
+        // Если рамка вырождена — не рисуем
         if (x2 <= x1 || y2 <= y1) return;
-
+        
+        // Полупрозрачный фон
         ctx.fillStyle = MINIMAP_COLORS.viewport;
         ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
-
+        
+        // Контур
         ctx.strokeStyle = MINIMAP_COLORS.viewportEdge;
         ctx.lineWidth = 1;
         ctx.strokeRect(x1 + 0.5, y1 + 0.5, x2 - x1 - 1, y2 - y1 - 1);
     }
 
+    /**
+     * Отрисовка стрелок-outlier (модули дальше MAX_SANE_DISTANCE_GRID от центра).
+     * Стрелки сгруппированы по 8 октантам (N, NE, E, SE, S, SW, W, NW).
+     */
     _drawOutlierArrows(ctx, bounds, t) {
-        const outliers = this._getOutliers(bounds);
+        const outliers = this._cachedOutliers;
         if (outliers.length === 0) return;
-
+        
+        // Группируем по октантам
         const groups = groupByOctant(outliers, bounds.cx, bounds.cy);
-
+        
+        // Рисуем стрелку для каждой группы
         for (const [oct, mods] of Object.entries(groups)) {
             if (mods.length === 0) continue;
+            
             const anchor = this._arrowAnchor(oct, t.inner);
             const isHover = this._hoverArrowOctant === oct;
-
+            
             this._drawArrow(
                 ctx,
                 anchor.x, anchor.y, oct,
@@ -456,29 +547,31 @@ export class Minimap {
 
     _onMouseMove(e) {
         const pos = this._localPos(e);
-
-        // ⭐ DRAG — только здесь, БЕЗ пересчёта bounds/t
+        
+        // DRAG — пан мира
         if (this._isDragging && this._dragStartPos) {
             const dCanvasX = pos.x - this._dragStartPos.x;
             const dCanvasY = pos.y - this._dragStartPos.y;
-
-            // Пиксели minimap → пиксели мира (в base-cells → пиксели экрана)
+            
             const dWorldX = dCanvasX * this._dragScale.x;
             const dWorldY = dCanvasY * this._dragScale.y;
-
-            // Тянем карту вправо → мир "уезжает" вправо → offset уменьшается
+            
             this.system.offsetX = this._dragStartOffset.x - dWorldX * this.system.scale;
             this.system.offsetY = this._dragStartOffset.y - dWorldY * this.system.scale;
-            this.system.forceRedraw?.();
+            
+            // ⭐ Только viewport, не модули
+            this._markViewportDirty();
+            this.system.requestMainRedraw?.();  // вместо forceRedraw()
             return;
         }
-
-        // Hover над стрелкой — только когда не drag
+        
+        // Hover над стрелкой
         const bounds = this._bounds;
         if (!bounds) return;
-        const t = this._makeTransform(bounds);
-
-        const outliers = this._getOutliers(bounds);
+        
+        const t = this._cachedTransform || this._makeTransform(bounds);
+        const outliers = this._cachedOutliers || this._getOutliers(bounds);
+        
         let hoverOct = null;
         if (outliers.length > 0) {
             const groups = groupByOctant(outliers, bounds.cx, bounds.cy);
@@ -491,12 +584,14 @@ export class Minimap {
                 }
             }
         }
+        
         if (hoverOct !== this._hoverArrowOctant) {
             this._hoverArrowOctant = hoverOct;
+            this._markArrowsDirty();  // ⭐ только стрелки
         }
+        
         this.canvas.style.cursor = hoverOct ? 'pointer' : 'grab';
     }
-
     _onMouseUp() {
         if (!this._isDragging) return;
         this._isDragging = false;
@@ -530,17 +625,23 @@ export class Minimap {
     _jumpToModule(module) {
         const s = this.system;
         if (!module || !s.canvas) return;
+        
         const cx = module.gridX + module.gridWidth / 2;
         const cy = module.gridY + module.gridHeight / 2;
+        
         const newOX = s.canvas.width  / 2 - cx * BASE_STEP_X * s.scale;
         const newOY = s.canvas.height / 2 - cy * BASE_STEP_Y * s.scale;
+        
         if (!Number.isFinite(newOX) || !Number.isFinite(newOY)) {
             console.warn('[Minimap] _jumpToModule: non-finite offset', newOX, newOY);
             return;
         }
+        
         s.offsetX = newOX;
         s.offsetY = newOY;
-        s.forceRedraw?.();
-        this._markDirty();
+        
+        // ⭐ Только viewport, не модули
+        this._markViewportDirty();
+        s.requestMainRedraw?.();  // вместо forceRedraw()
     }
 }

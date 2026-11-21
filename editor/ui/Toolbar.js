@@ -149,62 +149,42 @@ export class Toolbar {
     async _onExport() {
         if (!this.app.module) return;
 
-        const { generateJsCode, sanitizeName } = await import('../saveService.js');
-        const { serializeComponents, collectParamIds, collectPorts } = await import('../ComponentRegistry.js');
+        const { generateModuleFiles } = await import('../saveService.js');
 
-        const name = sanitizeName(this.app.module.title || 'MyMod');
-        const module = this.app.module;
-
-        // ⭐ Собираем moduleData — как в saveService.saveModule
-        const moduleData = {
-            name,
-            displayName: name,
-            category: module.category || 'custom',
-            status: module.status || 'dev',
-            gridHeight: module.gridHeight || 3,
-            type: name,
-            defaultParams: [],
-            tooltip: name,
-            params: collectParamIds(this.app.components),
-            inputs: collectPorts(this.app.components).inputs,
-            outputs: collectPorts(this.app.components).outputs,
-            customColor: module.customColor || null,
-            components: serializeComponents(this.app.components),
-        };
-
-        const jsCode = generateJsCode(moduleData);
-        const dspCode = this.app.codeViewerWindow?.getCode() || '';
+        let jsCode, dspCode, name;
+        try {
+            ({ jsCode, dspCode, name } = await generateModuleFiles(this.app));
+        } catch (e) {
+            this.app.uiManager.showNotification(`❌ Export failed: ${e.message}`);
+            return;
+        }
 
         const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
         if (isTauri) {
-            // ⭐ Tauri: нативные диалоги
             const { save } = await import('@tauri-apps/plugin-dialog');
             const { writeTextFile } = await import('@tauri-apps/plugin-fs');
 
-            // Сохраняем .js
             const jsPath = await save({
                 defaultPath: `${name}.js`,
                 filters: [{ name: 'JavaScript', extensions: ['js'] }],
             });
-            if (!jsPath) return; // пользователь отменил
+            if (!jsPath) return;
             await writeTextFile(jsPath, jsCode);
 
-            // Сохраняем .txt
             const txtPath = await save({
                 defaultPath: `${name}.txt`,
                 filters: [{ name: 'Text', extensions: ['txt'] }],
             });
-            if (txtPath) await writeTextFile(txtPath, dspCode);
+            if (txtPath) await writeTextFile(txtPath, dspCode || '');
 
             this.app.uiManager.showNotification(`⬇ Exported ${name}.js + ${name}.txt`);
         } else {
-            // Web: Blob download
             this._download(`${name}.js`, jsCode, 'application/javascript');
 
             setTimeout(() => {
-                this._download(`${name}.txt`, dspCode, 'text/plain');
-            }, 300); // 300 ms delay for safari
+                this._download(`${name}.txt`, dspCode || '', 'text/plain');
+            }, 300);
             this.app.uiManager.showNotification(`⬇ Exported ${name}.js + ${name}.txt`);
         }
     }

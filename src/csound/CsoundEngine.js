@@ -112,17 +112,8 @@ export class CsoundEngine {
 
             await this.instance.setOption('-odac');
             await this.instance.setOption('-M0');       mark('setOptions');
-            await this.instance.setOption('-d');     
-            // ⭐ Audio buffers (software / hardware)
-            //const audioOpts = this.audioOptions || {};
-            // if (audioOpts.softwareBuffer) {
-            //    await this.instance.setOption('-b', String(audioOpts.softwareBuffer));
-            // }
-            // if (audioOpts.hardwareBuffer) {
-            //     await this.instance.setOption('-B', String(audioOpts.hardwareBuffer));
-            // }
-            // ksmps goes through ORC template
-
+            await this.instance.setOption('-d');   
+            await this.instance.setOption('-m0');     
             const orc = await this.system.csoundGen.generateOrc(); mark('generateOrc');
 
             const result = await this.instance.compileOrc(orc);    mark('compileOrc');
@@ -130,7 +121,7 @@ export class CsoundEngine {
                 throw new Error(`ORC compilation failed (code ${result}). Check console for Csound messages.`);
             }
 
-            const sco = 'i1 0 [60*60*24*7]\ni2 0 [60*60*24*7]\ni3 0 [60*60*24*7]\ni5 0 [60*60*24*7]';
+            const sco = this.system.csoundGen.generateSco();
             await this.instance.readScore(sco);         mark('readScore');
 
             await this.instance.start();                mark('start');
@@ -219,7 +210,9 @@ export class CsoundEngine {
             await this.instance.reset();                mark('reset');
 
             await this.instance.setOption('-odac');
-            await this.instance.setOption('-M0');       mark('setOptions');
+            await this.instance.setOption('-M0');       
+            await this.instance.setOption('-d');    mark('setOptions');
+            await this.instance.setOption('-m0');   
             // ⭐ Audio buffers (software / hardware)
             const audioOpts = this.audioOptions || {};
             if (audioOpts.softwareBuffer) {
@@ -237,7 +230,7 @@ export class CsoundEngine {
             // Do not compare against 0. Rely on try/catch + Csound message channel instead.
             await this.instance.compileOrc(orc);
 
-            const sco = 'i1 0 [60*60*24*7]\ni2 0 [60*60*24*7]\ni3 0 [60*60*24*7]\ni5 0 [60*60*24*7]';
+            const sco = this.system.csoundGen.generateSco();
             await this.instance.readScore(sco);
 
             await this.instance.start();

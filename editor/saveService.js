@@ -37,6 +37,7 @@ export const ${name}Module = {
     displayName: '${m.displayName || name}',
     category: '${m.category || 'custom'}',
     status: '${m.status || 'dev'}',
+    ${m.needsVoiceId ? 'needsVoiceId: true,' : ''}
     gridHeight: ${m.gridHeight || 3},
     originalName: '${name}',
     tooltip: '${m.displayName || name}',
@@ -74,6 +75,7 @@ async function _collectModuleData(app, finalName) {
         status: app.module?.status || 'dev',
         gridHeight: app.module?.gridHeight || 3,
         customColor: app.module?.customColor || null,
+        needsVoiceId: app.module?.needsVoiceId === true,   // ⭐ NEW
         params,
         inputs: ports.inputs,
         outputs: ports.outputs,
@@ -176,4 +178,39 @@ function _ensureOpcodeName(dspCode, name) {
     if (!m) return dspCode;              // нет opcode — не трогаем
     if (m[2] === name) return dspCode;   // уже совпадает
     return dspCode.replace(re, `$1opcode ${name}`);
+}
+
+/**
+ * Сгенерировать JS + DSP без записи (для Export / Download).
+ * Использует тот же _collectModuleData, что и saveModule —
+ * одно источник правды для всех полей (needsVoiceId, status, customColor, ...).
+ *
+ * @param {EditorApp} app
+ * @param {object} [opts]
+ * @param {string} [opts.name=null] — переопределить имя (иначе app.module.title)
+ * @returns {Promise<{ jsCode: string, dspCode: string|null, name: string }>}
+ */
+export async function generateModuleFiles(app, opts = {}) {
+    const { name = null } = opts;
+
+    const rawName = name !== null ? name : (app.module?.title || 'NewModule');
+    const finalName = sanitizeName(rawName);
+    if (!finalName) {
+        throw new Error(`Invalid module name: "${rawName}"`);
+    }
+
+    const moduleData = await _collectModuleData(app, finalName);
+    const jsCode = generateJsCode(moduleData);
+
+    let dspCode = null;
+    if (app.codeViewerWindow?.getCode) {
+        dspCode = app.codeViewerWindow.getCode();
+    } else if (app.module?._userCsoundCode) {
+        dspCode = app.module._userCsoundCode;
+    }
+    if (dspCode) {
+        dspCode = _ensureOpcodeName(dspCode, finalName);
+    }
+
+    return { jsCode, dspCode, name: finalName };
 }

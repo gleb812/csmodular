@@ -180,9 +180,29 @@ Tables loaded via `/tables/<name>.json` (flat array), HTML-fallback detection, c
 1. `_prepareConverters()` — K2A / A2K before receiving module
 2. `_collectMappingFtgens()` — ftgen for `;@ map` tables
 3. UDO section (from `includes`, sorted)
-4. `instr 1` (voice) — module calls + converters + LED/MiniVU
-5. `instr 2` (fx) — same
-6. `instr 3` — MIDI filter; `instr 4` — offline render
+4. **Voice block** — `N = _numVoices`, generates `instr 100 .. 100+N-1`. Each instr calls `formatModuleLine(m, v)` with `v = voiceId`.
+5. `instr 2` (fx) — same, no polyphony (fx is global)
+6. `instr 5` — global output (mvol, BPM, `outs`); `instr 6` — voice launcher; `instr 4` — offline render
+
+### Bus allocation — `_busNumber(localBus, type, voiceId)`
+
+`localBus` is per-voice. Absolute bus = `localBus + voiceId * _audioBusCount` (audio) or `localBus + voiceId * _controlBusCount` (control). **`zakinit = _audioBusCount * N, _controlBusCount * N`** (see `getZakInitString()`).
+
+`formatModuleLine(module, voiceId)` must call `_busNumber` for **every** bus number:
+- `inletBuses` / `outletBuses` — `[{ bus, type }]`, not plain numbers
+- converter lines (`K2A`/`A2K`) — src/result types inferred from `conv.type`
+- tap buses (`tap.bus`, `tap.a2kBus`), LED / MiniVU lines
+- **`gaL` / `gaR` are global** — NOT multiplied by voiceId (all voices sum into `instr 5` output)
+
+### Scope
+
+`_generateScopeCode()` uses bus numbers **without** voice shift — generated only for `voice 0` (`v === 0`); `v > 0` gets `; scope: voice 0 only`. Do not add per-voice scope until needed.
+
+### Module `needsVoiceId`
+
+If `moduleDef.needsVoiceId === true`, `formatModuleLine` appends `voiceId` as the **last** argument to the opcode call. UDO must have a trailing `i`-rate input (`opcode Foo, 0, kkki` → `iVoiceId xin`).
+
+Editor: `PropertiesPanel` module tab has a `Needs Voice ID` checkbox → `module.needsVoiceId` → `saveService.generateJsCode` writes `needsVoiceId: true` (via `${m.needsVoiceId ? 'needsVoiceId: true,' : ''}` — **not** `...(moduleData...)`, that breaks `parseModuleDefinition`). `CodeViewerWindow.generateCsoundCode` appends `i` to `paramStr` and `iVoiceId` to `xinParams`.
 
 ### BPM (internal / external)
 - **State:** `ModularSystem._bpm` (20..300), `_bpmSource` (`internal` | `external`).
@@ -207,8 +227,10 @@ Tables loaded via `/tables/<name>.json` (flat array), HTML-fallback detection, c
 **Tauri:** user UDOs in `<lib>/modules/<Name>.txt`, not `csound/modules/`.
 
 ### Recompile
-`reset()` + `setOption('-odac')` + `compileOrc` + `readScore` + `start`.
+`reset()` + `setOption('-odac')` + `setOption('-m0')` + `compileOrc` + `readScore`
++ `start`. Score via `generateSco()` (BPM `i5`, voice launcher `i6`).
 After: `_resyncAllControls()` pushes UI values back.
+**Voice config change (`numVoices`, `mode`)** → full `stop()` + `init()`, not `recompile`.
 `CsoundGenerator.reset()` clears `modules`, `includes`, cables. **Base UDOs
 (`led_rms.txt`, `mVU_rms.txt`) must be re-added after `includes.clear()`** —
 they are not module-bound.
@@ -399,19 +421,45 @@ Start patch: `public/patches/startup.json` → `PatchLoader.loadBuiltinPatch(nam
 ⭐ **Every `loadPatch` call must forward `opts`** — `loadBuiltinPatch`,
 `loadPatchFromFile` (optional), `ModularSystem.loadPatchFromJson`.
 
-## MIDI
+## MIDI & Polyphony
 
-**Chain:** Web MIDI API → `MidiManager.onMessage` → `CsoundEngine.midiMessage(status, d1, d2)` → Csound `instr 3` → `gkGate`/`gkNote`.
+**Chain:** Web MIDI API → `MidiManager.onMessage` → `VoiceAllocator.handleMidiMessage(evt)` → `csoundEngine.setChannel('pch_X' / 'gate_X' / 'vel_X', ...)`.
+
+**No `instr 3` / `gkNote` / `gkGate`** — removed. MIDI never reaches Csound via `midiin`. `CsoundEngine.midiMessage()` is legacy/no-op; do not reintroduce.
 
 `MidiManager` (`src/midi/MidiManager.js`): `init()` (from click only), `dispose()`, `onStateChange`, `onMessage`, `getInfo`, `getHistory` (last 50). States: `idle | requesting | ready | denied | unsupported`.
 
 **Clock / Learn:** `_handleMidiClockTick()` (`0xF8`, avg interval over 48 ticks → BPM), `startLearn(comp, onDone)` / `cancelLearn()`. `0xF8` and learn-CC are **consumed before** `onMessage` subscribers (notes still pass).
 
-**`instr 3`:** `0x90` → `gkGate=1, gkNote=data1`; `0x80` → `gkGate=0`. Velocity ignored. Other messages pass.
-
 **Enable:** click **`MI`** in BottomBar (gesture requirement). State in SysInfo popup (`i`).
 
 **Requirements:** secure context; Chrome/Edge/Firefox; Linux via ALSA; Tauri — macOS WKWebView has no Web MIDI.
+
+### VoiceAllocator (`src/midi/VoiceAllocator.js`)
+
+Holds `voices[]` (`{ id, note, startedAt, active }`), `numVoices` (1..8), `mode` (`'poly' | 'unison'`). Knows `csoundEngine` (injected). API: `handleMidiMessage(evt)`, `noteOn/noteOff`, `getVoices()`, `setNumVoices(n)`, `setMode(m)`, `onChange(cb)`.
+
+**Poly:** note-on → retrigger existing / free voice / **steal oldest** (`startedAt` min). Emits `{ type:'on', voiceId, note, vel }` → `setChannel('pch_X', note)`, `('vel_X', vel/127)`, `('gate_X', 1)`. Note-off → `{ type:'off', voiceId }` → `gate_X = 0`.
+
+**Unison:** all voices on the same note. Note-on → all voices active. Note-off of current note → all off.
+
+**Steal:** `gate_X=0` (old) then `gate_X=1` (new) — no fade-out yet (TODO).
+
+### Csound side — receivers
+
+Each `instr 100+v` (`v = 0..N-1`) contains a receiver:
+```SchanPitch sprintf "pch_%d", ivId
+SchanGate sprintf "gate_%d", ivId
+SchanVel sprintf "vel_%d", ivId
+kPitch chnget SchanPitch
+kGate chnget SchanGate
+kVel chnget SchanVel
+```
+`ivId = ${v}` is a **literal** in generated ORC (not `p4` — `p4` does not work inside UDOs, see rules).
+
+### VoiceSettingsPanel (`src/ui/VoiceSettingsPanel.js`)
+
+`Vc` button in BottomBar slide-panel → panel with `<select>` (1..8) + mode `Poly`/`Unison` + Apply/Close. `localStorage 'csmodular:voices'` = `{ numVoices, mode }`. On Apply → `system.setVoiceConfig({ numVoices, mode })` → `stop()` + `init()` (zakinit must be rebuilt).
 
 ## Main classes
 
@@ -425,7 +473,7 @@ Start patch: `public/patches/startup.json` → `PatchLoader.loadBuiltinPatch(nam
 | `Grid` | `src/grid/Grid.js` | Step, snap, crosses |
 | `EventManager` | `src/managers/EventManager.js` | Mouse events, pan, zoom |
 | `UIManager` | `src/managers/UIManager.js` | Left control panel |
-| `BottomBar` | `src/ui/BottomBar.js` | Transport: BPM/MIDI/OSC, run, zoom, volume, `Mp`, `De`, `Sh`, `⟳`, `?` (About), `i` (SysInfo), `Ed`, `#` (lock). **`Sa` = long-press → Save menu** (Save / Save As / Export CSD) |
+| `BottomBar` | `src/ui/BottomBar.js` | Transport: BPM/MIDI/OSC, run, zoom, volume, `Sa` (long-press → Save menu). Slide-panel: `Mp`, `De`, `Se`, `Sh`, `⟳`, `St`, `?`, `i`, `Vc`, `Ed`, `#`. Right dock = `[slide-panel][>][fader]`; left edge fixed, fader moves right. |
 | `Minimap` | `src/ui/Minimap.js` | World overview |
 | `Splash` | `src/ui/Splash.js` | Splash / About (session-once) |
 | `DesignSettingsPanel` | `src/ui/DesignSettingsPanel.js` | Theme editor (`D`) |
@@ -441,8 +489,10 @@ Start patch: `public/patches/startup.json` → `PatchLoader.loadBuiltinPatch(nam
 | `moduleCategories` | `src/moduleCategories.js` |
 | `spatial` | `src/utils/spatial.js` | `median`, `bboxNearModules`, `groupByOctant`, `isOutputModule` |
 | `Theme`, `themeStore`, `currentTheme` | `src/theme/*.js` | Classic / LCD |
-| `MidiManager` | `src/midi/MidiManager.js` | Web MIDI API receiver |
 | `MidiManager` | `src/midi/MidiManager.js` | Web MIDI API receiver, clock, learn |
+| `VoiceAllocator` | `src/midi/VoiceAllocator.js` | Poly/unison allocation → `pch_X`/`gate_X`/`vel_X` |
+| `VoiceIndicator` | `src/ui/VoiceIndicator.js` | 8 debug dots (bottom-left), rebuilt on numVoices change |
+| `VoiceSettingsPanel` | `src/ui/VoiceSettingsPanel.js` | `Vc` popup: voices 1..8, Poly/Unison |
 | `ComponentContextMenu` | `src/ui/ComponentContextMenu.js` | Knob/Slider menu (MIDI Learn) |
 | `SevenSegmentDisplay` | `src/ui/SevenSegmentDisplay.js` | Canvas 7-seg display (BPM / EXT) |
 
@@ -709,7 +759,22 @@ Only non-obvious rules that are easy to violate. Full list → `ARCHITECTURE.md`
     (#252525, cleared) / `active` (#2a2a2a + border-left #0af, single one via
     `_activeTreeEl`). Patch actions (Load/Save/New/CSD) — **only** in
     `BottomBar`, not in ContextMenu.
-
+45. **No `p4` inside UDO** — `p4` is `0` in opcodes. Pass `voiceId` as an explicit
+    trailing `i`-argument (`needsVoiceId: true` → `formatModuleLine` appends it).
+    `CodeViewerWindow` auto-generates `i` in `opcode` header + `iVoiceId xin`.
+46. **Polyphony bus shift via `_busNumber(localBus, type, voiceId)`** — every bus
+    number in `formatModuleLine` (inlets, outlets, converters, taps, LEDs, MiniVU)
+    must go through it. `gaL`/`gaR` are global — do NOT shift.
+47. **`zakinit` multiplies by `_numVoices`** — `_audioBusCount * N, _controlBusCount * N`.
+    Changing `_numVoices` requires `csoundEngine.stop()` + `init()` (not `recompile`).
+48. **Scope only for `voice 0`** — `v > 0` gets `; scope: voice 0 only`. Do not
+    generate per-voice scope until explicitly needed.
+49. **`CsoundEngine` score via `generateSco()`** — never hardcode `sco` in
+    `init()` / `recompile()`. `i6` (voice launcher) reads `_numVoices` from
+    `CsoundGenerator`.
+50. **`-m0` suppress Csound `T/TT/M` output** — `setOption('-m0')` after `-d` in
+    `init()` and `recompile()`. Otherwise console floods on every k-block.
+    
 ## Style
 
 - **All `.md` documentation is English-only.** No Russian text in `AI Context.md`,

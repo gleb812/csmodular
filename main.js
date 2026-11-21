@@ -29,6 +29,8 @@ import { StickerPropertiesPanel } from './src/ui/StickerPropertiesPanel.js';
 import { releaseSvg } from './src/stickers/svgCache.js';
 import { BottomBar } from './src/ui/BottomBar.js';
 import { MidiManager } from './src/midi/MidiManager.js';
+import { VoiceAllocator } from './src/midi/VoiceAllocator.js';
+import { VoiceIndicator } from './src/ui/VoiceIndicator.js';
 import { OscManager } from './src/midi/OscManager.js';
 import { OscSettingsPanel } from './src/ui/OscSettingsPanel.js';
 import { Minimap } from './src/ui/Minimap.js';
@@ -200,6 +202,7 @@ class ModularSystem {
     this.csoundGen.system = this; 
 
     this.midiManager = new MidiManager();
+    this.bottomBar?.attachMidi?.();  
     this._bpm = 120;
     this._bpmSource = 'internal';   
 
@@ -229,6 +232,41 @@ class ModularSystem {
     if (this._bpm === v) return;
     this._bpm = v;
     this.csoundEngine?.setChannel?.('bpm', v);
+  }
+
+  /**
+   * Применить конфигурацию голосов: число + режим.
+   * Перезапускает Csound (stop + init), чтобы zakinit пересобрался.
+   *
+   * @param {{ numVoices: number, mode: 'poly'|'unison' }} cfg
+   * @returns {Promise<void>}
+   */
+  async setVoiceConfig({ numVoices, mode }) {
+      const n = Math.max(1, Math.min(8, parseInt(numVoices, 10) || 8));
+      const m = (mode === 'unison') ? 'unison' : 'poly';
+
+      // 1. CsoundGenerator: _numVoices (влияет на generateOrc → zakinit)
+      if (this.csoundGen) {
+          this.csoundGen._numVoices = n;
+        }
+      // 2. VoiceAllocator: numVoices + mode
+      if (this.voiceAllocator) {
+          this.voiceAllocator.setNumVoices(n);
+          this.voiceAllocator.setMode(m);
+      }
+
+      // 3. VoiceIndicator: пересоздать DOM под новое число голосов
+      if (this.voiceIndicator) {
+          this.voiceIndicator.rebuild(n);
+      }
+
+      // 4. Перезапуск Csound
+      const engine = this.csoundEngine;
+      if (engine) {
+          this.showNotification?.(`🔄 Restarting Csound with ${n} voice${n === 1 ? '' : 's'}…`);
+          await engine.stop();
+          await engine.init();
+      }
   }
 
   getBPM() {
@@ -1777,9 +1815,17 @@ class ModularSystem {
       // === DYNAMIC (LED, MiniVU, Graph) ===
       this._renderDynamic();
 
-      // ⭐ Minimap — рисуем в экранных координатах, поверх всего
+      // ⭐ Minimap — рисуем только когда нужно
       if (this.minimap && this.minimap.visible) {
-          this.minimap.draw();
+          const minimapNeedsRedraw = 
+              this.minimap._boundsDirty ||
+              this.minimap._viewportDirty ||
+              this.minimap._arrowsDirty ||
+              this.minimap._isDragging;
+          
+          if (minimapNeedsRedraw) {
+              this.minimap.draw();
+          }
       }
 
       if (typeof this.endMeasure === 'function') this.endMeasure('total');
@@ -1789,6 +1835,12 @@ class ModularSystem {
       }
 
       requestAnimationFrame(() => this.animate());
+  }
+
+  requestMainRedraw() {
+      this._voiceDirty = true;
+      this._fxDirty = true;
+      // НЕ _cablesDirty, НЕ _stickerDirty
   }
 
   logPerformance() {
@@ -2653,12 +2705,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!engine || engine.state !== 'running') return;
         if (evt.status === 0xF8) return;   // clock doesn't go to Csound
         engine.midiMessage(evt.status, evt.data1, evt.data2);
+        modularSystem.voiceAllocator?.handleMidiMessage(evt);
     });
 
     // ⭐ OSC + CSP-bridge
     modularSystem.oscManager = new OscManager();
     modularSystem.oscSettings = new OscSettingsPanel(modularSystem);
     modularSystem.bottomBar._oscSettings = modularSystem.oscSettings;
+
+    // ⭐ Voice allocation (этюд)
+    // ⭐ Загружаем настройки голосов из localStorage
+    const { VoiceSettingsPanel } = await import('./src/ui/VoiceSettingsPanel.js');
+    const voiceCfg = VoiceSettingsPanel.loadConfig();
+
+    // Применяем к CsoundGenerator ДО первого init (иначе ORC сгенерится с 8 голосами)
+    modularSystem.csoundGen._numVoices = voiceCfg.numVoices;
+
+    modularSystem.voiceAllocator = new VoiceAllocator({
+        numVoices: voiceCfg.numVoices,
+        mode: voiceCfg.mode,
+        csoundEngine: modularSystem.csoundEngine,
+    });
+    modularSystem.voiceIndicator = new VoiceIndicator(modularSystem.voiceAllocator);
 
     // Автоподключение, если пользователь не отключал
     const oscCfg = (() => {

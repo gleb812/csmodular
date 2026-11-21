@@ -741,7 +741,7 @@ export class CodeViewerWindow {
     generateCsoundCode() {
         const module = this.app.module;
         if (!module) return '';
-
+        const needsVoiceId = module.needsVoiceId === true;   // ⭐ NEW
         let moduleName = module.title || 'NewModule';
         moduleName = moduleName.replace(/\s/g, '');
         if (moduleName.match(/^[0-9]/)) moduleName = 'M' + moduleName;
@@ -818,8 +818,12 @@ export class CodeViewerWindow {
         for (const out of audioOutputs)   allParams.push(out.param);
         for (const out of controlOutputs) allParams.push(out.param);
 
-        const paramStr = 'k'.repeat(allParams.length);
-        const xinStr = allParams.join(', ');
+        // ⭐ iVoiceId — i-rate вход в конце, если needsVoiceId
+        const xinParams = [...allParams];
+        if (needsVoiceId) xinParams.push('iVoiceId');
+
+        const paramStr = 'k'.repeat(allParams.length) + (needsVoiceId ? 'i' : '');
+        const xinStr = xinParams.join(', ');
 
         const uniqueMappings = [];
         const seenMappings = new Set();
@@ -838,7 +842,7 @@ export class CodeViewerWindow {
 
         code += `opcode ${moduleName}, 0, ${paramStr}\n`;
 
-        if (allParams.length > 0) {
+        if (xinParams.length > 0) {
             code += `${xinStr} xin\n`;
         }
 

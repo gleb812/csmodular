@@ -273,6 +273,29 @@ export class PropertiesPanel {
         statusWrapper.appendChild(statusSelect);
         this._inlineField('Status', statusWrapper);
 
+        // ── Needs Voice ID ── (⭐ NEW)
+        const voiceIdCb = document.createElement('input');
+        voiceIdCb.type = 'checkbox';
+        voiceIdCb.checked = module.needsVoiceId === true;
+        voiceIdCb.style.cssText = 'width: 16px; height: 16px; cursor: pointer; accent-color: #0af;';
+        voiceIdCb.onchange = () => {
+            if (this.app.module) {
+                this.app.module.needsVoiceId = voiceIdCb.checked;
+                // ⭐ сразу перегенерировать Csound-код (как при добавлении Knob/Input)
+                if (this.app.codeViewerWindow) {
+                    this.app.codeViewerWindow.updateCode();
+                }
+            }
+        };
+
+        const voiceIdHint = document.createElement('div');
+        voiceIdHint.style.cssText = 'color: #555; font-size: 9px; margin-top: 2px;';
+        voiceIdHint.textContent = 'Pass voiceId as last argument to UDO (for pch_X / gate_X receivers)';
+
+        const voiceIdWrap = document.createElement('div');
+        voiceIdWrap.appendChild(voiceIdCb);
+        voiceIdWrap.appendChild(voiceIdHint);
+        this._inlineField('Needs Voice ID', voiceIdWrap);
     }
 
     _updateSize() {
