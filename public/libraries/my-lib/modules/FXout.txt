@@ -1,0 +1,18 @@
+;@ map CLA001
+opcode FXout, 0, kkk
+kParam3, kIn1, kIn2 xin
+
+    ; --- mapping tables ---
+    kParam3 table kParam3, giCLA001
+    ; ----------------------
+
+ain1 zar kIn1
+ain2 zar kIn2
+
+; --- module body ---
+; Add your DSP code here
+gaL += ain1 * kParam3
+gaR += ain2 * kParam3
+gaFX1 = 0
+gaFX2 = 0
+endop

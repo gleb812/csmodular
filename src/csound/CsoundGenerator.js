@@ -20,10 +20,18 @@ export class CsoundGenerator {
         
         // маппинг кабель -> номер шины
         this._cableBusMap = {};      // cableId -> busNumber
-        this._audioBusCounter = 2;   // следующий свободный номер для audio
-        this._controlBusCounter = 2; // следующий свободный номер для control
-        this._availableAudioBuses = [];   // освободившиеся audio номера
-        this._availableControlBuses = []; // освободившиеся control номера
+
+        this._audioBusCounter = 2;   // следующий свободный номер для audio (voice)
+        this._controlBusCounter = 2; // следующий свободный номер для control (voice)
+        this._availableAudioBuses = [];   // освободившиеся audio номера (voice)
+        this._availableControlBuses = []; // освободившиеся control номера (voice)
+
+        // ⭐ FX bus counters (independent range, starts after all voice buses)
+        this._audioFxBusCounter = 2;
+        this._controlFxBusCounter = 2;
+        this._availableAudioFxBuses = [];
+        this._availableControlFxBuses = [];
+
         // Шаблон Csound (будет обновляться динамически)      
         for (const udo of BASE_UDOS) this.includes.add(udo); 
         // ⭐ Scope tables
@@ -227,16 +235,15 @@ export class CsoundGenerator {
     `;
         }
 
-        // ⭐ FX-модули (как раньше, один instr 2)
+        // ⭐ FX-модули (один instr 2)
         const fxModules = Array.from(this.modules.values())
             .filter(m => m.layer === 'fx')
-            .map(m => this.formatModuleLine(m))
+            .map(m => this.formatModuleLine(m, 0, 'fx'))
             .join('\n');
 
         // ⭐ 3. Zakinit
         const zakinitString = this.getZakInitString();
         
-
         // ⭐ 4. ПОЛЬЗОВАТЕЛЬСКИЕ МОДУЛИ
         const userModulesCode = '';
         const ksmps = this.system?.csoundEngine?.audioOptions?.ksmps ?? 4;
@@ -249,10 +256,8 @@ export class CsoundGenerator {
 
     gkBPM init 120
     gkMVOL init 1
-    gaFX1 init 0
-    gaFX2 init 0
-    gaFX3 init 0
-    gaFX4 init 0
+    gaFX1 init 0 ; cleared in FXout
+    gaFX2 init 0 ; cleared in FXout
     gaL init 0
     gaR init 0
 
@@ -333,7 +338,7 @@ export class CsoundGenerator {
         ; master limiter goes here
         outs aL, aR
         gaL = 0
-        gaR = 0         
+        gaR = 0
     endin
 
     instr 6 
@@ -378,7 +383,6 @@ export class CsoundGenerator {
         return names;
     }
 
-
     async _collectMappingFtgens() {
         const usedNames = new Set();
         
@@ -397,7 +401,6 @@ export class CsoundGenerator {
                 console.warn(`⚠️ Could not read UDO ${udoPath}:`, e);
             }
         }
-        
         console.log('🔍 usedNames from UDO files:', [...usedNames]);
         
         if (usedNames.size === 0) {
@@ -482,6 +485,16 @@ export class CsoundGenerator {
             const cable = this._activeCables.find(c => c.id === cableId);
             const layer = cable?.fromJack?.parentModule?.layer || 'voice';
 
+            // ⭐ local bus → absolute zak bus (with layer + voiceId=0)
+            // - voice scope: voice 0 only (bus shift = 0)
+            // - fx scope: fx range (base after all voice buses)
+            const absBus = this._busNumber(
+                info.bus,
+                info.isAudio ? 'audio' : 'control',
+                0,
+                layer,
+            );
+
             const lines = [];
 
             // k-rate phasor: за 4096 k-блоков проходит 0..1
@@ -489,10 +502,10 @@ export class CsoundGenerator {
             lines.push(`aScopeIdx_${info.tableNum} phasor (sr / ksmps) / 4096`);
 
             if (info.isAudio) {
-                lines.push(`aScopeSig_${info.tableNum} zar ${info.bus}`);
+                lines.push(`aScopeSig_${info.tableNum} zar ${absBus}`);
                 lines.push(`tablew aScopeSig_${info.tableNum}, aScopeIdx_${info.tableNum}, ${info.tableNum}, 1`);
             } else {
-                lines.push(`kScopeSig_${info.tableNum} zkr ${info.bus}`);
+                lines.push(`kScopeSig_${info.tableNum} zkr ${absBus}`);
                 lines.push(`tablew kScopeSig_${info.tableNum}, k(aScopeIdx_${info.tableNum}), ${info.tableNum}, 1`);
             }
 
@@ -564,13 +577,24 @@ export class CsoundGenerator {
                     continue;
                 }
                 
+                const layer = moduleData.layer || 'voice';
                 let newBus;
-                if (inputRate === 'audio') {
-                    newBus = this._audioBusCounter++;
-                    this._audioBusCount = this._audioBusCounter;    // ⭐ синхронизация
+                if (layer === 'fx') {
+                    if (inputRate === 'audio') {
+                        newBus = this._audioFxBusCounter++;
+                        this._audioFxBusCount = this._audioFxBusCounter;
+                    } else {
+                        newBus = this._controlFxBusCounter++;
+                        this._controlFxBusCount = this._controlFxBusCounter;
+                    }
                 } else {
-                    newBus = this._controlBusCounter++;
-                    this._controlBusCount = this._controlBusCounter; // ⭐ синхронизация
+                    if (inputRate === 'audio') {
+                        newBus = this._audioBusCounter++;
+                        this._audioBusCount = this._audioBusCounter;
+                    } else {
+                        newBus = this._controlBusCounter++;
+                        this._controlBusCount = this._controlBusCounter;
+                    }
                 }
                 
                 const key = `${cable.id}_${inputId}`;
@@ -593,52 +617,69 @@ export class CsoundGenerator {
      * ⭐ Синхронизирует _audioBusCount / _controlBusCount при выдаче нового номера.
      */
     _assignBusNumberToCable(cable) {
-        if (this._cableBusMap[cable.id] !== undefined) {
-            return;
-        }
-        
-        // Проверяем, есть ли уже кабель с таким же выходом
+        if (this._cableBusMap[cable.id] !== undefined) return;
+
+        // Layer: from source jack's parent module
+        const layer = cable.fromJack?.parentModule?.layer || 'voice';
+
+        // Shared output: reuse existing bus for cables from same output jack
         const outputJack = cable.fromJack;
         if (outputJack) {
-            const existingCable = this._activeCables.find(c => 
-                c.fromJack === outputJack && 
+            const existingCable = this._activeCables.find(c =>
+                c.fromJack === outputJack &&
                 c.id !== cable.id &&
                 this._cableBusMap[c.id] !== undefined
             );
             if (existingCable) {
-                const busNumber = this._cableBusMap[existingCable.id];
-                this._cableBusMap[cable.id] = busNumber;
-                this.log(`🔢 Cable ${cable.id.substr(0, 8)} → bus ${busNumber} (shared from same output)`);
+                this._cableBusMap[cable.id] = this._cableBusMap[existingCable.id];
                 return;
             }
         }
-        
+
         const cableType = this._getCableType(cable);
         let busNumber;
-        
-        if (cableType === 'audio') {
-            // ⭐ Сначала проверяем освободившиеся номера
-            if (this._availableAudioBuses.length > 0) {
-                this._availableAudioBuses.sort((a, b) => a - b);
-                busNumber = this._availableAudioBuses.shift();
+
+        if (layer === 'fx') {
+            if (cableType === 'audio') {
+                if (this._availableAudioFxBuses.length > 0) {
+                    this._availableAudioFxBuses.sort((a, b) => a - b);
+                    busNumber = this._availableAudioFxBuses.shift();
+                } else {
+                    busNumber = this._audioFxBusCounter++;
+                    this._audioFxBusCount = this._audioFxBusCounter;
+                }
             } else {
-                busNumber = this._audioBusCounter++;
-                this._audioBusCount = this._audioBusCounter;   // ⭐ синхронизация
+                if (this._availableControlFxBuses.length > 0) {
+                    this._availableControlFxBuses.sort((a, b) => a - b);
+                    busNumber = this._availableControlFxBuses.shift();
+                } else {
+                    busNumber = this._controlFxBusCounter++;
+                    this._controlFxBusCount = this._controlFxBusCounter;
+                }
             }
         } else {
-            if (this._availableControlBuses.length > 0) {
-                this._availableControlBuses.sort((a, b) => a - b);
-                busNumber = this._availableControlBuses.shift();
+            // voice (as before)
+            if (cableType === 'audio') {
+                if (this._availableAudioBuses.length > 0) {
+                    this._availableAudioBuses.sort((a, b) => a - b);
+                    busNumber = this._availableAudioBuses.shift();
+                } else {
+                    busNumber = this._audioBusCounter++;
+                    this._audioBusCount = this._audioBusCounter;
+                }
             } else {
-                busNumber = this._controlBusCounter++;
-                this._controlBusCount = this._controlBusCounter; // ⭐ синхронизация
+                if (this._availableControlBuses.length > 0) {
+                    this._availableControlBuses.sort((a, b) => a - b);
+                    busNumber = this._availableControlBuses.shift();
+                } else {
+                    busNumber = this._controlBusCounter++;
+                    this._controlBusCount = this._controlBusCounter;
+                }
             }
         }
-        
-        this._cableBusMap[cable.id] = busNumber;
-        this.log(`🔢 Cable ${cable.id.substr(0, 8)} → bus ${busNumber} (${cableType})`);
-    }
 
+        this._cableBusMap[cable.id] = busNumber;
+    }
 
     getBusNumberForCable(cable) {
         return this._cableBusMap[cable.id];
@@ -688,21 +729,28 @@ export class CsoundGenerator {
         this._cableBusMap = {};
         this._availableAudioBuses = [];
         this._availableControlBuses = [];
+        this._availableAudioFxBuses = [];
+        this._availableControlFxBuses = [];
         this._audioBusCounter = 2;
         this._controlBusCounter = 2;
+        this._audioFxBusCounter = 2;
+        this._controlFxBusCounter = 2;
         this._audioBusCount = 2;
         this._controlBusCount = 2;
+        this._audioFxBusCount = 2;
+        this._controlFxBusCount = 2;
         this._updateZakInit();
         this.log(`🔌 All cables cleared, zakinit reset`);
     }
     
     /**
      * Страховка инварианта: _count = max(_count, _counter).
-     * ⭐ НЕ пересчитывает по кабелям — это и ломало инвариант.
      */
     _updateZakInit() {
         this._audioBusCount   = Math.max(this._audioBusCount,   this._audioBusCounter);
         this._controlBusCount = Math.max(this._controlBusCount, this._controlBusCounter);
+        this._audioFxBusCount   = Math.max(this._audioFxBusCount,   this._audioFxBusCounter);
+        this._controlFxBusCount = Math.max(this._controlFxBusCount, this._controlFxBusCounter);
     }
     
     _getCableType(cable) {
@@ -733,9 +781,15 @@ export class CsoundGenerator {
      * Получить строку zakinit.
      * ⭐ При полифонии — умножаем число шин на количество голосов.
      */
-    getZakInitString() {
-        const n = this._numVoices || 1;
-        return `zakinit ${this._audioBusCount * n}, ${this._controlBusCount * n}`;
+     getZakInitString() {
+        const V = this._numVoices || 1;
+        const voiceAudio = V * (this._audioBusCount - 2);
+        const voiceCtrl  = V * (this._controlBusCount - 2);
+        const fxAudio    = this._audioFxBusCount - 2;
+        const fxCtrl     = this._controlFxBusCount - 2;
+        const totalAudio = 2 + voiceAudio + fxAudio;
+        const totalCtrl  = 2 + voiceCtrl  + fxCtrl;
+        return `zakinit ${totalAudio}, ${totalCtrl}`;
     }
 
     /**
@@ -1006,7 +1060,7 @@ export class CsoundGenerator {
     </CsoundSynthesizer>`;
     }
     
-    formatModuleLine(module, voiceId = 0) {
+    formatModuleLine(module, voiceId = 0, layer = 'voice') {
         const {
             instanceName,
             instanceId,
@@ -1095,7 +1149,7 @@ export class CsoundGenerator {
             if (!busInfo || busInfo.bus === 0) {
                 // Нет кабеля — выделяем tap-шину того же типа, что Output
                 const busType = (outType === 'audio') ? 'audio' : 'control';
-                const newBus = this._allocateBus(busType);
+                const newBus = this._allocateBus(busType, layer);
                 outletBuses[srcIndex] = { bus: newBus, type: busType };
                 busInfo = outletBuses[srcIndex];
             }
@@ -1140,7 +1194,7 @@ export class CsoundGenerator {
             const tap = taps.get(key);
             if (!tap) continue;
             if (tap.type === 'audio' && tap.a2kBus === null) {
-                tap.a2kBus = this._allocateBus('control');
+                tap.a2kBus = this._allocateBus('control', layer);
             }
             // control/logic → LED читает tap.bus напрямую
         }
@@ -1191,8 +1245,8 @@ export class CsoundGenerator {
         const allArgs = [
             ...paramArgs,
             ...modeArgs,
-            ...inletBuses.map(b => String(this._busNumber(b.bus, b.type, voiceId))),
-            ...outletBuses.map(b => String(this._busNumber(b.bus, b.type, voiceId))),
+            ...inletBuses.map(b => String(this._busNumber(b.bus, b.type, voiceId, layer))),
+            ...outletBuses.map(b => String(this._busNumber(b.bus, b.type, voiceId, layer))),
             ...extraArgs,
         ];
         const callLine = `${moduleName} ${allArgs.join(', ')}`;
@@ -1209,8 +1263,8 @@ export class CsoundGenerator {
             // A2K: source = audio,   result = control
             const srcType    = (conv.type === 'K2A') ? 'control' : 'audio';
             const resultType = (conv.type === 'K2A') ? 'audio'   : 'control';
-            const srcBus    = this._busNumber(conv.sourceBus, srcType,    voiceId);
-            const resultBus = this._busNumber(conv.bus,       resultType, voiceId);
+            const srcBus    = this._busNumber(conv.sourceBus, srcType,    voiceId, layer);
+            const resultBus = this._busNumber(conv.bus,       resultType, voiceId, layer);
             converterLines.push(`${conv.type} ${srcBus}, ${resultBus}`);
         }
 
@@ -1221,8 +1275,8 @@ export class CsoundGenerator {
             if (!src || src.dir !== 'input') continue;
             const tap = taps.get(`input:${src.comp.id}`);
             if (!tap || tap.type !== 'audio' || tap.a2kBus === null) continue;
-            const srcBus = this._busNumber(tap.bus, 'audio', voiceId);
-            const dstBus = this._busNumber(tap.a2kBus, 'control', voiceId);
+            const srcBus = this._busNumber(tap.bus, 'audio', voiceId, layer);
+            const dstBus = this._busNumber(tap.a2kBus, 'control', voiceId, layer);
             const line = `A2K ${srcBus}, ${dstBus}`;
             if (!tapA2KInputLines.includes(line)) {
                 tapA2KInputLines.push(line);
@@ -1236,8 +1290,8 @@ export class CsoundGenerator {
             if (!src || src.dir !== 'output') continue;
             const tap = taps.get(`output:${src.comp.id}`);
             if (!tap || tap.type !== 'audio' || tap.a2kBus === null) continue;
-            const srcBus = this._busNumber(tap.bus, 'audio', voiceId);
-            const dstBus = this._busNumber(tap.a2kBus, 'control', voiceId);
+            const srcBus = this._busNumber(tap.bus, 'audio', voiceId, layer);
+            const dstBus = this._busNumber(tap.a2kBus, 'control', voiceId, layer);
             const line = `A2K ${srcBus}, ${dstBus}`;
             if (!tapA2KOutputLines.includes(line)) {
                 tapA2KOutputLines.push(line);
@@ -1256,10 +1310,10 @@ export class CsoundGenerator {
             if (tap.type === 'audio') {
                 if (tap.a2kBus === null) continue;
                 // a2kBus — control-шина (результат A2K)
-                bus = this._busNumber(tap.a2kBus, 'control', voiceId);
+                bus = this._busNumber(tap.a2kBus, 'control', voiceId, layer);
             } else {
                 // control-шина напрямую
-                bus = this._busNumber(tap.bus, 'control', voiceId);
+                bus = this._busNumber(tap.bus, 'control', voiceId, layer);
             }
 
             const channelName = `led_${instanceName}_${instanceId}_${led.id}`;
@@ -1284,7 +1338,7 @@ export class CsoundGenerator {
             }
 
             const channelName = `mvu_${instanceName}_${instanceId}_${mvu.id}`;
-            const bus = this._busNumber(tap.bus, 'audio', voiceId);   // MiniVU — только audio
+            const bus = this._busNumber(tap.bus, 'audio', voiceId, layer);   // MiniVU — только audio
             mvuLines.push(`mVU_rms ${bus}, "${channelName}"`);
         }
 
@@ -1470,22 +1524,26 @@ export class CsoundGenerator {
         this.modules.clear();
         this._activeCables = [];
         this._cableBusMap = {};
-        this._availableAudioBuses = [];     // ⭐ NEW
-        this._availableControlBuses = [];   // ⭐ NEW
+        this._availableAudioBuses = [];     
+        this._availableControlBuses = [];   
+        this._availableAudioFxBuses = [];
+        this._availableControlFxBuses = [];
         this._audioBusCounter = 2;
         this._controlBusCounter = 2;
+        this._audioFxBusCounter = 2;
+        this._controlFxBusCounter = 2;
         this._audioBusCount = 2;
         this._controlBusCount = 2;
+        this._audioFxBusCount = 2;
+        this._controlFxBusCount = 2;
         this._scopeTables.clear();
         this._scopeTableCounter = 9000;
         this.log('🔄 Reset'); 
-        //this.showFullCsd();
     }
 
     // ⭐ РЕГИСТРАЦИЯ ПОЛЬЗОВАТЕЛЬСКОГО МОДУЛЯ
     registerUserModule(name, data) {
         this.userModules[name] = data;
-        //console.log(`📝 CsoundGenerator: registered user module "${name}"`);
     }
 
 
@@ -1517,7 +1575,17 @@ export class CsoundGenerator {
      * @param {'audio'|'control'} type
      * @returns {number} номер шины
      */
-    _allocateBus(type) {
+    _allocateBus(type, layer = 'voice') {
+        if (layer === 'fx') {
+            if (type === 'audio') {
+                const bus = this._audioFxBusCounter++;
+                this._audioFxBusCount = this._audioFxBusCounter;
+                return bus;
+            }
+            const bus = this._controlFxBusCounter++;
+            this._controlFxBusCount = this._controlFxBusCounter;
+            return bus;
+        }
         if (type === 'audio') {
             const bus = this._audioBusCounter++;
             this._audioBusCount = this._audioBusCounter;
@@ -1529,17 +1597,31 @@ export class CsoundGenerator {
     }
 
     /**
-     * Convert a local bus number (per-voice) to the absolute zak bus.
-     * @param {number} localBus  — bus number within one voice (0..B-1 / 0..C-1)
+     * Convert a local bus number to the absolute zak bus.
+     * @param {number} localBus — bus number within one voice
      * @param {'audio'|'control'} type
      * @param {number} voiceId
      * @returns {number}
      */
-    _busNumber(localBus, type, voiceId = 0) {
-        if (type === 'audio') {
-            return localBus + voiceId * this._audioBusCount;
+    _busNumber(localBus, type, voiceId = 0, layer = 'voice') {
+        // Global system buses — never scaled
+        if (localBus === 0 || localBus === 1) return localBus;
+
+        const OFFSET = 2;
+        const V = this._numVoices || 1;
+
+        if (layer === 'fx') {
+            // FX range starts after all voice buses
+            const base = (type === 'audio')
+                ? OFFSET + V * (this._audioBusCount - 2)
+                : OFFSET + V * (this._controlBusCount - 2);
+            return base + (localBus - 2);
         }
-        return localBus + voiceId * this._controlBusCount;
+
+        // Voice range
+        return (type === 'audio')
+            ? OFFSET + voiceId * (this._audioBusCount - 2) + (localBus - 2)
+            : OFFSET + voiceId * (this._controlBusCount - 2) + (localBus - 2);
     }
 
     _normalizeJackType(jack) {

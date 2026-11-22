@@ -1,0 +1,11 @@
+opcode FXrcv, 0, kk
+kOut1, kOut2 xin
+
+; --- module body ---
+; Add your DSP code here
+aout1 = gaFX1
+aout2 = gaFX2
+
+zaw aout1, kOut1
+zaw aout2, kOut2
+endop

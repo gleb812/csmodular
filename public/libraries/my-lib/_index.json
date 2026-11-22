@@ -19,6 +19,24 @@
       "status": "passable"
     },
     {
+      "name": "FXout",
+      "displayName": "FXout",
+      "category": "custom",
+      "status": "passable"
+    },
+    {
+      "name": "FXrcv",
+      "displayName": "FXrcv",
+      "category": "custom",
+      "status": "passable"
+    },
+    {
+      "name": "FXsnd",
+      "displayName": "FXsnd",
+      "category": "custom",
+      "status": "passable"
+    },
+    {
       "name": "FdbkDel",
       "displayName": "FdbkDel",
       "category": "custom",

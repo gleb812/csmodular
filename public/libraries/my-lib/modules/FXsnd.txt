@@ -1,0 +1,11 @@
+opcode FXsnd, 0, kkk
+kParam5, kIn1, kIn2 xin
+ain1 zar kIn1
+ain2 zar kIn2
+
+; --- module body ---
+; Add your DSP code here
+gaFX1 += ain1 * kParam5
+gaFX2 += ain2 * kParam5
+
+endop
