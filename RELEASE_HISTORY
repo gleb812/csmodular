@@ -1,0 +1,12 @@
+RELEASE_HISTORY
+
+23.11.26
+0.1.6
+-- Big step towards tablets compability. Buttons, knobs, cables, Volume fader, BPM are all compatible now. Minimap to be done later.
+-- Factory patch browser
+-- Polyphony up to 8 voices via copies of voice instr. As an example VoiceId is implemented in MultiSaw 
+-- Global FX section works (see patch GlobalFX)
+-- More dirty flags to optimise the re-drawing
+-- New units: MixFour2, FXsnd, FXrcv, FXout, CVGate
+
+
