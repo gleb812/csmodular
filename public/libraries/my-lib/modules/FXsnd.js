@@ -3,7 +3,7 @@ export const FXsndModule = {
     type: 'FXsnd',
     defaultParams: [],
     displayName: 'FXsnd',
-    category: 'custom',
+    category: 'io',
     status: 'passable',
     
     gridHeight: 3,

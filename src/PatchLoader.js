@@ -210,7 +210,7 @@ export class PatchLoader {
         );
         
         modulesToRemove.forEach(module => {
-            this.system.removeModule(module);
+            this.system.removeModule(module, { silent: true });
         });
         
         // Очищаем кабели
@@ -710,6 +710,7 @@ export class PatchLoader {
             }
 
             const patchData = JSON.parse(text);
+            this.system.undoManager?.clear();
             await this.loadPatch(patchData, opts);   // ⭐ проброс
 
             return { success: true, filename: `${name}.json`, data: patchData };
@@ -725,6 +726,7 @@ export class PatchLoader {
 
             triggerFileInput(input, async (file) => {
                 try {
+                    this.system.undoManager?.clear();
                     const text = await file.text();
                     const patchData = JSON.parse(text);
 

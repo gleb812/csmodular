@@ -1,0 +1,281 @@
+{
+  "filename": "test.json",
+  "modules": [
+    {
+      "name": "MultiSaw",
+      "library": "my-lib",
+      "id": 1,
+      "type": 0,
+      "parameters": "[0,0,64,0,64,0,64]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 11,
+      "vpos": 7,
+      "customColor": null,
+      "midiMappings": []
+    },
+    {
+      "name": "ADSR",
+      "library": "my-lib",
+      "id": 2,
+      "type": 0,
+      "parameters": "[0,0,0,0,0,64,64,15.89874999999998,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 14,
+      "vpos": 13,
+      "customColor": null,
+      "midiMappings": []
+    },
+    {
+      "name": "CVGate",
+      "library": "my-lib",
+      "id": 3,
+      "type": 0,
+      "parameters": "[]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 5,
+      "vpos": 23,
+      "customColor": null,
+      "midiMappings": []
+    },
+    {
+      "name": "FXsnd",
+      "library": "user",
+      "id": 4,
+      "type": 0,
+      "parameters": "[0,0,0,0,0,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 34,
+      "vpos": 3,
+      "customColor": null,
+      "midiMappings": []
+    },
+    {
+      "name": "FXrcv",
+      "library": "user",
+      "id": 5,
+      "type": 0,
+      "parameters": "[]",
+      "modes": [],
+      "area": "FX",
+      "hpos": 47,
+      "vpos": 6,
+      "customColor": "#606060",
+      "midiMappings": []
+    },
+    {
+      "name": "PingPong",
+      "library": "my-lib",
+      "id": 6,
+      "type": "PingPong",
+      "parameters": "[0,0,0,27.328749999999964,64,64]",
+      "modes": [],
+      "area": "FX",
+      "hpos": 47,
+      "vpos": 9,
+      "customColor": "#606060",
+      "midiMappings": []
+    },
+    {
+      "name": "FXout",
+      "library": "user",
+      "id": 7,
+      "type": "FXout",
+      "parameters": "[0,0,0,64]",
+      "modes": [],
+      "area": "FX",
+      "hpos": 47,
+      "vpos": 12,
+      "customColor": "#606060",
+      "midiMappings": []
+    },
+    {
+      "name": "Outs2",
+      "library": "my-lib",
+      "id": 8,
+      "type": "Outs2",
+      "parameters": "[0,0,0,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 32,
+      "vpos": 22,
+      "customColor": null,
+      "midiMappings": []
+    }
+  ],
+  "cables": [
+    {
+      "from": {
+        "module": "MultiSaw",
+        "id": 1,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "ADSR",
+        "id": 2,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "CVGate",
+        "id": 3,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "ADSR",
+        "id": 2,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#3b82f6",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "CVGate",
+        "id": 3,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "MultiSaw",
+        "id": 1,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#3b82f6",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "ADSR",
+        "id": 2,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "FXsnd",
+        "id": 4,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "PingPong",
+        "id": 6,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "FXout",
+        "id": 7,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "FX"
+    },
+    {
+      "from": {
+        "module": "PingPong",
+        "id": 6,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "FXout",
+        "id": 7,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "FX"
+    },
+    {
+      "from": {
+        "module": "ADSR",
+        "id": 2,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "Outs2",
+        "id": 8,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "FXrcv",
+        "id": 5,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "PingPong",
+        "id": 6,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "FX"
+    }
+  ],
+  "stickers": [],
+  "design": {
+    "lcd": {
+      "color": "#1a1a1a",
+      "glow": 0.9,
+      "panelOpacity": 0.25,
+      "lineWeight": 1.75
+    },
+    "cables": {
+      "audioWidth": 3,
+      "controlWidth": 1.5,
+      "glow": false
+    },
+    "background": {
+      "image": null,
+      "parallax": true,
+      "parallaxStrength": 20
+    },
+    "grid": {
+      "multX": 1,
+      "multY": 1,
+      "snap": false,
+      "size": 4
+    }
+  },
+  "textpad": ""
+}

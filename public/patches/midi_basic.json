@@ -1,0 +1,157 @@
+{
+  "filename": "export.json",
+  "modules": [
+    {
+      "name": "MultiSaw",
+      "library": "my-lib",
+      "id": 1,
+      "type": "MultiSaw",
+      "parameters": "[0,0,64,0,64,0,25.899999999999977]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 23,
+      "vpos": 18,
+      "customColor": null,
+      "midiMappings": []
+    },
+    {
+      "name": "ADSR",
+      "library": "my-lib",
+      "id": 2,
+      "type": "ADSR",
+      "parameters": "[0,0,0,0,0,64,64,14.946249999999981,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 27,
+      "vpos": 21,
+      "customColor": null,
+      "midiMappings": []
+    },
+    {
+      "name": "CVGate",
+      "library": "my-lib",
+      "id": 3,
+      "type": "CVGate",
+      "parameters": "[]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 36,
+      "vpos": 26,
+      "customColor": null,
+      "midiMappings": []
+    },
+    {
+      "name": "Outs2",
+      "library": "my-lib",
+      "id": 4,
+      "type": "Outs2",
+      "parameters": "[0,0,0,0]",
+      "modes": [],
+      "area": "VOICE",
+      "hpos": 45,
+      "vpos": 23,
+      "customColor": null,
+      "midiMappings": []
+    }
+  ],
+  "cables": [
+    {
+      "from": {
+        "module": "MultiSaw",
+        "id": 1,
+        "jack": 1,
+        "pin": "out"
+      },
+      "to": {
+        "module": "ADSR",
+        "id": 2,
+        "jack": 1,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "CVGate",
+        "id": 3,
+        "jack": 1,
+        "pin": "out"
+      },
+      "to": {
+        "module": "ADSR",
+        "id": 2,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#3b82f6",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "CVGate",
+        "id": 3,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "MultiSaw",
+        "id": 1,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#3b82f6",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    },
+    {
+      "from": {
+        "module": "ADSR",
+        "id": 2,
+        "jack": 0,
+        "pin": "out"
+      },
+      "to": {
+        "module": "Outs2",
+        "id": 4,
+        "jack": 0,
+        "pin": "in"
+      },
+      "color": "#ef4444",
+      "customColor": null,
+      "type": "out-in",
+      "area": "VOICE"
+    }
+  ],
+  "stickers": [],
+  "design": {
+    "lcd": {
+      "color": "#1a1a1a",
+      "glow": 0.9,
+      "panelOpacity": 0.25,
+      "lineWeight": 1.75
+    },
+    "cables": {
+      "audioWidth": 3,
+      "controlWidth": 1.5,
+      "glow": false
+    },
+    "background": {
+      "image": null,
+      "parallax": true,
+      "parallaxStrength": 20
+    },
+    "grid": {
+      "multX": 1,
+      "multY": 1,
+      "snap": false,
+      "size": 4
+    }
+  },
+  "textpad": ""
+}

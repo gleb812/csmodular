@@ -35,6 +35,9 @@ import { OscManager } from './src/midi/OscManager.js';
 import { OscSettingsPanel } from './src/ui/OscSettingsPanel.js';
 import { Minimap } from './src/ui/Minimap.js';
 import { Splash, getStartPatchPref } from './src/ui/Splash.js'; 
+import { UndoManager } from './src/UndoManager.js';
+import { LowerBar } from './src/ui/LowerBar.js';
+import { PatchBrowser } from './src/ui/PatchBrowser.js';
 
 const DYNAMIC_COMPONENT_TYPES = new Set(['LED', 'MiniVU', 'Graph']);
 
@@ -132,6 +135,9 @@ class ModularSystem {
     this.minimap = new Minimap(this);
     this.minimap.hide();
     this.splash = new Splash(this);  
+    this.lowerBar = new LowerBar(this);
+    this.undoManager = new UndoManager(this);
+    this.patchBrowser = new PatchBrowser(this);
     this.csoundWindow = new CSoundWindow(this);
     this.designSettings = new DesignSettingsPanel(this);
 
@@ -452,6 +458,7 @@ class ModularSystem {
       const sticker = new Sticker(data);
       this.stickers.push(sticker);
       this.forceRedraw();
+      this.undoManager?.push('Add sticker');
       return sticker;
   }
 
@@ -477,6 +484,7 @@ class ModularSystem {
       }
 
       releaseSvg(sticker.id);
+      this.undoManager?.push('Delete sticker');
       this.forceRedraw();
   }
 
@@ -804,6 +812,27 @@ class ModularSystem {
         case 'Escape':
             this.deselectModule();
             this.deselectSticker();
+            break;
+        case 'z':
+        case 'Z':
+        case 'я':
+        case 'Я':
+            if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
+                e.preventDefault();
+                this.undoManager?.undo();
+            } else if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
+                e.preventDefault();
+                this.undoManager?.redo();
+            }
+            break;
+        case 'y':
+        case 'Y':
+        case 'н':
+        case 'Н':
+            if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
+                e.preventDefault();
+                this.undoManager?.redo();
+            }
             break;
         case 'd':
         case 'D':
@@ -1431,12 +1460,10 @@ class ModularSystem {
   }
 
   async addNewModule(moduleType, layerName, gridX = null, gridY = null) {
-    // Если переданы координаты — используем их
     if (gridX !== null && gridY !== null) {
       return this.addNewModuleAtPosition(moduleType, layerName, gridX, gridY);
     }
 
-    // Иначе ищем свободное место
     const freeSpace = this.findFreeSpace(
         layerName,
         PANEL_GRID_WIDTH,
@@ -1565,6 +1592,9 @@ class ModularSystem {
           this.deselectModule();
       }
       this.minimap?._markDirty(); 
+      if (!opts.silent) {
+          this.undoManager?.push('Delete module');
+      }
   }
 
   bringModuleToFront(module) {
@@ -2126,6 +2156,7 @@ class ModularSystem {
           if (this.csoundEngine.state === 'running') {
               this._recompileDebounced();
           }
+          this.undoManager?.push('Add module');
         }
       } catch (error) {
         console.error(`Ошибка при создании модуля ${moduleType}:`, error);
@@ -2713,7 +2744,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     modularSystem.oscSettings = new OscSettingsPanel(modularSystem);
     modularSystem.bottomBar._oscSettings = modularSystem.oscSettings;
 
-    // ⭐ Voice allocation (этюд)
+    // ⭐ Voice allocation
     // ⭐ Загружаем настройки голосов из localStorage
     const { VoiceSettingsPanel } = await import('./src/ui/VoiceSettingsPanel.js');
     const voiceCfg = VoiceSettingsPanel.loadConfig();
@@ -2726,7 +2757,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         mode: voiceCfg.mode,
         csoundEngine: modularSystem.csoundEngine,
     });
-    modularSystem.voiceIndicator = new VoiceIndicator(modularSystem.voiceAllocator);
+    modularSystem.voiceIndicator = new VoiceIndicator(
+        modularSystem.voiceAllocator,
+        { container: document.getElementById('lower-bar-voice-mount') }
+    );
 
     // Автоподключение, если пользователь не отключал
     const oscCfg = (() => {

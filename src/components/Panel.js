@@ -29,6 +29,8 @@ export class Panel {
     this.opacity = 1.0;
     this.bgOpacity = 1.0;
     this.isDragging = false;
+    this._dragStartGridX = this.gridX;
+    this._dragStartGridY = this.gridY;
     this.dragOffsetX = 0;
     this.dragOffsetY = 0;
     this.isResizing = false;
@@ -370,8 +372,13 @@ export class Panel {
   }
 
   endPanelDrag() {
-    this.isDragging = false;
-    this.isResizing = false;
+      const moved = this.isDragging &&
+          (this.gridX !== this._dragStartGridX || this.gridY !== this._dragStartGridY);
+      this.isDragging = false;
+      this.isResizing = false;
+      if (moved) {
+          this.parentSystem?.undoManager?.push('Move module');
+      }
   }
 
   setOpacity(opacity) {

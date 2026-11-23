@@ -937,26 +937,32 @@ export class BottomBar {
 
         // --- drag BPM ---
         let dragging = false, startY = 0, startBpm = 120;
-        main.addEventListener('mousedown', (e) => {
+        main.addEventListener('pointerdown', (e) => {
             if (e.button !== 0) return;
             if (e.target.closest('.bb-bpm-modes')) return;
             if (this._isExternalBpm()) return;
             e.preventDefault();
+            try { main.setPointerCapture(e.pointerId); } catch {}
             dragging = true;
             this._bpmDragging = true;
             startY = e.clientY;
             startBpm = this.system.getBPM?.() ?? 120;
             document.body.style.cursor = 'ns-resize';
         });
-        document.addEventListener('mousemove', (e) => {
+        main.addEventListener('pointermove', (e) => {
             if (!dragging) return;
             const dy = startY - e.clientY;
             const factor = e.shiftKey ? 0.1 : 1;
-            const next = startBpm + dy * factor;
-            this.system.setBPM?.(next);
+            this.system.setBPM?.(startBpm + dy * factor);
             this._refreshBpm();
         });
-        document.addEventListener('mouseup', () => {
+        main.addEventListener('pointerup', () => {
+            if (!dragging) return;
+            dragging = false;
+            this._bpmDragging = false;
+            document.body.style.cursor = '';
+        });
+        main.addEventListener('pointercancel', () => {
             if (!dragging) return;
             dragging = false;
             this._bpmDragging = false;
@@ -1102,15 +1108,35 @@ export class BottomBar {
             this._refreshFader();
             this._pushVolumeToEngine();
         };
-        track.addEventListener('mousedown', (e) => {
+
+        const onMove = (e) => { if (dragging) update(e); };
+        const onUp = (e) => {
+            if (!dragging) return;
+            dragging = false;
+            document.body.style.cursor = '';
+            try { track.releasePointerCapture(e.pointerId); } catch {}
+        };
+
+        track.addEventListener('pointerdown', (e) => {
             if (e.button !== 0) return;
             e.preventDefault();
             e.stopPropagation();
             dragging = true;
+            try { track.setPointerCapture(e.pointerId); } catch {}
             document.body.style.cursor = 'ns-resize';
             update(e);
         });
-        document.addEventListener('mousemove', (e) => { if (dragging) update(e); });
+        track.addEventListener('pointermove', onMove);
+        track.addEventListener('pointerup', onUp);
+        track.addEventListener('pointercancel', onUp);
+
+        // double-click → reset to unity (0 dB)
+        track.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            this._volume = this._dbToUi(0);
+            this._refreshFader();
+            this._pushVolumeToEngine();
+        });
         document.addEventListener('mouseup', () => {
             if (!dragging) return;
             dragging = false;
@@ -1377,6 +1403,8 @@ export class BottomBar {
             if (e.target.closest('button, input, .bb-bpm-main, .bb-fader-track')) return;
 
             isDragging = true;
+            try { bar.setPointerCapture(e.pointerId); } catch {}
+
             const rect = bar.getBoundingClientRect();
             offsetX = e.clientX - rect.left;
             offsetY = e.clientY - rect.top;
@@ -1389,8 +1417,7 @@ export class BottomBar {
             e.preventDefault();
         };
 
-        bar.addEventListener('mousedown', startDrag);
-        document.addEventListener('mousemove', (e) => {
+        const onMove = (e) => {
             if (!isDragging) return;
             const nx = e.clientX - offsetX;
             const ny = e.clientY - offsetY;
@@ -1398,17 +1425,24 @@ export class BottomBar {
             const maxY = window.innerHeight - bar.offsetHeight;
             bar.style.left = `${Math.max(0, Math.min(nx, maxX))}px`;
             bar.style.top  = `${Math.max(0, Math.min(ny, maxY))}px`;
-        });
-        document.addEventListener('mouseup', () => {
+        };
+
+        const onUp = (e) => {
             if (!isDragging) return;
             isDragging = false;
             bar.style.cursor = '';
+            try { bar.releasePointerCapture(e.pointerId); } catch {}
             // persist position (левый/верхний край)
             const left = parseFloat(bar.style.left);
             const top  = parseFloat(bar.style.top);
             if (Number.isFinite(left)) this._saveJSON('left', left);
             if (Number.isFinite(top))  this._saveJSON('top',  top);
-        });
+        };
+
+        bar.addEventListener('pointerdown', startDrag);
+        bar.addEventListener('pointermove', onMove);
+        bar.addEventListener('pointerup', onUp);
+        bar.addEventListener('pointercancel', onUp);
     }
 
     // ============================================================
@@ -1633,7 +1667,7 @@ export class BottomBar {
     setupEvents() {
         document.addEventListener('csmodular:theme-changed', () => this.applyTheme());
 
-        document.addEventListener('mousedown', (e) => {
+        document.addEventListener('pointerdown', (e) => {   // ⭐ mousedown → pointerdown
             if (!this._sysInfoOpen) return;
             if (this._sysInfoPopup.contains(e.target)) return;
             if (this.element.contains(e.target)) return;
@@ -1650,7 +1684,6 @@ export class BottomBar {
             }
         });
 
-        // ⭐ midiManager может быть создан позже BottomBar — подписка ленивая
         this.attachMidi();
 
         const osc = this.system?.oscManager;

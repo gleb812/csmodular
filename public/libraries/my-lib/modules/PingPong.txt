@@ -1,12 +1,13 @@
-; --- user prelude end ---
 ;@ map DLY_2s CLA000
 opcode PingPong, 0, kkkkkk
 krate, kfeed, klev, kIn1, kOut1, kOut2 xin
+
     ; --- mapping tables ---
     krate table krate, giDLY_2s
     kfeed table kfeed, giCLA000
     klev table klev, giCLA000
     ; ----------------------
+
 ain1 zar kIn1
 aout1 init 0
 aout2 init 0
@@ -28,4 +29,3 @@ aout2 = atap2 * klev
 zaw aout1, kOut1
 zaw aout2, kOut2
 endop
-; --- user postlude ---

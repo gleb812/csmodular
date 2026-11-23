@@ -60,7 +60,9 @@ export class PatchManager {
       if (this.system?.csoundEngine?.state === 'running') {
           this.system._recompileDebounced();
       }
-
+      if (cable && this.system?.undoManager) {
+          this.system.undoManager.push('Add cable');
+      }
       return cable;
   }
 
@@ -164,6 +166,9 @@ export class PatchManager {
       if (this.system?.csoundEngine?.state === 'running') {
           this.system._recompileDebounced();
       }
+      if (!opts.silent && this.system?.undoManager) {
+          this.system.undoManager.push('Delete cable');
+      }
   }
 
   clear() {
@@ -232,16 +237,10 @@ export class PatchManager {
 
   // === ПЕРЕТАСКИВАНИЕ КАБЕЛЕЙ ===
   startCableDrag(jack, mouseX, mouseY) {
-    //console.log('🔗 START CABLE DRAG:');
-    //console.log('  Джек:', jack.label);
-
     // Используем безопасный метод получения центра
     const jackCenter = jack.getCenter
       ? jack.getCenter()
       : jack.center || { x: mouseX, y: mouseY };
-
-    //console.log('  Центр джека:', jackCenter);
-    //console.log('  Координаты мыши:', { x: mouseX, y: mouseY });
 
     this.startJack = jack;
     this.draggingCable = {
@@ -249,8 +248,6 @@ export class PatchManager {
       to: { x: mouseX, y: mouseY }, // Используем мировые координаты мыши
       isDragging: true,
     };
-
-    //console.log('  Установлен to:', this.draggingCable.to);
 
     return true;
   }

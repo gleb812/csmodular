@@ -1,0 +1,22 @@
+;@ map CLA001
+opcode MixFour2, 0, kkkkkkkkk
+kParam11, kParam12, kParam13, kParam14, kIn1, kIn4, kIn3, kIn2, kOut1 xin
+
+    ; --- mapping tables ---
+    kParam11 table kParam11, giCLA001
+    kParam12 table kParam12, giCLA001
+    kParam13 table kParam13, giCLA001
+    kParam14 table kParam14, giCLA001
+    ; ----------------------
+
+ain1 zar kIn1
+ain4 zar kIn4
+ain3 zar kIn3
+ain2 zar kIn2
+aout1 init 0
+
+; --- module body ---
+; Add your DSP code here
+aout1 = ain1 * kParam11 + ain2 * kParam12 + ain3 * kParam13 + ain4 * kParam14
+zaw aout1, kOut1
+endop

@@ -3,7 +3,7 @@ export const FXoutModule = {
     type: 'FXout',
     defaultParams: [],
     displayName: 'FXout',
-    category: 'custom',
+    category: 'io',
     status: 'passable',
     
     gridHeight: 3,
@@ -44,6 +44,14 @@ export const FXoutModule = {
                 "defaultValue": 64,
                 "mappingTable": "CLA001",
                 "csoundName": "Param3"
+        },
+        {
+                "componentType": "TextLabel",
+                "id": "4",
+                "x": 200,
+                "y": 15,
+                "text": "Lev",
+                "fontSize": 10
         }
 ]
 };

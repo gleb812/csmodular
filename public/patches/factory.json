@@ -1,0 +1,28 @@
+{
+  "patches": [
+    {
+      "file": "startup.json",
+      "name": "Startup",
+      "author": "CsModular",
+      "category": "demo",
+      "version": "1.0.0",
+      "short_description": "Demo patch loaded on first launch"
+    },
+    {
+      "file": "midi_basic.json",
+      "name": "MIDI Basic",
+      "author": "CsModular",
+      "category": "demo",
+      "version": "1.0.0",
+      "short_description": "Demo patch for MIDI input"
+    },
+    {
+      "file": "globalFX.json",
+      "name": "FX bus test",
+      "author": "CsModular",
+      "category": "demo",
+      "version": "1.0.0",
+      "short_description": "Demo patch for FX send"
+    }
+  ]
+}

@@ -6,11 +6,10 @@ export class EventManager {
     this.canvas = canvas;
     this.system = system;
 
-    // Состояние для обработки событий
     this.lastMouseX = null;
     this.lastMouseY = null;
 
-    // Для throttling mousemove
+    //  throttling mousemove
     this.mouseMovePending = false;
     this.lastMouseEvent = null;
 
@@ -18,18 +17,16 @@ export class EventManager {
     this._cursorCacheValid = false;
     this._cursorCache = { jack: null, module: null };
 
-    // Настройка обработчиков
     this.setupEventListeners();
   }
   setupEventListeners() {
-    this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
-    this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-    this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+    this.canvas.addEventListener('pointerdown', (e) => this.handlePointerDown(e));
+    this.canvas.addEventListener('pointermove', (e) => this.handlePointerMove(e));
+    this.canvas.addEventListener('pointerup',   (e) => this.handlePointerUp(e));
+    this.canvas.addEventListener('pointercancel', (e) => this.handlePointerUp(e)); // ⭐ как mouseup
     this.canvas.addEventListener('wheel', (e) => this.handleMouseWheel(e));
-    this.canvas.addEventListener('contextmenu', (e) =>
-      this.handleContextMenu(e),
+    this.canvas.addEventListener('contextmenu', (e) => this.handleContextMenu(e),
     );
-
     this.canvas.addEventListener('dblclick', (e) => {
         const rect = this.canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -51,7 +48,10 @@ export class EventManager {
         }
     });
 
-        // Space+drag для pan (как в Figma)
+    // long-press → contextmenu (for iPad)
+    this._setupLongPress();
+
+        // Space+drag (like in Figma)
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Space' && !e.repeat && 
           e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
@@ -69,6 +69,75 @@ export class EventManager {
   }
 
   // === ОСНОВНЫЕ ОБРАБОТЧИКИ ===
+  handlePointerDown(e) {
+      // ⭐ setPointerCapture — гарантирует pointermove даже за пределами canvas
+      try {
+          this.canvas.setPointerCapture(e.pointerId);
+      } catch (err) { /* ignore */ }
+
+      // ⭐ На тач: button может быть 0, но e.button для pointerdown — 0.
+      //    Для мыши: левая = 0, правая = 2. Для пера: 0. Всё как у mouse.
+      //    Значит логика handleMouseDown работает как есть.
+
+      this._cancelLongPress();   // ⭐ палец коснулся — long-press ещё не сработал
+
+      this.handleMouseDown(e);   // переиспользуем существующий код
+  }
+
+  handlePointerMove(e) {
+      // ⭐ Отменяем long-press при движении (это drag, не long-press)
+      if (this._longPressMoved(e)) this._cancelLongPress();
+
+      // ⭐ На тач e.button = -1 (нет кнопки), а handleMouseMove проверяет e.button === 2.
+      //    Для тач это всегда false — правильно. Для мыши работает как есть.
+      this.handleMouseMove(e);
+  }
+
+  handlePointerUp(e) {
+      this._cancelLongPress();
+      try {
+          this.canvas.releasePointerCapture(e.pointerId);
+      } catch (err) { /* ignore */ }
+      this.handleMouseUp(e);
+  }
+
+  _setupLongPress() {
+      this._longPressTimer = null;
+      this._longPressStart = null;
+
+      this.canvas.addEventListener('pointerdown', (e) => {
+          if (e.pointerType !== 'touch') return;   // только палец
+          this._longPressStart = { x: e.clientX, y: e.clientY, id: e.pointerId };
+          this._longPressTimer = setTimeout(() => {
+              this._longPressTimer = null;
+              if (!this._longPressStart) return;
+              // эмулируем contextmenu
+              const evt = new MouseEvent('contextmenu', {
+                  bubbles: true,
+                  cancelable: true,
+                  clientX: this._longPressStart.x,
+                  clientY: this._longPressStart.y,
+                  button: 2,
+              });
+              this.canvas.dispatchEvent(evt);
+          }, 500);
+      });
+  }
+
+  _longPressMoved(e) {
+      if (!this._longPressStart) return false;
+      const dx = e.clientX - this._longPressStart.x;
+      const dy = e.clientY - this._longPressStart.y;
+      return (dx * dx + dy * dy) > 100;   // 10px threshold
+  }
+
+  _cancelLongPress() {
+      if (this._longPressTimer) {
+          clearTimeout(this._longPressTimer);
+          this._longPressTimer = null;
+      }
+      this._longPressStart = null;
+  }
 
   handleMouseDown(e) {
     const rect = this.canvas.getBoundingClientRect();

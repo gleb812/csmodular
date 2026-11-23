@@ -3,8 +3,9 @@ export const LPF18Module = {
     type: 'LPF18',
     defaultParams: [],
     displayName: 'LPF18',
-    category: 'custom',
+    category: 'filter',
     status: 'passable',
+    
     gridHeight: 3,
     originalName: 'LPF18',
     tooltip: 'LPF18',
@@ -20,7 +21,8 @@ export const LPF18Module = {
                 "y": 5,
                 "jackType": "audio",
                 "bandwidth": "dynamic",
-                "ConnectorName": ""
+                "ConnectorName": "",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Output",
@@ -29,7 +31,8 @@ export const LPF18Module = {
                 "y": 25,
                 "jackType": "audio",
                 "bandwidth": "dynamic",
-                "ConnectorName": ""
+                "ConnectorName": "",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",
@@ -95,7 +98,8 @@ export const LPF18Module = {
                 "y": 25,
                 "jackType": "control",
                 "bandwidth": "dynamic",
-                "ConnectorName": ""
+                "ConnectorName": "",
+                "ConnectorIndex": 0
         },
         {
                 "componentType": "Knob",

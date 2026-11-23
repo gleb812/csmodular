@@ -21,19 +21,19 @@
     {
       "name": "FXout",
       "displayName": "FXout",
-      "category": "custom",
+      "category": "io",
       "status": "passable"
     },
     {
       "name": "FXrcv",
       "displayName": "FXrcv",
-      "category": "custom",
+      "category": "io",
       "status": "passable"
     },
     {
       "name": "FXsnd",
       "displayName": "FXsnd",
-      "category": "custom",
+      "category": "io",
       "status": "passable"
     },
     {
@@ -57,7 +57,7 @@
     {
       "name": "LPF18",
       "displayName": "LPF18",
-      "category": "custom",
+      "category": "filter",
       "status": "passable"
     },
     {
@@ -69,6 +69,12 @@
     {
       "name": "MixFour",
       "displayName": "MixFour",
+      "category": "mixer",
+      "status": "stable"
+    },
+    {
+      "name": "MixFour2",
+      "displayName": "MixFour2",
       "category": "mixer",
       "status": "stable"
     },
@@ -99,7 +105,7 @@
     {
       "name": "PingPong",
       "displayName": "PingPong",
-      "category": "custom",
+      "category": "fx",
       "status": "passable"
     },
     {

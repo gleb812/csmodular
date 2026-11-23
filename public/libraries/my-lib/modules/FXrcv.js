@@ -3,7 +3,7 @@ export const FXrcvModule = {
     type: 'FXrcv',
     defaultParams: [],
     displayName: 'FXrcv',
-    category: 'custom',
+    category: 'io',
     status: 'passable',
     
     gridHeight: 3,

@@ -3,8 +3,9 @@ export const PingPongModule = {
     type: 'PingPong',
     defaultParams: [],
     displayName: 'PingPong',
-    category: 'custom',
+    category: 'fx',
     status: 'passable',
+    
     gridHeight: 3,
     originalName: 'PingPong',
     tooltip: 'PingPong',
@@ -21,8 +22,8 @@ export const PingPongModule = {
                 "infoFunc": 0,
                 "size": "medium",
                 "defaultValue": 64,
-                "csoundName": "rate",
-                "mappingTable": "DLY_2s"
+                "mappingTable": "DLY_2s",
+                "csoundName": "rate"
         },
         {
                 "componentType": "Knob",
@@ -32,8 +33,8 @@ export const PingPongModule = {
                 "infoFunc": 0,
                 "size": "medium",
                 "defaultValue": 64,
-                "csoundName": "feed",
-                "mappingTable": "CLA000"
+                "mappingTable": "CLA000",
+                "csoundName": "feed"
         },
         {
                 "componentType": "Knob",
@@ -43,8 +44,8 @@ export const PingPongModule = {
                 "infoFunc": 0,
                 "size": "medium",
                 "defaultValue": 64,
-                "csoundName": "lev",
-                "mappingTable": "CLA000"
+                "mappingTable": "CLA000",
+                "csoundName": "lev"
         },
         {
                 "componentType": "Input",

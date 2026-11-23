@@ -5,7 +5,7 @@
 // Потом уедет на панель управления.
 
 import { getCurrentTheme } from '../theme/currentTheme.js';
-
+const MAX_SLOTS = 8;   // ⭐ всегда 8 кружков, не зависимо от numVoices
 export class VoiceIndicator {
     constructor(voiceAllocator, { container = document.body } = {}) {
         this.voiceAllocator = voiceAllocator;
@@ -25,21 +25,16 @@ export class VoiceIndicator {
         style.id = 'voice-indicator-styles';
         style.textContent = `
 #voice-indicator {
-    position: fixed;
-    left: 8px;
-    bottom: 8px;
     display: flex;
     gap: 4px;
-    padding: 6px 8px;
-    background: rgba(0,0,0,0.35);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 8px;
-    z-index: 15000;
-    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    padding: 0 4px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    font-family: inherit;
     font-size: 10px;
     user-select: none;
     pointer-events: none;
-    backdrop-filter: blur(6px);
 }
 #voice-indicator .vi-dot {
     width: 10px;
@@ -61,16 +56,31 @@ export class VoiceIndicator {
     letter-spacing: 1px;
     align-self: center;
 }
+#voice-indicator .vi-dot.vi-out-of-range {
+    background: transparent;
+    border-color: rgba(255,255,255,0.10);   /* едва заметная рамка */
+    opacity: 0.35;
+}
+#voice-indicator .vi-dot.vi-out-of-range.active {
+    /* на случай бага — активный слот вне диапазона всё равно серый */
+    background: rgba(255,255,255,0.10);
+    border-color: rgba(255,255,255,0.10);
+    box-shadow: none;
+}
 `;
         document.head.appendChild(style);
     }
 
     _build(container) {
+        if (!container) {
+            console.warn('[VoiceIndicator] container not found, appending to body');
+            container = document.body;
+        }
         this.element = document.createElement('div');
         this.element.id = 'voice-indicator';
         this.element.title = 'Voice allocation (debug)';
 
-        for (let i = 0; i < this.voiceAllocator.numVoices; i++) {
+        for (let i = 0; i < MAX_SLOTS; i++) {
             const dot = document.createElement('div');
             dot.className = 'vi-dot';
             dot.dataset.id = i;
@@ -86,43 +96,37 @@ export class VoiceIndicator {
 
         container.appendChild(this.element);
         this.applyTheme();
+        this._render(
+            this.voiceAllocator?.getVoices?.() ?? [],
+            this.voiceAllocator?.getMode?.() ?? 'poly',
+        );
     }
 
-    /**
-     * Пересоздать DOM-кружки под новое число голосов.
-     * Вызывается после смены numVoices в VoiceAllocator.
-     */
     rebuild(numVoices) {
-        if (!this.element) return;
-        const n = Math.max(1, Math.min(8, parseInt(numVoices, 10) || 8));
-
-        // Удаляем старые кружки (оставляем mode-label)
-        const oldDots = this.element.querySelectorAll('.vi-dot');
-        oldDots.forEach(d => d.remove());
-        this._dots = [];
-
-        // Вставляем новые перед mode-label
-        const modeEl = this._modeEl;
-        for (let i = 0; i < n; i++) {
-            const dot = document.createElement('div');
-            dot.className = 'vi-dot';
-            dot.dataset.id = i;
-            this.element.insertBefore(dot, modeEl);
-            this._dots.push(dot);
-        }
-
-        // Перерисовать состояние из allocator
+        // DOM всегда 8 слотов — пересоздавать нечего.
+        // Просто перерисовать состояние (см. _render).
         if (this.voiceAllocator) {
-            this._render(this.voiceAllocator.getVoices(), this.voiceAllocator.getMode());
+            this._render(
+                this.voiceAllocator.getVoices(),
+                this.voiceAllocator.getMode(),
+            );
         }
     }
 
     _render(voices, mode) {
-        for (const v of voices) {
-            const dot = this._dots[v.id];
+        const numVoices = this.voiceAllocator?.numVoices ?? MAX_SLOTS;
+
+        for (let i = 0; i < MAX_SLOTS; i++) {
+            const dot = this._dots[i];
             if (!dot) continue;
-            dot.classList.toggle('active', !!v.active);
+
+            const inRange = i < numVoices;              // ⭐ слот в зоне активных голосов
+            const v = voices.find(x => x.id === i);     // ⭐ было voices[i] — неверно, если id не совпадает с индексом
+
+            dot.classList.toggle('vi-out-of-range', !inRange);   // ⭐ серый
+            dot.classList.toggle('active', !!v?.active && inRange);
         }
+
         if (this._modeEl) {
             this._modeEl.textContent = mode.toUpperCase();
         }
