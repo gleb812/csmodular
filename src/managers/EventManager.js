@@ -65,13 +65,35 @@ export class EventManager {
     });
   }
 
-  // === ОСНОВНЫЕ ОБРАБОТЧИКИ ===
+  // === MAIN PROCESSORS ===
   handlePointerDown(e) {
-      // ⭐ Tap-tap → контекстное меню (кросс-планшетный путь)
       const now = performance.now();
-      const TAP_TAP_MS = 350;   // окно между тапами
-      const TAP_SLOP_PX = 20;   // насколько могут сдвинуться пальцы между тапами
+      const TAP_TAP_MS = 350;
+      const TAP_SLOP_PX = 20;
 
+      // ⭐ Стилус — только long-press (tap-tap не нужен, у пера нет системного меню)
+      if (e.pointerType === 'pen') {
+          this._penLongPressStart = { x: e.clientX, y: e.clientY };
+          this._penLongPressTimer = setTimeout(() => {
+              this._penLongPressTimer = null;
+              if (!this._penLongPressStart) return;
+              const evt = new MouseEvent('contextmenu', {
+                  bubbles: true,
+                  cancelable: true,
+                  clientX: this._penLongPressStart.x,
+                  clientY: this._penLongPressStart.y,
+                  button: 2,
+              });
+              this.canvas.dispatchEvent(evt);
+          }, 500);
+
+          // всё равно продолжаем — чтобы drag стилусом работал
+          try { this.canvas.setPointerCapture(e.pointerId); } catch {}
+          this.handleMouseDown(e);
+          return;
+      }
+
+      // ⭐ Палец / мышь — tap-tap
       if (this._lastTap) {
           const dt = now - this._lastTap.time;
           const dx = e.clientX - this._lastTap.x;
@@ -79,11 +101,10 @@ export class EventManager {
           const dist2 = dx * dx + dy * dy;
 
           if (dt < TAP_TAP_MS && dist2 < TAP_SLOP_PX * TAP_SLOP_PX) {
-              // ⭐ Это tap-tap → открываем контекст
               this._lastTap = null;
+              this._dragMoved = false;
               e.preventDefault();
 
-              // Эмулируем contextmenu в точке тапа
               const evt = new MouseEvent('contextmenu', {
                   bubbles: true,
                   cancelable: true,
@@ -92,35 +113,55 @@ export class EventManager {
                   button: 2,
               });
               this.canvas.dispatchEvent(evt);
-              return;   // ⭐ не даём одиночному тапу обработаться
+              return;
           }
       }
 
       this._lastTap = { time: now, x: e.clientX, y: e.clientY };
-      this._dragMoved = false;   // ⭐ NEW — сброс флага drag для нового жеста
-      // ⭐ setPointerCapture — гарантирует pointermove даже за пределами canvas
-      try {
-          this.canvas.setPointerCapture(e.pointerId);
-      } catch (err) { /* ignore */ }
+      this._dragMoved = false;
 
-      this.handleMouseDown(e);   // переиспользуем существующий код
+      try { this.canvas.setPointerCapture(e.pointerId); } catch {}
+      this.handleMouseDown(e);
   }
 
   handlePointerMove(e) {
-      if (this._lastTap) {
+      // ⭐ Стилус: движение отменяет long-press
+      if (this._penLongPressStart) {
+          const dx = e.clientX - this._penLongPressStart.x;
+          const dy = e.clientY - this._penLongPressStart.y;
+          if (dx * dx + dy * dy > 100) {
+              if (this._penLongPressTimer) {
+                  clearTimeout(this._penLongPressTimer);
+                  this._penLongPressTimer = null;
+              }
+              this._penLongPressStart = null;
+          }
+      }
+
+      // ⭐ Палец/мышь: движение помечает drag (чтобы tap-tap не склеился)
+      if (this._lastTap && !this._dragMoved) {
           const dx = e.clientX - this._lastTap.x;
           const dy = e.clientY - this._lastTap.y;
           if (dx * dx + dy * dy > 100) this._dragMoved = true;
       }
+
       this.handleMouseMove(e);
   }
 
   handlePointerUp(e) {
-      // ⭐ Если был drag — сбрасываем tap-tap, чтобы следующий тап не склеился
+      // ⭐ Стилус: сброс long-press
+      if (this._penLongPressTimer) {
+          clearTimeout(this._penLongPressTimer);
+          this._penLongPressTimer = null;
+      }
+      this._penLongPressStart = null;
+
+      // ⭐ Палец/мышь: если был drag — сбрасываем tap-tap
       if (this._dragMoved) {
           this._lastTap = null;
           this._dragMoved = false;
       }
+
       try { this.canvas.releasePointerCapture(e.pointerId); } catch {}
       this.handleMouseUp(e);
   }
