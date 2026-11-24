@@ -48,10 +48,7 @@ export class EventManager {
         }
     });
 
-    // long-press → contextmenu (for iPad)
-    this._setupLongPress();
-
-        // Space+drag (like in Figma)
+    // Space+drag (like in Figma)
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Space' && !e.repeat && 
           e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
@@ -70,73 +67,62 @@ export class EventManager {
 
   // === ОСНОВНЫЕ ОБРАБОТЧИКИ ===
   handlePointerDown(e) {
+      // ⭐ Tap-tap → контекстное меню (кросс-планшетный путь)
+      const now = performance.now();
+      const TAP_TAP_MS = 350;   // окно между тапами
+      const TAP_SLOP_PX = 20;   // насколько могут сдвинуться пальцы между тапами
+
+      if (this._lastTap) {
+          const dt = now - this._lastTap.time;
+          const dx = e.clientX - this._lastTap.x;
+          const dy = e.clientY - this._lastTap.y;
+          const dist2 = dx * dx + dy * dy;
+
+          if (dt < TAP_TAP_MS && dist2 < TAP_SLOP_PX * TAP_SLOP_PX) {
+              // ⭐ Это tap-tap → открываем контекст
+              this._lastTap = null;
+              e.preventDefault();
+
+              // Эмулируем contextmenu в точке тапа
+              const evt = new MouseEvent('contextmenu', {
+                  bubbles: true,
+                  cancelable: true,
+                  clientX: e.clientX,
+                  clientY: e.clientY,
+                  button: 2,
+              });
+              this.canvas.dispatchEvent(evt);
+              return;   // ⭐ не даём одиночному тапу обработаться
+          }
+      }
+
+      this._lastTap = { time: now, x: e.clientX, y: e.clientY };
+      this._dragMoved = false;   // ⭐ NEW — сброс флага drag для нового жеста
       // ⭐ setPointerCapture — гарантирует pointermove даже за пределами canvas
       try {
           this.canvas.setPointerCapture(e.pointerId);
       } catch (err) { /* ignore */ }
 
-      // ⭐ На тач: button может быть 0, но e.button для pointerdown — 0.
-      //    Для мыши: левая = 0, правая = 2. Для пера: 0. Всё как у mouse.
-      //    Значит логика handleMouseDown работает как есть.
-
-      this._cancelLongPress();   // ⭐ палец коснулся — long-press ещё не сработал
-
       this.handleMouseDown(e);   // переиспользуем существующий код
   }
 
   handlePointerMove(e) {
-      // ⭐ Отменяем long-press при движении (это drag, не long-press)
-      if (this._longPressMoved(e)) this._cancelLongPress();
-
-      // ⭐ На тач e.button = -1 (нет кнопки), а handleMouseMove проверяет e.button === 2.
-      //    Для тач это всегда false — правильно. Для мыши работает как есть.
+      if (this._lastTap) {
+          const dx = e.clientX - this._lastTap.x;
+          const dy = e.clientY - this._lastTap.y;
+          if (dx * dx + dy * dy > 100) this._dragMoved = true;
+      }
       this.handleMouseMove(e);
   }
 
   handlePointerUp(e) {
-      this._cancelLongPress();
-      try {
-          this.canvas.releasePointerCapture(e.pointerId);
-      } catch (err) { /* ignore */ }
-      this.handleMouseUp(e);
-  }
-
-  _setupLongPress() {
-      this._longPressTimer = null;
-      this._longPressStart = null;
-
-      this.canvas.addEventListener('pointerdown', (e) => {
-          if (e.pointerType !== 'touch') return;   // только палец
-          this._longPressStart = { x: e.clientX, y: e.clientY, id: e.pointerId };
-          this._longPressTimer = setTimeout(() => {
-              this._longPressTimer = null;
-              if (!this._longPressStart) return;
-              // эмулируем contextmenu
-              const evt = new MouseEvent('contextmenu', {
-                  bubbles: true,
-                  cancelable: true,
-                  clientX: this._longPressStart.x,
-                  clientY: this._longPressStart.y,
-                  button: 2,
-              });
-              this.canvas.dispatchEvent(evt);
-          }, 500);
-      });
-  }
-
-  _longPressMoved(e) {
-      if (!this._longPressStart) return false;
-      const dx = e.clientX - this._longPressStart.x;
-      const dy = e.clientY - this._longPressStart.y;
-      return (dx * dx + dy * dy) > 100;   // 10px threshold
-  }
-
-  _cancelLongPress() {
-      if (this._longPressTimer) {
-          clearTimeout(this._longPressTimer);
-          this._longPressTimer = null;
+      // ⭐ Если был drag — сбрасываем tap-tap, чтобы следующий тап не склеился
+      if (this._dragMoved) {
+          this._lastTap = null;
+          this._dragMoved = false;
       }
-      this._longPressStart = null;
+      try { this.canvas.releasePointerCapture(e.pointerId); } catch {}
+      this.handleMouseUp(e);
   }
 
   handleMouseDown(e) {
