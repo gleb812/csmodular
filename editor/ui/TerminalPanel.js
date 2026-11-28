@@ -263,8 +263,21 @@ export class TerminalPanel {
                 'item', 'fontSize', 'color', 'mappingTable', 'min', 'max',
                 'jackType',
             ];
+        } else if (cmd === 'olap') {
+            candidates = ['on', 'off'];
+        } else if (cmd === 'pad') {
+            candidates = []; // свободный числовой ввод
         } else if (cmd === 'align') {
             candidates = ['l', 'r', 'u', 'd'];
+        } else if (cmd === 'guide' || cmd === 'guides' || cmd === 'gd') {
+            const sub = (tokens[1] || '').toLowerCase();
+            if (sub === 'del' || sub === 'remove' || sub === 'rm') {
+                candidates = ['v', 'h'];
+            } else {
+                candidates = ['v', 'h', 'del', 'clear', 'max'];
+            }
+        } else if (cmd === 'snap') {
+            candidates = [];   // числовой ввод
         } else if (cmd === 'distr') {
             candidates = ['h', 'v'];
         } else if (cmd === 'grid') {
@@ -348,10 +361,14 @@ export class TerminalPanel {
                 case 'save':              return await this._cmdSave(args);
                 case 'load':              return await this._cmdLoad(args);
                 case 'rmlib': return await this._cmdRmlib(args);
-                case 'rm':                return await this._cmdRm(args);       // ⭐ NEW
-                case 'lsmod':             return await this._cmdLsmod(args);    // ⭐ NEW
+                case 'rm':                return await this._cmdRm(args);       
+                case 'lsmod':             return await this._cmdLsmod(args);   
                 case 'lslib': return await this._cmdLslib(args);
                 case 'lib': case 'where': return await this._cmdLib(args);
+                case 'pad':           return this._cmdPadding(args);
+                case 'olap':           return this._cmdOverlap(args);
+                case 'guide': case 'guides': case 'gd': return this._cmdGuide(args);
+                case 'snap':              return this._cmdSnap(args);
                 case 'stats':             return this._cmdStats();
                 default:
                     this._printError(`Unknown command: ${cmd}`);
@@ -360,6 +377,160 @@ export class TerminalPanel {
         } catch (e) {
             this._printError(e.message || String(e));
         }
+    }
+
+    _cmdName(args) {
+        if (args.length === 0) {
+            this._printError('Usage: name <newName>');
+            return;
+        }
+        let raw = args.join(' ').trim().replace(/\s/g, '');
+        if (/^[0-9]/.test(raw)) raw = 'M' + raw;
+        raw = raw.replace(/[^a-zA-Z0-9_]/g, '') || 'NewModule';
+
+        const old = this.app.module?.title;
+        if (old === raw) {
+            this._printInfo(`Name already "${raw}"`);
+            return;
+        }
+
+        // ⭐ Единая точка — переносит гайды
+        this.app.setModuleTitle(raw);
+        this._printOk(`Renamed "${old}" → "${raw}"`);
+    }
+
+    _cmdGuide(args) {
+        if (args.length === 0) {
+            const v = this.app.guides.v;
+            const h = this.app.guides.h;
+            const max = this.app.maxGuidesPerAxis;
+            if (v.length === 0 && h.length === 0) {
+                this._print('(no guides)', '#666');
+                return;
+            }
+            this._printInfo(`Guides (max ${max} per axis):`);
+            if (v.length > 0) this._print(`  V: ${v.join(', ')}`);
+            if (h.length > 0) this._print(`  H: ${h.join(', ')}`);
+            return;
+        }
+
+        const sub = args[0].toLowerCase();
+
+        if (sub === 'clear') {
+            const count = this.app.guides.v.length + this.app.guides.h.length;
+            this.app.clearGuides();
+            this._printOk(`Cleared ${count} guide(s)`);
+            return;
+        }
+
+        if (sub === 'max') {
+            if (args.length < 2) {
+                this._printInfo(`max guides per axis: ${this.app.maxGuidesPerAxis}`);
+                return;
+            }
+            const n = parseInt(args[1]);
+            if (Number.isNaN(n) || n < 1 || n > 40) {
+                this._printError('max must be 1..40');
+                return;
+            }
+            this.app.setMaxGuides(n);
+            this._printOk(`max guides per axis = ${this.app.maxGuidesPerAxis}`);
+            return;
+        }
+
+        if (sub === 'del' || sub === 'remove' || sub === 'rm') {
+            if (args.length < 3) {
+                this._printError('Usage: guide del v|h <pos>');
+                return;
+            }
+            const axis = args[1].toLowerCase() === 'h' ? 'h' : args[1].toLowerCase() === 'v' ? 'v' : null;
+            if (!axis) { this._printError('axis must be v or h'); return; }
+            const pos = parseFloat(args[2]);
+            if (Number.isNaN(pos)) { this._printError('pos must be a number'); return; }
+            const list = this.app.guides[axis];
+            const idx = list.findIndex(p => Math.abs(p - pos) < 2);
+            if (idx < 0) {
+                this._printError(`No ${axis} guide near ${pos}`);
+                return;
+            }
+            this.app.removeGuide(axis, idx);
+            this._printOk(`Removed ${axis} guide @ ${pos}`);
+            return;
+        }
+
+        if (sub === 'v' || sub === 'h') {
+            if (args.length < 2) {
+                this._printError(`Usage: guide ${sub} <pos>`);
+                return;
+            }
+            const pos = parseFloat(args[1]);
+            if (Number.isNaN(pos)) { this._printError('pos must be a number'); return; }
+            const module = this.app.module;
+            const max = sub === 'v' ? module.width : module.height;
+            if (pos < 0 || pos > max) {
+                this._printError(`pos must be 0..${Math.round(max)}`);
+                return;
+            }
+            if (this.app.addGuide(sub, pos)) {
+                this._printOk(`${sub === 'v' ? 'Vertical' : 'Horizontal'} guide @ ${Math.round(pos)}`);
+            } else {
+                this._printError(`Cannot add guide (limit or duplicate)`);
+            }
+            return;
+        }
+
+        this._printError(`Unknown guide subcommand: ${sub}`);
+        this._print('  guide            — list', '#666');
+        this._print('  guide v <pos>    — add vertical', '#666');
+        this._print('  guide h <pos>    — add horizontal', '#666');
+        this._print('  guide del v|h <pos>', '#666');
+        this._print('  guide max <n>    — set per-axis limit', '#666');
+        this._print('  guide clear      — remove all', '#666');
+    }
+
+    _cmdSnap(args) {
+        if (args.length === 0) {
+            this._printInfo(`snap radius: ${this.app.snapRadius}px (0 = off)`);
+            return;
+        }
+        const n = parseInt(args[0]);
+        if (Number.isNaN(n) || n < 0 || n > 40) {
+            this._printError('snap radius must be 0..40 (0 = off)');
+            return;
+        }
+        this.app.setSnapRadius(n);
+        this._printOk(`snap radius = ${this.app.snapRadius}px`);
+    }
+
+    _cmdPadding(args) {
+        if (args.length === 0) {
+            this._printInfo(`collision padding: ${this.app.collisionPadding}px`);
+            return;
+        }
+        const n = parseInt(args[0]);
+        if (Number.isNaN(n) || n < 0 || n > 40) {
+            this._printError('padding must be 0..40');
+            return;
+        }
+        this.app.setCollisionPadding(n);
+        this._printOk(`collision padding = ${this.app.collisionPadding}px`);
+    }
+
+    _cmdOverlap(args) {
+        if (args.length === 0) {
+            this._printInfo(`overlap: ${this.app.allowOverlap ? 'on' : 'off'}`);
+            return;
+        }
+        const v = args[0].toLowerCase();
+        if (v === 'on' || v === '1' || v === 'true') {
+            this.app.setAllowOverlap(true);
+        } else if (v === 'off' || v === '0' || v === 'false') {
+            this.app.setAllowOverlap(false);
+        } else {
+            this._printError('Usage: overlap on|off');
+            return;
+        }
+        this._printOk(`overlap = ${this.app.allowOverlap ? 'on' : 'off'}`);
     }
 
     async _cmdRmlib(args) {
@@ -1021,6 +1192,79 @@ export class TerminalPanel {
         return out;
     }
 
+    /**
+     * Разбирает список ID из токенов.
+     * Поддерживает:
+     *   "2 3 4"   → [2,3,4]
+     *   "2,3,4"   → [2,3,4]
+     *   "2-4"     → [2,3,4]
+     *   "2..4"    → [2,3,4]
+     *   "2 - 4"   → [2,3,4]   (пробелы вокруг дефиса)
+     *   "2 .. 4"  → [2,3,4]
+     * Смешанное: "1 3-5 7" → [1,3,4,5,7]
+     * Не-ID токены (имена типов и т.п.) возвращаются в `rest`.
+     * @returns {{ids:number[], rest:string[]}}
+     */
+    _parseIdList(tokens) {
+        const ids = [];
+        const rest = [];
+
+        // Склеиваем "2 - 4" / "2 .. 4" в один токен
+        const merged = [];
+        for (let i = 0; i < tokens.length; i++) {
+            const t = tokens[i];
+            const next = tokens[i + 1];
+            const next2 = tokens[i + 2];
+
+            if ((t === '-' || t === '..') && merged.length > 0 && next) {
+                merged[merged.length - 1] = merged[merged.length - 1] + t + next;
+                i += 1;
+                continue;
+            }
+            if ((next === '-' || next === '..') && next2) {
+                merged.push(t + next + next2);
+                i += 2;
+                continue;
+            }
+            merged.push(t);
+        }
+
+        const pushRange = (a, b) => {
+            if (a > b) [a, b] = [b, a];
+            for (let k = a; k <= b; k++) ids.push(k);
+        };
+
+        for (const tok of merged) {
+            if (/^\d+$/.test(tok)) {
+                ids.push(parseInt(tok, 10));
+                continue;
+            }
+            const m = tok.match(/^(\d+)\s*(?:-|\.\.)\s*(\d+)$/);
+            if (m) {
+                pushRange(parseInt(m[1], 10), parseInt(m[2], 10));
+                continue;
+            }
+            if (tok.includes(',')) {
+                const parts = tok.split(',').map(s => s.trim()).filter(Boolean);
+                const sub = this._parseIdList(parts);
+                ids.push(...sub.ids);
+                rest.push(...sub.rest);
+                continue;
+            }
+            rest.push(tok);
+        }
+
+        // Дедуп с сохранением порядка
+        const seen = new Set();
+        const uniq = [];
+        for (const id of ids) {
+            if (seen.has(id)) continue;
+            seen.add(id);
+            uniq.push(id);
+        }
+        return { ids: uniq, rest };
+    }
+
     // ─────────────────────────── HELP ───────────────────────────────
 
     _cmdHelp(args) {
@@ -1031,16 +1275,20 @@ export class TerminalPanel {
         this._print('  ina / ink / outa / outk add input/output');
         this._print('  knob|slider|label|toggle [args]  shortcut for add <type>');
         this._print('  ls [type] [-l]         list components');
-        this._print('  del <id|type|range>... delete components');
-        this._print('  mv <id> <x> <y>        move (absolute or +dx +dy)');
+        this._print('  del <id|type|range>... delete (ranges: 3-5, 3..5, 1,3,5)');
+        this._print('  mv <ids...> <x y|+dx +dy>  move (group supported)');
         this._print('  cp <id> [x y]          copy component');
         this._print('  cpmod <newName>        copy module to new name (stay on original)');
         this._print('  cpmod <lib>/<newName>  copy module to specific library');
         this._print('  map <id> <table>       bind mapping table');
         this._print('  set <id> <prop> <v>    set property');
-        this._print('  align <ids> l|r|u|d    align');
-        this._print('  distr <ids> h|v        distribute');
+        this._print('  align <ids...> l|r|u|d     align (ranges ok)');
+        this._print('  distr <ids...> h|v         distribute (ranges ok)');
         this._print('  grid on|off|N          micro-grid');
+        this._print('  pad [N]                collision padding (0..40 px)');
+        this._print('  olap on|off            allow components to overlap');
+        this._print('  guide [v|h <pos>|del v|h <pos>|max N|clear]  guides');
+        this._print('  snap [N]               snap radius in px (0 = off)');
         this._print('  name <newName>         rename module');
         this._print('  category <cat>         set category');
         this._print('  new [name]             new module');
@@ -1070,8 +1318,12 @@ export class TerminalPanel {
             add: 'add <type> [x y]\n' +
                  '  types: ' + Object.keys(TYPE_ALIASES).join(', ') + '\n' +
                  '  jack types: ' + Object.keys(JACK_TYPE_ALIASES).join(', '),
-            del: 'del <id> | del <type> | del <id> <id> ... | del <from>..<to>\n  examples: del 3, del knob, del 3 4 5, del 3..7',
-            mv:  'mv <id> <x> <y>   — absolute position\nmv <id> +dx +dy   — relative shift',
+            del: 'del <id|type|range>...\n' +
+                 '  ranges: 3-5, 3..5, 1,3,5, or space-separated: del 1 3 5\n' +
+                 '  examples: del 3 | del knob | del 3-5 | del 3..7 | del 1,3,5',
+            mv:  'mv <ids...> <x> <y>     — absolute (first id to (x,y), rest by delta)\n' +
+                 'mv <ids...> +dx +dy     — relative shift (whole group)\n' +
+                 '  examples: mv 3 10 20 | mv 3 +5 -3 | mv 1 2 3 +5 0',
             cp: 'cp <id>                    — copy component (same settings)\n' +
                 'cp <id> <x> <y>            — copy to specific position\n' +
                 'cp <id> +dx +dy            — copy with offset\n' +
@@ -1083,8 +1335,27 @@ export class TerminalPanel {
             map: 'map <id> <table>  — bind mapping table\nmap <id>          — unbind',
             name: 'name <newName>  — rename module\n  e.g. name MyFilter, name "Cool Synth"',
             new: 'new [name]  — clear module and reset DSP code\n  new           → "NewModule"\n  new MyFilter  → "MyFilter"',
-            align: 'align <ids...> <edge>\n  edges: l (left), r (right), u (up), d (down)',
-            distr: 'distr <ids...> <axis>\n  axes: h (horizontal), v (vertical)',
+            align: 'align <ids...> <edge>\n' +
+                   '  edges: l, r, u, d\n' +
+                   '  ids: ranges ok — align 1-4 l, align 1 2 3 u',
+            distr: 'distr <ids...> <axis>\n' +
+                   '  axes: h, v\n' +
+                   '  ids: ranges ok — distr 1-5 h',
+            pad: 'padding            — show current padding\n' +
+                     'padding <n>        — set collision padding 0..40 px',
+            olap: 'overlap            — show current mode\n' +
+                     'overlap on|off     — allow/forbid component overlap\n' +
+                     '  Note: collision zones are still highlighted in red.',
+            guide: 'guide                       — list guides (V / H)\n' +
+                   'guide v <pos>               — add vertical guide\n' +
+                   'guide h <pos>               — add horizontal guide\n' +
+                   'guide del v|h <pos>         — remove nearest guide within 2px\n' +
+                   'guide max <n>               — set per-axis limit (1..40, default 5)\n' +
+                   'guide clear                 — remove all guides\n' +
+                   '  Also: Alt+drag from module edge on canvas.',
+            snap: 'snap                        — show current snap radius\n' +
+                  'snap <n>                    — set snap radius in screen px (0 = off, default 6)\n' +
+                  '  Snap targets: guides → component edges/centers → module edges/centers.',
             set: 'set <id> <property> <value>\n' +
                  '  examples:\n' +
                  '    set 3 text LFO\n' +
@@ -1361,29 +1632,14 @@ export class TerminalPanel {
     _cmdDel(args) {
         if (args.length === 0) {
             this._printError('Usage: del <id|type|range>...');
+            this._print('  examples: del 3 | del knob | del 3 4 5 | del 3-5 | del 3..7 | del 1,3,5', '#666');
             return;
         }
 
-        // Собираем id для удаления
-        const idsToDelete = new Set();
+        const { ids: rawIds, rest } = this._parseIdList(args);
+        const idsToDelete = new Set(rawIds);
 
-        for (const a of args) {
-            // Диапазон 3..7
-            const rangeMatch = a.match(/^(\d+)\.\.(\d+)$/);
-            if (rangeMatch) {
-                const from = parseInt(rangeMatch[1]);
-                const to = parseInt(rangeMatch[2]);
-                for (let i = from; i <= to; i++) idsToDelete.add(i);
-                continue;
-            }
-
-            // Число
-            if (/^\d+$/.test(a)) {
-                idsToDelete.add(parseInt(a));
-                continue;
-            }
-
-            // Тип (низкий регистр)
+        for (const a of rest) {
             const type = TYPE_ALIASES[a.toLowerCase()];
             if (type) {
                 for (const c of this.app.components) {
@@ -1392,7 +1648,6 @@ export class TerminalPanel {
                 }
                 continue;
             }
-
             this._printError(`Cannot parse "${a}"`);
             return;
         }
@@ -1409,7 +1664,7 @@ export class TerminalPanel {
             const idx = this.app.components.findIndex(c => parseInt(c.id) === id);
             if (idx === -1) { notFound.push(id); continue; }
             const comp = this.app.components[idx];
-            this.app.removeComponent(comp);
+            this.app.removeComponent(comp, true);
             deleted++;
         }
 
@@ -1426,71 +1681,110 @@ export class TerminalPanel {
 
     _cmdMv(args) {
         if (args.length < 3) {
-            this._printError('Usage: mv <id> <x> <y> | mv <id> +dx +dy');
+            this._printError('Usage: mv <id|ids...> <x> <y> | mv <id|ids...> +dx +dy');
             return;
         }
 
-        const id = parseInt(args[0]);
-        if (isNaN(id)) {
-            this._printError('id must be a number');
+        // Последние два — координаты/дельты, всё до них — список ID
+        const yTok = args[args.length - 1];
+        const xTok = args[args.length - 2];
+        const idPart = args.slice(0, -2);
+
+        const { ids, rest } = this._parseIdList(idPart);
+        if (rest.length > 0) {
+            this._printError(`Cannot parse: ${rest.join(' ')}`);
+            return;
+        }
+        if (ids.length === 0) {
+            this._printError('No component ids');
             return;
         }
 
-        const comp = this.app.components.find(c => parseInt(c.id) === id);
-        if (!comp) {
-            this._printError(`Component id=${id} not found`);
-            return;
+        const comps = [];
+        for (const id of ids) {
+            const c = this.app.components.find(x => parseInt(x.id) === id);
+            if (!c) { this._printError(`Component id=${id} not found`); return; }
+            comps.push(c);
         }
 
         let dx, dy;
-        const rawX = args[1], rawY = args[2];
-
-        if (rawX.startsWith('+') || rawX.startsWith('-') ||
-            rawY.startsWith('+') || rawY.startsWith('-')) {
-            // Относительное
-            dx = parseFloat(rawX);
-            dy = parseFloat(rawY);
+        const relative = (xTok.startsWith('+') || xTok.startsWith('-') ||
+                          yTok.startsWith('+') || yTok.startsWith('-'));
+        if (relative) {
+            dx = parseFloat(xTok);
+            dy = parseFloat(yTok);
             if (isNaN(dx) || isNaN(dy)) {
                 this._printError('Delta values must be numbers');
                 return;
             }
+            // Для группы относительный сдвиг — единая дельта
         } else {
-            // Абсолютное
-            const nx = parseFloat(rawX);
-            const ny = parseFloat(rawY);
+            // Абсолютные координаты — двигаем ПЕРВЫЙ к (x,y), остальные на ту же дельту
+            const nx = parseFloat(xTok);
+            const ny = parseFloat(yTok);
             if (isNaN(nx) || isNaN(ny)) {
                 this._printError('Coordinates must be numbers');
                 return;
             }
-            dx = nx - comp.relX;
-            dy = ny - comp.relY;
+            dx = nx - comps[0].relX;
+            dy = ny - comps[0].relY;
         }
 
-        const newX = comp.relX + dx;
-        const newY = comp.relY + dy;
         const module = this.app.module;
 
-        // Проверка границ
-        if (newX < 0 || newX + comp.width > module.width ||
-            newY < 0 || newY + comp.height > module.height) {
-            this._printError(`Outside module (module is ${module.width}×${module.height})`);
-            return;
+        // Проверка: все ли помещаются после сдвига
+        for (const c of comps) {
+            const nx = c.relX + dx;
+            const ny = c.relY + dy;
+            if (nx < 0 || nx + c.width > module.width ||
+                ny < 0 || ny + c.height > module.height) {
+                this._printError(`id=${c.id} would be outside module (${module.width}×${module.height})`);
+                return;
+            }
         }
 
-        // Проверка коллизий
-        if (hasCollisions(comp) && this._collides(newX, newY, comp.width, comp.height, comp)) {
-            this._printError(`Collision at (${newX}, ${newY})`);
-            return;
+        // Проверка коллизий: только с компонентами вне группы
+        const groupSet = new Set(comps);
+        if (!this.app.allowOverlap) {
+            const pad = this.app.collisionPadding || 0;
+            for (const c of comps) {
+                if (!hasCollisions(c)) continue;
+                const nx = c.relX + dx;
+                const ny = c.relY + dy;
+                for (const other of this.app.components) {
+                    if (other === c) continue;
+                    if (other._isNewDragging) continue;
+                    if (groupSet.has(other)) continue;
+                    if (!hasCollisions(other)) continue;
+                    const ox = other.relX ?? 0;
+                    const oy = other.relY ?? 0;
+                    const ow = other.width ?? 0;
+                    const oh = other.height ?? 0;
+                    if (!(nx - pad >= ox + ow ||
+                          nx + c.width + pad <= ox ||
+                          ny - pad >= oy + oh ||
+                          ny + c.height + pad <= oy)) {
+                        this._printError(`Collision: id=${c.id} with id=${other.id} at (${nx}, ${ny})`);
+                        return;
+                    }
+                }
+            }
         }
 
-        comp.relX = newX;
-        comp.relY = newY;
-        comp.x = module.x + newX;
-        comp.y = module.y + newY;
+        // Применяем
+        for (const c of comps) {
+            c.relX += dx;
+            c.relY += dy;
+            c.x = module.x + c.relX;
+            c.y = module.y + c.relY;
+        }
 
-        this._printOk(`Moved id=${id} to (${Math.round(newX)}, ${Math.round(newY)})`);
+        if (comps.length === 1) {
+            this._printOk(`Moved id=${comps[0].id} to (${Math.round(comps[0].relX)}, ${Math.round(comps[0].relY)})`);
+        } else {
+            this._printOk(`Moved ${comps.length} components by (${dx}, ${dy})`);
+        }
     }
-
     // ─────────────────────────── MAP ────────────────────────────────
 
     _cmdMap(args) {
@@ -1533,25 +1827,21 @@ export class TerminalPanel {
         }
 
         const edge = args[args.length - 1].toLowerCase();
-        const idArgs = args.slice(0, -1);
-
         if (!['l', 'r', 'u', 'd', 'left', 'right', 'up', 'down'].includes(edge)) {
             this._printError(`Unknown edge "${edge}". Use l, r, u, d.`);
             return;
         }
 
+        const { ids, rest } = this._parseIdList(args.slice(0, -1));
+        if (rest.length > 0) {
+            this._printError(`Cannot parse: ${rest.join(' ')}`);
+            return;
+        }
+
         const comps = [];
-        for (const a of idArgs) {
-            const id = parseInt(a);
-            if (isNaN(id)) {
-                this._printError(`Not a number: ${a}`);
-                return;
-            }
+        for (const id of ids) {
             const c = this.app.components.find(x => parseInt(x.id) === id);
-            if (!c) {
-                this._printError(`Component id=${id} not found`);
-                return;
-            }
+            if (!c) { this._printError(`Component id=${id} not found`); return; }
             comps.push(c);
         }
 
@@ -1607,11 +1897,14 @@ export class TerminalPanel {
             return;
         }
 
-        const idArgs = args.slice(0, -1);
+        const { ids, rest } = this._parseIdList(args.slice(0, -1));
+        if (rest.length > 0) {
+            this._printError(`Cannot parse: ${rest.join(' ')}`);
+            return;
+        }
+
         const comps = [];
-        for (const a of idArgs) {
-            const id = parseInt(a);
-            if (isNaN(id)) { this._printError(`Not a number: ${a}`); return; }
+        for (const id of ids) {
             const c = this.app.components.find(x => parseInt(x.id) === id);
             if (!c) { this._printError(`Component id=${id} not found`); return; }
             comps.push(c);
@@ -2078,18 +2371,20 @@ export class TerminalPanel {
     }
 
     _collides(x, y, w, h, exclude) {
+        if (this.app.allowOverlap) return false;        // ⭐ глобальный режим
+        const pad = this.app.collisionPadding || 0;
         for (const c of this.app.components) {
             if (c === exclude) continue;
             if (c._isNewDragging) continue;
-            if (!hasCollisions(c)) continue;    // ← NEW: ярлыки не мешают
+            if (!hasCollisions(c)) continue;
             const cx = c.relX ?? 0;
             const cy = c.relY ?? 0;
             const cw = c.width ?? 0;
             const ch = c.height ?? 0;
-            const overlap = !(x + w <= cx ||
-                              x >= cx + cw ||
-                              y + h <= cy ||
-                              y >= cy + ch);
+            const overlap = !(x - pad >= cx + cw ||
+                              x + w + pad <= cx ||
+                              y - pad >= cy + ch ||
+                              y + h + pad <= cy);
             if (overlap) return true;
         }
         return false;

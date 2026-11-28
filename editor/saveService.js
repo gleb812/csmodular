@@ -149,12 +149,17 @@ export async function saveModule(app, opts = {}) {
     // 7. Запись
     const ok = await libraryStore.saveModule(lib, finalName, jsCode, dspCode);
     if (!ok) {
-        // ⭐ Откат переименования при провале
         if (needsRename && app.codeViewerWindow) {
             app.module.title = oldTitle;
             app.codeViewerWindow.updateCode();
         }
         throw new Error(`saveModule("${lib}/${finalName}") returned false`);
+    }
+
+    // ⭐ 7a. Гайды: при save-as (finalName !== oldTitle) — копируем на новый ключ.
+    // 7a. Гайды: при save-as копируем на новый ключ
+    if (oldTitle && oldTitle !== finalName && typeof app.copyGuidesTo === 'function') {
+        app.copyGuidesTo(finalName, `csmodular:editor-guides:${oldTitle}`);
     }
 
     // 8. Синхронизация с app

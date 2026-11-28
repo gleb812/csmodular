@@ -33,7 +33,6 @@ import { SVG } from '../src/components/SVG.js';
 import { Line } from '../src/components/Line.js';
 import { Graph } from '../src/components/Graph.js';
 import { MiniVU } from '../src/components/MiniVU.js';
-
 import { MappingTables } from '../src/csound/MappingTables.js';
 
 const GRID_UNITS = {
@@ -61,13 +60,27 @@ export class EditorApp {
         this.selectedComponent = null;
         this.resizingCorner = null;
         
-        // ⭐ Для drag-and-drop
         this.draggingNewComponent = null;      // Компонент который перетаскиваем
         this.draggingNewComponentType = null;  // Тип компонента
         this.isDraggingNewComponent = false;
         this.dropValid = false;                // Можно ли бросить
         this.dropTargetModule = null;          // Целевой модуль
         this.draggingExistingComponent = null;
+        // ── Multi-selection ──────────────────────────────────
+        this.selectedComponents = new Set();   // Set<EditorPanel> (primary = selectedComponent)
+        // ── Collision settings ───────────────────────────────
+        this.collisionPadding = this._loadNumber('csmodular:editor-collision-padding', 4);
+        this.allowOverlap     = this._loadBool('csmodular:editor-allow-overlap', false);
+        // ── Guides ────────────────────────────────────────────
+        this.guides = { v: [], h: [] };        // мировые px относительно module.x/y
+        this.maxGuidesPerAxis = this._loadNumber('csmodular:editor-max-guides', 5);
+        this.draggingGuide = null;             // { axis: 'v'|'h', index, isNew }
+        this.hoveredGuide = null;              // { axis, index }
+        this._activeSnapGuides = [];           // для подсветки при снапе
+        // ── Snap ──────────────────────────────────────────────
+        this.snapRadius = this._loadNumber('csmodular:editor-snap-radius', 6);
+        this._guidesKey = null;                // текущий ключ в localStorage
+
         this.dragOffsetX = 0;
         this.dragOffsetY = 0;
         this.dragStartRelX = 0;
@@ -410,8 +423,16 @@ export class EditorApp {
                               target.isContentEditable;
             if (isEditable) return;
 
-            if (e.key === 'Delete' && this.selectedComponent) {
-                this.removeComponent(this.selectedComponent);
+            if (e.key === 'Delete') {
+                const group = this.selectedComponents && this.selectedComponents.size > 0
+                    ? Array.from(this.selectedComponents)
+                    : (this.selectedComponent ? [this.selectedComponent] : []);
+                if (group.length > 0) {
+                    for (const c of group) this.removeComponent(c, /*skipNotify*/ true);
+                    this.selectedComponents.clear();
+                    this.selectedComponent = null;
+                    this.uiManager.showNotification(`🗑️ Removed ${group.length}`);
+                }
             }
             if (e.key === 'Escape' && this.isDraggingNewComponent) {
                 this.cancelDraggingNewComponent();
@@ -431,7 +452,6 @@ export class EditorApp {
         });
     }
 
-// editor/EditorApp.js - onMouseDown
 
     onMouseDown(e) {
         const rect = this.canvas.getBoundingClientRect();
@@ -441,7 +461,47 @@ export class EditorApp {
         const worldX = (x - this.offsetX) / this.zoom;
         const worldY = (y - this.offsetY) / this.zoom;
 
-        // ⭐ NEW: закрыть открытые меню, если клик мимо
+        // ── Alt+drag: новая направляющая от края модуля ──
+        if (e.altKey && this.module) {
+            const m = this.module;
+            const edge = 8 / this.zoom;   // радиус захвата края
+            let axis = null;
+            if (Math.abs(worldX - m.x) < edge || Math.abs(worldX - (m.x + m.width)) < edge) {
+                axis = 'v';
+            } else if (Math.abs(worldY - m.y) < edge || Math.abs(worldY - (m.y + m.height)) < edge) {
+                axis = 'h';
+            }
+            if (axis) {
+                const pos = axis === 'v' ? (worldX - m.x) : (worldY - m.y);
+                this.draggingGuide = { axis, index: -1, pos: Math.round(pos), isNew: true };
+                this.canvas.style.cursor = axis === 'v' ? 'ew-resize' : 'ns-resize';
+                return;
+            }
+        }
+
+        // ── Захват существующей направляющей ──
+        if (this.module) {
+            const m = this.module;
+            const eps = 4 / this.zoom;
+            // сначала вертикальные
+            for (let i = 0; i < this.guides.v.length; i++) {
+                const gx = m.x + this.guides.v[i];
+                if (Math.abs(worldX - gx) < eps) {
+                    this.draggingGuide = { axis: 'v', index: i, pos: this.guides.v[i], isNew: false };
+                    this.canvas.style.cursor = 'ew-resize';
+                    return;
+                }
+            }
+            for (let i = 0; i < this.guides.h.length; i++) {
+                const gy = m.y + this.guides.h[i];
+                if (Math.abs(worldY - gy) < eps) {
+                    this.draggingGuide = { axis: 'h', index: i, pos: this.guides.h[i], isNew: false };
+                    this.canvas.style.cursor = 'ns-resize';
+                    return;
+                }
+            }
+        }
+
         for (const comp of this.components) {
             if (comp._isNewDragging) continue;
             if (typeof comp.closeIfClickOutside === 'function') {
@@ -461,42 +521,70 @@ export class EditorApp {
             return;
         }
         
-        // ⭐ Проверяем компоненты для перетаскивания
+        // ⭐ Check components for dragging
         for (let i = this.components.length - 1; i >= 0; i--) {
             const comp = this.components[i];
             if (comp._isNewDragging) continue;
-            
+
             let isInside = false;
-            if (typeof comp.isPointInside === 'function') {
-                isInside = comp.isPointInside(worldX, worldY);
-            } else if (typeof comp.contains === 'function') {
-                isInside = comp.contains(worldX, worldY);
-            }
-            
-            if (isInside) {
-                this.selectedComponent = comp;
-                this.draggingExistingComponent = comp;
-                
-                // Переключаем на таб Component в панели свойств
-                if (this.propertiesPanel) {
-                    this.propertiesPanel.setTab('component');
+            if (typeof comp.isPointInside === 'function')      isInside = comp.isPointInside(worldX, worldY);
+            else if (typeof comp.contains === 'function')      isInside = comp.contains(worldX, worldY);
+
+            if (!isInside) continue;
+
+            // ── Shift+click: toggle в мультивыделении ──
+            if (e.shiftKey) {
+                if (this.selectedComponents.has(comp)) {
+                    this.selectedComponents.delete(comp);
+                    if (this.selectedComponent === comp) this.selectedComponent = null;
+                } else {
+                    this.selectedComponents.add(comp);
+                    this.selectedComponent = comp;          // primary для Properties
+                    if (this.propertiesPanel) this.propertiesPanel.setTab('component');
                 }
-                this.dragOffsetX = worldX - comp.x;
-                this.dragOffsetY = worldY - comp.y;
-                
-                // Сохраняем исходные rel координаты
-                this.dragStartRelX = comp.relX;
-                this.dragStartRelY = comp.relY;
-                
-                // Z-order — отдельный массив, НЕ мутируем components[]
-                // (см. AI Context.md: params[] order = components[] order, never sort)
-                if (!this._zOrder) this._zOrder = [];
-                const zi = this._zOrder.indexOf(comp);
-                if (zi > -1) this._zOrder.splice(zi, 1);
-                this._zOrder.push(comp);
-                
-                return;
+                return;   // не начинаем drag на shift+click
             }
+
+            // ── Обычный click ──
+            if (!this.selectedComponents.has(comp)) {
+                // клик по невыделенному — сбрасываем сет, выбираем один
+                this.selectedComponents.clear();
+                this.selectedComponents.add(comp);
+            }
+            // если comp уже в сете — тащим всю группу, сет не трогаем
+
+            this.selectedComponent = comp;
+            this.draggingExistingComponent = comp;
+
+            if (this.propertiesPanel) this.propertiesPanel.setTab('component');
+
+            // ⭐ Снимок стартовых позиций для всей группы
+            this._dragStartPositions = new Map();
+            for (const c of this.selectedComponents) {
+                this._dragStartPositions.set(c, { relX: c.relX, relY: c.relY });
+            }
+
+            this.dragOffsetX = worldX - comp.x;
+            this.dragOffsetY = worldY - comp.y;
+            this.dragStartRelX = comp.relX;
+            this.dragStartRelY = comp.relY;
+
+            // Z-order — поднять всю группу
+            if (!this._zOrder) this._zOrder = [];
+            for (const c of this.selectedComponents) {
+                const zi = this._zOrder.indexOf(c);
+                if (zi > -1) this._zOrder.splice(zi, 1);
+                this._zOrder.push(c);
+            }
+
+            return;
+        }
+
+        // клик по пустому месту модуля — сброс выделения
+        if (this.module && this.module.isInside(worldX, worldY)) {
+            this.selectedComponent = null;
+            this.selectedComponents.clear();
+            if (this.componentPropertiesWindow) this.componentPropertiesWindow.hide();
         }
         
         if (this.module && this.module.isInside(worldX, worldY)) {
@@ -511,142 +599,222 @@ export class EditorApp {
         const rect = this.canvas.getBoundingClientRect();
         const x = (e.clientX - rect.left) * (this.width / rect.width);
         const y = (e.clientY - rect.top) * (this.height / rect.height);
-        
+
         const worldX = (x - this.offsetX) / this.zoom;
         const worldY = (y - this.offsetY) / this.zoom;
-        
-        // ===== DRAG-AND-DROP НОВОГО КОМПОНЕНТА =====
-        if (this.isDraggingNewComponent && this.draggingNewComponent) {
-            const comp = this.draggingNewComponent;
-            
-            let newX = worldX - comp.width / 2;
-            let newY = worldY - comp.height / 2;
-            
-            // Прилипание к микросетке если включено
-            if (this.snapEnabled) {
-                newX = Math.round(newX / this.snapGridSize) * this.snapGridSize;
-                newY = Math.round(newY / this.snapGridSize) * this.snapGridSize;
+
+        // ===== DRAG НАПРАВЛЯЮЩЕЙ =====
+        if (this.draggingGuide) {
+            const m = this.module;
+            const g = this.draggingGuide;
+            const raw = g.axis === 'v' ? (worldX - m.x) : (worldY - m.y);
+            let pos = Math.round(raw);
+            const max = g.axis === 'v' ? m.width : m.height;
+            pos = Math.max(0, Math.min(max, pos));
+
+            // снап самой направляющей к краям/центрам компонентов
+            if (this.snapRadius > 0) {
+                const r = this.snapRadius / this.zoom;
+                const candidates = [];
+                for (const c of this.components) {
+                    if (c._isNewDragging) continue;
+                    if (g.axis === 'v') {
+                        const cx = c.relX ?? 0, cw = c.width ?? 0;
+                        candidates.push(cx, cx + cw / 2, cx + cw);
+                    } else {
+                        const cy = c.relY ?? 0, ch = c.height ?? 0;
+                        candidates.push(cy, cy + ch / 2, cy + ch);
+                    }
+                }
+                candidates.push(0, max / 2, max);
+                let best = pos, bestD = Infinity;
+                for (const cand of candidates) {
+                    const d = cand - pos;
+                    if (Math.abs(d) < bestD && Math.abs(d) <= r) {
+                        bestD = Math.abs(d);
+                        best = Math.round(cand);
+                    }
+                }
+                pos = best;
             }
-            
-            comp.x = newX;
-            comp.y = newY;
-            
-            // Проверка внутри модуля (без учёта заголовка)
-            const isInsideModule = this.module && 
-                comp.x >= this.module.x &&
-                comp.x + comp.width <= this.module.x + this.module.width &&
-                comp.y >= this.module.y &&
-                comp.y + comp.height <= this.module.y + this.module.height;
-            
-            // Проверка коллизий с другими компонентами
-            this.dropValid = isInsideModule && !this._hasCollision(comp);
-            this.dropTargetModule = isInsideModule ? this.module : null;
-            
-            this.canvas.style.cursor = this.dropValid ? 'copy' : 'not-allowed';
+            g.pos = pos;
+            this.canvas.style.cursor = g.axis === 'v' ? 'ew-resize' : 'ns-resize';
             return;
         }
-        
+
         // ===== РЕСАЙЗ МОДУЛЯ =====
         if (this.resizingCorner) {
             const dx = worldX - this.resizingCorner.startX;
             const dy = worldY - this.resizingCorner.startY;
-            
+
             let newGridWidth = 1;
             let newGridHeight = Math.round(
                 (this.resizingCorner.startGridHeight * GRID_UNITS.Y + dy) / GRID_UNITS.Y
             );
-            
             newGridWidth = Math.max(MIN_GRID_WIDTH, newGridWidth);
             newGridHeight = Math.max(MIN_GRID_HEIGHT, newGridHeight);
-            
             this.module.resize(newGridWidth, newGridHeight);
 
-            // ⭐ Обновляем Properties Panel, если открыт таб Module
             if (this.propertiesPanel && this.propertiesPanel.activeTab === 'module') {
                 this.propertiesPanel._render();
             }
-            
-            
-            // Обновляем позиции всех компонентов при ресайзе
+
             for (const comp of this.components) {
                 if (comp._isNewDragging) continue;
-                // Ограничиваем компоненты внутри нового размера модуля
                 if (comp.x + comp.width > this.module.x + this.module.width) {
                     comp.x = this.module.x + this.module.width - comp.width;
-                    if (comp.relX !== undefined) {
-                        comp.relX = comp.x - this.module.x;
-                    }
+                    if (comp.relX !== undefined) comp.relX = comp.x - this.module.x;
                 }
                 if (comp.y + comp.height > this.module.y + this.module.height) {
                     comp.y = this.module.y + this.module.height - comp.height;
-                    if (comp.relY !== undefined) {
-                        comp.relY = comp.y - this.module.y;
-                    }
+                    if (comp.relY !== undefined) comp.relY = comp.y - this.module.y;
                 }
             }
-            
             return;
         }
-        
-        // ===== ПЕРЕТАСКИВАНИЕ СУЩЕСТВУЮЩЕГО КОМПОНЕНТА =====
+
+        // ===== DRAG СУЩЕСТВУЮЩЕГО КОМПОНЕНТА / ГРУППЫ =====
         if (this.draggingExistingComponent) {
             const comp = this.draggingExistingComponent;
-            
+
             let newX = worldX - this.dragOffsetX;
             let newY = worldY - this.dragOffsetY;
-            
-            // Прилипание к микросетке если включено
+
             if (this.snapEnabled) {
                 newX = Math.round(newX / this.snapGridSize) * this.snapGridSize;
                 newY = Math.round(newY / this.snapGridSize) * this.snapGridSize;
             }
-            
-            // Ограничиваем внутри модуля
-            newX = Math.max(this.module.x, Math.min(this.module.x + this.module.width - comp.width, newX));
+
+            newX = Math.max(this.module.x, Math.min(this.module.x + this.module.width  - comp.width,  newX));
             newY = Math.max(this.module.y, Math.min(this.module.y + this.module.height - comp.height, newY));
-            
+
+            // ⭐ SNAP: bbox группы (или одиночного) → направляющие / края / модуль
+            const groupArr = Array.from(
+                this.selectedComponents.size > 0 ? this.selectedComponents : [comp]
+            );
+            const propRelX = newX - this.module.x;
+            const propRelY = newY - this.module.y;
+
+            let bboxX, bboxY, bboxW, bboxH;
+            if (groupArr.length === 1) {
+                bboxX = propRelX;
+                bboxY = propRelY;
+                bboxW = comp.width;
+                bboxH = comp.height;
+            } else {
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                for (const c of groupArr) {
+                    const cx = c.relX ?? 0;
+                    const cy = c.relY ?? 0;
+                    if (cx < minX) minX = cx;
+                    if (cy < minY) minY = cy;
+                    if (cx + c.width  > maxX) maxX = cx + c.width;
+                    if (cy + c.height > maxY) maxY = cy + c.height;
+                }
+                const dxPrimary = propRelX - (comp.relX ?? 0);
+                const dyPrimary = propRelY - (comp.relY ?? 0);
+                bboxX = minX + dxPrimary;
+                bboxY = minY + dyPrimary;
+                bboxW = maxX - minX;
+                bboxH = maxY - minY;
+            }
+
+            const exclude = new Set(groupArr);
+            const snapped = this._snapBBox(
+                { x: bboxX, y: bboxY, w: bboxW, h: bboxH },
+                exclude
+            );
+            newX += snapped.x - bboxX;
+            newY += snapped.y - bboxY;
+
+            // повторный clamp после снапа
+            newX = Math.max(this.module.x, Math.min(this.module.x + this.module.width  - comp.width,  newX));
+            newY = Math.max(this.module.y, Math.min(this.module.y + this.module.height - comp.height, newY));
+
+            const dx = newX - comp.x;
+            const dy = newY - comp.y;
+
+            for (const c of this.selectedComponents) {
+                if (c === comp) continue;
+                c.x += dx;
+                c.y += dy;
+            }
             comp.x = newX;
             comp.y = newY;
-            
-            // Обновляем rel координаты
-            comp.relX = newX - this.module.x;
-            comp.relY = newY - this.module.y;
-            
-            // Проверяем коллизии с другими компонентами
-            const hasCollision = this._hasCollision(comp);
-            this.canvas.style.cursor = hasCollision ? 'not-allowed' : 'grabbing';
+
+            let anyCollision = false;
+            for (const c of this.selectedComponents) {
+                c.x = Math.max(this.module.x, Math.min(this.module.x + this.module.width  - c.width,  c.x));
+                c.y = Math.max(this.module.y, Math.min(this.module.y + this.module.height - c.height, c.y));
+                c.relX = c.x - this.module.x;
+                c.relY = c.y - this.module.y;
+                if (this._hasCollision(c)) anyCollision = true;
+            }
+
+            this._activeSnapGuides = snapped.hits;
+            this.canvas.style.cursor = anyCollision ? 'not-allowed' : 'grabbing';
             return;
         }
-        
+
+        // ===== DRAG-AND-DROP НОВОГО КОМПОНЕНТА =====
+        if (this.isDraggingNewComponent && this.draggingNewComponent) {
+            const comp = this.draggingNewComponent;
+
+            let newX = worldX - comp.width / 2;
+            let newY = worldY - comp.height / 2;
+
+            if (this.snapEnabled) {
+                newX = Math.round(newX / this.snapGridSize) * this.snapGridSize;
+                newY = Math.round(newY / this.snapGridSize) * this.snapGridSize;
+            }
+
+            // ⭐ SNAP для нового компонента
+            const propRelX = newX - this.module.x;
+            const propRelY = newY - this.module.y;
+            const snapped = this._snapBBox(
+                { x: propRelX, y: propRelY, w: comp.width, h: comp.height },
+                new Set()
+            );
+            comp.x = this.module.x + snapped.x;
+            comp.y = this.module.y + snapped.y;
+            this._activeSnapGuides = snapped.hits;
+
+            const isInsideModule = this.module &&
+                comp.x >= this.module.x &&
+                comp.x + comp.width  <= this.module.x + this.module.width &&
+                comp.y >= this.module.y &&
+                comp.y + comp.height <= this.module.y + this.module.height;
+
+            this.dropValid = isInsideModule && !this._hasCollision(comp);
+            this.dropTargetModule = isInsideModule ? this.module : null;
+            this.canvas.style.cursor = this.dropValid ? 'copy' : 'not-allowed';
+            return;
+        }
+
         // ===== ХОВЕР НАД КОМПОНЕНТАМИ =====
-        // Обновляем состояние hover для компонентов
         for (const comp of this.components) {
             if (comp._isNewDragging) continue;
             if (typeof comp.handleMouseMove === 'function') {
                 comp.handleMouseMove(worldX, worldY);
             }
         }
-        
-        // Меняем курсор при наведении на компонент
+
         let cursorChanged = false;
         for (let i = this.components.length - 1; i >= 0; i--) {
             const comp = this.components[i];
             if (comp._isNewDragging) continue;
-            
+
             let isInside = false;
-            if (typeof comp.isPointInside === 'function') {
-                isInside = comp.isPointInside(worldX, worldY);
-            } else if (typeof comp.contains === 'function') {
-                isInside = comp.contains(worldX, worldY);
-            }
-            
+            if (typeof comp.isPointInside === 'function')      isInside = comp.isPointInside(worldX, worldY);
+            else if (typeof comp.contains === 'function')      isInside = comp.contains(worldX, worldY);
+
             if (isInside) {
                 this.canvas.style.cursor = 'grab';
                 cursorChanged = true;
                 break;
             }
         }
-        
+
         if (!cursorChanged && !this.isDraggingNewComponent && !this.draggingExistingComponent) {
             this.canvas.style.cursor = 'default';
         }
@@ -661,6 +829,32 @@ export class EditorApp {
 
         const worldX = (x - this.offsetX) / this.zoom;
         const worldY = (y - this.offsetY) / this.zoom;
+
+        // right-click по направляющей → удалить
+        if (this.module) {
+            const m = this.module;
+            const eps = 4 / this.zoom;
+            for (let i = 0; i < this.guides.v.length; i++) {
+                const gx = m.x + this.guides.v[i];
+                if (Math.abs(worldX - gx) < eps) {
+                    e.preventDefault();
+                    if (confirm(`Delete vertical guide @ ${this.guides.v[i]}?`)) {
+                        this.removeGuide('v', i);
+                    }
+                    return;
+                }
+            }
+            for (let i = 0; i < this.guides.h.length; i++) {
+                const gy = m.y + this.guides.h[i];
+                if (Math.abs(worldY - gy) < eps) {
+                    e.preventDefault();
+                    if (confirm(`Delete horizontal guide @ ${this.guides.h[i]}?`)) {
+                        this.removeGuide('h', i);
+                    }
+                    return;
+                }
+            }
+        }
 
         // Ищем компонент под курсором (topmost first)
         for (let i = this.components.length - 1; i >= 0; i--) {
@@ -713,13 +907,19 @@ export class EditorApp {
     }
 
     restoreModuleFromData(moduleData, dspCode) {
-        
         // ⭐ 1. Очищаем текущее состояние
         this.components = [];
         this._zOrder = [];
         this.selectedComponent = null;
         this._nextComponentId = 1;
         this._availableIds = [];
+        this.selectedComponents = new Set();
+        this._dragStartPositions = null;
+        this.guides = { v: [], h: [] };
+        this._guidesKey = null;
+        this.draggingGuide = null;
+        this.loadGuides();
+        this._activeSnapGuides = [];
         
         // ⭐ 2. Восстанавливаем размеры модуля
         const gridWidth = moduleData.gridWidth || 1;
@@ -790,8 +990,7 @@ export class EditorApp {
         if (this.propertiesWindow && this.propertiesWindow.isVisible) {
             this.propertiesWindow.show();
         }
-        
-        // ⭐ 7. Перерисовка (animate сам)
+
     }
 
     _createComponentFromData(compData) {
@@ -800,6 +999,27 @@ export class EditorApp {
     }
 
     onMouseUp(e) {
+        if (this.draggingGuide) {
+            const g = this.draggingGuide;
+            const m = this.module;
+            const pos = g.pos;
+            if (g.isNew) {
+                if (this.addGuide(g.axis, pos)) {
+                    this.uiManager.showNotification(`📏 ${g.axis === 'v' ? 'Vertical' : 'Horizontal'} guide @ ${pos}`);
+                }
+            } else {
+                // обновить существующую
+                const list = this.guides[g.axis];
+                if (list && g.index >= 0 && g.index < list.length) {
+                    list[g.index] = pos;
+                    list.sort((a, b) => a - b);
+                    this.saveGuides();
+                }
+            }
+            this.draggingGuide = null;
+            this.canvas.style.cursor = 'default';
+            return;
+        }
         // ===== ЗАВЕРШЕНИЕ DRAG-AND-DROP НОВОГО КОМПОНЕНТА =====
         if (this.isDraggingNewComponent && this.draggingNewComponent) {
             if (this.dropValid && this.dropTargetModule) {
@@ -840,43 +1060,72 @@ export class EditorApp {
         // ===== ЗАВЕРШЕНИЕ ПЕРЕТАСКИВАНИЯ СУЩЕСТВУЮЩЕГО КОМПОНЕНТА =====
         if (this.draggingExistingComponent) {
             const comp = this.draggingExistingComponent;
-            
-            // Проверяем валидность позиции (внутри модуля)
-            const isValid = comp.x >= this.module.x &&
-                           comp.x + comp.width <= this.module.x + this.module.width &&
-                           comp.y >= this.module.y &&
-                           comp.y + comp.height <= this.module.y + this.module.height;
-            
-            // Проверяем коллизии с другими компонентами
-            const hasCollision = this._hasCollision(comp);
-            
-            // Если позиция невалидна или есть коллизия - возвращаем на исходную
-            if (!isValid || hasCollision) {
-                comp.x = this.module.x + this.dragStartRelX;
-                comp.y = this.module.y + this.dragStartRelY;
-                comp.relX = this.dragStartRelX;
-                comp.relY = this.dragStartRelY;
-                
-                if (!isValid) {
-                    this.uiManager.showNotification('⚠️ Component returned - outside module');
-                } else if (hasCollision) {
-                    this.uiManager.showNotification('⚠️ Component returned - collision detected');
+            const group = Array.from(this.selectedComponents);
+            if (group.length === 0) group.push(comp);
+
+            // Валидность: все внутри модуля
+            const allInside = group.every(c =>
+                c.x >= this.module.x &&
+                c.x + c.width  <= this.module.x + this.module.width &&
+                c.y >= this.module.y &&
+                c.y + c.height <= this.module.y + this.module.height
+            );
+
+            // Коллизии: только между членами группы и внешними
+            const groupSet = new Set(group);
+            let hasCollision = false;
+            if (!this.allowOverlap) {
+                for (const c of group) {
+                    if (!hasCollisions(c)) continue;
+                    const pad = this.collisionPadding || 0;
+                    for (const other of this.components) {
+                        if (other === c || other._isNewDragging) continue;
+                        if (groupSet.has(other)) continue;   // внутри группы не конфликтуем
+                        if (!hasCollisions(other)) continue;
+                        if (c.x - pad < other.x + other.width &&
+                            c.x + c.width + pad > other.x &&
+                            c.y - pad < other.y + other.height &&
+                            c.y + c.height + pad > other.y) {
+                            hasCollision = true; break;
+                        }
+                    }
+                    if (hasCollision) break;
                 }
-            } else {
-                // Фиксируем новую позицию
-                comp.relX = comp.x - this.module.x;
-                comp.relY = comp.y - this.module.y;
-                this.uiManager.showNotification('✅ Component moved');
             }
-            
+
+            if (!allInside || hasCollision) {
+                // откат всей группы к снимку
+                if (this._dragStartPositions) {
+                    for (const [c, pos] of this._dragStartPositions) {
+                        c.relX = pos.relX;
+                        c.relY = pos.relY;
+                        c.x = this.module.x + pos.relX;
+                        c.y = this.module.y + pos.relY;
+                    }
+                }
+                if (!allInside)      this.uiManager.showNotification('⚠️ Group returned - outside module');
+                else if (hasCollision) this.uiManager.showNotification('⚠️ Group returned - collision detected');
+            } else {
+                // фиксируем rel (уже обновлены в onMouseMove)
+                for (const c of group) {
+                    c.relX = c.x - this.module.x;
+                    c.relY = c.y - this.module.y;
+                }
+                this.uiManager.showNotification(
+                    group.length > 1 ? `✅ Group moved (${group.length})` : '✅ Component moved'
+                );
+            }
+
             this.draggingExistingComponent = null;
+            this._dragStartPositions = null;
             this.dragOffsetX = 0;
             this.dragOffsetY = 0;
             this.dragStartRelX = 0;
             this.dragStartRelY = 0;
             this.canvas.style.cursor = 'default';
         }
-        
+
+        this._activeSnapGuides = [];
         // ===== ЗАВЕРШЕНИЕ РЕСАЙЗА =====
         this.resizingCorner = null;
     }
@@ -957,29 +1206,17 @@ export class EditorApp {
 
     editModuleTitle() {
         if (!this.module) return;
-
         const currentTitle = this.module.title;
         const newTitle = prompt('Enter module name:', currentTitle);
+        if (newTitle === null || newTitle.trim() === '') return;
 
-        if (newTitle !== null && newTitle.trim() !== '') {
-            // Санитайз — как везде
-            let name = newTitle.trim().replace(/\s/g, '');
-            if (/^[0-9]/.test(name)) name = 'M' + name;
-            name = name.replace(/[^a-zA-Z0-9_]/g, '');
-            if (!name) name = 'NewModule';
+        let name = newTitle.trim().replace(/\s/g, '');
+        if (/^[0-9]/.test(name)) name = 'M' + name;
+        name = name.replace(/[^a-zA-Z0-9_]/g, '');
+        if (!name) name = 'NewModule';
 
-            this.module.title = name;
-
-            // Обновить Csound-код
-            if (this.codeViewerWindow) this.codeViewerWindow.updateCode();
-
-            // Обновить панель свойств, если открыт таб Module
-            if (this.propertiesPanel && this.propertiesPanel.activeTab === 'module') {
-                this.propertiesPanel._render();
-            }
-
-            this.uiManager.showNotification(`📝 Module renamed to: ${name}`);
-        }
+        this.setModuleTitle(name);
+        this.uiManager.showNotification(`📝 Module renamed to: ${name}`);
     }
 
     // ========== ZOOM ==========
@@ -1040,35 +1277,34 @@ export class EditorApp {
 
     // ========== УПРАВЛЕНИЕ КОМПОНЕНТАМИ ==========
 
-// editor/EditorApp.js - обновлённый removeComponent()
-// editor/EditorApp.js - добавьте этот метод
-
     getComponentPorts() {
         return collectPorts(this.components);
     }
     
-    removeComponent(component) {
+    removeComponent(component, skipNotify = false) {
         const index = this.components.indexOf(component);
         if (index > -1) {
-            // ⭐ Освобождаем ID для переиспользования
             const id = parseInt(component.id);
-            if (!isNaN(id)) {
-                this._releaseComponentId(id);
-            }
-            
+            if (!isNaN(id)) this._releaseComponentId(id);
             this.components.splice(index, 1);
-            this.selectedComponent = null;
-            this.uiManager.showNotification('🗑️ Component removed');
+            this.selectedComponents?.delete(component);
+            if (this.selectedComponent === component) this.selectedComponent = null;
+            if (!skipNotify) this.uiManager.showNotification('🗑️ Component removed');
         }
     }
 
-    // EditorApp.js
     clearModule(opts = {}) {
         this.components = [];
         this._zOrder = [];
         this.selectedComponent = null;
         this._nextComponentId = 1;
         this._availableIds = [];
+        this.selectedComponents = new Set();
+        this._dragStartPositions = null;
+        this.guides = { v: [], h: [] };
+        this._guidesKey = null;
+        this.draggingGuide = null;
+        this._activeSnapGuides = [];
 
         if (this.module) {
             if (opts.title !== undefined) this.module.title = opts.title;
@@ -1127,7 +1363,8 @@ export class EditorApp {
         if (this.showMicroGrid && this.module) {
             this.drawMicroGrid(this.ctx);
         }
-
+        // 2a. Направляющие
+        this._drawGuides(this.ctx);
         // 3. Компоненты — рисуем по z-order, данные берём из components[]
         //    ⭐ ВАЖНО: components[] НЕ мутируем (params[] order = components[] order).
         //    Z-order — отдельный массив this._zOrder.
@@ -1186,9 +1423,21 @@ export class EditorApp {
             this.module.drawResizeCorner(this.ctx);
         }
 
-        // 5. Selection
-        if (this.selectedComponent && !this.selectedComponent._isNewDragging) {
-            this.drawSelection(this.selectedComponent);
+        // 5. Selection — один общий контур вокруг группы
+        const selGroup = this.selectedComponents && this.selectedComponents.size > 0
+            ? Array.from(this.selectedComponents).filter(c => !c._isNewDragging)
+            : (this.selectedComponent && !this.selectedComponent._isNewDragging
+                ? [this.selectedComponent] : []);
+
+        if (selGroup.length === 1) {
+            this.drawSelection(selGroup[0]);
+        } else if (selGroup.length > 1) {
+            this.drawGroupSelection(selGroup);
+        }
+
+        // 5a. Красные зоны коллизий (пассивно, каждый кадр; n² при n<100 — ок)
+        if (this.collisionPadding > 0 || this.allowOverlap) {
+            this._drawCollisionZones();
         }
 
         this.ctx.restore();
@@ -1205,11 +1454,160 @@ export class EditorApp {
         requestAnimationFrame(() => this.animate());
     }
 
-    /**
-     * Overlay-проход: всё, что должно быть ПОВЕРХ модулей.
-     * Сейчас — выпадающее меню PartSelector (и любых других компонентов
-     * с drawOverlay()).
-     */
+    _drawGuides(ctx) {
+        if (!this.module) return;
+        const m = this.module;
+
+        // «Активные» — те, к которым сейчас прилипли (яркая подсветка)
+        const activeSet = new Set(
+            (this._activeSnapGuides || []).map(h => `${h.axis}:${h.pos}`)
+        );
+
+        // Границы canvas в мировых координатах (чтобы линия шла через весь экран, как в GIMP)
+        const worldLeft   = (0 - this.offsetX) / this.zoom;
+        const worldRight  = (this.width  - this.offsetX) / this.zoom;
+        const worldTop    = (0 - this.offsetY) / this.zoom;
+        const worldBottom = (this.height - this.offsetY) / this.zoom;
+
+        ctx.save();
+        ctx.setLineDash([]);   // ⭐ непрерывная линия
+
+        // ── Вертикальные ──
+        for (let i = 0; i < this.guides.v.length; i++) {
+            const gx = m.x + this.guides.v[i];
+            const isActive = activeSet.has(`v:${this.guides.v[i]}`);
+            const isDragging = this.draggingGuide &&
+                this.draggingGuide.axis === 'v' &&
+                (this.draggingGuide.isNew
+                    ? this.draggingGuide.pos === this.guides.v[i]
+                    : this.draggingGuide.index === i);
+
+            ctx.strokeStyle = (isActive || isDragging)
+                ? 'rgba(0, 170, 255, 0.95)'
+                : 'rgba(0, 170, 255, 0.45)';
+            ctx.lineWidth = (isActive || isDragging)
+                ? 1.5 / this.zoom
+                : 1 / this.zoom;
+
+            ctx.beginPath();
+            ctx.moveTo(gx, worldTop);
+            ctx.lineTo(gx, worldBottom);
+            ctx.stroke();
+        }
+
+        // ── Горизонтальные ──
+        for (let i = 0; i < this.guides.h.length; i++) {
+            const gy = m.y + this.guides.h[i];
+            const isActive = activeSet.has(`h:${this.guides.h[i]}`);
+            const isDragging = this.draggingGuide &&
+                this.draggingGuide.axis === 'h' &&
+                (this.draggingGuide.isNew
+                    ? this.draggingGuide.pos === this.guides.h[i]
+                    : this.draggingGuide.index === i);
+
+            ctx.strokeStyle = (isActive || isDragging)
+                ? 'rgba(0, 170, 255, 0.95)'
+                : 'rgba(0, 170, 255, 0.45)';
+            ctx.lineWidth = (isActive || isDragging)
+                ? 1.5 / this.zoom
+                : 1 / this.zoom;
+
+            ctx.beginPath();
+            ctx.moveTo(worldLeft, gy);
+            ctx.lineTo(worldRight, gy);
+            ctx.stroke();
+        }
+
+        // ── Превью новой направляющей (при drag) ──
+        if (this.draggingGuide && this.draggingGuide.isNew) {
+            const g = this.draggingGuide;
+            ctx.strokeStyle = 'rgba(0, 170, 255, 1)';
+            ctx.lineWidth = 2 / this.zoom;
+
+            if (g.axis === 'v') {
+                const gx = m.x + g.pos;
+                ctx.beginPath();
+                ctx.moveTo(gx, worldTop);
+                ctx.lineTo(gx, worldBottom);
+                ctx.stroke();
+            } else {
+                const gy = m.y + g.pos;
+                ctx.beginPath();
+                ctx.moveTo(worldLeft, gy);
+                ctx.lineTo(worldRight, gy);
+                ctx.stroke();
+            }
+        }
+
+        ctx.restore();
+    }
+
+    drawGroupSelection(list) {
+        if (list.length === 0) return;
+        let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+        for (const c of list) {
+            const cx = c.x || 0, cy = c.y || 0;
+            const cw = c.width || c.actualSize || 20;
+            const ch = c.height || c.actualSize || 20;
+            if (cx < x0) x0 = cx;
+            if (cy < y0) y0 = cy;
+            if (cx + cw > x1) x1 = cx + cw;
+            if (cy + ch > y1) y1 = cy + ch;
+        }
+        const ctx = this.ctx;
+        const pad = 3 / this.zoom;
+        ctx.save();
+        ctx.strokeStyle = '#0af';
+        ctx.lineWidth = 2 / this.zoom;
+        ctx.setLineDash([6 / this.zoom, 4 / this.zoom]);
+        ctx.strokeRect(x0 - pad, y0 - pad, (x1 - x0) + 2 * pad, (y1 - y0) + 2 * pad);
+        ctx.setLineDash([]);
+
+        // индивидуальные тонкие контуры
+        ctx.strokeStyle = 'rgba(0, 170, 255, 0.5)';
+        ctx.lineWidth = 1 / this.zoom;
+        for (const c of list) {
+            const cx = c.x || 0, cy = c.y || 0;
+            const cw = c.width || c.actualSize || 20;
+            const ch = c.height || c.actualSize || 20;
+            ctx.strokeRect(cx, cy, cw, ch);
+        }
+        ctx.restore();
+    }
+
+    _drawCollisionZones() {
+        const pad = this.collisionPadding || 0;
+        const comps = this.components.filter(c => !c._isNewDragging && hasCollisions(c));
+        const ctx = this.ctx;
+
+        for (let i = 0; i < comps.length; i++) {
+            const a = comps[i];
+            for (let j = i + 1; j < comps.length; j++) {
+                const b = comps[j];
+                // Пересечение расширенных bbox'ов
+                const ax0 = a.x - pad, ax1 = a.x + a.width  + pad;
+                const ay0 = a.y - pad, ay1 = a.y + a.height + pad;
+                const bx0 = b.x - pad, bx1 = b.x + b.width  + pad;
+                const by0 = b.y - pad, by1 = b.y + b.height + pad;
+                if (ax0 >= bx1 || bx0 >= ax1 || ay0 >= by1 || by0 >= ay1) continue;
+
+                // Область пересечения расширенных рамок
+                const ix0 = Math.max(ax0, bx0);
+                const iy0 = Math.max(ay0, by0);
+                const ix1 = Math.min(ax1, bx1);
+                const iy1 = Math.min(ay1, by1);
+
+                ctx.save();
+                ctx.fillStyle = 'rgba(232, 74, 74, 0.25)';
+                ctx.fillRect(ix0, iy0, ix1 - ix0, iy1 - iy0);
+                ctx.strokeStyle = 'rgba(232, 74, 74, 0.8)';
+                ctx.lineWidth = 1 / this.zoom;
+                ctx.strokeRect(ix0, iy0, ix1 - ix0, iy1 - iy0);
+                ctx.restore();
+            }
+        }
+    }
+
     drawOverlays() {
         const ctx = this.ctx;
 
@@ -1229,7 +1627,7 @@ export class EditorApp {
         ctx.restore();
     }
 
-    // ⭐ НОВЫЙ МЕТОД - рисует микросетку только внутри модуля
+    // рисует микросетку только внутри модуля
     drawMicroGrid(ctx) {
         if (!this.module) return;
         
@@ -1262,8 +1660,6 @@ export class EditorApp {
         
         ctx.restore();
     }
-
-    // editor/EditorApp.js - drawBackground (убираем микросетку отсюда)
 
     drawBackground() {
         const ctx = this.ctx;
@@ -1322,24 +1718,18 @@ export class EditorApp {
         ctx.restore();
     }
 
-    /**
-     * Проверка коллизий компонента с другими.
-     * Ярлыки (noCollision) не проверяются и не мешают.
-     * @param {object} comp — компонент, который двигаем/ставим
-     * @param {number} x — новые мировые X
-     * @param {number} y — новые мировые Y
-     * @returns {boolean} true если есть коллизия
-     */
     _hasCollision(comp, x = comp.x, y = comp.y) {
-        if (!hasCollisions(comp)) return false;   // сам ярлык — не проверяем
+        if (this.allowOverlap) return false;          // ⭐ режим «без конфликтов»
+        if (!hasCollisions(comp)) return false;       // сам ярлык — не проверяем
+        const pad = this.collisionPadding || 0;
         for (const other of this.components) {
             if (other === comp) continue;
             if (other._isNewDragging) continue;
-            if (!hasCollisions(other)) continue;  // ярлык не мешает
-            if (x < other.x + other.width &&
-                x + comp.width > other.x &&
-                y < other.y + other.height &&
-                y + comp.height > other.y) {
+            if (!hasCollisions(other)) continue;      // ярлык не мешает
+            if (x - pad < other.x + other.width &&
+                x + comp.width + pad > other.x &&
+                y - pad < other.y + other.height &&
+                y + comp.height + pad > other.y) {
                 return true;
             }
         }
@@ -1370,5 +1760,273 @@ export class EditorApp {
         );
         ctx.setLineDash([]);
         ctx.restore();
+    }
+
+    _guidesStorageKey() {
+        const title = this.module?.title || 'NewModule';
+        return `csmodular:editor-guides:${title}`;
+    }
+
+    /**
+     * Перенести гайды со старого ключа на новый (при переименовании модуля).
+     * Старый ключ удаляется, чтобы не копить мусор в localStorage.
+     */
+    renameGuides(oldTitle, newTitle) {
+        if (!oldTitle || !newTitle || oldTitle === newTitle) return;
+        const oldKey = `csmodular:editor-guides:${oldTitle}`;
+        const newKey = `csmodular:editor-guides:${newTitle}`;
+        if (oldKey === newKey) return;
+
+        try {
+            const raw = localStorage.getItem(oldKey);
+            if (raw !== null) {
+                localStorage.setItem(newKey, raw);
+                localStorage.removeItem(oldKey);
+            }
+            // Если старых не было — не создаём пустой; loadGuides вернёт [].
+        } catch { /* ignore quota */ }
+
+        this._guidesKey = newKey;
+    }
+
+    /**
+     * Скопировать гайды текущего модуля под новое имя (при save-as / copy).
+     * НЕ удаляет старый ключ — оригинал остаётся как есть.
+     * Переключает якорь `_guidesKey` на новое имя (редактор продолжает
+     * работать с копией под новым именем).
+     */
+    copyGuidesTo(newTitle, srcTitle = null) {
+        if (!this.module || !newTitle) return;
+        const src = srcTitle || this._guidesKey || this._guidesStorageKey();
+        const dstKey = `csmodular:editor-guides:${newTitle}`;
+        if (src === dstKey) return;
+
+        try {
+            const raw = localStorage.getItem(src);
+            const data = raw !== null ? raw : JSON.stringify(this.guides);
+            localStorage.setItem(dstKey, data);
+        } catch { /* ignore quota */ }
+
+        this._guidesKey = dstKey;
+    }
+
+    /**
+     * Единая точка смены имени модуля.
+     * Переносит гайды, обновляет Csound-код и Properties Panel.
+     */
+    setModuleTitle(newTitle) {
+        if (!this.module || !newTitle) return;
+        const oldTitle = this.module.title;
+        if (oldTitle === newTitle) return;
+
+        this.module.title = newTitle;
+        this.renameGuides(oldTitle, newTitle);
+
+        if (this.codeViewerWindow) this.codeViewerWindow.updateCode();
+        if (this.propertiesPanel?.activeTab === 'module') this.propertiesPanel._render();
+    }
+
+    loadGuides() {
+        const key = this._guidesStorageKey();
+        this._guidesKey = key;
+        try {
+            const raw = localStorage.getItem(key);
+            if (!raw) { this.guides = { v: [], h: [] }; return; }
+            const data = JSON.parse(raw);
+            this.guides = {
+                v: Array.isArray(data.v) ? data.v.filter(n => Number.isFinite(n)) : [],
+                h: Array.isArray(data.h) ? data.h.filter(n => Number.isFinite(n)) : [],
+            };
+        } catch {
+            this.guides = { v: [], h: [] };
+        }
+    }
+
+    saveGuides() {
+        if (!this._guidesKey) this._guidesKey = this._guidesStorageKey();
+        try {
+            localStorage.setItem(this._guidesKey, JSON.stringify(this.guides));
+        } catch { /* ignore quota */ }
+    }
+
+    addGuide(axis, pos) {
+        const list = this.guides[axis];
+        if (!list) return false;
+        if (list.length >= this.maxGuidesPerAxis) {
+            this.uiManager.showNotification(`⚠️ Max ${this.maxGuidesPerAxis} ${axis} guides`);
+            return false;
+        }
+        const p = Math.round(pos);
+        if (list.some(v => Math.abs(v - p) < 2)) return false; // почти дубль
+        list.push(p);
+        list.sort((a, b) => a - b);
+        this.saveGuides();
+        return true;
+    }
+
+    removeGuide(axis, index) {
+        const list = this.guides[axis];
+        if (!list || index < 0 || index >= list.length) return false;
+        list.splice(index, 1);
+        this.saveGuides();
+        return true;
+    }
+
+    clearGuides() {
+        this.guides = { v: [], h: [] };
+        this.saveGuides();
+    }
+
+    /**
+     * Возвращает скорректированные (x, y) для bbox, прилипая к направляющим,
+     * краям/центрам других компонентов и краям/центрам модуля.
+     *
+     * @param {{x:number,y:number,w:number,h:number}} bbox — предлагаемый bbox (в мировых px, относительно module.x/y)
+     * @param {Set<object>} exclude — компоненты, которые не учитываем (двигаемая группа)
+     * @returns {{x:number, y:number, hits:Array<{axis:'v'|'h', pos:number}>}}
+     */
+    _snapBBox(bbox, exclude = new Set()) {
+        const result = { x: bbox.x, y: bbox.y, hits: [] };
+        if (this.snapRadius <= 0) return result;
+
+        // Радиус в мировых пикселях — зависит от зума
+        const r = this.snapRadius / this.zoom;
+
+        // ── Кандидаты по X (вертикальные линии) ──
+        // Каждая запись: { pos, kind: 'guide'|'comp'|'module', source }
+        const xCandidates = [];
+        // направляющие
+        for (const gx of this.guides.v) {
+            xCandidates.push({ pos: gx, kind: 'guide' });
+        }
+        // края/центры других компонентов
+        for (const c of this.components) {
+            if (c._isNewDragging) continue;
+            if (exclude.has(c)) continue;
+            const cx = c.relX ?? 0;
+            const cw = c.width ?? 0;
+            xCandidates.push({ pos: cx,             kind: 'comp' });
+            xCandidates.push({ pos: cx + cw / 2,    kind: 'comp' });
+            xCandidates.push({ pos: cx + cw,        kind: 'comp' });
+        }
+        // края/центры модуля
+        if (this.module) {
+            xCandidates.push({ pos: 0,                    kind: 'module' });
+            xCandidates.push({ pos: this.module.width / 2, kind: 'module' });
+            xCandidates.push({ pos: this.module.width,     kind: 'module' });
+        }
+
+        // «Якоря» двигаемого bbox по X
+        const xAnchors = [bbox.x, bbox.x + bbox.w / 2, bbox.x + bbox.w];
+
+        // Найти лучший сдвиг по X
+        let bestDx = 0;
+        let bestDistX = Infinity;
+        for (const cand of xCandidates) {
+            for (const anchor of xAnchors) {
+                const d = cand.pos - anchor;
+                const ad = Math.abs(d);
+                if (ad > r) continue;
+                // приоритет: guide < comp < module (при равенстве расстояния)
+                const prio = cand.kind === 'guide' ? 0 : cand.kind === 'comp' ? 1 : 2;
+                const score = ad + prio * 0.001;
+                if (score < bestDistX) {
+                    bestDistX = score;
+                    bestDx = d;
+                }
+            }
+        }
+        result.x += bestDx;
+
+        // ── Кандидаты по Y (горизонтальные) ──
+        const yCandidates = [];
+        for (const gy of this.guides.h) {
+            yCandidates.push({ pos: gy, kind: 'guide' });
+        }
+        for (const c of this.components) {
+            if (c._isNewDragging) continue;
+            if (exclude.has(c)) continue;
+            const cy = c.relY ?? 0;
+            const ch = c.height ?? 0;
+            yCandidates.push({ pos: cy,             kind: 'comp' });
+            yCandidates.push({ pos: cy + ch / 2,    kind: 'comp' });
+            yCandidates.push({ pos: cy + ch,        kind: 'comp' });
+        }
+        if (this.module) {
+            yCandidates.push({ pos: 0,                     kind: 'module' });
+            yCandidates.push({ pos: this.module.height / 2, kind: 'module' });
+            yCandidates.push({ pos: this.module.height,     kind: 'module' });
+        }
+
+        const yAnchors = [bbox.y, bbox.y + bbox.h / 2, bbox.y + bbox.h];
+
+        let bestDy = 0;
+        let bestDistY = Infinity;
+        for (const cand of yCandidates) {
+            for (const anchor of yAnchors) {
+                const d = cand.pos - anchor;
+                const ad = Math.abs(d);
+                if (ad > r) continue;
+                const prio = cand.kind === 'guide' ? 0 : cand.kind === 'comp' ? 1 : 2;
+                const score = ad + prio * 0.001;
+                if (score < bestDistY) {
+                    bestDistY = score;
+                    bestDy = d;
+                }
+            }
+        }
+        result.y += bestDy;
+
+        // ── Собираем «попадания» для подсветки направляющих ──
+        // Если после сдвига какой-то якорь совпал с направляющей — она активна
+        const eps = 0.5 / this.zoom;
+        const xAfter = [result.x, result.x + bbox.w / 2, result.x + bbox.w];
+        for (const gx of this.guides.v) {
+            if (xAfter.some(a => Math.abs(a - gx) < eps)) {
+                result.hits.push({ axis: 'v', pos: gx });
+            }
+        }
+        const yAfter = [result.y, result.y + bbox.h / 2, result.y + bbox.h];
+        for (const gy of this.guides.h) {
+            if (yAfter.some(a => Math.abs(a - gy) < eps)) {
+                result.hits.push({ axis: 'h', pos: gy });
+            }
+        }
+
+        return result;
+    }
+
+    setSnapRadius(px) {
+        this.snapRadius = Math.max(0, Math.min(40, Math.round(px) || 0));
+        localStorage.setItem('csmodular:editor-snap-radius', String(this.snapRadius));
+        if (this.propertiesPanel?.activeTab === 'module') this.propertiesPanel._render();
+    }
+
+    setMaxGuides(n) {
+        this.maxGuidesPerAxis = Math.max(1, Math.min(40, Math.round(n) || 1));
+        localStorage.setItem('csmodular:editor-max-guides', String(this.maxGuidesPerAxis));
+        if (this.propertiesPanel?.activeTab === 'module') this.propertiesPanel._render();
+    }
+
+    _loadNumber(key, def) {
+        const v = parseFloat(localStorage.getItem(key));
+        return Number.isFinite(v) ? v : def;
+    }
+
+    _loadBool(key, def) {
+        const v = localStorage.getItem(key);
+        return v === null ? def : v === '1';
+    }
+
+    setCollisionPadding(px) {
+        this.collisionPadding = Math.max(0, Math.min(40, Math.round(px) || 0));
+        localStorage.setItem('csmodular:editor-collision-padding', String(this.collisionPadding));
+        if (this.propertiesPanel?.activeTab === 'module') this.propertiesPanel._render();
+    }
+
+    setAllowOverlap(flag) {
+        this.allowOverlap = !!flag;
+        localStorage.setItem('csmodular:editor-allow-overlap', this.allowOverlap ? '1' : '0');
+        if (this.propertiesPanel?.activeTab === 'module') this.propertiesPanel._render();
     }
 }

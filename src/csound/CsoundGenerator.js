@@ -220,14 +220,6 @@ export class CsoundGenerator {
     ;---------------------------------
     ; VOICE ${v}
     instr ${100 + v}
-        ;ivId = ${v}
-        ; --- receiver: pch_X / gate_X / vel_X → local k-vars ---
-        ;SchanPitch sprintf "pch_%d", ivId
-        ;SchanGate  sprintf "gate_%d", ivId
-        ;SchanVel   sprintf "vel_%d",  ivId
-        ;kPitch chnget SchanPitch
-        ;kGate  chnget SchanGate
-        ;kVel   chnget SchanVel
         ; --- voice modules ---
         ${voiceModulesCode || '; no voice modules'}
         ${scopeTables}

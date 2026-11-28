@@ -2,9 +2,6 @@
 //
 // Панель свойств с табами Module / Component.
 //
-// Заменяет ModulePropertiesWindow + ComponentPropertiesWindow.
-// Логика — из них же (schema-based рендер для компонента,
-// form-based для модуля).
 import { ColorPicker } from '../../src/ui/ColorPicker.js';
 import { CATEGORIES, isValidCategory } from '../../src/moduleCategories.js';
 import { getStatusMeta } from '../../src/api/moduleStatusStore.js';   // ⭐ NEW
@@ -143,18 +140,12 @@ export class PropertiesPanel {
             (v) => {
                 let name = v.replace(/\s/g, '');
                 name = name.replace(/[^a-zA-Z0-9_]/g, '');
-
-                // ⭐ Имя модуля не может начинаться с цифры — отбрасываем ведущие цифры
                 name = name.replace(/^[0-9]+/, '');
-
                 if (!name) name = 'NewModule';
+                nameInput.value = name;
 
-                module.title = name;
-                nameInput.value = name;   // показываем санитайзнутое
-
-                if (this.app.codeViewerWindow) {
-                    this.app.codeViewerWindow.updateCode();
-                }
+                // ⭐ Через единую точку — переносит гайды, обновляет код и панель
+                this.app.setModuleTitle(name);
             }
         );
         // Enter → blur → change
@@ -296,6 +287,61 @@ export class PropertiesPanel {
         voiceIdWrap.appendChild(voiceIdCb);
         voiceIdWrap.appendChild(voiceIdHint);
         this._inlineField('Needs Voice ID', voiceIdWrap);
+
+        // ── Collision padding ──
+        const padInput = this._numberInput(
+            this.app.collisionPadding ?? 4,
+            0, 40,
+            () => {
+                const v = parseInt(padInput.value);
+                if (!Number.isNaN(v)) this.app.setCollisionPadding(v);
+            },
+            'collision-padding-input'
+        );
+        padInput.style.cssText += 'width: 70px;';
+        this._inlineField('Collision padding', padInput);
+
+        // ── Allow overlap ──
+        const overlapCb = document.createElement('input');
+        overlapCb.type = 'checkbox';
+        overlapCb.checked = this.app.allowOverlap === true;
+        overlapCb.style.cssText = 'width: 16px; height: 16px; cursor: pointer; accent-color: #0af;';
+        overlapCb.onchange = () => this.app.setAllowOverlap(overlapCb.checked);
+
+        const overlapHint = document.createElement('div');
+        overlapHint.style.cssText = 'color: #555; font-size: 9px; margin-top: 2px;';
+        overlapHint.textContent = 'Allow components to overlap (collision zones still highlighted)';
+
+        const overlapWrap = document.createElement('div');
+        overlapWrap.appendChild(overlapCb);
+        overlapWrap.appendChild(overlapHint);
+        this._inlineField('Allow overlap', overlapWrap);
+
+        // ── Snap radius ──
+        const snapInput = this._numberInput(
+            this.app.snapRadius ?? 6,
+            0, 40,
+            () => {
+                const v = parseInt(snapInput.value);
+                if (!Number.isNaN(v)) this.app.setSnapRadius(v);
+            },
+            'snap-radius-input'
+        );
+        snapInput.style.cssText += 'width: 70px;';
+        this._inlineField('Snap radius (px)', snapInput);
+
+        // ── Max guides per axis ──
+        const maxGuidesInput = this._numberInput(
+            this.app.maxGuidesPerAxis ?? 5,
+            1, 40,
+            () => {
+                const v = parseInt(maxGuidesInput.value);
+                if (!Number.isNaN(v)) this.app.setMaxGuides(v);
+            },
+            'max-guides-input'
+        );
+        maxGuidesInput.style.cssText += 'width: 70px;';
+        this._inlineField('Max guides / axis', maxGuidesInput);
     }
 
     _updateSize() {

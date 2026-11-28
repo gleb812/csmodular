@@ -25,8 +25,9 @@ export class CodeViewerWindow {
         this.createWindow();
         this.setupEventListeners();
 
-        // Первичное построение структуры
-        this._rebuildStructure();
+        if (app.module) {
+            this._rebuildStructure();
+        }
     }
 
     // ─────────────────────────── DOM ────────────────────────────────
